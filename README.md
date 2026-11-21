@@ -26,7 +26,8 @@ custom-styled menus: dark panels, coloured header bars, icon tiles and NEW!/HOT!
 
 ## Install
 
-1. Run `./tools/build.sh`. It creates `dist/FactionsEconomy.mcaddon`.
+1. Run `./tools/build.sh`. It creates `dist/FactionsEconomy_v<version>.mcaddon`
+   (the version also shows in the pack names in-game).
 2. Open the `.mcaddon` file to import it into Minecraft.
 3. Make a world (or edit your realm's world). Add **both** the behaviour pack and the resource pack.
 4. No experimental toggles are needed. It uses the stable Script API (`@minecraft/server` 2.0.0, game 1.21.90+).
