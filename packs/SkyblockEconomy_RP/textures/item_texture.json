@@ -76,6 +76,36 @@
     },
     "eco_head_iron_golem": {
       "textures": "textures/items/eco_heads/iron_golem"
+    },
+    "eco_enchanted_wheat": {
+      "textures": "textures/items/wheat"
+    },
+    "eco_enchanted_carrot": {
+      "textures": "textures/items/carrot"
+    },
+    "eco_enchanted_potato": {
+      "textures": "textures/items/potato"
+    },
+    "eco_enchanted_beetroot": {
+      "textures": "textures/items/beetroot"
+    },
+    "eco_enchanted_nether_wart": {
+      "textures": "textures/items/nether_wart"
+    },
+    "eco_enchanted_cocoa": {
+      "textures": "textures/items/dye_powder_brown"
+    },
+    "eco_enchanted_melon": {
+      "textures": "textures/items/melon"
+    },
+    "eco_enchanted_pumpkin": {
+      "textures": "textures/blocks/pumpkin_face_off"
+    },
+    "eco_enchanted_sugar_cane": {
+      "textures": "textures/items/reeds"
+    },
+    "eco_enchanted_cactus": {
+      "textures": "textures/blocks/cactus_side"
     }
   }
 }

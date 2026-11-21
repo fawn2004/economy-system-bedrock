@@ -295,6 +295,8 @@ export const SKILL_TOOLS = {
     xpPerUse: 1, // per fully grown crop harvested
     bonusPerLevel: 10, // % chance of an extra drop, per level
     replantLevel: 3, // crops replant themselves from this level
+    enchantedChance: 5, // % chance a fully grown crop drops an "Enchanted <crop>" (any tool)
+    enchantedPerLevel: 0.5, // extra % per Farming Hoe level when harvesting with the hoe
   },
   slayer: {
     name: "Slayer Sword",
@@ -366,34 +368,36 @@ export const MOB_DROPS = {
 
 // ============================================================================
 //  TOOL UPGRADES  (sneak + use a skill tool to open its upgrade menu)
-//  Each level costs money + heads of one mob (from your head balance).
+//  Each level costs money + either heads of one mob (headMob, sword) or
+//  enchanted crops of one crop (crop, hoe) from the player's balances.
+//  heads = how many heads / enchanted crops each level costs.
 //  enchant = vanilla enchantment it sets;  perLevel = custom bonus per level
 // ============================================================================
 export const TOOL_UPGRADES = {
   farming: [
     {
       id: "harvester", name: "Harvester", max: 5, perLevel: 10, icon: "textures/items/wheat",
-      desc: "+10% bonus crop drops per level", headMob: "cow",
+      desc: "+10% bonus crop drops per level", crop: "wheat",
       money: [2000, 5000, 12000, 25000, 50000], heads: [5, 10, 20, 40, 80],
     },
     {
       id: "cultivating", name: "Cultivating", max: 4, perLevel: 25, icon: "textures/items/experience_bottle",
-      desc: "+25% hoe XP per level", headMob: "sheep",
+      desc: "+25% hoe XP per level", crop: "carrot",
       money: [3000, 8000, 20000, 45000], heads: [5, 15, 30, 60],
     },
     {
       id: "fortune", name: "Fortune", enchant: "fortune", max: 3, icon: "textures/items/emerald",
-      desc: "Vanilla Fortune", headMob: "pig",
+      desc: "Vanilla Fortune", crop: "potato",
       money: [5000, 15000, 40000], heads: [10, 25, 50],
     },
     {
       id: "efficiency", name: "Efficiency", enchant: "efficiency", max: 5, icon: "textures/items/gold_hoe",
-      desc: "Breaks melons & pumpkins faster", headMob: "chicken",
+      desc: "Breaks melons & pumpkins faster", crop: "melon",
       money: [1000, 3000, 7000, 15000, 30000], heads: [3, 6, 12, 25, 50],
     },
     {
       id: "replenish", name: "Replenish", max: 1, perLevel: 1, icon: "textures/items/seeds_wheat",
-      desc: "Auto-replant at any tool level", headMob: "rabbit",
+      desc: "Auto-replant at any tool level", crop: "pumpkin",
       money: [15000], heads: [20],
     },
   ],

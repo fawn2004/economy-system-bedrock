@@ -1,7 +1,7 @@
 import { ItemStack, world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
-import { BADGES, CONFIG, KITS, SHOP_LAYOUT, SKILL_TOOLS, SPAWNERS } from "./config.js";
+import { BADGES, CONFIG, CROPS, KITS, SHOP_LAYOUT, SKILL_TOOLS, SPAWNERS } from "./config.js";
 import { addMoney, fmt, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
   applyEnchants,
@@ -28,7 +28,18 @@ import {
   mobName,
   ownedSpawnerCount,
 } from "./spawners.js";
-import { collectionsMenu, makeTool, skillToolTiles } from "./tools.js";
+import {
+  addCropPoints,
+  collectionsMenu,
+  countEnchanted,
+  cropIcon,
+  cropName,
+  depositEnchanted,
+  enchantedId,
+  getCropPoints,
+  makeTool,
+  skillToolTiles,
+} from "./tools.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 
 const U = "textures/ui/eco/";
@@ -447,6 +458,33 @@ export async function sellMenu(player, msg) {
     });
   }
   // Enchanted heads go into that mob's head balance, not money
+  // Enchanted crops go into that crop's enchanted balance (used for hoe upgrades)
+  const enchanted = [...countEnchanted(player)];
+  if (enchanted.length) {
+    tiles.push({
+      text: "§a§lSELL ENCHANTED",
+      sub: `§7${enchanted.reduce((s, [, n]) => s + n, 0)} crops`,
+      icon: cropIcon(enchanted[0][0]),
+      onClick: () => {
+        const done = depositEnchanted(player);
+        const list = [...done].map(([c, n]) => `${n} ${cropName(c)}`).join(", ");
+        success(player, `Added to your enchanted crops: ${list}`);
+        return sellMenu(player, `§aAdded to enchanted crops: §f${list}`);
+      },
+    });
+    for (const [cid, n] of enchanted) {
+      tiles.push({
+        text: `§aEnch. ${clip(cropName(cid), 12)}`,
+        sub: `§7x${n} §a+${n}`,
+        icon: cropIcon(cid),
+        onClick: () => {
+          const got = depositEnchanted(player, cid).get(cid) ?? 0;
+          success(player, `Added ${got} Enchanted ${cropName(cid)} to your balance.`);
+          return sellMenu(player, `§aAdded §f${got} Enchanted ${cropName(cid)}`);
+        },
+      });
+    }
+  }
   const heads = [...countHeads(player)];
   if (heads.length) {
     tiles.push({
@@ -490,7 +528,7 @@ export async function sellMenu(player, msg) {
   }
   tiles.push(backTile(() => mainMenu(player)));
 
-  const info = sellable.length || heads.length
+  const info = sellable.length || heads.length || enchanted.length
     ? "§7Click an item to sell all of it. §dHeads §7go to your head balance."
     : "§7You have nothing that can be sold. §8(Kit & renamed items can't be sold)";
   await tileMenu(player, { title: "SELL", theme: "green", body: `${msgLine(msg)}${info}    ${balLine(player)}`, tiles });
@@ -622,6 +660,7 @@ async function adminMenu(player, msg) {
     tiles: [
       { text: "§a§lMONEY", sub: "§7Player balances", icon: ICON.bank, onClick: () => adminMoneyMenu(player) },
       { text: "§d§lHEADS", sub: "§7Player head balances", icon: mobIcon("zombie"), onClick: () => adminHeadsMenu(player) },
+      { text: "§a§lCROPS", sub: "§7Enchanted crops", icon: "textures/items/wheat", onClick: () => adminCropsMenu(player) },
       { text: "§b§lSETTINGS", sub: "§7Spawners, kits...", icon: ICON.admin, onClick: () => settingsMenu(player, back) },
       { text: "§6§lSHOP EDITOR", sub: "§7Move/hide items", icon: ICON.shop, onClick: () => editorMenu(player, back) },
       {
@@ -715,6 +754,72 @@ async function adminPlayerMenu(player, target, msg) {
 }
 
 // ---- admin: heads ------------------------------------------------------------
+// ---- admin: enchanted crops --------------------------------------------------
+async function adminCropsMenu(player) {
+  if (!player.hasTag(CONFIG.adminTag)) return;
+  const tiles = world.getPlayers().map((p) => ({
+    text: `§f${clip(p.name)}`,
+    sub: `§a${CROPS.reduce((n, c) => n + getCropPoints(p, c.id), 0)} ench.`,
+    icon: ICON.player,
+    onClick: () => adminCropsPlayer(player, p),
+  }));
+  tiles.push(backTile(() => adminMenu(player)));
+  await tileMenu(player, { title: "PLAYER CROPS", theme: "green", body: "§7Pick a player to give or take enchanted crops.", tiles });
+}
+
+async function adminCropsPlayer(player, target) {
+  if (!target.isValid) return adminCropsMenu(player);
+  const tiles = CROPS.map((c) => ({
+    text: `§f${clip(c.name)}`,
+    sub: `§a${getCropPoints(target, c.id)}`,
+    icon: c.icon,
+    onClick: () => adminCropOne(player, target, c.id),
+  }));
+  await tileMenu(player, {
+    title: `${clip(target.name.toUpperCase(), 16)}: CROPS`,
+    theme: "green",
+    body: `§7Pick a crop to change §f${target.name}§7's enchanted balance.`,
+    tiles: withNav(tiles, { back: () => adminCropsMenu(player) }),
+  });
+}
+
+async function adminCropOne(player, target, cid, msg) {
+  if (!target.isValid) return adminCropsMenu(player);
+  const name = `Enchanted ${cropName(cid)}`;
+  const change = (delta) => () => {
+    const now = delta === null ? 0 : Math.max(0, getCropPoints(target, cid) + delta);
+    addCropPoints(target, cid, now - getCropPoints(target, cid));
+    success(player, `${target.name} now has ${now} ${name}.`);
+    return adminCropOne(player, target, cid, `§a${target.name} now has §f${now} §a${name}`);
+  };
+  await tileMenu(player, {
+    title: clip(name.toUpperCase(), 22),
+    theme: "green",
+    body: `${msg ? msg + "\n" : ""}§f${target.name}§7 has §a${getCropPoints(target, cid)} ${name}§7.`,
+    tiles: [
+      { text: "§a§l+10", sub: "§7Add", icon: cropIcon(cid), onClick: change(10) },
+      { text: "§a§l+50", sub: "§7Add", icon: cropIcon(cid), onClick: change(50) },
+      { text: "§a§l+100", sub: "§7Add", icon: cropIcon(cid), onClick: change(100) },
+      { text: "§c§l-10", sub: "§7Remove", icon: cropIcon(cid), onClick: change(-10) },
+      { text: "§4§lRESET", sub: "§7Set to 0", icon: ICON.cancel, onClick: change(null) },
+      {
+        text: "§d§lGIVE ITEMS",
+        sub: "§7Items x64",
+        icon: ICON.shop,
+        onClick: () => {
+          try {
+            const overflow = target.getComponent("minecraft:inventory").container.addItem(new ItemStack(enchantedId(cid), 64));
+            if (overflow) target.dimension.spawnItem(overflow, target.location);
+          } catch {}
+          success(player, `Gave ${target.name} 64 ${name}.`);
+          return adminCropOne(player, target, cid, `§aGave §f64 §a${name} items`);
+        },
+      },
+      backTile(() => adminCropsPlayer(player, target)),
+    ],
+  });
+}
+
 async function adminHeadsMenu(player) {
   if (!player.hasTag(CONFIG.adminTag)) return;
   const tiles = world.getPlayers().map((p) => {

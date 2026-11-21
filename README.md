@@ -54,9 +54,12 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
   Hand-placed melons, pumpkins, sugar cane and cactus don't count.
 - **Upgrades:** sneak + use a skill tool (or Collections > Upgrade Tool) to open its upgrade
   menu. Slayer Sword: Sharpness, Looting, Fire Aspect, Head Hunter (+head chance), Plunder
-  (+bonus drops). Farming Hoe: Harvester (+bonus crops), Cultivating (+XP), Fortune,
-  Efficiency, Replenish (auto-replant at any level). Each level costs money **and** heads
-  of a specific mob.
+  (+bonus drops), paid with money **and** heads of a set mob. Farming Hoe: Harvester
+  (+bonus crops), Cultivating (+XP), Fortune, Efficiency, Replenish (auto-replant at any
+  level), paid with money **and** enchanted crops of a set crop.
+- **Enchanted crops:** fully grown crops have a 5% chance (more with the hoe) to drop an
+  *Enchanted <Crop>*. Selling them adds them to that crop's enchanted balance
+  (Collections > Enchanted). Admins can give them under Admin > Crops.
 - Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `TOOL_UPGRADES`, `COLLECTION_TIERS`, `CROPS`
   and `MOB_DROPS` in `config.js`.
 

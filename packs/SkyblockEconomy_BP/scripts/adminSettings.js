@@ -1,6 +1,6 @@
 import { ModalFormData } from "@minecraft/server-ui";
 import { getCatalog } from "./catalog.js";
-import { COLLECTION_TIERS, CONFIG, KITS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { COLLECTION_TIERS, CONFIG, CROPS, KITS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 import { fmt } from "./economy.js";
 import { container } from "./inventory.js";
 import {
@@ -445,7 +445,10 @@ function skillToolsSettings(player, back, msg) {
 function toolSettings(player, kind, back, msg) {
   const t = SKILL_TOOLS[kind];
   const reopen = (m) => toolSettings(player, kind, back, m);
-  const extra = kind === "farming" ? `§7Auto-replant from level: §f${t.replantLevel}` : `§7Head chance per level: §d+${t.headBonusPerLevel}%`;
+  const extra =
+    kind === "farming"
+      ? `§7Auto-replant from level: §f${t.replantLevel}   §7Enchanted crop chance: §a${t.enchantedChance ?? 0}% §7(+${t.enchantedPerLevel ?? 0}%/lv)`
+      : `§7Head chance per level: §d+${t.headBonusPerLevel}%`;
   return tileMenu(player, {
     title: t.name.toUpperCase(),
     theme: "gold",
@@ -469,12 +472,22 @@ async function toolForm(player, kind, reopen) {
     f.textField("Bonus drop chance per tool level (%)", String(t.bonusPerLevel), { defaultValue: String(t.bonusPerLevel) });
     if (kind === "farming") f.textField("Auto-replant from tool level", String(t.replantLevel), { defaultValue: String(t.replantLevel) });
     else f.textField("Extra head chance per tool level (%)", String(t.headBonusPerLevel), { defaultValue: String(t.headBonusPerLevel) });
+    if (kind === "farming") {
+      f.textField("Enchanted crop drop chance (%) - any tool", String(t.enchantedChance ?? 0), { defaultValue: String(t.enchantedChance ?? 0) });
+      f.textField("Extra enchanted crop chance per hoe level (%)", String(t.enchantedPerLevel ?? 0), { defaultValue: String(t.enchantedPerLevel ?? 0) });
+    }
   });
   if (!v) return reopen();
   const name = String(v[0]).trim().slice(0, 24);
   const price = num(v[1], 0), xp = num(v[2], 1), bonus = num(v[3], 0, true), last = num(v[4], 0, true);
   if (!name || [price, xp, bonus, last].some((x) => x === undefined)) return reopen("§cCheck the numbers and try again.");
-  setTool(kind, { name, price, xpPerUse: xp, bonusPerLevel: bonus, ...(kind === "farming" ? { replantLevel: Math.max(1, Math.floor(last)) } : { headBonusPerLevel: last }) });
+  let extra = {};
+  if (kind === "farming") {
+    const ch = num(v[5], 0, true), per = num(v[6], 0, true);
+    if (ch === undefined || per === undefined || ch > 100) return reopen("§cEnchanted chance must be 0-100.");
+    extra = { enchantedChance: ch, enchantedPerLevel: per };
+  }
+  setTool(kind, { name, price, xpPerUse: xp, bonusPerLevel: bonus, ...extra, ...(kind === "farming" ? { replantLevel: Math.max(1, Math.floor(last)) } : { headBonusPerLevel: last }) });
   success(player, `${name} saved.`);
   return reopen(`§a${name} saved.`);
 }
@@ -484,7 +497,7 @@ function upgradesMenu(player, kind, back, msg) {
   const ups = TOOL_UPGRADES[kind] ?? [];
   const tiles = ups.map((u, i) => ({
     text: `${u.disabled ? "§c" : "§e"}§l${clip(u.name.toUpperCase(), 14)}`,
-    sub: u.disabled ? "§cOff" : `§7Max ${u.max} §d${clip(mobNameOf(u.headMob), 9)}`,
+    sub: u.disabled ? "§cOff" : `§7Max ${u.max} §d${clip(u.crop ? cropNameOf(u.crop) : mobNameOf(u.headMob), 9)}`,
     icon: u.icon,
     onClick: () => upgradeForm(player, kind, i, reopen),
   }));
@@ -508,16 +521,20 @@ function upgradesMenu(player, kind, back, msg) {
 }
 
 const mobNameOf = (mob) => SPAWNERS.find((s) => s.mob === mob)?.name ?? mob;
+const cropNameOf = (id) => CROPS.find((c) => c.id === id)?.name ?? id;
 
 async function upgradeForm(player, kind, i, reopen) {
   const u = TOOL_UPGRADES[kind][i];
-  const mobIdx = Math.max(0, SPAWNERS.findIndex((s) => s.mob === u.headMob));
+  // the hoe is paid with enchanted crops, the sword with mob heads
+  const useCrops = kind === "farming" || !!u.crop;
+  const options = useCrops ? CROPS.map((c) => `Enchanted ${c.name}`) : SPAWNERS.map((s) => `${s.name} heads`);
+  const curIdx = Math.max(0, useCrops ? CROPS.findIndex((c) => c.id === u.crop) : SPAWNERS.findIndex((s) => s.mob === u.headMob));
   const v = await modal(player, `Upgrade: ${u.name}`, (f) => {
     f.textField("Name", u.name, { defaultValue: u.name });
     f.textField("Description", u.desc ?? "", { defaultValue: u.desc ?? "" });
-    f.dropdown("Paid with heads of", SPAWNERS.map((s) => s.name), { defaultValueIndex: mobIdx });
+    f.dropdown("Also costs", options, { defaultValueIndex: curIdx });
     f.textField(`Money cost for each level, comma separated${u.enchant ? ` (max ${ENCHANT_MAX[u.enchant] ?? 5} levels)` : ""}`, list(u.money), { defaultValue: list(u.money) });
-    f.textField("Head cost for each level (same number of levels)", list(u.heads), { defaultValue: list(u.heads) });
+    f.textField(`${useCrops ? "Enchanted crop" : "Head"} cost for each level (same number of levels)`, list(u.heads), { defaultValue: list(u.heads) });
     if (!u.enchant) f.textField("Bonus per level (% or levels)", String(u.perLevel ?? 0), { defaultValue: String(u.perLevel ?? 0) });
     f.toggle("Enabled (shown in the upgrade menu)", { defaultValue: !u.disabled });
   });
@@ -534,7 +551,8 @@ async function upgradeForm(player, kind, i, reopen) {
   const maxLv = u.enchant ? Math.min(money.length, ENCHANT_MAX[u.enchant] ?? 5) : money.length;
   const next = TOOL_UPGRADES[kind].map((x) => ({ ...x }));
   next[i] = {
-    ...u, name, desc, headMob: SPAWNERS[v[2]]?.mob ?? u.headMob,
+    ...u, name, desc,
+    ...(useCrops ? { crop: CROPS[v[2]]?.id ?? u.crop, headMob: undefined } : { headMob: SPAWNERS[v[2]]?.mob ?? u.headMob, crop: undefined }),
     money: money.slice(0, maxLv), heads: heads.slice(0, maxLv), max: maxLv,
     ...(u.enchant ? {} : { perLevel }), disabled: !enabled,
   };

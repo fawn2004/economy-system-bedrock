@@ -51,6 +51,48 @@ export function collectionTotal(player, kind) {
 
 const roman = (n) => ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][n] ?? String(n);
 
+// ---- enchanted crops (like enchanted heads, but from farming) ----------------
+export const enchantedId = (cropId) => `eco:enchanted_${cropId}`;
+export const enchantedCrop = (typeId) => (typeId?.startsWith("eco:enchanted_") ? typeId.slice(14) : undefined);
+export const cropName = (id) => CROPS.find((c) => c.id === id)?.name ?? id;
+export const cropIcon = (id) => CROPS.find((c) => c.id === id)?.icon ?? "textures/ui/eco/icon_farming";
+export const getCropPoints = (player, id) => Number(player.getDynamicProperty(`eco:crops:${id}`) ?? 0);
+export function addCropPoints(player, id, n) {
+  player.setDynamicProperty(`eco:crops:${id}`, Math.max(0, getCropPoints(player, id) + n));
+}
+export function allCropPoints(player) {
+  return CROPS.map((c) => ({ id: c.id, points: getCropPoints(player, c.id) })).filter((c) => c.points > 0);
+}
+
+/** Enchanted crop items in the inventory: Map cropId -> count */
+export function countEnchanted(player) {
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  const out = new Map();
+  if (!inv) return out;
+  for (let i = 0; i < inv.size; i++) {
+    const it = inv.getItem(i);
+    const id = enchantedCrop(it?.typeId);
+    if (id) out.set(id, (out.get(id) ?? 0) + it.amount);
+  }
+  return out;
+}
+
+/** Turns enchanted crop items into balance. cropId = only that crop, else all. -> Map cropId -> count */
+export function depositEnchanted(player, cropId) {
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  const done = new Map();
+  if (!inv) return done;
+  for (let i = 0; i < inv.size; i++) {
+    const it = inv.getItem(i);
+    const id = enchantedCrop(it?.typeId);
+    if (!id || (cropId && id !== cropId)) continue;
+    done.set(id, (done.get(id) ?? 0) + it.amount);
+    inv.setItem(i, undefined);
+  }
+  for (const [id, n] of done) addCropPoints(player, id, n);
+  return done;
+}
+
 // ---- tools ------------------------------------------------------------------
 export function readTool(item) {
   if (!item) return undefined;
@@ -188,6 +230,14 @@ function rollExtra(pct) {
 // ---- upgrades -----------------------------------------------------------------
 const upgradeDef = (kind, id) => (TOOL_UPGRADES[kind] ?? []).find((u) => u.id === id);
 
+/** What an upgrade is paid with besides money: enchanted crops (u.crop) or mob heads (u.headMob). */
+function currency(player, u) {
+  if (u.crop) {
+    return { have: getCropPoints(player, u.crop), take: (n) => addCropPoints(player, u.crop, -n), label: `Enchanted ${cropName(u.crop)}`, short: "e" };
+  }
+  return { have: getHeadPoints(player, u.headMob), take: (n) => addHeadPoints(player, u.headMob, -n), label: `${mobName(u.headMob)} heads`, short: "h" };
+}
+
 /** Opens the upgrade menu for the skill tool in the player's hand. */
 export async function upgradeMenu(player, back, msg) {
   const held = ["slayer", "farming"].map((k) => heldTool(player, k)).find(Boolean);
@@ -203,10 +253,11 @@ export async function upgradeMenu(player, back, msg) {
     const cur = held.ups[u.id] ?? 0;
     if (cur >= u.max) return { text: `§a§l${u.name.toUpperCase()}`, sub: `§a${roman(cur)} §7MAX`, icon: u.icon, onClick: () => reopen(`§a${u.name} is already maxed.`) };
     const money = u.money[cur], heads = u.heads[cur];
-    const okMoney = getBalance(player) >= money, okHeads = getHeadPoints(player, u.headMob) >= heads;
+    const c = currency(player, u);
+    const okMoney = getBalance(player) >= money, okHeads = c.have >= heads;
     return {
       text: `§e§l${u.name.toUpperCase()} ${roman(cur + 1)}`,
-      sub: `${okMoney ? "§a" : "§c"}${fmt(money)} ${okHeads ? "§d" : "§c"}${heads}h`,
+      sub: `${okMoney ? "§a" : "§c"}${fmt(money)} ${okHeads ? "§d" : "§c"}${heads}${c.short}`,
       icon: u.icon,
       onClick: () => reopen(buyUpgrade(player, kind, u)),
     };
@@ -214,7 +265,7 @@ export async function upgradeMenu(player, back, msg) {
   if (back) tiles.push(backTile(back));
   const lines = defs.map((u) => {
     const cur = held.ups[u.id] ?? 0;
-    const next = cur < u.max ? `next: §a${fmt(u.money[cur])} §7+ §d${u.heads[cur]} ${mobName(u.headMob)} heads` : "§aMAX";
+    const next = cur < u.max ? `next: §a${fmt(u.money[cur])} §7+ §d${u.heads[cur]} ${currency(player, u).label}` : "§aMAX";
     return `§f${u.name} §6${cur ? roman(cur) : "-"}§7/${roman(u.max)} §8(${u.desc}) §7${next}`;
   });
   await tileMenu(player, {
@@ -234,16 +285,16 @@ function buyUpgrade(player, kind, u) {
   const cur = held.ups[u.id] ?? 0;
   if (cur >= u.max) return `§a${u.name} is already maxed.`;
   const money = u.money[cur], heads = u.heads[cur];
-  const have = getHeadPoints(player, u.headMob);
-  if (have < heads) {
-    fail(player, `You need ${heads} ${mobName(u.headMob)} heads (you have ${have}).`);
-    return `§cYou need §f${heads} ${mobName(u.headMob)} §cheads §7(you have ${have})`;
+  const c = currency(player, u);
+  if (c.have < heads) {
+    fail(player, `You need ${heads} ${c.label} (you have ${c.have}).`);
+    return `§cYou need §f${heads} ${c.label} §7(you have ${c.have})`;
   }
   if (!takeMoney(player, money)) {
     fail(player, `You need ${fmt(money)}.`);
     return `§cYou need §f${fmt(money)}§c.`;
   }
-  addHeadPoints(player, u.headMob, -heads);
+  c.take(heads);
   held.ups[u.id] = cur + 1;
   writeTool(held.item, kind, held.level, held.xp, player, held.ups);
   held.inv.setItem(held.slot, held.item);
@@ -291,6 +342,12 @@ export function registerTools() {
     const pct = level * SKILL_TOOLS.farming.bonusPerLevel + harvester + tierOf(getCol(player, "crop", crop.id)) * COLLECTION_TIERS.bonusPerTier;
     const extra = rollExtra(pct);
     const at = { x: ev.block.x + 0.5, y: ev.block.y + 0.5, z: ev.block.z + 0.5 };
+    const ft = SKILL_TOOLS.farming;
+    if (Math.random() * 100 < (ft.enchantedChance ?? 0) + level * (ft.enchantedPerLevel ?? 0)) {
+      try {
+        ev.dimension.spawnItem(new ItemStack(enchantedId(crop.id), 1), at);
+      } catch {}
+    }
     if (extra > 0) {
       try {
         ev.dimension.spawnItem(new ItemStack(crop.drop, extra), at);
@@ -362,8 +419,21 @@ export async function collectionsMenu(player, back) {
       { text: "§c§lCOMBAT", sub: `§7${commas(combat)} kills`, icon: "textures/ui/eco/icon_spawners", onClick: () => colList(player, "mob", reopen) },
       { text: "§6§lSKILL TOOLS", sub: "§7Levels & unlocks", icon: SKILL_TOOLS.farming.icon, onClick: () => toolsInfo(player, reopen) },
       { text: "§c§lUPGRADE TOOL", sub: "§7Tool in your hand", icon: SKILL_TOOLS.slayer.icon, onClick: () => upgradeMenu(player, reopen) },
+      { text: "§a§lENCHANTED", sub: "§7Crop balances", icon: "textures/items/wheat", onClick: () => enchantedMenu(player, reopen) },
       backTile(back),
     ],
+  });
+}
+
+function enchantedMenu(player, back) {
+  const list = allCropPoints(player);
+  return tileMenu(player, {
+    title: "ENCHANTED CROPS",
+    theme: "green",
+    body: list.length
+      ? "§7Enchanted crops you've sold. Spend them on §6Farming Hoe §7upgrades\n§8(sneak + use the hoe)."
+      : `§7Fully grown crops have a §a${SKILL_TOOLS.farming.enchantedChance}% §7chance to drop an §aEnchanted crop§7\n§7(more with the Farming Hoe). Sell them to add them here.`,
+    tiles: [...list.map((c) => ({ text: `§a${cropName(c.id)}`, sub: `§f${commas(c.points)}`, icon: cropIcon(c.id), onClick: () => enchantedMenu(player, back) })), backTile(back)],
   });
 }
 

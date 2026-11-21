@@ -800,6 +800,54 @@ def make_shapes():
         shape_icon(shape, "stone")
 
 
+# ---------------------------------------------------------------------------
+# Enchanted crops (dropped when harvesting; used to upgrade the Farming Hoe).
+# Keep in sync with CROPS in scripts/config.js.  id: (name, vanilla texture)
+# ---------------------------------------------------------------------------
+ENCHANTED_CROPS = {
+    "wheat": ("Wheat", "textures/items/wheat"),
+    "carrot": ("Carrot", "textures/items/carrot"),
+    "potato": ("Potato", "textures/items/potato"),
+    "beetroot": ("Beetroot", "textures/items/beetroot"),
+    "nether_wart": ("Nether Wart", "textures/items/nether_wart"),
+    "cocoa": ("Cocoa Beans", "textures/items/dye_powder_brown"),
+    "melon": ("Melon", "textures/items/melon"),
+    "pumpkin": ("Pumpkin", "textures/blocks/pumpkin_face_off"),
+    "sugar_cane": ("Sugar Cane", "textures/items/reeds"),
+    "cactus": ("Cactus", "textures/blocks/cactus_side"),
+}
+
+
+def make_enchanted_crops():
+    item_dir = os.path.join(BP, "items", "crops")
+    os.makedirs(item_dir, exist_ok=True)
+    tex_path = os.path.join(RP, "textures", "item_texture.json")
+    data = json.load(open(tex_path))
+    lang_lines = []
+    for cid, (name, tex) in ENCHANTED_CROPS.items():
+        data["texture_data"][f"eco_enchanted_{cid}"] = {"textures": tex}
+        item = {
+            "format_version": "1.21.60",
+            "minecraft:item": {
+                "description": {"identifier": f"eco:enchanted_{cid}", "menu_category": {"category": "items"}},
+                "components": {
+                    "minecraft:icon": f"eco_enchanted_{cid}",
+                    "minecraft:display_name": {"value": f"§r§aEnchanted {name}"},
+                    "minecraft:max_stack_size": 64,
+                    "minecraft:glint": True,
+                },
+            },
+        }
+        with open(os.path.join(item_dir, f"enchanted_{cid}.json"), "w") as f:
+            json.dump(item, f, indent=2, ensure_ascii=False)
+        lang_lines.append(f"item.eco:enchanted_{cid}=Enchanted {name}\n")
+    with open(tex_path, "w") as f:
+        json.dump(data, f, indent=2)
+    for lang in ("en_US", "en_GB"):
+        with open(os.path.join(RP, "texts", lang + ".lang"), "a") as f:
+            f.writelines(lang_lines)
+
+
 if __name__ == "__main__":
     make_shapes()
     make_frames()
@@ -809,4 +857,5 @@ if __name__ == "__main__":
     make_pack_icons()
     make_structures()
     make_heads()
+    make_enchanted_crops()
     print("Assets generated.")
