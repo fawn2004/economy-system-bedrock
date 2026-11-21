@@ -32,6 +32,12 @@ const canManage = (p, d) => !d.owner || d.owner === p.id || isAdmin(p);
 export const capacityOf = (d) => CH.baseStorage + (d.level ?? 0) * CH.storagePerLevel;
 const stored = (d) => Object.values(d.store ?? {}).reduce((a, b) => a + b, 0);
 const maxLevel = () => CH.upgradeCosts.length;
+const maxSpeed = () => Math.min(CH.speedCosts?.length ?? 0, (CH.speedIntervals?.length ?? 1) - 1);
+export const intervalOf = (d) => {
+  const list = CH.speedIntervals?.length ? CH.speedIntervals : [1];
+  return list[Math.min(d.speed ?? 0, list.length - 1)];
+};
+const nextRun = new Map(); // key -> tick of the next sweep
 
 function parseKey(key) {
   const rest = key.slice(KEY.length);
@@ -42,7 +48,10 @@ function parseKey(key) {
 
 function save(key, d) {
   hoppers.set(key, d);
-  world.setDynamicProperty(key, JSON.stringify({ owner: d.owner, ownerName: d.ownerName, level: d.level ?? 0, store: d.store ?? {} }));
+  world.setDynamicProperty(
+    key,
+    JSON.stringify({ owner: d.owner, ownerName: d.ownerName, level: d.level ?? 0, speed: d.speed ?? 0, store: d.store ?? {} })
+  );
 }
 
 function forget(key) {
@@ -61,15 +70,17 @@ function loadAll() {
 }
 
 // ---- item ------------------------------------------------------------------------
-export function makeHopperItem(level = 0) {
+export function makeHopperItem(level = 0, speed = 0) {
   const s = new ItemStack(ITEM, 1);
-  s.nameTag = `§r§6Chunk Hopper${level ? ` §7[Storage ${level}]` : ""}`;
+  const tags = [level ? `Storage ${level}` : "", speed ? `Speed ${speed}` : ""].filter(Boolean).join(", ");
+  s.nameTag = `§r§6Chunk Hopper${tags ? ` §7[${tags}]` : ""}`;
   s.setLore([
     "§7Collects every dropped item",
     "§7in its chunk. Tap it to sell,",
     "§7collect or upgrade. One per chunk.",
     `§7Storage: §f${commas(CH.baseStorage + level * CH.storagePerLevel)} items`,
-    `${TAG}${level}`,
+    `§7Collects every §f${intervalOf({ speed })}s`,
+    `${TAG}${level}:${speed}`,
   ]);
   return s;
 }
@@ -77,13 +88,15 @@ export function makeHopperItem(level = 0) {
 function levelFromItem(item) {
   if (item?.typeId !== ITEM) return undefined;
   const line = item.getLore().find((l) => l.startsWith(TAG));
-  return line ? Math.max(0, Number(line.slice(TAG.length)) || 0) : 0;
+  if (!line) return { level: 0, speed: 0 };
+  const [level, speed] = line.slice(TAG.length).split(":");
+  return { level: Math.max(0, Number(level) || 0), speed: Math.max(0, Number(speed) || 0) };
 }
 
 // ---- placing / protection -------------------------------------------------------
 const FACE = { Up: [0, 1, 0], Down: [0, -1, 0], North: [0, 0, -1], South: [0, 0, 1], East: [1, 0, 0], West: [-1, 0, 0] };
 
-function place(player, block, face, level) {
+function place(player, block, face, info) {
   const [ox, oy, oz] = FACE[face] ?? FACE.Up;
   const dim = player.dimension;
   const at = { x: block.x + ox, y: block.y + oy, z: block.z + oz };
@@ -103,7 +116,7 @@ function place(player, block, face, level) {
   } catch {
     target.setType("minecraft:hopper");
   }
-  save(keyOf(dim.id, at), { owner: player.id, ownerName: player.name, level, store: {}, dim: dim.id, ...at });
+  save(keyOf(dim.id, at), { owner: player.id, ownerName: player.name, level: info.level, speed: info.speed, store: {}, dim: dim.id, ...at });
   if (String(player.getGameMode()).toLowerCase() !== "creative") {
     player.getComponent("minecraft:inventory").container.setItem(player.selectedSlotIndex, undefined);
   }
@@ -123,8 +136,11 @@ function isPlain(st) {
 function tick() {
   if (!hoppers.size) return;
   const dims = new Set(world.getAllPlayers().map((p) => p.dimension.id));
+  const now = system.currentTick;
   for (const [key, d] of hoppers) {
     if (!dims.has(d.dim)) continue;
+    if ((nextRun.get(key) ?? 0) > now) continue;
+    nextRun.set(key, now + Math.max(5, Math.round(intervalOf(d) * 20)));
     let dim, block;
     try {
       dim = world.getDimension(d.dim);
@@ -191,6 +207,7 @@ export async function hopperMenu(player, key, msg) {
     msg,
     `§6Chunk Hopper   §7Owner: §f${d.ownerName ?? "?"}`,
     `§7Storage: ${total >= cap ? "§c" : "§f"}${commas(total)}/${commas(cap)}${total >= cap ? " FULL" : ""}   §7Level: §f${d.level ?? 0}/${maxLevel()}`,
+    `§7Collects every §f${intervalOf(d)}s   §7Speed: §f${d.speed ?? 0}/${maxSpeed()}`,
     total ? `§7Holding: ${top}${Object.keys(d.store).length > 6 ? "§7..." : ""}` : "§7Empty - dropped items in this chunk will be collected.",
   ].filter(Boolean);
   const tiles = [];
@@ -204,15 +221,22 @@ export async function hopperMenu(player, key, msg) {
       icon: ICON.top,
       onClick: () => reopen(upgrade(player, key)),
     });
+    const spd = d.speed ?? 0;
+    tiles.push({
+      text: "§e§lUPGRADE SPEED",
+      sub: spd >= maxSpeed() ? "§aMAX" : `${getBalance(player) >= CH.speedCosts[spd] ? "§a" : "§c"}${fmt(CH.speedCosts[spd])}`,
+      icon: "textures/items/sugar",
+      onClick: () => reopen(upgradeSpeed(player, key)),
+    });
     tiles.push({
       text: "§c§lPICK UP",
-      sub: "§7Keeps its level",
+      sub: "§7Keeps upgrades",
       icon: ICON.cancel,
       onClick: () =>
         tileMenu(player, {
           title: "PICK UP HOPPER?",
           theme: "red",
-          body: "§7The Chunk Hopper goes back to your inventory with its storage level,\n§7and you get everything it has stored.",
+          body: "§7The Chunk Hopper goes back to your inventory with its storage and speed upgrades,\n§7and you get everything it has stored.",
           tiles: [
             { text: "§a§lYES", sub: "§7Pick it up", icon: ICON.confirm, onClick: () => pickUp(player, key) },
             { text: "§c§lNO", sub: "§7Cancel", icon: ICON.cancel, onClick: () => reopen() },
@@ -306,6 +330,24 @@ function upgrade(player, key) {
   return `§aStorage upgraded to §f${commas(capacityOf(d))} §aitems!`;
 }
 
+function upgradeSpeed(player, key) {
+  const d = hoppers.get(key);
+  if (!d || !canManage(player, d)) return "§cThis isn't your Chunk Hopper.";
+  const spd = d.speed ?? 0;
+  if (spd >= maxSpeed()) return "§aSpeed is already maxed.";
+  const cost = CH.speedCosts[spd];
+  if (!takeMoney(player, cost)) {
+    fail(player, `You need ${fmt(cost)}.`);
+    return `§cYou need §f${fmt(cost)}§c.`;
+  }
+  d.speed = spd + 1;
+  save(key, d);
+  nextRun.delete(key);
+  player.playSound("random.levelup");
+  success(player, `Chunk Hopper now collects every ${intervalOf(d)}s.`);
+  return `§aSpeed upgraded - now collects every §f${intervalOf(d)}s§a!`;
+}
+
 function pickUp(player, key) {
   const d = hoppers.get(key);
   if (!d || !canManage(player, d)) return fail(player, "This isn't your Chunk Hopper.");
@@ -314,7 +356,7 @@ function pickUp(player, key) {
     const over = inv.addItem(st);
     if (over) player.dimension.spawnItem(over, player.location);
   };
-  give(makeHopperItem(d.level ?? 0));
+  give(makeHopperItem(d.level ?? 0, d.speed ?? 0));
   for (const [id, count] of Object.entries(d.store ?? {})) {
     let left = count;
     while (left > 0) {
@@ -339,7 +381,7 @@ function pickUp(player, key) {
 export function registerChunkHoppers() {
   world.afterEvents.worldLoad.subscribe(() => {
     loadAll();
-    system.runInterval(tick, 20);
+    system.runInterval(tick, 5);
   });
 
   world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
@@ -352,12 +394,12 @@ export function registerChunkHoppers() {
         return;
       }
     }
-    const level = levelFromItem(ev.itemStack);
-    if (level === undefined) return;
+    const info = levelFromItem(ev.itemStack);
+    if (info === undefined) return;
     ev.cancel = true;
     if (!ev.isFirstEvent) return;
     const face = ev.blockFace;
-    system.run(() => place(player, block, face, level));
+    system.run(() => place(player, block, face, info));
   });
 
   world.beforeEvents.playerBreakBlock.subscribe((ev) => {

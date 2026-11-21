@@ -295,8 +295,9 @@ export const SKILL_TOOLS = {
     xpPerUse: 1, // per fully grown crop harvested
     bonusPerLevel: 10, // % chance of an extra drop, per level
     replantLevel: 3, // crops replant themselves from this level
-    enchantedChance: 5, // % chance a fully grown crop drops an "Enchanted <crop>" (any tool)
-    enchantedPerLevel: 0.5, // extra % per Farming Hoe level when harvesting with the hoe
+    enchantedChance: 8, // % chance a fully grown crop drops an "Enchanted <crop>" (any tool)
+    enchantedPerLevel: 0.75, // extra % per Farming Hoe level when harvesting with the hoe
+    grownXpMultiplier: 3, // fully grown crops give this many times the hoe XP of unripe ones
   },
   slayer: {
     name: "Slayer Sword",
@@ -578,4 +579,7 @@ export const CHUNK_HOPPER = {
   baseStorage: 1000, // items it holds at storage level 0
   storagePerLevel: 1000, // extra items per storage upgrade
   upgradeCosts: [10000, 25000, 50000, 100000, 200000, 400000, 750000, 1500000], // one per level
+  // Speed: seconds between sweeps of the chunk at speed level 0, 1, 2, ...
+  speedIntervals: [4, 3, 2, 1.5, 1, 0.75, 0.5, 0.25],
+  speedCosts: [10000, 25000, 60000, 120000, 250000, 500000, 1000000], // one per speed level
 };

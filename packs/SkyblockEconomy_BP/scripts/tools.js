@@ -196,10 +196,10 @@ function heldTool(player, kind) {
   return t && t.kind === kind ? { ...t, item, inv, slot } : undefined;
 }
 
-function addToolXp(player, held) {
+function addToolXp(player, held, mult = 1) {
   const kind = held.kind;
   const boost = 1 + ((held.ups.cultivating ?? 0) * (upgradeDef(kind, "cultivating")?.perLevel ?? 0)) / 100;
-  const xp = held.xp + Math.max(1, Math.round(SKILL_TOOLS[kind].xpPerUse * boost));
+  const xp = held.xp + Math.max(1, Math.round(SKILL_TOOLS[kind].xpPerUse * boost * mult));
   const target = Math.min(levelFromXp(xp), levelCap(player, kind));
   const level = Math.max(held.level, target);
   writeTool(held.item, kind, level, xp, player, held.ups);
@@ -337,6 +337,28 @@ function buyUpgrade(player, kind, u) {
   return `§aUpgraded §f${u.name} §ato §f${roman(cur + 1)}§a!`;
 }
 
+// ---- crop growth --------------------------------------------------------------
+/** The crop's growth state as [name, value], whatever the game version calls it. */
+function growthState(perm, crop) {
+  try {
+    const v = perm.getState(crop.mature[0]);
+    if (typeof v === "number") return [crop.mature[0], v];
+  } catch {}
+  try {
+    const all = perm.getAllStates() ?? {};
+    const k = Object.keys(all).find((n) => /growth|age/.test(n));
+    if (k !== undefined && typeof all[k] === "number") return [k, all[k]];
+  } catch {}
+  return undefined;
+}
+
+/** Fully grown? (crops that don't grow in stages - melon, cane... - always count) */
+function isGrown(perm, crop) {
+  if (crop.grown) return true;
+  const st = growthState(perm, crop);
+  return st ? st[1] >= crop.mature[1] : true; // can't tell: count it
+}
+
 // ---- events ------------------------------------------------------------------
 export function registerTools() {
   // sneak + use (tap the air or a block) with a skill tool -> upgrade menu
@@ -360,18 +382,15 @@ export function registerTools() {
     const crop = CROPS.find((c) => c.block === perm.type.id);
     if (!crop) return;
     const key = posKey(ev.dimension.id, ev.block.location);
-    if (crop.grown) {
-      if (placed.delete(key)) return; // placed by a player - doesn't count
-    } else {
-      try {
-        if (perm.getState(crop.mature[0]) !== crop.mature[1]) return; // not fully grown
-      } catch {}
-    }
     const player = ev.player;
-    addCol(player, "crop", crop.id, crop.name);
+    const handPlaced = crop.grown && placed.delete(key);
+    const grown = !handPlaced && isGrown(perm, crop);
+    // The Farming Hoe gets XP from breaking ANY farmable block; fully grown crops give more.
     const held = heldTool(player, "farming");
     let level = 0;
-    if (held) level = addToolXp(player, held);
+    if (held) level = addToolXp(player, held, grown ? SKILL_TOOLS.farming.grownXpMultiplier ?? 1 : 1);
+    if (!grown) return; // unripe / hand-placed: hoe XP only, no rewards
+    addCol(player, "crop", crop.id, crop.name);
     addSkillXp(player, "farming", SKILLS.farming.xp?.[crop.id] ?? 1);
     const harvester = held ? (held.ups.harvester ?? 0) * (upgradeDef("farming", "harvester")?.perLevel ?? 0) : 0;
     const pct =
@@ -396,7 +415,7 @@ export function registerTools() {
       system.run(() => {
         try {
           const b = dim.getBlock(loc);
-          if (b?.isAir) b.setPermutation(perm.withState(crop.mature[0], 0));
+          if (b?.isAir) b.setPermutation(perm.withState(growthState(perm, crop)?.[0] ?? crop.mature[0], 0));
         } catch {
           try {
             dim.getBlock(loc)?.setPermutation(BlockPermutation.resolve(crop.block));

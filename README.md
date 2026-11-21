@@ -59,7 +59,8 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
   (+bonus drops), paid with money **and** heads of a set mob. Farming Hoe: Harvester
   (+bonus crops), Cultivating (+XP), Fortune, Efficiency, Replenish (auto-replant at any
   level), paid with money **and** enchanted crops of a set crop.
-- **Enchanted crops:** fully grown crops have a 5% chance (more with the hoe) to drop an
+- The Farming Hoe gains XP from breaking **any** farmable block (fully grown crops give 3x).
+- **Enchanted crops:** fully grown crops have an 8% chance (+0.75% per hoe level) to drop an
   *Enchanted <Crop>*. Selling them adds them to that crop's enchanted balance
   (Collections > Enchanted). Admins can give them under Admin > Crops.
 - Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `TOOL_UPGRADES`, `COLLECTION_TIERS`, `CROPS`
@@ -127,7 +128,8 @@ piles. Renamed / enchanted / special items are left alone. It's a locked hopper,
 moves items itself. Tap it to **Sell All** (minion items at their value; heads and enchanted
 crops go to your balances), **Collect All**, **Upgrade Storage** (1,000 items + 1,000 per
 level) or **Pick Up** (keeps its level). One per chunk; owner/admin only; can't be mined or
-blown up. Price, storage and upgrade costs: **Admin > Settings > Chunk Hopper**.
+blown up. **Upgrade Speed** makes it sweep the chunk faster (every 4s down to every 0.25s).
+Price, storage, speed and upgrade costs: **Admin > Settings > Chunk Hopper**.
 
 ## Skills
 

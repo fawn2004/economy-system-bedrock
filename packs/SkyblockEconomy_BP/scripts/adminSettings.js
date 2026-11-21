@@ -90,12 +90,17 @@ export async function settingsMenu(player, back, msg) {
               .textField("Shop price", String(H.price), { defaultValue: String(H.price) })
               .textField("Storage before upgrades (items)", String(H.baseStorage), { defaultValue: String(H.baseStorage) })
               .textField("Extra storage per upgrade (items)", String(H.storagePerLevel), { defaultValue: String(H.storagePerLevel) })
-              .textField("Upgrade cost for each level, comma separated", list(H.upgradeCosts), { defaultValue: list(H.upgradeCosts) })
+              .textField("Storage upgrade cost for each level, comma separated", list(H.upgradeCosts), { defaultValue: list(H.upgradeCosts) })
+              .textField("Seconds between sweeps for speed level 0, 1, 2... (comma separated)", list(H.speedIntervals ?? [1]), { defaultValue: list(H.speedIntervals ?? [1]) })
+              .textField("Speed upgrade cost for each level (one fewer than the seconds list)", list(H.speedCosts ?? []), { defaultValue: list(H.speedCosts ?? []) })
           );
           if (!v) return reopen();
           const price = num(v[0], 0), base = num(v[1], 1), per = num(v[2], 0), costs = parseList(v[3]);
+          const secs = String(v[4]).split(/[,\s]+/).filter(Boolean).map(Number);
+          const speedCosts = parseList(v[5]);
           if ([price, base, per].some((x) => x === undefined) || !costs) return reopen("§cCheck the numbers (costs like 10000, 25000, 50000).");
-          setChunkHopper({ price, baseStorage: base, storagePerLevel: per, upgradeCosts: costs });
+          if (!secs.length || secs.some((x) => !Number.isFinite(x) || x < 0.25) || !speedCosts) return reopen("§cSpeed seconds must be numbers of 0.25 or more, with a cost list.");
+          setChunkHopper({ price, baseStorage: base, storagePerLevel: per, upgradeCosts: costs, speedIntervals: secs, speedCosts: speedCosts.slice(0, secs.length - 1) });
           return reopen(`§aChunk Hopper saved (${costs.length} upgrade levels).`);
         },
       },
