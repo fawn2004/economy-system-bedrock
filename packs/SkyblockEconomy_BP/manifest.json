@@ -1,29 +1,29 @@
 {
   "format_version": 2,
   "header": {
-    "name": "§bSkyblock Economy §7(Behaviour) §ev1.0.26",
+    "name": "§bSkyblock Economy §7(Behaviour) §ev1.0.27",
     "description": "Compass menu, shop, sell, pay & leaderboard for skyblock realms",
     "uuid": "5c2691b0-97fb-40e5-9b9b-7d8f44955d23",
-    "version": [1, 0, 26],
+    "version": [1, 0, 27],
     "min_engine_version": [1, 21, 90]
   },
   "modules": [
     {
       "type": "data",
       "uuid": "427a81aa-6fa8-4519-b12f-13f17b8cda06",
-      "version": [1, 0, 26]
+      "version": [1, 0, 27]
     },
     {
       "type": "script",
       "language": "javascript",
       "uuid": "d7fb50ae-2cd3-4e1c-93f0-3982f09b5153",
       "entry": "scripts/main.js",
-      "version": [1, 0, 26]
+      "version": [1, 0, 27]
     }
   ],
   "dependencies": [
     { "module_name": "@minecraft/server", "version": "2.0.0" },
     { "module_name": "@minecraft/server-ui", "version": "2.0.0" },
-    { "uuid": "7afcfb53-cef0-4163-bd4f-57d31350ad3b", "version": [1, 0, 26] }
+    { "uuid": "7afcfb53-cef0-4163-bd4f-57d31350ad3b", "version": [1, 0, 27] }
   ]
 }

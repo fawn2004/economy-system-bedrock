@@ -7,7 +7,11 @@
         "default": "entity_alphatest"
       },
       "textures": {
-        "default": "textures/entity/eco_minion"
+        "s0": "textures/entity/eco_minion_mining",
+        "s1": "textures/entity/eco_minion_nether",
+        "s2": "textures/entity/eco_minion_obsidian",
+        "s3": "textures/entity/eco_minion_end",
+        "s4": "textures/entity/eco_minion_bedrock"
       },
       "geometry": {
         "default": "geometry.eco_minion"
@@ -21,7 +25,7 @@
         ]
       },
       "render_controllers": [
-        "controller.render.default"
+        "controller.render.eco_minion"
       ]
     }
   }

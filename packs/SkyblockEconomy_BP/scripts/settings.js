@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import { COLLECTION_TIERS, CONFIG, KITS, MINION_SETTINGS, MINION_TIERS, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { COLLECTION_TIERS, CONFIG, KITS, MINION_SETTINGS, MINION_TYPES, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 
 // ============================================================================
 //  IN-GAME SETTINGS
@@ -35,7 +35,7 @@ const DEFAULTS = {
   skillSettings: clone(SKILL_SETTINGS),
   minionSettings: clone(MINION_SETTINGS),
   minionUpgrades: clone(MINION_UPGRADES),
-  minionTiers: clone(MINION_TIERS),
+  minionTypes: clone(MINION_TYPES),
 };
 
 // Spawner settings that are simple numbers / switches (shown in the settings form)
@@ -131,8 +131,23 @@ function applyMinions() {
   replaceObject(MINION_SETTINGS, { ...DEFAULTS.minionSettings, ...(saved.minionSettings ?? {}) });
   MINION_UPGRADES.length = 0;
   MINION_UPGRADES.push(...clone(saved.minionUpgrades ?? DEFAULTS.minionUpgrades));
-  MINION_TIERS.length = 0;
-  MINION_TIERS.push(...clone(saved.minionTiers ?? DEFAULTS.minionTiers));
+  for (const t of MINION_TYPES) {
+    const def = DEFAULTS.minionTypes.find((x) => x.id === t.id);
+    const sv = saved.minionTypes?.[t.id] ?? {};
+    t.price = sv.price ?? def.price;
+    t.upgradeMultiplier = sv.upgradeMultiplier ?? def.upgradeMultiplier;
+    // older versions saved the Mining Minion's tiers as "minionTiers"
+    const tiers = sv.tiers ?? (t.id === "mining" ? saved.minionTiers : undefined) ?? def.tiers;
+    t.tiers.length = 0;
+    t.tiers.push(...clone(tiers).map((x, i) => ({ ...x, display: def.tiers[i]?.display ?? x.display })));
+  }
+}
+
+export function setMinionType(id, values) {
+  saved.minionTypes = saved.minionTypes ?? {};
+  saved.minionTypes[id] = { ...(saved.minionTypes[id] ?? {}), ...clone(values) };
+  store();
+  applyMinions();
 }
 
 export function setMinionSettings(values) {
@@ -148,9 +163,7 @@ export function setMinionUpgrades(list) {
 }
 
 export function setMinionTiers(list) {
-  saved.minionTiers = clone(list);
-  store();
-  applyMinions();
+  setMinionType("mining", { tiers: list });
 }
 
 function applySkills() {

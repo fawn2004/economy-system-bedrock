@@ -12,7 +12,39 @@
             "Texture.t4",
             "Texture.t5",
             "Texture.t6",
-            "Texture.t7"
+            "Texture.t7",
+            "Texture.t8",
+            "Texture.t9",
+            "Texture.t10",
+            "Texture.t11",
+            "Texture.t12",
+            "Texture.t13",
+            "Texture.t14",
+            "Texture.t15",
+            "Texture.t16",
+            "Texture.t17",
+            "Texture.t18",
+            "Texture.t19",
+            "Texture.t20",
+            "Texture.t21",
+            "Texture.t22",
+            "Texture.t23",
+            "Texture.t24",
+            "Texture.t25",
+            "Texture.t26",
+            "Texture.t27",
+            "Texture.t28",
+            "Texture.t29",
+            "Texture.t30",
+            "Texture.t31",
+            "Texture.t32",
+            "Texture.t33",
+            "Texture.t34",
+            "Texture.t35",
+            "Texture.t36",
+            "Texture.t37",
+            "Texture.t38",
+            "Texture.t39"
           ]
         }
       },
@@ -24,6 +56,28 @@
       ],
       "textures": [
         "Array.tiers[query.variant]"
+      ]
+    },
+    "controller.render.eco_minion": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.s0",
+            "Texture.s1",
+            "Texture.s2",
+            "Texture.s3",
+            "Texture.s4"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Array.skins[query.variant]"
       ]
     }
   }

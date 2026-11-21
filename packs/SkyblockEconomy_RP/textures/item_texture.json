@@ -133,6 +133,102 @@
     },
     "eco_mloot_emerald": {
       "textures": "textures/items/emerald"
+    },
+    "eco_mloot_netherrack": {
+      "textures": "textures/blocks/netherrack"
+    },
+    "eco_mloot_soul_sand": {
+      "textures": "textures/blocks/soul_sand"
+    },
+    "eco_mloot_quartz": {
+      "textures": "textures/items/quartz"
+    },
+    "eco_mloot_glowstone_dust": {
+      "textures": "textures/items/glowstone_dust"
+    },
+    "eco_mloot_magma_cream": {
+      "textures": "textures/items/magma_cream"
+    },
+    "eco_mloot_blaze_rod": {
+      "textures": "textures/items/blaze_rod"
+    },
+    "eco_mloot_ancient_debris": {
+      "textures": "textures/blocks/ancient_debris_side"
+    },
+    "eco_mloot_netherite_scrap": {
+      "textures": "textures/items/netherite_scrap"
+    },
+    "eco_mloot_obsidian": {
+      "textures": "textures/blocks/obsidian"
+    },
+    "eco_mloot_crying_obsidian": {
+      "textures": "textures/blocks/crying_obsidian"
+    },
+    "eco_mloot_amethyst_shard": {
+      "textures": "textures/items/amethyst_shard"
+    },
+    "eco_mloot_sea_lantern": {
+      "textures": "textures/blocks/sea_lantern"
+    },
+    "eco_mloot_shroomlight": {
+      "textures": "textures/blocks/shroomlight"
+    },
+    "eco_mloot_sculk_catalyst": {
+      "textures": "textures/blocks/sculk_catalyst_side"
+    },
+    "eco_mloot_echo_shard": {
+      "textures": "textures/items/echo_shard"
+    },
+    "eco_mloot_heavy_core": {
+      "textures": "textures/blocks/heavy_core"
+    },
+    "eco_mloot_end_stone": {
+      "textures": "textures/blocks/end_stone"
+    },
+    "eco_mloot_purpur_block": {
+      "textures": "textures/blocks/purpur_block"
+    },
+    "eco_mloot_chorus_fruit": {
+      "textures": "textures/items/chorus_fruit"
+    },
+    "eco_mloot_ender_pearl": {
+      "textures": "textures/items/ender_pearl"
+    },
+    "eco_mloot_shulker_shell": {
+      "textures": "textures/items/shulker_shell"
+    },
+    "eco_mloot_end_crystal": {
+      "textures": "textures/items/end_crystal"
+    },
+    "eco_mloot_dragon_breath": {
+      "textures": "textures/items/dragons_breath"
+    },
+    "eco_mloot_dragon_egg": {
+      "textures": "textures/blocks/dragon_egg"
+    },
+    "eco_mloot_bedrock": {
+      "textures": "textures/blocks/bedrock"
+    },
+    "eco_mloot_reinforced_deepslate": {
+      "textures": "textures/blocks/reinforced_deepslate_top"
+    },
+    "eco_mloot_budding_amethyst": {
+      "textures": "textures/blocks/budding_amethyst"
+    },
+    "eco_mloot_end_portal_frame": {
+      "textures": "textures/blocks/endframe_top"
+    },
+    "eco_mloot_mob_spawner": {
+      "textures": "textures/blocks/mob_spawner"
+    },
+    "eco_mloot_beacon": {
+      "textures": "textures/blocks/beacon"
+    },
+    "eco_mloot_netherite_block": {
+      "textures": "textures/blocks/netherite_block"
+    },
+    "eco_mloot_nether_star": {
+      "textures": "textures/items/nether_star"
     }
   }
 }

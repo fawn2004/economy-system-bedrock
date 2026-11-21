@@ -46,6 +46,166 @@
         "minecraft:variant": {
           "value": 7
         }
+      },
+      "eco:tier_8": {
+        "minecraft:variant": {
+          "value": 8
+        }
+      },
+      "eco:tier_9": {
+        "minecraft:variant": {
+          "value": 9
+        }
+      },
+      "eco:tier_10": {
+        "minecraft:variant": {
+          "value": 10
+        }
+      },
+      "eco:tier_11": {
+        "minecraft:variant": {
+          "value": 11
+        }
+      },
+      "eco:tier_12": {
+        "minecraft:variant": {
+          "value": 12
+        }
+      },
+      "eco:tier_13": {
+        "minecraft:variant": {
+          "value": 13
+        }
+      },
+      "eco:tier_14": {
+        "minecraft:variant": {
+          "value": 14
+        }
+      },
+      "eco:tier_15": {
+        "minecraft:variant": {
+          "value": 15
+        }
+      },
+      "eco:tier_16": {
+        "minecraft:variant": {
+          "value": 16
+        }
+      },
+      "eco:tier_17": {
+        "minecraft:variant": {
+          "value": 17
+        }
+      },
+      "eco:tier_18": {
+        "minecraft:variant": {
+          "value": 18
+        }
+      },
+      "eco:tier_19": {
+        "minecraft:variant": {
+          "value": 19
+        }
+      },
+      "eco:tier_20": {
+        "minecraft:variant": {
+          "value": 20
+        }
+      },
+      "eco:tier_21": {
+        "minecraft:variant": {
+          "value": 21
+        }
+      },
+      "eco:tier_22": {
+        "minecraft:variant": {
+          "value": 22
+        }
+      },
+      "eco:tier_23": {
+        "minecraft:variant": {
+          "value": 23
+        }
+      },
+      "eco:tier_24": {
+        "minecraft:variant": {
+          "value": 24
+        }
+      },
+      "eco:tier_25": {
+        "minecraft:variant": {
+          "value": 25
+        }
+      },
+      "eco:tier_26": {
+        "minecraft:variant": {
+          "value": 26
+        }
+      },
+      "eco:tier_27": {
+        "minecraft:variant": {
+          "value": 27
+        }
+      },
+      "eco:tier_28": {
+        "minecraft:variant": {
+          "value": 28
+        }
+      },
+      "eco:tier_29": {
+        "minecraft:variant": {
+          "value": 29
+        }
+      },
+      "eco:tier_30": {
+        "minecraft:variant": {
+          "value": 30
+        }
+      },
+      "eco:tier_31": {
+        "minecraft:variant": {
+          "value": 31
+        }
+      },
+      "eco:tier_32": {
+        "minecraft:variant": {
+          "value": 32
+        }
+      },
+      "eco:tier_33": {
+        "minecraft:variant": {
+          "value": 33
+        }
+      },
+      "eco:tier_34": {
+        "minecraft:variant": {
+          "value": 34
+        }
+      },
+      "eco:tier_35": {
+        "minecraft:variant": {
+          "value": 35
+        }
+      },
+      "eco:tier_36": {
+        "minecraft:variant": {
+          "value": 36
+        }
+      },
+      "eco:tier_37": {
+        "minecraft:variant": {
+          "value": 37
+        }
+      },
+      "eco:tier_38": {
+        "minecraft:variant": {
+          "value": 38
+        }
+      },
+      "eco:tier_39": {
+        "minecraft:variant": {
+          "value": 39
+        }
       }
     },
     "events": {
@@ -63,7 +223,39 @@
             "eco:tier_4",
             "eco:tier_5",
             "eco:tier_6",
-            "eco:tier_7"
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
           ]
         }
       },
@@ -81,7 +273,39 @@
             "eco:tier_4",
             "eco:tier_5",
             "eco:tier_6",
-            "eco:tier_7"
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
           ]
         }
       },
@@ -99,7 +323,39 @@
             "eco:tier_4",
             "eco:tier_5",
             "eco:tier_6",
-            "eco:tier_7"
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
           ]
         }
       },
@@ -117,7 +373,39 @@
             "eco:tier_4",
             "eco:tier_5",
             "eco:tier_6",
-            "eco:tier_7"
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
           ]
         }
       },
@@ -135,7 +423,39 @@
             "eco:tier_3",
             "eco:tier_5",
             "eco:tier_6",
-            "eco:tier_7"
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
           ]
         }
       },
@@ -153,7 +473,39 @@
             "eco:tier_3",
             "eco:tier_4",
             "eco:tier_6",
-            "eco:tier_7"
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
           ]
         }
       },
@@ -171,7 +523,39 @@
             "eco:tier_3",
             "eco:tier_4",
             "eco:tier_5",
-            "eco:tier_7"
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
           ]
         }
       },
@@ -189,7 +573,1639 @@
             "eco:tier_3",
             "eco:tier_4",
             "eco:tier_5",
-            "eco:tier_6"
+            "eco:tier_6",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_8": {
+        "add": {
+          "component_groups": [
+            "eco:tier_8"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_9": {
+        "add": {
+          "component_groups": [
+            "eco:tier_9"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_10": {
+        "add": {
+          "component_groups": [
+            "eco:tier_10"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_11": {
+        "add": {
+          "component_groups": [
+            "eco:tier_11"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_12": {
+        "add": {
+          "component_groups": [
+            "eco:tier_12"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_13": {
+        "add": {
+          "component_groups": [
+            "eco:tier_13"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_14": {
+        "add": {
+          "component_groups": [
+            "eco:tier_14"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_15": {
+        "add": {
+          "component_groups": [
+            "eco:tier_15"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_16": {
+        "add": {
+          "component_groups": [
+            "eco:tier_16"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_17": {
+        "add": {
+          "component_groups": [
+            "eco:tier_17"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_18": {
+        "add": {
+          "component_groups": [
+            "eco:tier_18"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_19": {
+        "add": {
+          "component_groups": [
+            "eco:tier_19"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_20": {
+        "add": {
+          "component_groups": [
+            "eco:tier_20"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_21": {
+        "add": {
+          "component_groups": [
+            "eco:tier_21"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_22": {
+        "add": {
+          "component_groups": [
+            "eco:tier_22"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_23": {
+        "add": {
+          "component_groups": [
+            "eco:tier_23"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_24": {
+        "add": {
+          "component_groups": [
+            "eco:tier_24"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_25": {
+        "add": {
+          "component_groups": [
+            "eco:tier_25"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_26": {
+        "add": {
+          "component_groups": [
+            "eco:tier_26"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_27": {
+        "add": {
+          "component_groups": [
+            "eco:tier_27"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_28": {
+        "add": {
+          "component_groups": [
+            "eco:tier_28"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_29": {
+        "add": {
+          "component_groups": [
+            "eco:tier_29"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_30": {
+        "add": {
+          "component_groups": [
+            "eco:tier_30"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_31": {
+        "add": {
+          "component_groups": [
+            "eco:tier_31"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_32": {
+        "add": {
+          "component_groups": [
+            "eco:tier_32"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_33": {
+        "add": {
+          "component_groups": [
+            "eco:tier_33"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_34": {
+        "add": {
+          "component_groups": [
+            "eco:tier_34"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_35": {
+        "add": {
+          "component_groups": [
+            "eco:tier_35"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_36": {
+        "add": {
+          "component_groups": [
+            "eco:tier_36"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_37",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_37": {
+        "add": {
+          "component_groups": [
+            "eco:tier_37"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_38",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_38": {
+        "add": {
+          "component_groups": [
+            "eco:tier_38"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_39"
+          ]
+        }
+      },
+      "eco:set_tier_39": {
+        "add": {
+          "component_groups": [
+            "eco:tier_39"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:tier_0",
+            "eco:tier_1",
+            "eco:tier_2",
+            "eco:tier_3",
+            "eco:tier_4",
+            "eco:tier_5",
+            "eco:tier_6",
+            "eco:tier_7",
+            "eco:tier_8",
+            "eco:tier_9",
+            "eco:tier_10",
+            "eco:tier_11",
+            "eco:tier_12",
+            "eco:tier_13",
+            "eco:tier_14",
+            "eco:tier_15",
+            "eco:tier_16",
+            "eco:tier_17",
+            "eco:tier_18",
+            "eco:tier_19",
+            "eco:tier_20",
+            "eco:tier_21",
+            "eco:tier_22",
+            "eco:tier_23",
+            "eco:tier_24",
+            "eco:tier_25",
+            "eco:tier_26",
+            "eco:tier_27",
+            "eco:tier_28",
+            "eco:tier_29",
+            "eco:tier_30",
+            "eco:tier_31",
+            "eco:tier_32",
+            "eco:tier_33",
+            "eco:tier_34",
+            "eco:tier_35",
+            "eco:tier_36",
+            "eco:tier_37",
+            "eco:tier_38"
           ]
         }
       }

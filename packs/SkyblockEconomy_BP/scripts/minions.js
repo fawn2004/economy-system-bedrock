@@ -1,6 +1,6 @@
 import { ItemStack, system, world } from "@minecraft/server";
 import { sellPrice } from "./catalog.js";
-import { CONFIG, MINION_SETTINGS as MS, MINION_TIERS, MINION_UPGRADES } from "./config.js";
+import { CONFIG, MINION_SETTINGS as MS, MINION_TYPES, MINION_UPGRADES } from "./config.js";
 import { addMoney, fmt, getBalance, takeMoney } from "./economy.js";
 import { ICON, backTile, fail, success, tileMenu } from "./ui.js";
 
@@ -27,6 +27,7 @@ const pretty = (id) => id.replace(/^minecraft:/, "").replace(/_/g, " ").replace(
 const upDef = (id) => MINION_UPGRADES.find((u) => u.id === id);
 const lvl = (d, id) => d.ups?.[id] ?? 0;
 const isAdmin = (p) => p.hasTag(CONFIG.adminTag);
+const fmtShortish = (n) => (n >= 1e6 ? `$${Math.round(n / 1e5) / 10}M` : n >= 1e4 ? `$${Math.round(n / 100) / 10}k` : fmt(n));
 const canManage = (p, d) => !d.owner || d.owner === p.id || isAdmin(p);
 
 // ---- enchanted loot (worth lootMultiplier x the normal item) -------------------
@@ -34,18 +35,26 @@ const LOOT = "eco:mloot_";
 export const lootIdFor = (base) => LOOT + base.replace(/^minecraft:/, "");
 export const baseFromLoot = (id) => (id?.startsWith(LOOT) ? "minecraft:" + id.slice(LOOT.length) : undefined);
 export const isMinionLoot = (id) => !!baseFromLoot(id);
-export const lootName = (id) => "Enchanted " + pretty(baseFromLoot(id) ?? id);
+export const lootName = (id) => {
+  const base = baseFromLoot(id);
+  for (const t of MINION_TYPES) for (const tier of t.tiers) if (tier.drop[0] === base) return "Enchanted " + tier.name;
+  return "Enchanted " + pretty(base ?? id);
+};
 export const lootIcon = (id) => {
   const b = baseFromLoot(id)?.replace("minecraft:", "");
   return b ? ({ cobblestone: "textures/blocks/cobblestone", lapis_lazuli: "textures/items/dye_powder_blue", redstone: "textures/items/redstone_dust" }[b] ?? `textures/items/${b}`) : ICON.coin;
 };
+/** Sell value of one enchanted item made from `base` (tier value, or shop price x lootMultiplier). */
+function baseValue(base) {
+  for (const t of MINION_TYPES) for (const tier of t.tiers) if (tier.drop[0] === base && tier.value) return tier.value;
+  return sellPrice(base) * (MS.lootMultiplier ?? 1);
+}
 /** Sell price of one enchanted minion item (0 if it isn't one). */
 export const lootSellPrice = (id) => {
   const base = baseFromLoot(id);
-  return base ? sellPrice(base) * (MS.lootMultiplier ?? 1) : 0;
+  return base ? baseValue(base) : 0;
 };
-/** Sell price of one stored item (stored as the base item id). */
-const storedValue = (base) => sellPrice(base) * (MS.lootMultiplier ?? 1);
+const storedValue = (base) => baseValue(base);
 
 function lootStack(base, amount) {
   try {
@@ -65,7 +74,11 @@ export const capacityOf = (d) => MS.baseStorage + lvl(d, "storage") * (upDef("st
 const luckOf = (d) => lvl(d, "luck") * (upDef("luck")?.perLevel ?? 0);
 const fortuneOf = (d) => lvl(d, "fortune") * (upDef("fortune")?.perLevel ?? 0);
 const stored = (d) => Object.values(d.store ?? {}).reduce((a, b) => a + b, 0);
-const tierOf = (d) => MINION_TIERS[Math.min(d.tier ?? 0, MINION_TIERS.length - 1)];
+export const typeOf = (d) => MINION_TYPES.find((t) => t.id === (d?.type ?? "mining")) ?? MINION_TYPES[0];
+const tiersOf = (d) => typeOf(d).tiers;
+const tierOf = (d) => tiersOf(d)[Math.min(d.tier ?? 0, tiersOf(d).length - 1)];
+const nextTierOf = (d) => tiersOf(d)[(d.tier ?? 0) + 1];
+const upCost = (d, u, level) => Math.round(u.money[level] * (typeOf(d).upgradeMultiplier ?? 1));
 
 function rollExtra(pct) {
   let n = Math.floor(pct / 100);
@@ -85,18 +98,19 @@ function read(e) {
 function write(e, d) {
   e.setDynamicProperty("eco:mn", JSON.stringify(d));
   const total = stored(d), cap = capacityOf(d);
-  e.nameTag = `§eMining Minion §7[${tierOf(d).name}]\n${total >= cap ? "§c" : "§f"}${commas(total)}/${commas(cap)}${total >= cap ? " FULL" : ""}`;
+  e.nameTag = `§e${typeOf(d).name} Minion §7[${tierOf(d).name}]\n${total >= cap ? "§c" : "§f"}${commas(total)}/${commas(cap)}${total >= cap ? " FULL" : ""}`;
 }
 
 // ---- items -------------------------------------------------------------------
-export function makeMinionItem(tier = 0, ups = {}) {
+export function makeMinionItem(tier = 0, ups = {}, type = "mining") {
   const s = new ItemStack(ITEM, 1);
-  const t = MINION_TIERS[tier] ?? MINION_TIERS[0];
-  s.nameTag = `§r§eMining Minion §7[${t.name}]`;
-  const lines = [`§7Tier: §f${t.name} §8(${tier + 1}/${MINION_TIERS.length})`];
+  const mt = MINION_TYPES.find((t) => t.id === type) ?? MINION_TYPES[0];
+  const t = mt.tiers[tier] ?? mt.tiers[0];
+  s.nameTag = `§r§e${mt.name} Minion §7[${t.name}]`;
+  const lines = [`§7Tier: §f${t.name} §8(${tier + 1}/${mt.tiers.length})`];
   for (const u of MINION_UPGRADES) if (ups[u.id]) lines.push(`§7${u.name}: §a${roman(ups[u.id])}`);
   lines.push("§7Place it on a block - it mines", "§7the way you are facing.");
-  lines.push(`${TAG}${tier}:${MINION_UPGRADES.map((u) => ups[u.id] ?? 0).join(",")}`);
+  lines.push(`${TAG}${tier}:${MINION_UPGRADES.map((u) => ups[u.id] ?? 0).join(",")}:${mt.id}`);
   s.setLore(lines);
   return s;
 }
@@ -104,14 +118,15 @@ export function makeMinionItem(tier = 0, ups = {}) {
 function readItem(item) {
   if (item?.typeId !== ITEM) return undefined;
   const line = item.getLore().find((l) => l.startsWith(TAG));
-  if (!line) return { tier: 0, ups: {} };
-  const [tier, levels] = line.slice(TAG.length).split(":");
+  if (!line) return { tier: 0, ups: {}, type: "mining" };
+  const [tier, levels, type] = line.slice(TAG.length).split(":");
+  const mt = MINION_TYPES.find((t) => t.id === type) ?? MINION_TYPES[0];
   const ups = {};
   (levels ?? "").split(",").forEach((v, i) => {
     const u = MINION_UPGRADES[i];
     if (u && Number(v) > 0) ups[u.id] = Number(v);
   });
-  return { tier: Math.min(MINION_TIERS.length - 1, Math.max(0, Number(tier) || 0)), ups };
+  return { tier: Math.min(mt.tiers.length - 1, Math.max(0, Number(tier) || 0)), ups, type: mt.id };
 }
 
 const ownedCount = (playerId) =>
@@ -147,9 +162,13 @@ function place(player, block, face, info) {
   try {
     m.setRotation({ x: 0, y: (Math.atan2(-dir.x, dir.z) * 180) / Math.PI });
   } catch {}
-  const b = spawnBlock(dim, bl, info.tier, m.id);
+  const mt = MINION_TYPES.find((t) => t.id === info.type) ?? MINION_TYPES[0];
+  try {
+    m.triggerEvent(`eco:set_skin_${mt.skin ?? 0}`);
+  } catch {}
+  const b = spawnBlock(dim, bl, mt.tiers[info.tier]?.display ?? 0, m.id);
   const d = {
-    owner: player.id, ownerName: player.name, tier: info.tier, ups: info.ups, store: {},
+    type: mt.id, owner: player.id, ownerName: player.name, tier: info.tier, ups: info.ups, store: {},
     last: Date.now(), block: bl, blockId: b?.id,
   };
   write(m, d);
@@ -162,10 +181,10 @@ function place(player, block, face, info) {
   success(player, "Minion placed! Tap it to open its menu.");
 }
 
-function spawnBlock(dim, loc, tier, minionId) {
+function spawnBlock(dim, loc, display, minionId) {
   try {
     const b = dim.spawnEntity(BLOCK, { x: loc.x + 0.5, y: loc.y, z: loc.z + 0.5 });
-    b.triggerEvent(`eco:set_tier_${Math.min(tier, 7)}`);
+    b.triggerEvent(`eco:set_tier_${display}`);
     b.setDynamicProperty("eco:minion", minionId);
     return b;
   } catch {
@@ -180,8 +199,14 @@ function update(e) {
   // make sure its block is there (re-create it if something removed it)
   let blk = d.blockId ? world.getEntity(d.blockId) : undefined;
   if (!blk?.isValid) {
-    blk = spawnBlock(e.dimension, d.block, d.tier, e.id);
+    blk = spawnBlock(e.dimension, d.block, tierOf(d).display ?? 0, e.id);
     d.blockId = blk?.id;
+  }
+  if (!d.skinSet) {
+    try {
+      e.triggerEvent(`eco:set_skin_${typeOf(d).skin ?? 0}`);
+      d.skinSet = true;
+    } catch {}
   }
   const now = Date.now();
   const step = intervalOf(d) * 1000;
@@ -194,7 +219,7 @@ function update(e) {
     d.store = d.store ?? {};
     while (n-- > 0 && total < cap) {
       const cur = tierOf(d);
-      const next = MINION_TIERS[(d.tier ?? 0) + 1];
+      const next = nextTierOf(d);
       const [item, count] = next && Math.random() * 100 < luckOf(d) ? next.drop : cur.drop;
       const amount = Math.min(cap - total, count * (1 + rollExtra(fortuneOf(d))));
       d.store[item] = (d.store[item] ?? 0) + amount;
@@ -245,16 +270,16 @@ export async function minionMenu(player, e, msg) {
   const d = r.d;
   const manage = canManage(player, d);
   const t = tierOf(d);
-  const next = MINION_TIERS[(d.tier ?? 0) + 1];
+  const next = nextTierOf(d);
   const total = stored(d), cap = capacityOf(d);
   const reopen = (m) => minionMenu(player, e, m);
   const worth = Object.entries(d.store ?? {}).reduce((n, [id, c]) => n + storedValue(id) * c, 0);
   const lines = [
     msg,
-    `§eMining Minion §7- §f${t.name} §8(tier ${(d.tier ?? 0) + 1}/${MINION_TIERS.length})   §7Owner: §f${d.ownerName ?? "?"}`,
+    `§e${typeOf(d).name} Minion §7- §f${t.name} §8(tier ${(d.tier ?? 0) + 1}/${tiersOf(d).length})   §7Owner: §f${d.ownerName ?? "?"}`,
     `§7Mines every §f${intervalOf(d).toFixed(1)}s   §7Storage: ${total >= cap ? "§c" : "§f"}${commas(total)}/${commas(cap)}`,
     `§7Luck: §a${luckOf(d)}%${next ? ` §8(${next.name})` : ""}   §7Fortune: §a+${fortuneOf(d)}%`,
-    `§bMines enchanted items worth ${MS.lootMultiplier ?? 1}x the normal price!`,
+    `§bEach Enchanted ${t.name} sells for ${fmt(storedValue(t.drop[0]))}!`,
   ].filter(Boolean);
   const tiles = [];
   if (manage) {
@@ -280,7 +305,7 @@ export async function minionMenu(player, e, msg) {
     lines.push(`§8Only ${d.ownerName ?? "the owner"} can use this minion.`);
   }
   tiles.push({ text: "§7§lCLOSE", sub: "§7Close menu", icon: ICON.back });
-  await tileMenu(player, { title: "MINING MINION", theme: "orange", body: lines.join("\n"), tiles });
+  await tileMenu(player, { title: `${typeOf(d).name.toUpperCase()} MINION`, theme: "orange", body: lines.join("\n"), tiles });
 }
 
 function collect(player, e) {
@@ -341,7 +366,7 @@ function pickUp(player, e) {
     const overflow = inv.addItem(stack);
     if (overflow) player.dimension.spawnItem(overflow, player.location);
   };
-  drop(makeMinionItem(d.tier ?? 0, d.ups ?? {}));
+  drop(makeMinionItem(d.tier ?? 0, d.ups ?? {}, typeOf(d).id));
   for (const [id, count] of Object.entries(d.store ?? {})) {
     let left = count;
     while (left > 0) {
@@ -369,7 +394,7 @@ function upgradesMenu(player, e, back, msg) {
   const reopen = (m) => upgradesMenu(player, e, back, m);
   const tiles = MINION_UPGRADES.map((u) => {
     const cur = lvl(d, u.id), max = u.money.length;
-    const ok = cur < max && getBalance(player) >= u.money[cur];
+    const ok = cur < max && getBalance(player) >= upCost(d, u, cur);
     return {
       text: `§e§l${u.name.toUpperCase()}`,
       sub: cur >= max ? `§a${roman(cur)} §7MAX` : `§7${cur ? roman(cur) : "-"} > ${ok ? "§a" : "§c"}${roman(cur + 1)}`,
@@ -377,7 +402,7 @@ function upgradesMenu(player, e, back, msg) {
       onClick: () => upgradeDetail(player, e, u, () => reopen()),
     };
   });
-  const next = MINION_TIERS[(d.tier ?? 0) + 1];
+  const next = nextTierOf(d);
   tiles.push({
     text: "§d§lBETTER BLOCKS",
     sub: next ? `§7> ${getBalance(player) >= next.cost ? "§a" : "§c"}${next.name}` : "§aMAX",
@@ -401,10 +426,10 @@ function upgradeDetail(player, e, u, back, msg) {
   const tiles = [];
   const lines = [msg, `§f${u.name} §6${cur ? roman(cur) : "-"}§7/§6${roman(max)}`, `§7${u.desc}`];
   if (cur < max) {
-    lines.push(`§7Cost: ${getBalance(player) >= u.money[cur] ? "§a" : "§c"}${fmt(u.money[cur])}   §8(you have ${fmt(getBalance(player))})`);
+    lines.push(`§7Cost: ${getBalance(player) >= upCost(d, u, cur) ? "§a" : "§c"}${fmt(upCost(d, u, cur))}   §8(you have ${fmt(getBalance(player))})`);
     tiles.push({
       text: `§a§lBUY ${roman(cur + 1)}`,
-      sub: `§a${fmt(u.money[cur])}`,
+      sub: `§a${fmtShortish(upCost(d, u, cur))}`,
       icon: u.icon,
       onClick: () => {
         const dd = read(e);
@@ -413,9 +438,9 @@ function upgradeDetail(player, e, u, back, msg) {
         const fresh = read(e);
         const c = lvl(fresh, u.id);
         if (c >= u.money.length) return reopen("§aAlready maxed.");
-        if (!takeMoney(player, u.money[c])) {
-          fail(player, `You need ${fmt(u.money[c])}.`);
-          return reopen(`§cYou need §f${fmt(u.money[c])}§c.`);
+        if (!takeMoney(player, upCost(fresh, u, c))) {
+          fail(player, `You need ${fmt(upCost(fresh, u, c))}.`);
+          return reopen(`§cYou need §f${fmt(upCost(fresh, u, c))}§c.`);
         }
         fresh.ups = { ...(fresh.ups ?? {}), [u.id]: c + 1 };
         write(e, fresh);
@@ -434,15 +459,15 @@ function tierDetail(player, e, back, msg) {
   if (!d) return back();
   const reopen = (m) => tierDetail(player, e, back, m);
   const cur = tierOf(d);
-  const next = MINION_TIERS[(d.tier ?? 0) + 1];
+  const next = nextTierOf(d);
   const lines = [
     msg,
-    `§fBetter Blocks   §7Now mining: §f${cur.name} §8(${pretty(cur.drop[0])} x${cur.drop[1]})`,
-    MINION_TIERS.map((t, i) => `${i <= (d.tier ?? 0) ? "§a" : "§8"}${t.name}`).join(" §7> "),
+    `§fBetter Blocks   §7Now mining: §f${cur.name} §8(worth ${fmt(storedValue(cur.drop[0]))} each)`,
+    tiersOf(d).map((t, i) => `${i <= (d.tier ?? 0) ? "§a" : "§8"}${t.name}`).join(" §7> "),
   ];
   const tiles = [];
   if (next) {
-    lines.push(`§7Next: §e${next.name} §8(${pretty(next.drop[0])} x${next.drop[1]})   §7Cost: ${getBalance(player) >= next.cost ? "§a" : "§c"}${fmt(next.cost)}`);
+    lines.push(`§7Next: §e${next.name} §8(worth ${fmt(storedValue(next.drop[0]))} each)   §7Cost: ${getBalance(player) >= next.cost ? "§a" : "§c"}${fmt(next.cost)}`);
     tiles.push({
       text: `§a§lUPGRADE`,
       sub: `§7to ${next.name}`,
@@ -452,7 +477,7 @@ function tierDetail(player, e, back, msg) {
         if (!dd || !canManage(player, dd)) return reopen("§cThis isn't your minion.");
         update(e);
         const fresh = read(e);
-        const nt = MINION_TIERS[(fresh.tier ?? 0) + 1];
+        const nt = nextTierOf(fresh);
         if (!nt) return reopen("§aAlready the best tier.");
         if (!takeMoney(player, nt.cost)) {
           fail(player, `You need ${fmt(nt.cost)}.`);
@@ -461,7 +486,7 @@ function tierDetail(player, e, back, msg) {
         fresh.tier = (fresh.tier ?? 0) + 1;
         write(e, fresh);
         try {
-          world.getEntity(fresh.blockId)?.triggerEvent(`eco:set_tier_${Math.min(fresh.tier, 7)}`);
+          world.getEntity(fresh.blockId)?.triggerEvent(`eco:set_tier_${tierOf(fresh).display ?? 0}`);
         } catch {}
         player.playSound("random.levelup");
         success(player, `Your minion now mines ${nt.name}!`);

@@ -853,14 +853,99 @@ def make_enchanted_crops():
 # entity + the minion item. Tier textures must match MINION_TIERS order in
 # scripts/config.js (8 tiers).
 # ---------------------------------------------------------------------------
-MINION_TIER_TEXTURES = [
-    "textures/blocks/cobblestone", "textures/blocks/coal_ore", "textures/blocks/iron_ore",
-    "textures/blocks/gold_ore", "textures/blocks/lapis_ore", "textures/blocks/redstone_ore",
-    "textures/blocks/diamond_ore", "textures/blocks/emerald_ore",
+B, I = "textures/blocks/", "textures/items/"
+# Minion types. Each tier: (name, drop item, count, sell value per item or None
+# for "shop sell price x lootMultiplier", upgrade cost, display block texture,
+# item icon texture). Written to scripts/minion_types.js.
+MINION_TYPES = [
+    {"id": "mining", "name": "Mining", "price": 25000, "upgradeMultiplier": 1,
+     "skin": ("#f2c12e", "#c98d12", "#3f6fd1", "#2c4f99"),
+     "tiers": [
+         ("Cobblestone", "cobblestone", 1, None, 0, B + "cobblestone", B + "cobblestone"),
+         ("Coal", "coal", 1, None, 50000, B + "coal_ore", I + "coal"),
+         ("Iron", "raw_iron", 1, None, 150000, B + "iron_ore", I + "raw_iron"),
+         ("Gold", "raw_gold", 1, None, 350000, B + "gold_ore", I + "raw_gold"),
+         ("Lapis", "lapis_lazuli", 4, None, 600000, B + "lapis_ore", I + "dye_powder_blue"),
+         ("Redstone", "redstone", 4, None, 1000000, B + "redstone_ore", I + "redstone_dust"),
+         ("Diamond", "diamond", 1, None, 2500000, B + "diamond_ore", I + "diamond"),
+         ("Emerald", "emerald", 1, None, 5000000, B + "emerald_ore", I + "emerald"),
+     ]},
+    {"id": "nether", "name": "Nether", "price": 150000, "upgradeMultiplier": 3,
+     "skin": ("#c0392b", "#7a1f1f", "#5a1a1a", "#3a0f0f"),
+     "tiers": [
+         ("Netherrack", "netherrack", 1, 1200, 0, B + "netherrack", B + "netherrack"),
+         ("Soul Sand", "soul_sand", 1, 1500, 300000, B + "soul_sand", B + "soul_sand"),
+         ("Quartz", "quartz", 1, 1900, 600000, B + "quartz_ore", I + "quartz"),
+         ("Glowstone", "glowstone_dust", 1, 2400, 1200000, B + "glowstone", I + "glowstone_dust"),
+         ("Magma", "magma_cream", 1, 3000, 2000000, B + "magma", I + "magma_cream"),
+         ("Blaze Rod", "blaze_rod", 1, 3800, 3500000, B + "nether_wart_block", I + "blaze_rod"),
+         ("Ancient Debris", "ancient_debris", 1, 4800, 6000000, B + "ancient_debris_side", B + "ancient_debris_side"),
+         ("Netherite Scrap", "netherite_scrap", 1, 6000, 10000000, B + "netherite_block", I + "netherite_scrap"),
+     ]},
+    {"id": "obsidian", "name": "Obsidian", "price": 2000000, "upgradeMultiplier": 8,
+     "skin": ("#6c3fb0", "#45267a", "#2a1f3d", "#17112a"),
+     "tiers": [
+         ("Obsidian", "obsidian", 1, 7000, 0, B + "obsidian", B + "obsidian"),
+         ("Crying Obsidian", "crying_obsidian", 1, 8500, 3000000, B + "crying_obsidian", B + "crying_obsidian"),
+         ("Amethyst", "amethyst_shard", 1, 10000, 5000000, B + "amethyst_block", I + "amethyst_shard"),
+         ("Sea Lantern", "sea_lantern", 1, 12500, 8000000, B + "sea_lantern", B + "sea_lantern"),
+         ("Shroomlight", "shroomlight", 1, 15000, 12000000, B + "shroomlight", B + "shroomlight"),
+         ("Sculk Catalyst", "sculk_catalyst", 1, 18000, 18000000, B + "sculk_catalyst_side", B + "sculk_catalyst_side"),
+         ("Echo Shard", "echo_shard", 1, 22000, 26000000, B + "sculk", I + "echo_shard"),
+         ("Heavy Core", "heavy_core", 1, 27000, 40000000, B + "heavy_core", B + "heavy_core"),
+     ]},
+    {"id": "end", "name": "End", "price": 10000000, "upgradeMultiplier": 20,
+     "skin": ("#e8e2a8", "#b8b27a", "#8e5fb5", "#5f3d80"),
+     "tiers": [
+         ("End Stone", "end_stone", 1, 30000, 0, B + "end_stone", B + "end_stone"),
+         ("Purpur", "purpur_block", 1, 36000, 12000000, B + "purpur_block", B + "purpur_block"),
+         ("Chorus Fruit", "chorus_fruit", 1, 43000, 18000000, B + "chorus_flower", I + "chorus_fruit"),
+         ("Ender Pearl", "ender_pearl", 1, 52000, 26000000, B + "end_bricks", I + "ender_pearl"),
+         ("Shulker Shell", "shulker_shell", 1, 62000, 38000000, B + "shulker_top_undyed", I + "shulker_shell"),
+         ("End Crystal", "end_crystal", 1, 75000, 55000000, B + "purpur_pillar", I + "end_crystal"),
+         ("Dragon's Breath", "dragon_breath", 1, 90000, 80000000, B + "purpur_pillar_top", I + "dragons_breath"),
+         ("Dragon Egg", "dragon_egg", 1, 110000, 120000000, B + "dragon_egg", B + "dragon_egg"),
+     ]},
+    {"id": "bedrock", "name": "Bedrock", "price": 50000000, "upgradeMultiplier": 50,
+     "skin": ("#4a4a4a", "#2a2a2a", "#222222", "#111111"),
+     "tiers": [
+         ("Bedrock", "bedrock", 1, 125000, 0, B + "bedrock", B + "bedrock"),
+         ("Reinforced Deepslate", "reinforced_deepslate", 1, 150000, 60000000, B + "reinforced_deepslate_top", B + "reinforced_deepslate_top"),
+         ("Budding Amethyst", "budding_amethyst", 1, 180000, 90000000, B + "budding_amethyst", B + "budding_amethyst"),
+         ("End Portal Frame", "end_portal_frame", 1, 215000, 130000000, B + "endframe_top", B + "endframe_top"),
+         ("Spawner", "mob_spawner", 1, 260000, 190000000, B + "mob_spawner", B + "mob_spawner"),
+         ("Beacon", "beacon", 1, 310000, 270000000, B + "beacon", B + "beacon"),
+         ("Netherite Block", "netherite_block", 1, 375000, 380000000, B + "netherite_block", B + "netherite_block"),
+         ("Nether Star", "nether_star", 1, 450000, 550000000, B + "beacon", I + "nether_star"),
+     ]},
 ]
+DISPLAY_TEXTURES = [t[5] for mt in MINION_TYPES for t in mt["tiers"]]
 
 
-def minion_skin():
+def write_minion_types_js():
+    out, idx = [], 0
+    for si, mt in enumerate(MINION_TYPES):
+        tiers = []
+        for (name, base, count, value, cost, _disp, _icon) in mt["tiers"]:
+            t = {"name": name, "drop": ["minecraft:" + base, count], "cost": cost, "display": idx}
+            if value is not None:
+                t["value"] = value
+            tiers.append(t)
+            idx += 1
+        out.append({"id": mt["id"], "name": mt["name"], "price": mt["price"],
+                    "upgradeMultiplier": mt["upgradeMultiplier"], "skin": si, "tiers": tiers})
+    path = os.path.join(BP, "scripts", "minion_types.js")
+    with open(path, "w") as f:
+        f.write("// AUTO-GENERATED by tools/generate_assets.py (MINION_TYPES).\n")
+        f.write("// Change prices/costs/values in-game (Admin > Settings > Minions) or there.\n")
+        f.write("// value = sell price of one enchanted item (no value = shop sell price x lootMultiplier)\n")
+        f.write("// display = block texture index in the resource pack (don't change by hand)\n")
+        f.write("export const MINION_TYPES = " + json.dumps(out, indent=2) + ";\n")
+
+
+
+
+def minion_skin(colors=("#f2c12e", "#c98d12", "#3f6fd1", "#2c4f99")):
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     px = img.load()
 
@@ -870,8 +955,8 @@ def minion_skin():
                 px[x, y] = c
 
     skin, skin_d = hexc("#e8b07a"), hexc("#c98f5a")
-    helmet, helmet_d = hexc("#f2c12e"), hexc("#c98d12")
-    shirt, overall, overall_d = hexc("#8a5a2b"), hexc("#3f6fd1"), hexc("#2c4f99")
+    helmet, helmet_d = hexc(colors[0]), hexc(colors[1])
+    shirt, overall, overall_d = hexc("#8a5a2b"), hexc(colors[2]), hexc(colors[3])
     boot = hexc("#3a2a1a")
     # head (box uv at 0,0; 8x8x8)
     fill(0, 0, 32, 16, skin)
@@ -911,6 +996,9 @@ def make_minions():
     os.makedirs(os.path.join(RP, "render_controllers"), exist_ok=True)
     os.makedirs(os.path.join(BP, "entities"), exist_ok=True)
     save(minion_skin(), os.path.join(RP, "textures", "entity", "eco_minion.png"))
+    for si, mt in enumerate(MINION_TYPES):
+        save(minion_skin(mt["skin"]), os.path.join(RP, "textures", "entity", f"eco_minion_{mt['id']}.png"))
+    write_minion_types_js()
 
     # --- minion model (front = -Z) ---
     geo = {
@@ -973,11 +1061,11 @@ def make_minions():
         "minecraft:client_entity": {"description": {
             "identifier": "eco:minion",
             "materials": {"default": "entity_alphatest"},
-            "textures": {"default": "textures/entity/eco_minion"},
+            "textures": {f"s{i}": f"textures/entity/eco_minion_{mt['id']}" for i, mt in enumerate(MINION_TYPES)},
             "geometry": {"default": "geometry.eco_minion"},
             "animations": {"mine": "animation.eco_minion.mine"},
             "scripts": {"animate": ["mine"]},
-            "render_controllers": ["controller.render.default"],
+            "render_controllers": ["controller.render.eco_minion"],
         }},
     }
     with open(os.path.join(ent_dir, "eco_minion.entity.json"), "w") as f:
@@ -987,7 +1075,7 @@ def make_minions():
         "minecraft:client_entity": {"description": {
             "identifier": "eco:minion_block",
             "materials": {"default": "entity"},
-            "textures": {f"t{i}": t for i, t in enumerate(MINION_TIER_TEXTURES)},
+            "textures": {f"t{i}": t for i, t in enumerate(DISPLAY_TEXTURES)},
             "geometry": {"default": "geometry.eco_minion_block"},
             "render_controllers": ["controller.render.eco_minion_block"],
         }},
@@ -996,12 +1084,20 @@ def make_minions():
         json.dump(block_client, f, indent=2)
     rc = {
         "format_version": "1.8.0",
-        "render_controllers": {"controller.render.eco_minion_block": {
-            "arrays": {"textures": {"Array.tiers": [f"Texture.t{i}" for i in range(len(MINION_TIER_TEXTURES))]}},
-            "geometry": "Geometry.default",
-            "materials": [{"*": "Material.default"}],
-            "textures": ["Array.tiers[query.variant]"],
-        }},
+        "render_controllers": {
+            "controller.render.eco_minion_block": {
+                "arrays": {"textures": {"Array.tiers": [f"Texture.t{i}" for i in range(len(DISPLAY_TEXTURES))]}},
+                "geometry": "Geometry.default",
+                "materials": [{"*": "Material.default"}],
+                "textures": ["Array.tiers[query.variant]"],
+            },
+            "controller.render.eco_minion": {
+                "arrays": {"textures": {"Array.skins": [f"Texture.s{i}" for i in range(len(MINION_TYPES))]}},
+                "geometry": "Geometry.default",
+                "materials": [{"*": "Material.default"}],
+                "textures": ["Array.skins[query.variant]"],
+            },
+        },
     }
     with open(os.path.join(RP, "render_controllers", "eco_minion_block.render_controllers.json"), "w") as f:
         json.dump(rc, f, indent=2)
@@ -1019,11 +1115,17 @@ def make_minions():
             "on_interact": {"filters": {"all_of": [{"test": "is_family", "subject": "other", "value": "player"}]}},
             "interact_text": "action.interact.eco_minion"}]},
     }
+    ns = len(MINION_TYPES)
     minion = {
         "format_version": "1.21.0",
         "minecraft:entity": {
             "description": {"identifier": "eco:minion", "is_spawnable": False, "is_summonable": True},
+            "component_groups": {f"eco:skin_{i}": {"minecraft:variant": {"value": i}} for i in range(ns)},
+            "events": {f"eco:set_skin_{i}": {"add": {"component_groups": [f"eco:skin_{i}"]},
+                                             "remove": {"component_groups": [f"eco:skin_{j}" for j in range(ns) if j != i]}}
+                       for i in range(ns)},
             "components": {
+                "minecraft:variant": {"value": 0},
                 **common,
                 "minecraft:type_family": {"family": ["eco_minion", "inanimate"]},
                 "minecraft:collision_box": {"width": 0.5, "height": 1.0},
@@ -1034,7 +1136,7 @@ def make_minions():
     }
     with open(os.path.join(BP, "entities", "eco_minion.json"), "w") as f:
         json.dump(minion, f, indent=2)
-    n = len(MINION_TIER_TEXTURES)
+    n = len(DISPLAY_TEXTURES)
     groups = {f"eco:tier_{i}": {"minecraft:variant": {"value": i}} for i in range(n)}
     events = {f"eco:set_tier_{i}": {"add": {"component_groups": [f"eco:tier_{i}"]},
                                     "remove": {"component_groups": [f"eco:tier_{j}" for j in range(n) if j != i]}}
@@ -1112,17 +1214,11 @@ def make_minions():
             f.write("action.interact.eco_minion=Open Minion\n")
 
 
-# Enchanted minion loot (worth more than the normal item). id: (base item, name, texture)
-MINION_LOOT = {
-    "cobblestone": ("Cobblestone", "textures/blocks/cobblestone"),
-    "coal": ("Coal", "textures/items/coal"),
-    "raw_iron": ("Raw Iron", "textures/items/raw_iron"),
-    "raw_gold": ("Raw Gold", "textures/items/raw_gold"),
-    "lapis_lazuli": ("Lapis Lazuli", "textures/items/dye_powder_blue"),
-    "redstone": ("Redstone", "textures/items/redstone_dust"),
-    "diamond": ("Diamond", "textures/items/diamond"),
-    "emerald": ("Emerald", "textures/items/emerald"),
-}
+# Enchanted minion loot: one item per minion drop (see MINION_TYPES)
+MINION_LOOT = {}
+for _mt in MINION_TYPES:
+    for (_name, _base, _c, _v, _cost, _disp, _icon) in _mt["tiers"]:
+        MINION_LOOT[_base] = (" ".join(w.capitalize() for w in _base.split("_")) if _base not in ("mob_spawner", "dragon_breath") else {"mob_spawner": "Spawner", "dragon_breath": "Dragon's Breath"}[_base], _icon)
 
 
 def make_minion_loot():

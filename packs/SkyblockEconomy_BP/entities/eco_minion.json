@@ -6,7 +6,114 @@
       "is_spawnable": false,
       "is_summonable": true
     },
+    "component_groups": {
+      "eco:skin_0": {
+        "minecraft:variant": {
+          "value": 0
+        }
+      },
+      "eco:skin_1": {
+        "minecraft:variant": {
+          "value": 1
+        }
+      },
+      "eco:skin_2": {
+        "minecraft:variant": {
+          "value": 2
+        }
+      },
+      "eco:skin_3": {
+        "minecraft:variant": {
+          "value": 3
+        }
+      },
+      "eco:skin_4": {
+        "minecraft:variant": {
+          "value": 4
+        }
+      }
+    },
+    "events": {
+      "eco:set_skin_0": {
+        "add": {
+          "component_groups": [
+            "eco:skin_0"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_1",
+            "eco:skin_2",
+            "eco:skin_3",
+            "eco:skin_4"
+          ]
+        }
+      },
+      "eco:set_skin_1": {
+        "add": {
+          "component_groups": [
+            "eco:skin_1"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_2",
+            "eco:skin_3",
+            "eco:skin_4"
+          ]
+        }
+      },
+      "eco:set_skin_2": {
+        "add": {
+          "component_groups": [
+            "eco:skin_2"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_1",
+            "eco:skin_3",
+            "eco:skin_4"
+          ]
+        }
+      },
+      "eco:set_skin_3": {
+        "add": {
+          "component_groups": [
+            "eco:skin_3"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_1",
+            "eco:skin_2",
+            "eco:skin_4"
+          ]
+        }
+      },
+      "eco:set_skin_4": {
+        "add": {
+          "component_groups": [
+            "eco:skin_4"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_1",
+            "eco:skin_2",
+            "eco:skin_3"
+          ]
+        }
+      }
+    },
     "components": {
+      "minecraft:variant": {
+        "value": 0
+      },
       "minecraft:health": {
         "value": 1000,
         "max": 1000

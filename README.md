@@ -67,7 +67,22 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 
 ![Mining minion](docs/minion_render.png)
 
-**Shop > Minions** sells a **Mining Minion**. Place it on a block and it mines the block in
+![Minion types](docs/minion_types.png)
+
+**Shop > Minions** sells 5 minions. Each one costs more but pays more: every minion's
+cheapest block is worth more than the previous minion's best.
+
+| Minion | Price | Mines | Each item worth |
+|---|---|---|---|
+| Mining | $25k | Cobblestone > Coal > Iron > Gold > Lapis > Redstone > Diamond > Emerald | $10 - ~$1,000 |
+| Nether | $150k | Netherrack > Soul Sand > Quartz > Glowstone > Magma > Blaze Rod > Ancient Debris > Netherite Scrap | $1,200 - $6,000 |
+| Obsidian | $2M | Obsidian > Crying Obsidian > Amethyst > Sea Lantern > Shroomlight > Sculk Catalyst > Echo Shard > Heavy Core | $7,000 - $27,000 |
+| End | $10M | End Stone > Purpur > Chorus Fruit > Ender Pearl > Shulker Shell > End Crystal > Dragon's Breath > Dragon Egg | $30,000 - $110,000 |
+| Bedrock | $50M | Bedrock > Reinforced Deepslate > Budding Amethyst > End Portal Frame > Spawner > Beacon > Netherite Block > Nether Star | $125,000 - $450,000 |
+
+Upgrades cost x1 / x3 / x8 / x20 / x50 for each minion.
+
+Each minion Place it on a block and it mines the block in
 front of it on a loop. That block is part of the minion, so it can't be broken, blown up
 or pushed. Minions keep working while you're away and catch up when the area loads,
 until their storage is full.
@@ -83,9 +98,11 @@ Tap a minion (or its block) to:
   Lapis > Redstone > Diamond > Emerald
 - **Pick up** (keeps its upgrades and gives you its storage)
 
-Only the owner (or an admin) can use a minion. Prices, speed, storage, the per-player limit,
-upgrade costs/effects and tier costs are in **Admin > Settings > Minions**
-(`MINION_*` in `config.js`).
+Only the owner (or an admin) can use a minion. Each minion's price, upgrade multiplier and
+every tier's cost, drop amount and sell value, plus speed, storage, the per-player limit and
+upgrade costs/effects, are in **Admin > Settings > Minions** (defaults: `MINION_TYPES` in
+`tools/generate_assets.py` > `scripts/minion_types.js`, `MINION_SETTINGS` / `MINION_UPGRADES`
+in `config.js`).
 
 ## Skills
 
