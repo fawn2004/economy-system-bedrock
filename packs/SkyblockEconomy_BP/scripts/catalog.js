@@ -107,15 +107,28 @@ export function categoryPath(id) {
   return parent ? `${parent} > ${c.name}` : c.name;
 }
 
-export function search(query, { includeHidden = false } = {}) {
+/** Items from `pool` whose name or id contains every word of `query`. */
+export function filterItems(pool, query) {
   const q = query.toLowerCase().replace(/^minecraft:/, "").trim();
   if (!q) return [];
   const words = q.split(/\s+/);
   const out = [];
-  const pool = includeHidden ? getCatalog().all : getCatalog().byId;
-  for (const e of pool.values()) {
+  for (const e of pool) {
     const hay = (e.name + " " + e.id).toLowerCase();
     if (words.every((w) => hay.includes(w))) out.push(e);
   }
   return out.sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name));
+}
+
+export function search(query, { includeHidden = false } = {}) {
+  const pool = includeHidden ? getCatalog().all : getCatalog().byId;
+  return filterItems(pool.values(), query);
+}
+
+/** Every item in a category and all of its sub-sections. */
+export function itemsDeep(id) {
+  const { categories, byCategory } = getCatalog();
+  const out = [...(byCategory.get(id) ?? [])];
+  for (const c of categories) if (c.group === id) out.push(...itemsDeep(c.id));
+  return out;
 }

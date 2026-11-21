@@ -1,6 +1,6 @@
 import { world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
-import { getCatalog, search, sellPrice } from "./catalog.js";
+import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
 import { BADGES, CONFIG, KITS, SHOP_LAYOUT, SPAWNERS } from "./config.js";
 import { addMoney, fmt, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
@@ -15,7 +15,7 @@ import {
 } from "./inventory.js";
 import { editItemMenu, editorMenu } from "./editor.js";
 import { makeSpawnerItem } from "./spawners.js";
-import { ICON, backTile, fail, showForm, success, tileMenu } from "./ui.js";
+import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 
 const U = "textures/ui/eco/";
 const pretty = (id) =>
@@ -109,6 +109,7 @@ function categoryMenu(player, c, back) {
     theme: c.theme,
     desc: c.desc,
     items: byCategory.get(c.id) ?? [],
+    searchPool: itemsDeep(c.id), // the search button looks through sub-sections too
     children,
     back,
   });
@@ -128,25 +129,44 @@ async function blocksMenu(player) {
   await tileMenu(player, { title: "BLOCKS", theme: "blue", body: `§7Pick a type of block    ${balLine(player)}`, tiles });
 }
 
-/** A paged grid of catalogue items. */
+/** A paged grid of catalogue items, with SEARCH / PREV / NEXT / BACK at the top and bottom. */
 async function itemListMenu(player, list, page = 0) {
   const size = CONFIG.pageSize;
-  const pages = Math.max(1, Math.ceil(list.items.length / size));
+  const items = list.items.filter((e) => e.buy > 0);
+  const pages = Math.max(1, Math.ceil(items.length / size));
   page = Math.min(Math.max(0, page), pages - 1);
   const reopen = () => itemListMenu(player, list, page);
-  const tiles = page === 0 ? [...(list.children ?? [])] : [];
-  tiles.push(...list.items
-    .filter((e) => e.buy > 0)
-    .slice(page * size, page * size + size)
-    .map((e) => ({
+  const content = page === 0 ? [...(list.children ?? [])] : [];
+  content.push(
+    ...items.slice(page * size, page * size + size).map((e) => ({
       text: `§f${clip(e.name)}`,
       sub: `${priceColor(player, e.buy)}${fmtShort(e.buy)}`,
       icon: e.icon,
       onClick: () => buyItemMenu(player, e, reopen),
-    })));
-  if (page > 0) tiles.push({ text: "§e§l< PREV", sub: `§7Page ${page}`, icon: ICON.back, onClick: () => itemListMenu(player, list, page - 1) });
-  if (page < pages - 1) tiles.push({ text: "§e§lNEXT >", sub: `§7Page ${page + 2}`, icon: ICON.confirm, onClick: () => itemListMenu(player, list, page + 1) });
-  tiles.push(backTile(list.back));
+    }))
+  );
+  const tiles = withNav(content, {
+    page,
+    pages,
+    goto: (p) => itemListMenu(player, list, p),
+    back: list.back,
+    onSearch: async () => {
+      const q = await askSearch(player, `Search ${list.title.toLowerCase()}`);
+      if (!q) return reopen();
+      const found = filterItems(list.searchPool ?? list.items, q);
+      if (!found.length) {
+        fail(player, `No items in ${list.title.toLowerCase()} match "${q}".`);
+        return reopen();
+      }
+      return itemListMenu(player, {
+        title: `${list.title}: ${clip(q.toUpperCase(), 12)}`,
+        theme: list.theme,
+        desc: `${found.length} result${found.length === 1 ? "" : "s"} for "§f${q}§7" in ${list.title.toLowerCase()}`,
+        items: found,
+        back: reopen,
+      });
+    },
+  });
   const pageInfo = pages > 1 ? `§7Page §f${page + 1}§7/§f${pages}    ` : "";
   await tileMenu(player, { title: list.title, theme: list.theme, body: `§7${list.desc}\n${pageInfo}${balLine(player)}`, tiles });
 }

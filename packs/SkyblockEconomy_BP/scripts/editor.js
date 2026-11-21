@@ -1,5 +1,6 @@
 import { ModalFormData } from "@minecraft/server-ui";
 import {
+  filterItems,
   categoryPath,
   clearAllEdits,
   clearEdit,
@@ -11,7 +12,7 @@ import {
 } from "./catalog.js";
 import { CONFIG, SHOP_LAYOUT } from "./config.js";
 import { fmt } from "./economy.js";
-import { ICON, fail, pagedMenu, showForm, success, tileMenu } from "./ui.js";
+import { ICON, askSearch, fail, pagedMenu, showForm, success, tileMenu } from "./ui.js";
 
 // ============================================================================
 //  SHOP EDITOR (admins only)
@@ -158,7 +159,24 @@ function itemList(player, title, items, back) {
     icon: e.icon,
     onClick: () => editItemMenu(player, e.id, () => itemList(player, title, refresh(items), back)),
   }));
-  return pagedMenu(player, { title, theme: "red", body: `§7Click an item to edit it. §8(${items.length} items)`, tiles, back });
+  return pagedMenu(player, {
+    title,
+    theme: "red",
+    body: `§7Click an item to edit it. §8(${items.length} items)`,
+    tiles,
+    back,
+    onSearch: async () => {
+      const q = await askSearch(player, `Search ${title.toLowerCase()}`);
+      const reopen = () => itemList(player, title, refresh(items), back);
+      if (!q) return reopen();
+      const found = filterItems(refresh(items), q);
+      if (!found.length) {
+        fail(player, `Nothing in this list matches "${q}".`);
+        return reopen();
+      }
+      return itemList(player, `FOUND: ${clip(q.toUpperCase(), 12)}`, found, reopen);
+    },
+  });
 }
 
 const refresh = (items) => items.map((e) => getCatalog().all.get(e.id) ?? e);

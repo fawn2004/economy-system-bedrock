@@ -1,5 +1,5 @@
 import { system } from "@minecraft/server";
-import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
+import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import { THEME } from "./config.js";
 
 // Any form whose title starts with this marker is drawn with the custom
@@ -18,6 +18,7 @@ export const ICON = {
   confirm: "textures/ui/eco/icon_confirm",
   cancel: "textures/ui/eco/icon_cancel",
   coin: "textures/ui/eco/icon_coin",
+  search: "textures/ui/eco/icon_search",
 };
 
 export function ecoTitle(text, theme = "red") {
@@ -69,18 +70,46 @@ export function fail(player, msg) {
   player.playSound("note.bass", { pitch: 0.7 });
 }
 
+export const searchTile = (onClick, sub = "§7In this list") => ({ text: "§b§lSEARCH", sub, icon: ICON.search, onClick });
+
 /**
- * tileMenu with automatic pages: shows `perPage` tiles plus PREV / NEXT / BACK.
- *   opts: { title, theme, body, tiles, back, perPage? }
+ * Adds navigation tiles around a page of content tiles.
+ * Long or multi-page lists get SEARCH / PREV / NEXT / BACK in the top row and
+ * PREV / NEXT / BACK again at the bottom; short ones just at the bottom.
+ */
+export function withNav(content, { page = 0, pages = 1, goto, back, onSearch }) {
+  const moves = [];
+  if (page > 0) moves.push({ text: "§e§l< PREV", sub: `§7Page ${page}`, icon: ICON.back, onClick: () => goto(page - 1) });
+  if (page < pages - 1) moves.push({ text: "§e§lNEXT >", sub: `§7Page ${page + 2}`, icon: ICON.confirm, onClick: () => goto(page + 1) });
+  if (back) moves.push(backTile(back));
+  const top = onSearch ? [searchTile(onSearch)] : [];
+  if (content.length > 8 || pages > 1) return [...top, ...moves, ...content, ...moves];
+  return [...top, ...content, ...moves];
+}
+
+/**
+ * tileMenu with automatic pages.
+ *   opts: { title, theme, body, tiles, back, perPage?, onSearch? }
  */
 export async function pagedMenu(player, opts, page = 0) {
   const per = opts.perPage ?? 20;
   const pages = Math.max(1, Math.ceil(opts.tiles.length / per));
   page = Math.min(Math.max(0, page), pages - 1);
-  const tiles = opts.tiles.slice(page * per, page * per + per);
-  if (page > 0) tiles.push({ text: "§e§l< PREV", sub: `§7Page ${page}`, icon: ICON.back, onClick: () => pagedMenu(player, opts, page - 1) });
-  if (page < pages - 1) tiles.push({ text: "§e§lNEXT >", sub: `§7Page ${page + 2}`, icon: ICON.confirm, onClick: () => pagedMenu(player, opts, page + 1) });
-  if (opts.back) tiles.push(backTile(opts.back));
+  const tiles = withNav(opts.tiles.slice(page * per, page * per + per), {
+    page,
+    pages,
+    goto: (p) => pagedMenu(player, opts, p),
+    back: opts.back,
+    onSearch: opts.onSearch,
+  });
   const info = pages > 1 ? `\n§7Page §f${page + 1}§7/§f${pages}` : "";
   return tileMenu(player, { title: opts.title, theme: opts.theme, body: (opts.body ?? "") + info, tiles });
+}
+
+/** Asks for a search word. Resolves to the text, or undefined if cancelled/empty. */
+export async function askSearch(player, title) {
+  const res = await showForm(player, new ModalFormData().title(title).textField("Item name", "e.g. oak, stairs, diamond"));
+  if (!res || res.canceled) return undefined;
+  const q = String(res.formValues?.[0] ?? "").trim();
+  return q || undefined;
 }
