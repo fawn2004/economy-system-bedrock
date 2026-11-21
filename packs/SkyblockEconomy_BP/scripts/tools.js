@@ -253,32 +253,64 @@ export async function upgradeMenu(player, back, msg) {
   const reopen = (m) => upgradeMenu(player, back, m);
   const tiles = defs.map((u) => {
     const cur = held.ups[u.id] ?? 0;
-    if (cur >= u.max) return { text: `§a§l${u.name.toUpperCase()}`, sub: `§a${roman(cur)} §7MAX`, icon: u.icon, onClick: () => reopen(`§a${u.name} is already maxed.`) };
-    const money = u.money[cur], heads = u.heads[cur];
+    if (cur >= u.max) return { text: `§a§l${u.name.toUpperCase()}`, sub: `§a${roman(cur)} §7MAX`, icon: u.icon, onClick: () => upgradeDetail(player, kind, u, () => reopen()) };
     const c = currency(player, u);
-    const okMoney = getBalance(player) >= money, okHeads = c.have >= heads;
+    const ok = getBalance(player) >= u.money[cur] && c.have >= u.heads[cur];
     return {
-      text: `§e§l${u.name.toUpperCase()} ${roman(cur + 1)}`,
-      sub: `${okMoney ? "§a" : "§c"}${fmt(money)} ${okHeads ? "§d" : "§c"}${heads}${c.short}`,
+      text: `§e§l${u.name.toUpperCase()}`,
+      sub: `§7${cur ? roman(cur) : "-"} > ${ok ? "§a" : "§c"}${roman(cur + 1)}`,
       icon: u.icon,
-      onClick: () => reopen(buyUpgrade(player, kind, u)),
+      onClick: () => upgradeDetail(player, kind, u, () => reopen()),
     };
   });
   if (back) tiles.push(backTile(back));
-  const lines = defs.map((u) => {
-    const cur = held.ups[u.id] ?? 0;
-    const next = cur < u.max ? `next: §a${fmt(u.money[cur])} §7+ §d${u.heads[cur]} ${currency(player, u).label}` : "§aMAX";
-    return `§f${u.name} §6${cur ? roman(cur) : "-"}§7/${roman(u.max)} §8(${u.desc}) §7${next}`;
-  });
   await tileMenu(player, {
     title: `UPGRADE ${t.name.toUpperCase()}`,
     theme: kind === "slayer" ? "red" : "green",
     body:
       (msg ? msg + "\n" : "") +
-      `§6${t.name} §eLv ${held.level}  §7Balance: §a${fmt(getBalance(player))}\n` +
-      (lines.length ? lines.join("\n") : "§7No upgrades for this tool yet."),
+      `§6${t.name} §eLv ${held.level}   §7Balance: §a${fmt(getBalance(player))}\n` +
+      (defs.length ? "§7Tap an upgrade to see what it does and buy it. §8(green = you can afford it)" : "§7No upgrades for this tool yet."),
     tiles,
   });
+}
+
+/** One upgrade: what it does, its cost, and a BUY button. */
+async function upgradeDetail(player, kind, u, back, msg) {
+  const held = heldTool(player, kind);
+  if (!held) {
+    fail(player, "Hold your skill tool in your hand to upgrade it.");
+    return back();
+  }
+  const cur = held.ups[u.id] ?? 0;
+  const maxed = cur >= u.max;
+  const c = currency(player, u);
+  const reopen = (m) => upgradeDetail(player, kind, u, back, m);
+  const lines = [
+    msg,
+    `§f${u.name} §6${cur ? roman(cur) : "-"}§7/§6${roman(u.max)}`,
+    `§7${u.desc ?? ""}`,
+  ];
+  if (maxed) lines.push("§aFully upgraded!");
+  else {
+    const money = u.money[cur], need = u.heads[cur];
+    lines.push(
+      `§7Next: §e${u.name} ${roman(cur + 1)}`,
+      `§7Cost: ${getBalance(player) >= money ? "§a" : "§c"}${fmt(money)} §7+ ${c.have >= need ? "§d" : "§c"}${need} ${c.label}`,
+      `§8You have ${fmt(getBalance(player))} and ${c.have} ${c.label}`
+    );
+  }
+  const tiles = [];
+  if (!maxed) {
+    tiles.push({
+      text: `§a§lBUY ${roman(cur + 1)}`,
+      sub: `§a${fmt(u.money[cur])}`,
+      icon: u.icon,
+      onClick: () => reopen(buyUpgrade(player, kind, u)),
+    });
+  }
+  tiles.push(backTile(back));
+  await tileMenu(player, { title: u.name.toUpperCase(), theme: kind === "slayer" ? "red" : "green", body: lines.filter(Boolean).join("\n"), tiles });
 }
 
 function buyUpgrade(player, kind, u) {

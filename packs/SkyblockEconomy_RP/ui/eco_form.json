@@ -381,18 +381,6 @@
           ],
           "controls": [
             {
-              "info@eco_form.info_bar": {}
-            },
-            {
-              "gap": {
-                "type": "panel",
-                "size": [
-                  "100%",
-                  5
-                ]
-              }
-            },
-            {
               "scroll@eco_form.scroll_area": {}
             }
           ],
@@ -461,7 +449,8 @@
             {
               "binding_name": "#form_text"
             }
-          ]
+          ],
+          "font_scale_factor": 0.85
         }
       }
     ]
@@ -504,7 +493,8 @@
     ]
   },
   "grid_content": {
-    "type": "panel",
+    "type": "stack_panel",
+    "orientation": "vertical",
     "size": [
       "100% - 6px",
       "100%c"
@@ -513,27 +503,60 @@
     "anchor_to": "top_left",
     "controls": [
       {
-        "grid": {
-          "type": "grid",
+        "info@eco_form.info_bar": {}
+      },
+      {
+        "info_gap": {
+          "type": "panel",
           "size": [
             "100%",
-            "default"
+            4
           ],
-          "anchor_from": "top_left",
-          "anchor_to": "top_left",
-          "grid_item_template": "eco_form.tile",
-          "grid_rescaling_type": "horizontal",
-          "collection_name": "form_buttons",
           "bindings": [
             {
-              "binding_name": "#form_button_length",
-              "binding_name_override": "#maximum_grid_items"
+              "binding_name": "#form_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not (#form_text = ''))",
+              "target_property_name": "#visible"
             }
           ]
         }
       },
       {
-        "nav_row@eco_form.nav_row": {}
+        "grid_area": {
+          "type": "panel",
+          "size": [
+            "100%",
+            "100%c"
+          ],
+          "controls": [
+            {
+              "grid": {
+                "type": "grid",
+                "size": [
+                  "100%",
+                  "default"
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "grid_item_template": "eco_form.tile",
+                "grid_rescaling_type": "horizontal",
+                "collection_name": "form_buttons",
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_length",
+                    "binding_name_override": "#maximum_grid_items"
+                  }
+                ]
+              }
+            },
+            {
+              "nav_row@eco_form.nav_row": {}
+            }
+          ]
+        }
       }
     ]
   },
