@@ -523,75 +523,62 @@ export async function sellMenu(player, msg) {
   sellable.sort((a, b) => priceOf(b[0]) * b[1] - priceOf(a[0]) * a[1]);
   const total = sellable.reduce((sum, [id, n]) => sum + priceOf(id) * n, 0);
 
+  // Heads & enchanted crops are worth nothing in money: selling them only adds
+  // them to the player's head / enchanted crop balances.
+  const enchanted = [...countEnchanted(player)];
+  const heads = [...countHeads(player)];
+  const headCount = heads.reduce((n, [, c]) => n + c, 0);
+  const cropCount = enchanted.reduce((n, [, c]) => n + c, 0);
+
   const tiles = [];
-  if (sellable.length) {
+  if (sellable.length || heads.length || enchanted.length) {
+    const parts = [];
+    if (total) parts.push(`§a${fmtShort(total)}`);
+    if (headCount) parts.push(`§d+${headCount}h`);
+    if (cropCount) parts.push(`§2+${cropCount}e`);
     tiles.push({
       text: "§a§lSELL ALL",
-      sub: `§a${fmtShort(total)}`,
+      sub: parts.join(" "),
       icon: ICON.sell,
       badge: "HOT",
       onClick: () => {
         let earned = 0;
         for (const [id] of sellable) earned += priceOf(id) * removeAllPlain(player, id);
-        addMoney(player, earned);
-        success(player, `Sold everything for ${fmt(earned)}.`);
-        return sellMenu(player, `§aSold everything for §f${fmt(earned)}§a!`);
+        if (earned) addMoney(player, earned);
+        const h = [...depositHeads(player).values()].reduce((n, c) => n + c, 0);
+        const c = [...depositEnchanted(player).values()].reduce((n, x) => n + x, 0);
+        const done = [];
+        if (earned) done.push(`§f${fmt(earned)}`);
+        if (h) done.push(`§d${h} heads §7added to your head count`);
+        if (c) done.push(`§2${c} enchanted crops §7added to your balance`);
+        success(player, `Sold everything: ${done.map((x) => x.replace(/§./g, "")).join(", ")}.`);
+        return sellMenu(player, `§aSold everything: ${done.join("§a, ")}§a.`);
       },
     });
   }
-  // Enchanted heads go into that mob's head balance, not money
-  // Enchanted crops go into that crop's enchanted balance (used for hoe upgrades)
-  const enchanted = [...countEnchanted(player)];
-  if (enchanted.length) {
+  for (const [mob, n] of heads) {
     tiles.push({
-      text: "§a§lSELL ENCHANTED",
-      sub: `§7${enchanted.reduce((s, [, n]) => s + n, 0)} crops`,
-      icon: cropIcon(enchanted[0][0]),
+      text: `§d${clip(mobName(mob) + " Head")}`,
+      sub: `§7x${n} §d+${n} heads`,
+      icon: mobIcon(mob),
       onClick: () => {
-        const done = depositEnchanted(player);
-        const list = [...done].map(([c, n]) => `${n} ${cropName(c)}`).join(", ");
-        success(player, `Added to your enchanted crops: ${list}`);
-        return sellMenu(player, `§aAdded to enchanted crops: §f${list}`);
+        const got = depositHeads(player, mob).get(mob) ?? 0;
+        success(player, `Added ${got} ${mobName(mob)} heads to your head count.`);
+        return sellMenu(player, `§dAdded §f${got} ${mobName(mob)} §dheads to your head count`);
       },
     });
-    for (const [cid, n] of enchanted) {
-      tiles.push({
-        text: `§aEnch. ${clip(cropName(cid), 12)}`,
-        sub: `§7x${n} §a+${n}`,
-        icon: cropIcon(cid),
-        onClick: () => {
-          const got = depositEnchanted(player, cid).get(cid) ?? 0;
-          success(player, `Added ${got} Enchanted ${cropName(cid)} to your balance.`);
-          return sellMenu(player, `§aAdded §f${got} Enchanted ${cropName(cid)}`);
-        },
-      });
-    }
   }
-  const heads = [...countHeads(player)];
-  if (heads.length) {
+  for (const [cid, n] of enchanted) {
     tiles.push({
-      text: "§d§lSELL HEADS",
-      sub: `§7${heads.reduce((s, [, n]) => s + n, 0)} heads`,
-      icon: mobIcon(heads[0][0]),
+      text: `§aEnch. ${clip(cropName(cid), 12)}`,
+      sub: `§7x${n} §2+${n}`,
+      icon: cropIcon(cid),
       onClick: () => {
-        const done = depositHeads(player);
-        const list = [...done].map(([m, n]) => `${n} ${mobName(m)}`).join(", ");
-        success(player, `Added heads to your head balance: ${list}`);
-        return sellMenu(player, `§dAdded to head balance: §f${list}`);
+        const got = depositEnchanted(player, cid).get(cid) ?? 0;
+        success(player, `Added ${got} Enchanted ${cropName(cid)} to your balance.`);
+        return sellMenu(player, `§aAdded §f${got} Enchanted ${cropName(cid)}`);
       },
     });
-    for (const [mob, n] of heads) {
-      tiles.push({
-        text: `§d${clip(mobName(mob) + " Head")}`,
-        sub: `§7x${n} §d+${n} heads`,
-        icon: mobIcon(mob),
-        onClick: () => {
-          const got = depositHeads(player, mob).get(mob) ?? 0;
-          success(player, `Added ${got} ${mobName(mob)} heads to your head balance.`);
-          return sellMenu(player, `§dAdded §f${got} ${mobName(mob)} §dheads to your head balance`);
-        },
-      });
-    }
   }
   for (const [id, n] of sellable.slice(0, 40)) {
     const e = byId.get(id);
@@ -612,7 +599,7 @@ export async function sellMenu(player, msg) {
   tiles.push(backTile(() => mainMenu(player)));
 
   const info = sellable.length || heads.length || enchanted.length
-    ? "§7Click an item to sell all of it. §dHeads §7go to your head balance."
+    ? "§7Click an item to sell all of it. §dHeads §7and §2enchanted crops §7aren't worth money -\n§7they're added to your head count / crop balance for upgrades."
     : "§7You have nothing that can be sold. §8(Kit & renamed items can't be sold)";
   await tileMenu(player, { title: "SELL", theme: "green", body: `${msgLine(msg)}${info}    ${balLine(player)}`, tiles });
 }
