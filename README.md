@@ -32,8 +32,8 @@ Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration),
 |---|---|
 | **Place** | Place a spawner item like a block. It spins its mob and you become its owner. |
 | **Stack** | Tap your spawner while holding the **same mob and level** to add it (sneak to add the whole stack). Up to 16 per block. |
-| **Menu** | Tap your spawner with an **empty hand** to see its info, upgrade it, add heads, add spawners from your inventory, or pick it up. |
-| **Mob stacking** | Spawned mobs merge into one mob with a counter (e.g. *Zombie x25*). Killing it drops loot for one and the counter goes down. |
+| **Menu** | **Sneak and tap** your spawner to see its info, upgrade it, add heads, add spawners from your inventory, or pick it up. |
+| **Mob stacking** | Spawned mobs merge into one mob with a counter (e.g. *Zombie x25*), with no limit. They stand still on their spot and don't burn in daylight. Killing it drops loot for one and the counter goes down. |
 | **Enchanted heads** | Mobs from spawners can drop an **Enchanted <Mob> Head**. Selling heads (or *Add Heads* in the spawner menu) adds them to that mob's **head balance**, separate from money. |
 | **Upgrades** | Spend that mob's heads to level a spawner up (1 to 10): faster spawns and a better head chance each level. Heads only upgrade spawners of the same mob, and the cost is multiplied by the stack size. |
 | **Protection** | Spawners can't be mined or blown up. Only the owner (or an admin) can upgrade or pick them up. Picking up keeps the level and stack. |

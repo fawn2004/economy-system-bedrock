@@ -345,7 +345,7 @@ async function spawnerMenu(player, sp, msg) {
     theme: "red",
     body:
       `${msgLine(msg)}§f${sp.name} Spawner §7- §a${fmt(sp.price)} §7each\n` +
-      `§7Place it on your island, then tap it with an empty hand to\n§7upgrade it with §dEnchanted ${sp.name} Heads§7.    ${balLine(player)}`,
+      `§7Place it on your island, then §fsneak and tap it §7to\n§7upgrade it with §dEnchanted ${sp.name} Heads§7.    ${balLine(player)}`,
     tiles,
   });
 }

@@ -11,7 +11,7 @@ import { ICON, fail, success, tileMenu } from "./ui.js";
 //    handle stacking, upgrades, mob stacking and enchanted head drops.
 //  - Each placed spawner is saved in a world dynamic property:
 //      eco:sp:<dimension>:<x>,<y>,<z> = { mob, level, stack, owner, ownerName }
-//  - Tap with an empty hand  -> spawner menu (info, upgrade, heads, pick up)
+//  - Sneak + tap              -> spawner menu (info, upgrade, heads, pick up)
 //    Tap holding the same spawner -> add it to the stack (sneak = add all)
 //    Mining / explosions can't break them; the owner picks them up in the menu.
 // ============================================================================
@@ -91,8 +91,8 @@ export function makeSpawnerItem(mob, amount = 1, level = 1) {
   stack.setLore([
     `§7Mob: §f${mobName(mob)}`,
     `§7Level: §f${level}§7/§f${MAX_LEVEL}`,
-    "§7Place it, then tap it with an",
-    "§7empty hand to open its menu",
+    "§7Place it, then sneak and tap",
+    "§7it to open its menu",
     `${TAG}${mob}:${level}`,
   ]);
   return stack;
@@ -182,7 +182,7 @@ function placeSpawner(player, block, face, info) {
   });
   player.playSound("dig.stone");
   takeFromHand(player);
-  player.sendMessage(`§a${mobName(info.mob)} Spawner placed. §7Tap it with an empty hand to open its menu.`);
+  player.sendMessage(`§a${mobName(info.mob)} Spawner placed. §7Sneak and tap it to open its menu.`);
 }
 
 function addToStack(player, key, info, all) {
@@ -327,17 +327,60 @@ export async function spawnerMenu(player, key, msg) {
 }
 
 // ---- spawning ---------------------------------------------------------------
+const MOB_TAG = "eco_spawner_mob";
 const stackOf = (e) => Number(e.getDynamicProperty("eco:stack") ?? 1);
+const capStack = (n) => (S.maxMobStack > 0 ? Math.min(S.maxMobStack, n) : n);
+const isFull = (e) => S.maxMobStack > 0 && stackOf(e) >= S.maxMobStack;
 
 function setStack(e, mob, n) {
   e.setDynamicProperty("eco:stack", n);
-  e.nameTag = S.stackMobs ? `§e${mobName(mob)} §fx${n}` : `§e${mobName(mob)}`;
+  e.nameTag = S.stackMobs ? `§e${mobName(mob)} §fx${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : `§e${mobName(mob)}`;
 }
 
-function tagMob(e, key, mob, n) {
+function freeze(e) {
+  if (!S.freezeMobs) return;
+  try {
+    if (!e.getEffect("slowness")) e.addEffect("slowness", 20000000, { amplifier: 255, showParticles: false });
+    if (!e.getEffect("fire_resistance")) e.addEffect("fire_resistance", 20000000, { amplifier: 0, showParticles: false });
+  } catch {}
+}
+
+function tagMob(e, key, mob, n, anchor) {
   e.setDynamicProperty("eco:sp", key);
   e.setDynamicProperty("eco:mob", mob);
+  const a = anchor ?? e.location;
+  e.setDynamicProperty("eco:anchor", JSON.stringify({ x: a.x, y: a.y, z: a.z }));
+  try {
+    e.addTag(MOB_TAG);
+  } catch {}
   setStack(e, mob, n);
+  freeze(e);
+}
+
+/** Keeps every spawner mob standing on its spot. */
+function holdMobs() {
+  if (!S.freezeMobs || !spawners.size) return;
+  const dims = new Set([...spawners.values()].map((d) => d.dim));
+  for (const id of dims) {
+    let list;
+    try {
+      list = world.getDimension(id).getEntities({ tags: [MOB_TAG] });
+    } catch {
+      continue;
+    }
+    for (const e of list) {
+      try {
+        const raw = e.getDynamicProperty("eco:anchor");
+        if (typeof raw !== "string") continue;
+        const a = JSON.parse(raw);
+        const l = e.location;
+        if (Math.abs(l.x - a.x) > 0.2 || Math.abs(l.z - a.z) > 0.2 || Math.abs(l.y - a.y) > 0.6) {
+          e.teleport(a, { rotation: e.getRotation() });
+        }
+        freeze(e);
+      } catch {}
+    }
+  }
 }
 
 function findSpot(dim, d) {
@@ -364,18 +407,22 @@ function spawnFor(dim, key, d, count) {
     .filter((e) => e.getDynamicProperty("eco:sp") === key);
 
   if (S.stackMobs) {
-    const target = near.find((e) => stackOf(e) < S.maxMobStack);
+    const target = near.find((e) => !isFull(e));
     if (target) {
-      setStack(target, d.mob, Math.min(S.maxMobStack, stackOf(target) + count));
+      if (!target.hasTag(MOB_TAG)) tagMob(target, key, d.mob, stackOf(target)); // mob from an older version
+      setStack(target, d.mob, capStack(stackOf(target) + count));
       return;
     }
     if (near.length) return; // full stack nearby
-    const e = dim.spawnEntity(type, findSpot(dim, d));
-    tagMob(e, key, d.mob, Math.min(S.maxMobStack, count));
+    const spot = findSpot(dim, d);
+    tagMob(dim.spawnEntity(type, spot), key, d.mob, capStack(count), spot);
     return;
   }
   const room = Math.min(count, S.maxLooseMobs - near.length);
-  for (let i = 0; i < room; i++) tagMob(dim.spawnEntity(type, findSpot(dim, d)), key, d.mob, 1);
+  for (let i = 0; i < room; i++) {
+    const spot = findSpot(dim, d);
+    tagMob(dim.spawnEntity(type, spot), key, d.mob, 1, spot);
+  }
 }
 
 function tick() {
@@ -424,6 +471,7 @@ export function registerSpawners() {
   world.afterEvents.worldLoad.subscribe(() => {
     loadAll();
     system.runInterval(tick, 20);
+    system.runInterval(holdMobs, 5);
   });
 
   world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
@@ -438,7 +486,7 @@ export function registerSpawners() {
           if (ev.isFirstEvent) system.run(() => addToStack(player, key, info, player.isSneaking));
           return;
         }
-        if (!itemStack) {
+        if (player.isSneaking && !info) {
           ev.cancel = true;
           if (ev.isFirstEvent) system.run(() => spawnerMenu(player, key).catch((e) => console.warn("[eco] " + e)));
           return;
@@ -458,7 +506,7 @@ export function registerSpawners() {
     if (!spawners.has(keyOf(ev.block.dimension.id, ev.block.location))) return;
     ev.cancel = true;
     const p = ev.player;
-    system.run(() => p.sendMessage("§7Spawners can't be mined. §fTap it with an empty hand §7and press §cPICK UP§7."));
+    system.run(() => p.sendMessage("§7Spawners can't be mined. §fSneak and tap it §7and press §cPICK UP§7."));
   });
 
   // ...or blown up
@@ -470,7 +518,7 @@ export function registerSpawners() {
 
   // stacked mobs: killing one leaves the rest; maybe drop an enchanted head
   world.afterEvents.entityDie.subscribe(({ deadEntity }) => {
-    let key, mob, stack, loc, dim, type;
+    let key, mob, stack, loc, dim, type, anchor;
     try {
       key = deadEntity.getDynamicProperty("eco:sp");
       if (typeof key !== "string") return;
@@ -479,6 +527,8 @@ export function registerSpawners() {
       loc = deadEntity.location;
       dim = deadEntity.dimension;
       type = deadEntity.typeId;
+      const raw = deadEntity.getDynamicProperty("eco:anchor");
+      anchor = typeof raw === "string" ? JSON.parse(raw) : loc;
     } catch {
       return;
     }
@@ -490,7 +540,7 @@ export function registerSpawners() {
     }
     if (S.stackMobs && stack > 1) {
       try {
-        tagMob(dim.spawnEntity(type, loc), key, mob, stack - 1);
+        tagMob(dim.spawnEntity(type, anchor), key, mob, stack - 1, anchor);
       } catch {}
     }
   });

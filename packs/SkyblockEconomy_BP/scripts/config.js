@@ -238,7 +238,8 @@ export const SPAWNER_SETTINGS = {
   mobsPerSpawn: 1, // mobs spawned per spawner in the stack, each cycle
   activationRange: 24, // a player must be this close for a spawner to run
   stackMobs: true, // merge spawned mobs into one mob with a counter
-  maxMobStack: 200, // most mobs one stacked mob can hold
+  maxMobStack: 0, // most mobs one stacked mob can hold (0 = no limit)
+  freezeMobs: true, // spawner mobs stand still (and don't burn in daylight)
   mergeRadius: 8, // how close a stacked mob must be to the spawner to merge
   maxLooseMobs: 12, // if stackMobs is false: most loose mobs per spawner
 
