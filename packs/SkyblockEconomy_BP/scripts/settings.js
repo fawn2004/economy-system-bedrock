@@ -21,6 +21,7 @@ const DEFAULTS = {
     currency: CONFIG.currency,
     pageSize: CONFIG.pageSize,
     giveOnJoin: CONFIG.compass.giveOnJoin,
+    centerNav: CONFIG.centerNav,
     itemStacking: clone(CONFIG.itemStacking),
   },
   spawner: clone(SPAWNER_SETTINGS),
@@ -60,6 +61,7 @@ function applyConfig() {
   CONFIG.currency = c.currency;
   CONFIG.pageSize = c.pageSize;
   CONFIG.compass.giveOnJoin = c.giveOnJoin;
+  CONFIG.centerNav = c.centerNav !== false;
   CONFIG.itemStacking = { ...DEFAULTS.config.itemStacking, ...(c.itemStacking ?? {}) };
 }
 

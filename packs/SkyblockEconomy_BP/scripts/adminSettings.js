@@ -96,13 +96,14 @@ async function economyForm(player, reopen) {
       .textField("Currency symbol", "$", { defaultValue: CONFIG.currency })
       .textField("Items per shop page (8-40)", "20", { defaultValue: String(CONFIG.pageSize) })
       .toggle("Give the menu compass when players join", { defaultValue: CONFIG.compass.giveOnJoin })
+      .toggle("Search / Next / Back in a centred row at the top of lists", { defaultValue: CONFIG.centerNav })
   );
   if (!v) return reopen();
   const start = num(v[0]);
   const page = num(v[2], 8);
   const currency = String(v[1]).trim().slice(0, 3);
   if (start === undefined || page === undefined || !currency) return reopen("§cCheck the numbers and try again.");
-  setConfig({ startingBalance: start, currency, pageSize: Math.min(40, page), giveOnJoin: !!v[3] });
+  setConfig({ startingBalance: start, currency, pageSize: Math.min(40, page), giveOnJoin: !!v[3], centerNav: !!v[4] });
   success(player, "Economy settings saved.");
   return reopen("§aEconomy settings saved.");
 }

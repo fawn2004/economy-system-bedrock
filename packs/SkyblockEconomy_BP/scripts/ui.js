@@ -1,6 +1,6 @@
 import { system } from "@minecraft/server";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
-import { THEME } from "./config.js";
+import { CONFIG, THEME } from "./config.js";
 
 // Any form whose title starts with this marker is drawn with the custom
 // Skyblock Economy layout from the resource pack (ui/eco_form.json).
@@ -83,7 +83,16 @@ export function withNav(content, { page = 0, pages = 1, goto, back, onSearch }) 
   if (page < pages - 1) moves.push({ text: "§e§lNEXT >", sub: `§7Page ${page + 2}`, icon: ICON.confirm, onClick: () => goto(page + 1) });
   if (back) moves.push(backTile(back));
   const top = onSearch ? [searchTile(onSearch)] : [];
-  if (content.length > 8 || pages > 1) return [...top, ...moves, ...content, ...moves];
+  const long = content.length > 8 || pages > 1;
+  if (CONFIG.centerNav) {
+    // Centred row at the top (drawn by the resource pack over the grid's first
+    // row): tag the nav buttons and pad with hidden fillers to a full row of 4.
+    const nav = [...top, ...moves];
+    const row = nav.map((t) => ({ ...t, badge: `NAV${nav.length}` }));
+    while (row.length < 4) row.push({ text: "", badge: "NAVX" });
+    return [...row, ...content, ...(long ? moves : [])];
+  }
+  if (long) return [...top, ...moves, ...content, ...moves];
   return [...top, ...content, ...moves];
 }
 
