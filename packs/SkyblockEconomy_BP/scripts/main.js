@@ -14,7 +14,7 @@ function setupPlayer(player) {
   if (!player.getDynamicProperty("eco:joined")) {
     player.setDynamicProperty("eco:joined", true);
     setBalance(player, getBalance(player) + CONFIG.startingBalance);
-    player.sendMessage(`§6§lFactions Economy §r§7- you got §a${CONFIG.currency}${CONFIG.startingBalance} §7to start!`);
+    player.sendMessage(`§b§lSkyblock Economy §r§7- you got §a${CONFIG.currency}${CONFIG.startingBalance} §7to start!`);
   } else {
     rememberName(player);
   }

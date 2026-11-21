@@ -109,7 +109,7 @@ export function giveCompass(player, slot = 8) {
   const stack = new ItemStack(COMPASS_ID, 1);
   stack.lockMode = ItemLockMode.inventory; // can't be dropped or put in chests
   stack.keepOnDeath = true;
-  stack.setLore(["§7Use to open the §6Factions Menu"]);
+  stack.setLore(["§7Use to open the §bSkyblock Menu"]);
   if (!inv.getItem(slot)) inv.setItem(slot, stack);
   else inv.addItem(stack);
 }

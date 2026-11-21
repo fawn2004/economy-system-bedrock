@@ -2,7 +2,7 @@
   "namespace": "server_form",
 
   // Action forms whose title starts with the marker "§e§c§o" use the custom
-  // Factions Economy layout (eco_form.json). Every other form keeps the
+  // Skyblock Economy layout (eco_form.json). Every other form keeps the
   // vanilla look, so other add-ons on your realm are not affected.
   "long_form": {
     "type": "panel",

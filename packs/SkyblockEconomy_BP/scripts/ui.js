@@ -3,7 +3,7 @@ import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
 import { THEME } from "./config.js";
 
 // Any form whose title starts with this marker is drawn with the custom
-// Factions Economy layout from the resource pack (ui/eco_form.json).
+// Skyblock Economy layout from the resource pack (ui/eco_form.json).
 const MARKER = "§e§c§o";
 
 export const ICON = {

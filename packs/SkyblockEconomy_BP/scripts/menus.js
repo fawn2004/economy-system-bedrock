@@ -1,6 +1,7 @@
 import { world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
-import { CONFIG, SELL_ICONS, SELL_PRICES, SHOP } from "./config.js";
+import { getCatalog, search, sellPrice } from "./catalog.js";
+import { BADGES, CONFIG, KITS, SHOP_LAYOUT, SPAWNERS } from "./config.js";
 import { addMoney, fmt, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
   applyEnchants,
@@ -15,11 +16,13 @@ import {
 import { makeSpawnerItem } from "./spawners.js";
 import { ICON, backTile, fail, showForm, success, tileMenu } from "./ui.js";
 
+const U = "textures/ui/eco/";
 const pretty = (id) =>
   id
     .replace(/^minecraft:/, "")
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+const clip = (s, n = 18) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 
 const balLine = (player) => `§7Balance: §a${fmt(getBalance(player))}`;
 const msgLine = (msg) => (msg ? `${msg}\n` : "");
@@ -41,8 +44,8 @@ export async function mainMenu(player) {
     tiles.push({ text: "§c§lADMIN", sub: "§7Manage money", icon: ICON.admin, onClick: () => adminMenu(player) });
   }
   await tileMenu(player, {
-    title: "FACTIONS MENU",
-    theme: "red",
+    title: "SKYBLOCK MENU",
+    theme: "blue",
     body: `§7Welcome back, §f${player.name}§7!    ${balLine(player)}`,
     tiles,
   });
@@ -52,91 +55,111 @@ export async function mainMenu(player) {
 //  SHOP
 // ============================================================================
 export async function shopMenu(player, msg) {
-  const tiles = SHOP.map((cat) => {
-    const count = (cat.items ?? cat.kits ?? cat.spawners ?? []).length;
-    return {
-      text: `§e§l${cat.name.toUpperCase()}`,
-      sub: `§7${count} ${cat.kits ? "kits" : cat.spawners ? "spawners" : "items"}`,
-      icon: cat.icon,
-      badge: cat.badge,
-      onClick: () => categoryMenu(player, cat),
-    };
-  });
-  tiles.push(backTile(() => mainMenu(player)));
-  await tileMenu(player, {
-    title: "SHOP",
-    theme: "gold",
-    body: `${msgLine(msg)}§7Pick a category    ${balLine(player)}`,
-    tiles,
-  });
-}
-
-async function categoryMenu(player, cat) {
-  let tiles = [];
-  if (cat.items) {
-    tiles = cat.items.map((item) => ({
-      text: `§f${item.name}`,
-      sub: `${priceColor(player, item.price)}${fmtShort(item.price)} §7ea`,
-      icon: item.icon,
-      badge: item.badge,
-      onClick: () => buyItemMenu(player, cat, item),
-    }));
-  } else if (cat.kits) {
-    tiles = cat.kits.map((kit) => {
-      const wait = kitCooldownLeft(player, kit);
-      return {
-        text: `§f${kit.name}`,
-        sub: wait > 0 ? `§c${formatTime(wait)}` : `${priceColor(player, kit.price)}${fmtShort(kit.price)}`,
-        icon: kit.icon,
-        badge: kit.badge,
-        onClick: () => kitMenu(player, cat, kit),
-      };
-    });
-  } else if (cat.spawners) {
-    tiles = cat.spawners.map((sp) => ({
-      text: `§f${sp.name}`,
-      sub: `${priceColor(player, sp.price)}${fmtShort(sp.price)}`,
-      icon: sp.icon,
-      badge: sp.badge,
-      onClick: () => spawnerMenu(player, cat, sp),
-    }));
+  const { categories, byCategory } = getCatalog();
+  const cat = (id) => categories.find((c) => c.id === id);
+  const tiles = [];
+  for (const key of SHOP_LAYOUT) {
+    if (key === "blocks") {
+      const subs = categories.filter((c) => c.group === "blocks");
+      const n = subs.reduce((s, c) => s + (byCategory.get(c.id)?.length ?? 0), 0);
+      tiles.push({ text: "§e§lBLOCKS", sub: `§7${n} items`, icon: U + "icon_blocks", onClick: () => blocksMenu(player) });
+    } else if (key === "kits") {
+      tiles.push({ text: "§e§lKITS", sub: `§7${KITS.length} kits`, icon: U + "icon_kits", badge: BADGES.kits, onClick: () => kitsMenu(player) });
+    } else if (key === "spawners") {
+      tiles.push({ text: "§e§lSPAWNERS", sub: `§7${SPAWNERS.length} mobs`, icon: U + "icon_spawners", badge: BADGES.spawners, onClick: () => spawnersMenu(player) });
+    } else if (key === "search") {
+      tiles.push({ text: "§b§lSEARCH", sub: "§7Find any item", icon: U + "icon_coin", onClick: () => searchMenu(player) });
+    } else if (cat(key)) {
+      const c = cat(key);
+      tiles.push({
+        text: `§e§l${c.name.toUpperCase()}`,
+        sub: `§7${byCategory.get(c.id)?.length ?? 0} items`,
+        icon: c.icon,
+        badge: BADGES[c.id],
+        onClick: () => itemListMenu(player, { title: c.name.toUpperCase(), theme: c.theme, desc: c.desc, items: byCategory.get(c.id) ?? [], back: () => shopMenu(player) }),
+      });
+    }
   }
-  tiles.push(backTile(() => shopMenu(player)));
-  await tileMenu(player, {
-    title: cat.name.toUpperCase(),
-    theme: cat.theme,
-    body: `§7${cat.desc}    ${balLine(player)}`,
-    tiles,
-  });
+  tiles.push(backTile(() => mainMenu(player)));
+  await tileMenu(player, { title: "SHOP", theme: "gold", body: `${msgLine(msg)}§7Pick a category    ${balLine(player)}`, tiles });
 }
 
-// ---- normal items ----------------------------------------------------------
-async function buyItemMenu(player, cat, item, msg) {
-  const amounts = item.amounts ?? CONFIG.buyAmounts;
-  const tiles = amounts.map((n) => {
-    const cost = item.price * n;
+async function blocksMenu(player) {
+  const { categories, byCategory } = getCatalog();
+  const tiles = categories
+    .filter((c) => c.group === "blocks")
+    .map((c) => ({
+      text: `§e§l${c.name.toUpperCase()}`,
+      sub: `§7${byCategory.get(c.id)?.length ?? 0} items`,
+      icon: c.icon,
+      onClick: () =>
+        itemListMenu(player, { title: c.name.toUpperCase(), theme: c.theme, desc: c.desc, items: byCategory.get(c.id) ?? [], back: () => blocksMenu(player) }),
+    }));
+  tiles.push(backTile(() => shopMenu(player)));
+  await tileMenu(player, { title: "BLOCKS", theme: "blue", body: `§7Pick a type of block    ${balLine(player)}`, tiles });
+}
+
+/** A paged grid of catalogue items. */
+async function itemListMenu(player, list, page = 0) {
+  const size = CONFIG.pageSize;
+  const pages = Math.max(1, Math.ceil(list.items.length / size));
+  page = Math.min(Math.max(0, page), pages - 1);
+  const reopen = () => itemListMenu(player, list, page);
+  const tiles = list.items
+    .filter((e) => e.buy > 0)
+    .slice(page * size, page * size + size)
+    .map((e) => ({
+      text: `§f${clip(e.name)}`,
+      sub: `${priceColor(player, e.buy)}${fmtShort(e.buy)}`,
+      icon: e.icon,
+      onClick: () => buyItemMenu(player, e, reopen),
+    }));
+  if (page > 0) tiles.push({ text: "§e§l< PREV", sub: `§7Page ${page}`, icon: ICON.back, onClick: () => itemListMenu(player, list, page - 1) });
+  if (page < pages - 1) tiles.push({ text: "§e§lNEXT >", sub: `§7Page ${page + 2}`, icon: ICON.confirm, onClick: () => itemListMenu(player, list, page + 1) });
+  tiles.push(backTile(list.back));
+  const pageInfo = pages > 1 ? `§7Page §f${page + 1}§7/§f${pages}    ` : "";
+  await tileMenu(player, { title: list.title, theme: list.theme, body: `§7${list.desc}\n${pageInfo}${balLine(player)}`, tiles });
+}
+
+async function searchMenu(player) {
+  const res = await showForm(player, new ModalFormData().title("Search the shop").textField("Item name", "e.g. diamond, oak, wool"));
+  if (!res || res.canceled) return shopMenu(player);
+  const query = String(res.formValues?.[0] ?? "").trim();
+  const items = search(query).slice(0, 200);
+  if (!items.length) return shopMenu(player, `§cNo items found for "§f${query}§c".`);
+  await itemListMenu(player, { title: "SEARCH", theme: "blue", desc: `Results for "§f${query}§7" (${items.length})`, items, back: () => shopMenu(player) });
+}
+
+// ---- buying a normal item --------------------------------------------------
+function amountsFor(id) {
+  const max = makeStack(id)?.maxAmount ?? 64;
+  if (max === 1) return [1, 2, 4];
+  if (max === 16) return [1, 4, 8, 16];
+  return [1, 8, 16, 32, 64];
+}
+
+async function buyItemMenu(player, item, back, msg) {
+  const tiles = amountsFor(item.id).map((n) => {
+    const cost = item.buy * n;
     return {
       text: `§f§lBUY x${n}`,
       sub: `${priceColor(player, cost)}${fmtShort(cost)}`,
       icon: item.icon,
-      onClick: () => buyItemMenu(player, cat, item, buyItem(player, item, n)),
+      onClick: () => buyItemMenu(player, item, back, buyItem(player, item, n)),
     };
   });
-  tiles.push(backTile(() => categoryMenu(player, cat)));
+  tiles.push(backTile(back));
+  const sellInfo = item.sell > 0 ? `§7Sells for: §6${fmt(item.sell)}` : "§8Can't be sold";
   await tileMenu(player, {
-    title: item.name.toUpperCase(),
-    theme: cat.theme,
-    body: `${msgLine(msg)}§f${item.name} §7- §a${fmt(item.price)} §7each    ${balLine(player)}`,
+    title: clip(item.name.toUpperCase(), 24),
+    theme: "gold",
+    body: `${msgLine(msg)}§f${item.name}\n§7Buy: §a${fmt(item.buy)} §7each    ${sellInfo}\n${balLine(player)}`,
     tiles,
   });
 }
 
 function buyItem(player, item, amount) {
-  const cost = item.price * amount;
-  if (!makeStack(item.id)) {
-    fail(player, `${item.name} isn't a valid item (check config.js).`);
-    return "§cThat item is misconfigured.";
-  }
+  const cost = item.buy * amount;
   if (getBalance(player) < cost) {
     fail(player, `You need ${fmt(cost)} but only have ${fmt(getBalance(player))}.`);
     return `§cYou can't afford that! (§f${fmt(cost)}§c)`;
@@ -167,25 +190,39 @@ function formatTime(sec) {
   return `${s}s`;
 }
 
-async function kitMenu(player, cat, kit, msg) {
-  const contents = kit.items.map((i) => `${i.amount ? i.amount + "x " : ""}${pretty(i.id)}`).join("§7, §f");
-  const wait = kitCooldownLeft(player, kit);
-  const tiles = [
-    {
-      text: "§a§lBUY KIT",
+async function kitsMenu(player) {
+  const tiles = KITS.map((kit) => {
+    const wait = kitCooldownLeft(player, kit);
+    return {
+      text: `§f${kit.name}`,
       sub: wait > 0 ? `§c${formatTime(wait)}` : `${priceColor(player, kit.price)}${fmtShort(kit.price)}`,
       icon: kit.icon,
-      onClick: () => kitMenu(player, cat, kit, buyKit(player, kit)),
-    },
-    backTile(() => categoryMenu(player, cat)),
-  ];
+      badge: kit.badge,
+      onClick: () => kitMenu(player, kit),
+    };
+  });
+  tiles.push(backTile(() => shopMenu(player)));
+  await tileMenu(player, { title: "KITS", theme: "purple", body: `§7Gear bundles with cooldowns    ${balLine(player)}`, tiles });
+}
+
+async function kitMenu(player, kit, msg) {
+  const contents = kit.items.map((i) => `${i.amount ? i.amount + "x " : ""}${pretty(i.id)}`).join("§7, §f");
+  const wait = kitCooldownLeft(player, kit);
   await tileMenu(player, {
     title: kit.name.toUpperCase(),
-    theme: cat.theme,
+    theme: "purple",
     body:
       `${msgLine(msg)}§7Contains: §f${contents}\n` +
       `§7Price: §a${fmt(kit.price)}  §7Cooldown: §f${formatTime(kit.cooldown ?? 0)}    ${balLine(player)}`,
-    tiles,
+    tiles: [
+      {
+        text: "§a§lBUY KIT",
+        sub: wait > 0 ? `§c${formatTime(wait)}` : `${priceColor(player, kit.price)}${fmtShort(kit.price)}`,
+        icon: kit.icon,
+        onClick: () => kitMenu(player, kit, buyKit(player, kit)),
+      },
+      backTile(() => kitsMenu(player)),
+    ],
   });
 }
 
@@ -208,6 +245,7 @@ function buyKit(player, kit) {
     giveItems(player, i.id, i.amount ?? 1, (stack) => {
       applyEnchants(stack, i.enchants);
       if (i.name) stack.nameTag = i.name;
+      stack.setLore(["§8Kit item"]); // kit items can't be sold back to the shop
     });
   }
   player.setDynamicProperty(`eco:kit:${kit.id}`, Date.now());
@@ -216,23 +254,35 @@ function buyKit(player, kit) {
 }
 
 // ---- spawners --------------------------------------------------------------
-async function spawnerMenu(player, cat, sp, msg) {
+async function spawnersMenu(player) {
+  const tiles = SPAWNERS.map((sp) => ({
+    text: `§f${sp.name}`,
+    sub: `${priceColor(player, sp.price)}${fmtShort(sp.price)}`,
+    icon: sp.icon,
+    badge: sp.badge,
+    onClick: () => spawnerMenu(player, sp),
+  }));
+  tiles.push(backTile(() => shopMenu(player)));
+  await tileMenu(player, { title: "SPAWNERS", theme: "red", body: `§7Pre-set mob spawners    ${balLine(player)}`, tiles });
+}
+
+async function spawnerMenu(player, sp, msg) {
   const tiles = [1, 2, 5].map((n) => {
     const cost = sp.price * n;
     return {
       text: `§f§lBUY x${n}`,
       sub: `${priceColor(player, cost)}${fmtShort(cost)}`,
       icon: sp.icon,
-      onClick: () => spawnerMenu(player, cat, sp, buySpawner(player, sp, n)),
+      onClick: () => spawnerMenu(player, sp, buySpawner(player, sp, n)),
     };
   });
-  tiles.push(backTile(() => categoryMenu(player, cat)));
+  tiles.push(backTile(() => spawnersMenu(player)));
   await tileMenu(player, {
     title: `${sp.name.toUpperCase()} SPAWNER`,
-    theme: cat.theme,
+    theme: "red",
     body:
       `${msgLine(msg)}§f${sp.name} Spawner §7- §a${fmt(sp.price)} §7each\n` +
-      `§7Place it anywhere - it's already set to §f${sp.name}§7.    ${balLine(player)}`,
+      `§7Place it on your island - it's already set to §f${sp.name}§7.    ${balLine(player)}`,
     tiles,
   });
 }
@@ -258,9 +308,10 @@ function buySpawner(player, sp, amount) {
 //  SELL
 // ============================================================================
 export async function sellMenu(player, msg) {
-  const counts = countPlain(player);
-  const sellable = [...counts].filter(([id]) => SELL_PRICES[id] > 0);
-  const total = sellable.reduce((sum, [id, n]) => sum + SELL_PRICES[id] * n, 0);
+  const { byId } = getCatalog();
+  const sellable = [...countPlain(player)].filter(([id]) => sellPrice(id) > 0);
+  sellable.sort((a, b) => sellPrice(b[0]) * b[1] - sellPrice(a[0]) * a[1]);
+  const total = sellable.reduce((sum, [id, n]) => sum + sellPrice(id) * n, 0);
 
   const tiles = [];
   if (sellable.length) {
@@ -271,24 +322,25 @@ export async function sellMenu(player, msg) {
       badge: "HOT",
       onClick: () => {
         let earned = 0;
-        for (const [id] of sellable) earned += SELL_PRICES[id] * removeAllPlain(player, id);
+        for (const [id] of sellable) earned += sellPrice(id) * removeAllPlain(player, id);
         addMoney(player, earned);
         success(player, `Sold everything for ${fmt(earned)}.`);
         return sellMenu(player, `§aSold everything for §f${fmt(earned)}§a!`);
       },
     });
   }
-  for (const [id, n] of sellable) {
+  for (const [id, n] of sellable.slice(0, 40)) {
+    const e = byId.get(id);
     tiles.push({
-      text: `§f${pretty(id)}`,
-      sub: `§7x${n} §a${fmtShort(SELL_PRICES[id] * n)}`,
-      icon: SELL_ICONS[id] ?? ICON.coin,
+      text: `§f${clip(e?.name ?? pretty(id))}`,
+      sub: `§7x${n} §a${fmtShort(sellPrice(id) * n)}`,
+      icon: e?.icon ?? ICON.coin,
       onClick: () => {
         const sold = removeAllPlain(player, id);
-        const earned = sold * SELL_PRICES[id];
+        const earned = sold * sellPrice(id);
         addMoney(player, earned);
-        success(player, `Sold ${sold}x ${pretty(id)} for ${fmt(earned)}.`);
-        return sellMenu(player, `§aSold §f${sold}x ${pretty(id)} §afor §f${fmt(earned)}`);
+        success(player, `Sold ${sold}x ${e?.name ?? pretty(id)} for ${fmt(earned)}.`);
+        return sellMenu(player, `§aSold §f${sold}x ${e?.name ?? pretty(id)} §afor §f${fmt(earned)}`);
       },
     });
   }
@@ -296,7 +348,7 @@ export async function sellMenu(player, msg) {
 
   const info = sellable.length
     ? "§7Click an item to sell all of it."
-    : "§7You have nothing sellable. Ores, mob drops & crops sell here!";
+    : "§7You have nothing that can be sold. §8(Kit & renamed items can't be sold)";
   await tileMenu(player, { title: "SELL", theme: "green", body: `${msgLine(msg)}${info}    ${balLine(player)}`, tiles });
 }
 
@@ -394,12 +446,7 @@ async function topMenu(player, back) {
   const lines = top.length
     ? top.map((e, i) => `${medal[i] ?? "§7"}#${i + 1} §f${e.name} §7- §a${fmt(e.score)}`).join("\n")
     : "§7No one has any money yet!";
-  await tileMenu(player, {
-    title: "RICHEST PLAYERS",
-    theme: "gold",
-    body: lines,
-    tiles: [backTile(back)],
-  });
+  await tileMenu(player, { title: "RICHEST PLAYERS", theme: "gold", body: lines, tiles: [backTile(back)] });
 }
 
 // ============================================================================
@@ -453,10 +500,7 @@ async function adminPlayerMenu(player, target, msg) {
       onClick: async () => {
         const res = await showForm(
           player,
-          new ModalFormData()
-            .title(`Edit ${target.name}`)
-            .dropdown("Action", ["Add", "Remove", "Set"])
-            .textField("Amount", "1000")
+          new ModalFormData().title(`Edit ${target.name}`).dropdown("Action", ["Add", "Remove", "Set"]).textField("Amount", "1000")
         );
         if (!res || res.canceled) return adminPlayerMenu(player, target);
         const [action, raw] = res.formValues;

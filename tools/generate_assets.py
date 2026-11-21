@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generates every texture and structure file used by Factions Economy.
+Generates every texture and structure file used by Skyblock Economy.
 
     python3 tools/generate_assets.py
 
@@ -19,8 +19,8 @@ import struct
 from PIL import Image
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "packs")
-BP = os.path.join(ROOT, "FactionsEconomy_BP")
-RP = os.path.join(ROOT, "FactionsEconomy_RP")
+BP = os.path.join(ROOT, "SkyblockEconomy_BP")
+RP = os.path.join(ROOT, "SkyblockEconomy_RP")
 UI = os.path.join(RP, "textures", "ui", "eco")
 
 

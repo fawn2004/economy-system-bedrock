@@ -1,4 +1,4 @@
-// Factions Economy - custom menu layout.
+// Skyblock Economy - custom menu layout.
 // Generated layout, but safe to hand-edit.
 //  * Change the server name shown above the menu: $eco_server_name / $eco_server_tag (in eco_screen)
 //  * Textures live in textures/ui/eco/ (regenerate with tools/generate_assets.py)
@@ -12,7 +12,7 @@
       330,
       236
     ],
-    "$eco_server_name|default": "§l§fFACTIONS",
+    "$eco_server_name|default": "§l§fSKYBLOCK",
     "$eco_server_tag|default": "§l§6ECONOMY",
     "controls": [
       {
