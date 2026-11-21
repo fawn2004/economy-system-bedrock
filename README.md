@@ -82,7 +82,7 @@ cheapest block is worth more than the previous minion's best.
 
 Upgrades cost x1 / x3 / x8 / x20 / x50 for each minion.
 
-Each minion Place it on a block and it mines the block in
+Place a minion on a block and it mines the block in
 front of it on a loop. That block is part of the minion, so it can't be broken, blown up
 or pushed. Minions keep working while you're away and catch up when the area loads,
 until their storage is full.
