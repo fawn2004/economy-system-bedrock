@@ -47,7 +47,7 @@ WOODS6 = ["oak", "spruce", "birch", "jungle", "acacia", "dark_oak"]
 #  Items that can't be obtained in survival (or are technical) - never sold
 # ---------------------------------------------------------------------------
 EXCLUDE_EXACT = {
-    "bee_nest",  # removed from the shop on request
+    "bee_nest", "pitcher_pod",  # removed from the shop on request
     "allow", "deny", "border_block", "barrier", "bedrock", "command_block", "chain_command_block",
     "repeating_command_block", "command_block_minecart", "structure_block", "structure_void", "jigsaw",
     "end_portal_frame", "reinforced_deepslate", "budding_amethyst", "frosted_ice", "mob_spawner",
@@ -130,7 +130,7 @@ BASE = {
     "turtle_egg": 200, "wool": 8, "_wool": 8, "web": 10, "experience_bottle": 30, "ominous_bottle": 500,
     "creeper_head": 3000, "zombie_head": 1000, "skeleton_skull": 1000, "wither_skeleton_skull": 5000,
     "piglin_head": 2000, "dragon_head": 50000, "resin_clump": 4, "creaking_heart": 500,
-    "bee_nest": 50, "warped_wart_block": 1, "azalea_leaves_flowered": 1,
+    "bee_nest": 50, "warped_wart_block": 1, "chipped_anvil": 550, "damaged_anvil": 275, "azalea_leaves_flowered": 1,
     # coral & ocean
     "_coral": 3, "_coral_fan": 3, "_coral_block": 6, "dead_": 2,
     # treasure / loot
@@ -177,8 +177,15 @@ CATEGORY_RULES = [
     ("tools", r"_spear$"),
     ("buckets", r"(_bucket$|^bucket$)"),
     ("saplings", r"(_sapling$|^mangrove_propagule$|^azalea$|^flowering_azalea$|^crimson_fungus$|^warped_fungus$)"),
-    ("stone", r"^coarse_dirt$"),
-    ("mobs", r"^(blue|brown)_egg$"),
+    ("misc", r"^(composter|chest|ender_chest|crafting_table|barrel|furnace|blast_furnace|smoker|cartography_table|"
+             r"fletching_table|smithing_table|loom|stonecutter_block|grindstone|anvil|chipped_anvil|damaged_anvil|"
+             r"enchanting_table|lectern|jukebox|beacon|undyed_shulker_box|chiseled_bookshelf)$"),
+    ("natural", r"^(dirt|coarse_dirt|dirt_with_roots|grass_block|moss_block|pale_moss_block|mud|mycelium|podzol|"
+                r"sand|red_sand|gravel|clay)$"),
+    ("mobs", r"^(egg|blue_egg|brown_egg|sniffer_egg|turtle_egg)$"),
+    ("stone", r"copper_(door|trapdoor)$"),
+    ("nether", r"(_nylium$|^crimson_roots$|^warped_roots$|^warped_wart_block$)"),
+    ("decor", r"^mushroom_stem$"),
     ("ores", r"(_ore$|^raw_|_ingot$|^diamond$|^emerald$|^coal$|^charcoal$|^redstone$|^lapis_lazuli$|^quartz$|"
              r"amethyst|_nugget$|netherite_scrap|ancient_debris|^(iron|gold|copper|diamond|emerald|coal|"
              r"redstone|lapis|netherite|raw_iron|raw_gold|raw_copper)_block$|^flint$|glowstone_dust|prismarine_(shard|crystals))"),
@@ -220,13 +227,55 @@ CATEGORY_RULES = [
               r"concrete|copper|^chiseled_|^cut_|^ice$|^packed_ice$|^blue_ice$|^snow|amethyst_block|^resin)"),
     ("decor", r"."),
 ]
+# Sub-sections inside a category: (sub id, regex). First match wins; anything
+# left over stays in the parent category.
+SUB_RULES = {
+    "wood": [
+        ("wood_logs", r"(_log$|_wood$|_stem$|_hyphae$|^bamboo_block$|^stripped_bamboo_block$)"),
+        ("wood_planks", r"(_planks$|^bamboo_mosaic$)"),
+        ("wood_leaves", r"_leaves$"),
+        ("wood_stairs", r"_stairs$"),
+        ("wood_slabs", r"_slab$"),
+        ("wood_doors", r"_door$"),
+        ("wood_trapdoors", r"trapdoor$"),
+        ("wood_fences", r"(_fence$|_fence_gate$)"),
+        ("wood_signs", r"_sign$"),
+        ("wood_boats", r"(_boat$|_raft$)"),
+    ],
+    "stone": [
+        ("stone_copper", r"copper"),
+        ("stone_stairs", r"_stairs$"),
+        ("stone_slabs", r"_slab$"),
+        ("stone_walls", r"_wall$"),
+        ("stone_bricks", r"(brick|tiles$)"),
+        ("stone_polished", r"(^polished_|^smooth_|^chiseled_|^cut_)"),
+    ],
+}
+
 CATEGORY_INFO = {
     # id: (name, description, icon, theme, group)
     #   group "blocks"  = shown inside the Blocks tile
     #   group "<category id>" = a sub-category tile shown at the top of that category
     "stone":    ("Stone",        "Stone, bricks & building blocks", "textures/blocks/stonebrick", "blue", "blocks"),
     "wood":     ("Wood",         "Logs, planks & wooden things",    "textures/blocks/log_oak", "orange", "blocks"),
+    "natural":  ("Dirt & Natural", "Dirt, grass, sand, gravel & clay", "@dirt", "green", "blocks"),
     "colored":  ("Colours",      "Wool, glass, concrete & dyes",     "textures/blocks/wool_colored_red", "purple", "blocks"),
+    "wood_logs":      ("Logs",          "Logs, wood & stripped logs",  "@oak_log", "orange", "wood"),
+    "wood_planks":    ("Planks",        "Planks of every wood type",   "@oak_planks", "orange", "wood"),
+    "wood_leaves":    ("Leaves",        "Leaves of every tree",        "@oak_leaves", "green", "wood"),
+    "wood_stairs":    ("Stairs",        "Wooden stairs",               "textures/ui/eco/icon_stairs_wood", "orange", "wood"),
+    "wood_slabs":     ("Slabs",         "Wooden slabs",                "textures/ui/eco/icon_slab_wood", "orange", "wood"),
+    "wood_doors":     ("Doors",         "Wooden & iron doors",         "@wooden_door", "orange", "wood"),
+    "wood_trapdoors": ("Trapdoors",     "Wooden & iron trapdoors",     "@trapdoor", "orange", "wood"),
+    "wood_fences":    ("Fences",        "Fences & fence gates",        "textures/ui/eco/icon_fence_wood", "orange", "wood"),
+    "wood_signs":     ("Signs",         "Signs & hanging signs",       "@oak_sign", "orange", "wood"),
+    "wood_boats":     ("Boats",         "Boats, chest boats & rafts",  "@oak_boat", "blue", "wood"),
+    "stone_stairs":   ("Stairs",        "Stone & brick stairs",        "textures/ui/eco/icon_stairs_stone", "blue", "stone"),
+    "stone_slabs":    ("Slabs",         "Stone & brick slabs",         "textures/ui/eco/icon_slab_stone", "blue", "stone"),
+    "stone_walls":    ("Walls",         "Stone & brick walls",         "textures/ui/eco/icon_wall_stone", "blue", "stone"),
+    "stone_bricks":   ("Bricks",        "Bricks & tiles",              "@stone_bricks", "blue", "stone"),
+    "stone_polished": ("Polished",      "Polished, smooth & chiseled", "@polished_andesite", "blue", "stone"),
+    "stone_copper":   ("Copper",        "Copper blocks, doors & more", "@copper_block", "orange", "stone"),
     "nether":   ("Nether",       "Blocks from the Nether",           "textures/blocks/netherrack", "red", "blocks"),
     "end":      ("The End",      "End stone, purpur & more",         "textures/blocks/end_stone", "purple", "blocks"),
     "decor":    ("Decoration",   "Plants, lights & decoration",      "textures/blocks/flower_rose", "green", "blocks"),
@@ -236,6 +285,7 @@ CATEGORY_INFO = {
     "redstone": ("Redstone",     "Redstone parts & machines",        "textures/items/redstone_dust", "red", None),
     "food":     ("Food",         "Keep your island fed",            "textures/ui/eco/icon_food", "orange", None),
     "farming":  ("Farming",      "Seeds, crops & farm gear",         "textures/ui/eco/icon_farming", "green", None),
+    "misc":     ("Misc",         "Chests, crafting & workstations",  "@crafting_table", "orange", None),
     "saplings": ("Saplings",     "A sapling for every tree type",    "textures/blocks/sapling_oak", "green", "farming"),
     "buckets":  ("Buckets",      "Water, lava, milk & mob buckets",  "textures/items/bucket_water", "blue", None),
     "mobs":     ("Mob Drops",    "Loot from mobs",                   "textures/items/rotten_flesh", "green", None),
@@ -694,10 +744,19 @@ def main(src):
     rules = [(c, re.compile(r)) for c, r in CATEGORY_RULES]
 
     def category(n):
-        for c, r in rules:
+        c = "decor"
+        for cid, r in rules:
             if r.search(n):
-                return c
-        return "decor"
+                c = cid
+                break
+        for sub, r in SUB_RULES.get(c, []):
+            if re.search(r, n):
+                return sub
+        return c
+
+    for c, info in CATEGORY_INFO.items():  # "@item" icons = use that item's icon
+        if info[2].startswith("@"):
+            CATEGORY_INFO[c] = (info[0], info[1], icon(info[2][1:]) or "textures/ui/eco/icon_blocks") + info[3:]
 
     def nice(n):
         return " ".join(w.capitalize() for w in n.split("_"))

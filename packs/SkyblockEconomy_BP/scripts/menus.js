@@ -24,6 +24,14 @@ const pretty = (id) =>
     .replace(/\b\w/g, (c) => c.toUpperCase());
 const clip = (s, n = 18) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 
+/** Items in a category including all of its sub-sections. */
+function countDeep(id) {
+  const { categories, byCategory } = getCatalog();
+  let n = byCategory.get(id)?.length ?? 0;
+  for (const c of categories) if (c.group === id) n += countDeep(c.id);
+  return n;
+}
+
 const balLine = (player) => `§7Balance: §a${fmt(getBalance(player))}`;
 const msgLine = (msg) => (msg ? `${msg}\n` : "");
 const priceColor = (player, cost) => (getBalance(player) >= cost ? "§a" : "§c");
@@ -60,8 +68,7 @@ export async function shopMenu(player, msg) {
   const tiles = [];
   for (const key of SHOP_LAYOUT) {
     if (key === "blocks") {
-      const subs = categories.filter((c) => c.group === "blocks");
-      const n = subs.reduce((s, c) => s + (byCategory.get(c.id)?.length ?? 0), 0);
+      const n = countDeep("blocks");
       tiles.push({ text: "§e§lBLOCKS", sub: `§7${n} items`, icon: U + "icon_blocks", onClick: () => blocksMenu(player) });
     } else if (key === "kits") {
       tiles.push({ text: "§e§lKITS", sub: `§7${KITS.length} kits`, icon: U + "icon_kits", badge: BADGES.kits, onClick: () => kitsMenu(player) });
@@ -73,7 +80,7 @@ export async function shopMenu(player, msg) {
       const c = cat(key);
       tiles.push({
         text: `§e§l${c.name.toUpperCase()}`,
-        sub: `§7${byCategory.get(c.id)?.length ?? 0} items`,
+        sub: `§7${countDeep(c.id)} items`,
         icon: c.icon,
         badge: BADGES[c.id],
         onClick: () => categoryMenu(player, c, () => shopMenu(player)),
@@ -92,7 +99,7 @@ function categoryMenu(player, c, back) {
     .filter((sub) => sub.group === c.id)
     .map((sub) => ({
       text: `§e§l${sub.name.toUpperCase()}`,
-      sub: `§7${byCategory.get(sub.id)?.length ?? 0} items`,
+      sub: `§7${countDeep(sub.id)} items`,
       icon: sub.icon,
       onClick: () => categoryMenu(player, sub, reopen),
     }));
@@ -112,7 +119,7 @@ async function blocksMenu(player) {
     .filter((c) => c.group === "blocks")
     .map((c) => ({
       text: `§e§l${c.name.toUpperCase()}`,
-      sub: `§7${byCategory.get(c.id)?.length ?? 0} items`,
+      sub: `§7${countDeep(c.id)} items`,
       icon: c.icon,
       onClick: () => categoryMenu(player, c, () => blocksMenu(player)),
     }));
