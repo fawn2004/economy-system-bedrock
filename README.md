@@ -66,6 +66,15 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 - Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `TOOL_UPGRADES`, `COLLECTION_TIERS`, `CROPS`
   and `MOB_DROPS` in `config.js`.
 
+## Shop NPCs
+
+![NPCs](docs/npcs.png)
+
+Big shopkeepers (1.4x a player, ~2.5 blocks tall) that players tap instead of using the
+compass: **Shop** (purple), **Sell** (green) and **Menu** (blue). They turn to face the nearest
+player, are invincible and can't be pushed. Admins spawn them where they stand, or remove the
+nearest one, in **Admin > NPCs**.
+
 ## Minions
 
 ![Mining minion](docs/minion_render.png)

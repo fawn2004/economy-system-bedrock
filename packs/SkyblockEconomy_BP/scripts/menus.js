@@ -16,6 +16,7 @@ import {
 import { settingsMenu } from "./adminSettings.js";
 import { leaderboardsMenu } from "./leaderboards.js";
 import { makeHopperItem } from "./chunkHopper.js";
+import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
 import { isMinionLoot, lootIcon, lootIdFor, lootName, lootSellPrice, makeMinionItem } from "./minions.js";
 import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
@@ -767,6 +768,7 @@ async function adminMenu(player, msg) {
       { text: "§d§lHEADS", sub: "§7Player head balances", icon: mobIcon("zombie"), onClick: () => adminHeadsMenu(player) },
       { text: "§a§lCROPS", sub: "§7Enchanted crops", icon: "textures/items/wheat", onClick: () => adminCropsMenu(player) },
       { text: "§b§lSKILLS", sub: "§7Player skill levels", icon: "textures/items/iron_pickaxe", onClick: () => adminSkillsMenu(player) },
+      { text: "§6§lNPCS", sub: "§7Shop keepers", icon: ICON.player, onClick: () => adminNpcMenu(player) },
       { text: "§b§lSETTINGS", sub: "§7Spawners, kits...", icon: ICON.admin, onClick: () => settingsMenu(player, back) },
       { text: "§6§lSHOP EDITOR", sub: "§7Move/hide items", icon: ICON.shop, onClick: () => editorMenu(player, back) },
       {
@@ -860,6 +862,40 @@ async function adminPlayerMenu(player, target, msg) {
 }
 
 // ---- admin: heads ------------------------------------------------------------
+// ---- admin: NPCs -----------------------------------------------------------------
+async function adminNpcMenu(player, msg) {
+  if (!player.hasTag(CONFIG.adminTag)) return;
+  const spawn = (type, label) => () => {
+    spawnNpc(player, type);
+    success(player, `Spawned a ${label} NPC where you're standing.`);
+    return adminNpcMenu(player, `§aSpawned a §f${label} §aNPC. Step away to see it.`);
+  };
+  await tileMenu(player, {
+    title: "NPCS",
+    theme: "orange",
+    body:
+      (msg ? msg + "\n" : "") +
+      "§7Spawn a big shopkeeper where you're standing (it faces you).\n" +
+      "§7Players tap it instead of using the compass. §8Remove = nearest NPC within 6 blocks.",
+    tiles: [
+      { text: "§6§lSHOP NPC", sub: "§7Opens the shop", icon: ICON.shop, onClick: spawn("shop", "Shop") },
+      { text: "§a§lSELL NPC", sub: "§7Opens Sell", icon: ICON.sell, onClick: spawn("sell", "Sell") },
+      { text: "§b§lMENU NPC", sub: "§7Opens the menu", icon: ICON.top, onClick: spawn("menu", "Menu") },
+      {
+        text: "§c§lREMOVE NPC",
+        sub: "§7Nearest one",
+        icon: ICON.cancel,
+        onClick: () => {
+          const ok = removeNearestNpc(player);
+          if (ok) success(player, "Removed the nearest NPC.");
+          return adminNpcMenu(player, ok ? "§aRemoved the nearest NPC." : "§cNo NPC within 6 blocks.");
+        },
+      },
+      backTile(() => adminMenu(player)),
+    ],
+  });
+}
+
 // ---- admin: skills ------------------------------------------------------------
 async function adminSkillsMenu(player) {
   if (!player.hasTag(CONFIG.adminTag)) return;
@@ -1056,3 +1092,10 @@ async function adminHeadsMob(player, target, mob, msg) {
     ],
   });
 }
+
+// What each kind of NPC opens when tapped
+setNpcOpeners({
+  shop: (player) => shopMenu(player),
+  sell: (player) => sellMenu(player),
+  menu: (player) => mainMenu(player),
+});

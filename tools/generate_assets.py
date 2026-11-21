@@ -1380,6 +1380,157 @@ def make_chunk_hopper():
             f.write("item.eco:chunk_hopper=Chunk Hopper\n")
 
 
+# ---------------------------------------------------------------------------
+# Shop NPC: a big merchant (scale 1.4, ~2.5 blocks tall) players tap to open
+# the shop / sell / main menu. Spawned by admins (Admin > NPCs).
+# ---------------------------------------------------------------------------
+NPC_SKINS = {
+    # id: (robe, robe dark, trim, hat, hat dark)
+    "shop": ("#6c3fb0", "#45267a", "#f2c12e", "#3a1f5c", "#24133a"),
+    "sell": ("#2f8f3a", "#1f6626", "#f2c12e", "#174d1c", "#0e3312"),
+    "menu": ("#2c6fd6", "#1f4fa8", "#f2c12e", "#163a7a", "#0e2550"),
+}
+
+
+def npc_skin(robe, robe_d, trim, hat, hat_d):
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    px = img.load()
+
+    def fill(x0, y0, x1, y1, c):
+        for x in range(x0, x1):
+            for y in range(y0, y1):
+                px[x, y] = c
+
+    skin, skin_d = hexc("#e8b07a"), hexc("#c98f5a")
+    hair, beard = hexc("#5a3a1e"), hexc("#d9d0c0")
+    R, Rd, G, H, Hd = hexc(robe), hexc(robe_d), hexc(trim), hexc(hat), hexc(hat_d)
+    # head (0,0) 8x8x8
+    fill(0, 0, 32, 16, skin)
+    fill(8, 0, 16, 8, H)                                  # hat top
+    for (x0, x1) in ((0, 8), (8, 16), (16, 24), (24, 32)):
+        fill(x0, 8, x1, 10, H)                            # hat band
+        fill(x0, 10, x1, 11, G)                           # gold trim
+    fill(0, 11, 8, 16, hair); fill(16, 11, 24, 16, hair); fill(24, 11, 32, 16, hair)
+    fill(9, 12, 11, 13, hexc("#ffffff")); px[10, 12] = hexc("#3a2a1a")   # eyes
+    fill(13, 12, 15, 13, hexc("#ffffff")); px[13, 12] = hexc("#3a2a1a")
+    fill(9, 14, 15, 16, beard)                            # beard
+    px[11, 14] = px[12, 14] = skin_d                      # mouth
+    # body (16,16) 8x12x4 - robe with gold trim and belt
+    fill(16, 16, 40, 32, R)
+    fill(23, 20, 25, 32, G)                               # front trim
+    fill(16, 26, 40, 27, hexc("#3a2a1a"))                 # belt
+    px[23, 26] = px[24, 26] = G                           # buckle
+    fill(16, 30, 40, 32, Rd)
+    # arms (40,16) & (32,48): robe sleeves + hands
+    for (x0, y0) in ((40, 16), (32, 48)):
+        fill(x0, y0, x0 + 16, y0 + 16, R)
+        fill(x0, y0 + 9, x0 + 16, y0 + 10, G)
+        fill(x0, y0 + 10, x0 + 16, y0 + 16, skin)
+    # legs (0,16) & (16,48): long robe + shoes
+    for (x0, y0) in ((0, 16), (16, 48)):
+        fill(x0, y0, x0 + 16, y0 + 16, R)
+        fill(x0, y0 + 10, x0 + 16, y0 + 11, G)
+        fill(x0, y0 + 13, x0 + 16, y0 + 16, hexc("#2a1a10"))
+    return img
+
+
+def make_npc():
+    ent_dir = os.path.join(RP, "entity")
+    for nid, colors in NPC_SKINS.items():
+        save(npc_skin(*colors), os.path.join(RP, "textures", "entity", f"eco_npc_{nid}.png"))
+    geo = {
+        "format_version": "1.12.0",
+        "minecraft:geometry": [{
+            "description": {"identifier": "geometry.eco_npc", "texture_width": 64, "texture_height": 64,
+                            "visible_bounds_width": 3, "visible_bounds_height": 4, "visible_bounds_offset": [0, 1.5, 0]},
+            "bones": [
+                {"name": "root", "pivot": [0, 0, 0]},
+                {"name": "body", "parent": "root", "pivot": [0, 24, 0], "cubes": [{"origin": [-4, 12, -2], "size": [8, 12, 4], "uv": [16, 16]}]},
+                {"name": "head", "parent": "body", "pivot": [0, 24, 0], "cubes": [{"origin": [-4, 24, -4], "size": [8, 8, 8], "uv": [0, 0]}]},
+                {"name": "rightArm", "parent": "body", "pivot": [-5, 22, 0], "cubes": [{"origin": [-8, 12, -2], "size": [4, 12, 4], "uv": [40, 16]}]},
+                {"name": "leftArm", "parent": "body", "pivot": [5, 22, 0], "cubes": [{"origin": [4, 12, -2], "size": [4, 12, 4], "uv": [32, 48]}]},
+                {"name": "rightLeg", "parent": "root", "pivot": [-1.9, 12, 0], "cubes": [{"origin": [-3.9, 0, -2], "size": [4, 12, 4], "uv": [0, 16]}]},
+                {"name": "leftLeg", "parent": "root", "pivot": [1.9, 12, 0], "cubes": [{"origin": [-0.1, 0, -2], "size": [4, 12, 4], "uv": [16, 48]}]},
+            ],
+        }],
+    }
+    with open(os.path.join(RP, "models", "entity", "eco_npc.geo.json"), "w") as f:
+        json.dump(geo, f, indent=2)
+    anim = {
+        "format_version": "1.8.0",
+        "animations": {"animation.eco_npc.idle": {
+            "loop": True,
+            "bones": {
+                "rightArm": {"rotation": ["math.sin(query.life_time * 90) * 4", 0, "2 + math.sin(query.life_time * 70) * 2"]},
+                "leftArm": {"rotation": ["-math.sin(query.life_time * 90) * 4", 0, "-2 - math.sin(query.life_time * 70) * 2"]},
+                "head": {"rotation": ["math.sin(query.life_time * 40) * 3", 0, 0]},
+            },
+        }},
+    }
+    with open(os.path.join(RP, "animations", "eco_npc.animation.json"), "w") as f:
+        json.dump(anim, f, indent=2)
+    ids = list(NPC_SKINS)
+    client = {
+        "format_version": "1.10.0",
+        "minecraft:client_entity": {"description": {
+            "identifier": "eco:npc",
+            "materials": {"default": "entity_alphatest"},
+            "textures": {f"s{i}": f"textures/entity/eco_npc_{nid}" for i, nid in enumerate(ids)},
+            "geometry": {"default": "geometry.eco_npc"},
+            "animations": {"idle": "animation.eco_npc.idle"},
+            "scripts": {"animate": ["idle"]},
+            "render_controllers": ["controller.render.eco_npc"],
+        }},
+    }
+    with open(os.path.join(ent_dir, "eco_npc.entity.json"), "w") as f:
+        json.dump(client, f, indent=2)
+    rc = {
+        "format_version": "1.8.0",
+        "render_controllers": {"controller.render.eco_npc": {
+            "arrays": {"textures": {"Array.skins": [f"Texture.s{i}" for i in range(len(ids))]}},
+            "geometry": "Geometry.default",
+            "materials": [{"*": "Material.default"}],
+            "textures": ["Array.skins[query.variant]"],
+        }},
+    }
+    with open(os.path.join(RP, "render_controllers", "eco_npc.render_controllers.json"), "w") as f:
+        json.dump(rc, f, indent=2)
+    n = len(ids)
+    ent = {
+        "format_version": "1.21.0",
+        "minecraft:entity": {
+            "description": {"identifier": "eco:npc", "is_spawnable": False, "is_summonable": True},
+            "component_groups": {f"eco:npc_{i}": {"minecraft:variant": {"value": i}} for i in range(n)},
+            "events": {f"eco:set_npc_{i}": {"add": {"component_groups": [f"eco:npc_{i}"]},
+                                            "remove": {"component_groups": [f"eco:npc_{j}" for j in range(n) if j != i]}}
+                       for i in range(n)},
+            "components": {
+                "minecraft:variant": {"value": 0},
+                "minecraft:type_family": {"family": ["eco_npc", "npc", "inanimate"]},
+                "minecraft:collision_box": {"width": 0.8, "height": 2.5},
+                "minecraft:scale": {"value": 1.4},
+                "minecraft:health": {"value": 1000, "max": 1000},
+                "minecraft:damage_sensor": {"triggers": [{"cause": "all", "deals_damage": "no"}]},
+                "minecraft:physics": {"has_gravity": False, "has_collision": True},
+                "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
+                "minecraft:knockback_resistance": {"value": 1.0},
+                "minecraft:persistent": {},
+                "minecraft:fire_immune": {},
+                "minecraft:nameable": {"always_show": True, "allow_name_tag_renaming": False},
+                "minecraft:interact": {"interactions": [{
+                    "on_interact": {"filters": {"all_of": [{"test": "is_family", "subject": "other", "value": "player"}]}},
+                    "interact_text": "action.interact.eco_npc"}]},
+            },
+        },
+    }
+    with open(os.path.join(BP, "entities", "eco_npc.json"), "w") as f:
+        json.dump(ent, f, indent=2)
+    for lang in ("en_US", "en_GB"):
+        with open(os.path.join(RP, "texts", lang + ".lang"), "a") as f:
+            f.write("entity.eco:npc.name=Shopkeeper\n")
+            f.write("action.interact.eco_npc=Open\n")
+
+
 if __name__ == "__main__":
     make_shapes()
     make_frames()
@@ -1393,4 +1544,5 @@ if __name__ == "__main__":
     make_minions()
     make_minion_loot()
     make_chunk_hopper()
+    make_npc()
     print("Assets generated.")

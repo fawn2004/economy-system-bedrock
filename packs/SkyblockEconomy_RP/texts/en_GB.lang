@@ -120,3 +120,5 @@ item.eco:mloot_turtle_egg=Enchanted Turtle Egg
 item.eco:mloot_sniffer_egg=Enchanted Sniffer Egg
 item.eco:mloot_enchanted_golden_apple=Enchanted Enchanted Golden Apple
 item.eco:chunk_hopper=Chunk Hopper
+entity.eco:npc.name=Shopkeeper
+action.interact.eco_npc=Open
