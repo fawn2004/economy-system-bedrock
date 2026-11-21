@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import { COLLECTION_TIERS, CONFIG, KITS, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { COLLECTION_TIERS, CONFIG, KITS, MINION_SETTINGS, MINION_TIERS, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 
 // ============================================================================
 //  IN-GAME SETTINGS
@@ -33,6 +33,9 @@ const DEFAULTS = {
   collections: clone(COLLECTION_TIERS),
   skills: clone(SKILLS),
   skillSettings: clone(SKILL_SETTINGS),
+  minionSettings: clone(MINION_SETTINGS),
+  minionUpgrades: clone(MINION_UPGRADES),
+  minionTiers: clone(MINION_TIERS),
 };
 
 // Spawner settings that are simple numbers / switches (shown in the settings form)
@@ -121,6 +124,33 @@ export function applySavedSettings() {
   applyKits();
   applyTools();
   applySkills();
+  applyMinions();
+}
+
+function applyMinions() {
+  replaceObject(MINION_SETTINGS, { ...DEFAULTS.minionSettings, ...(saved.minionSettings ?? {}) });
+  MINION_UPGRADES.length = 0;
+  MINION_UPGRADES.push(...clone(saved.minionUpgrades ?? DEFAULTS.minionUpgrades));
+  MINION_TIERS.length = 0;
+  MINION_TIERS.push(...clone(saved.minionTiers ?? DEFAULTS.minionTiers));
+}
+
+export function setMinionSettings(values) {
+  saved.minionSettings = { ...(saved.minionSettings ?? {}), ...values };
+  store();
+  applyMinions();
+}
+
+export function setMinionUpgrades(list) {
+  saved.minionUpgrades = clone(list);
+  store();
+  applyMinions();
+}
+
+export function setMinionTiers(list) {
+  saved.minionTiers = clone(list);
+  store();
+  applyMinions();
 }
 
 function applySkills() {

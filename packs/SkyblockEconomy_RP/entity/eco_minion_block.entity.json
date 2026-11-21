@@ -1,0 +1,27 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "eco:minion_block",
+      "materials": {
+        "default": "entity"
+      },
+      "textures": {
+        "t0": "textures/blocks/cobblestone",
+        "t1": "textures/blocks/coal_ore",
+        "t2": "textures/blocks/iron_ore",
+        "t3": "textures/blocks/gold_ore",
+        "t4": "textures/blocks/lapis_ore",
+        "t5": "textures/blocks/redstone_ore",
+        "t6": "textures/blocks/diamond_ore",
+        "t7": "textures/blocks/emerald_ore"
+      },
+      "geometry": {
+        "default": "geometry.eco_minion_block"
+      },
+      "render_controllers": [
+        "controller.render.eco_minion_block"
+      ]
+    }
+  }
+}

@@ -35,3 +35,7 @@ item.eco:enchanted_melon=Enchanted Melon
 item.eco:enchanted_pumpkin=Enchanted Pumpkin
 item.eco:enchanted_sugar_cane=Enchanted Sugar Cane
 item.eco:enchanted_cactus=Enchanted Cactus
+item.eco:mining_minion=Mining Minion
+entity.eco:minion.name=Mining Minion
+entity.eco:minion_block.name=Minion Block
+action.interact.eco_minion=Open Minion

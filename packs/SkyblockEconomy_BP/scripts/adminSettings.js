@@ -1,6 +1,6 @@
 import { ModalFormData } from "@minecraft/server-ui";
 import { getCatalog } from "./catalog.js";
-import { COLLECTION_TIERS, CONFIG, CROPS, KITS, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { COLLECTION_TIERS, CONFIG, CROPS, KITS, MINION_SETTINGS, MINION_TIERS, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 import { fmt } from "./economy.js";
 import { container } from "./inventory.js";
 import {
@@ -13,6 +13,9 @@ import {
   setConfig,
   setLevels,
   setCollections,
+  setMinionSettings,
+  setMinionTiers,
+  setMinionUpgrades,
   setMob,
   setSkill,
   setSkillSettings,
@@ -74,6 +77,7 @@ export async function settingsMenu(player, back, msg) {
       { text: "§6§lSKILL TOOLS", sub: "§7Hoe, sword, upgrades", icon: "textures/items/diamond_hoe", onClick: () => skillToolsSettings(player, () => reopen()) },
       { text: "§d§lCOLLECTIONS", sub: "§7Tiers & rewards", icon: "textures/ui/eco/icon_farming", onClick: () => collectionsSettings(player, () => reopen()) },
       { text: "§b§lSKILLS", sub: "§7XP, perks, rewards", icon: "textures/items/iron_pickaxe", onClick: () => skillsSettings(player, () => reopen()) },
+      { text: "§e§lMINIONS", sub: "§7Price, upgrades, tiers", icon: "textures/ui/eco/icon_minion", onClick: () => minionSettings(player, () => reopen()) },
       { text: "§a§lECONOMY", sub: "§7Money & menus", icon: ICON.bank, onClick: () => economyForm(player, reopen) },
       {
         text: "§6§lFLOOR ITEMS",
@@ -757,5 +761,111 @@ function skillsSettings(player, back, msg) {
       (msg ? msg + "\n" : "") +
       `§7Max level §f${SS.maxLevel}§7, level L needs §f${SS.xpBase} x L^${SS.xpExponent} §7XP, reward §a${fmt(SS.moneyPerLevel)} x level§7.\n§8Tap a skill to change its perk, XP rate or turn it off.`,
     tiles,
+  });
+}
+
+// ---- minions ---------------------------------------------------------------------------
+function minionSettings(player, back, msg) {
+  const reopen = (m) => minionSettings(player, back, m);
+  const M = MINION_SETTINGS;
+  const tiles = [
+    {
+      text: "§e§lGENERAL",
+      sub: `§a${fmt(M.price)}`,
+      icon: ICON.admin,
+      onClick: async () => {
+        const v = await modal(player, "Minion settings", (f) =>
+          f
+            .textField("Shop price", String(M.price), { defaultValue: String(M.price) })
+            .textField("Seconds per block (before Speed upgrades)", String(M.baseInterval), { defaultValue: String(M.baseInterval) })
+            .textField("Storage (before Storage upgrades)", String(M.baseStorage), { defaultValue: String(M.baseStorage) })
+            .textField("Max minions per player", String(M.maxPerPlayer), { defaultValue: String(M.maxPerPlayer) })
+        );
+        if (!v) return reopen();
+        const price = num(v[0], 0), iv = num(v[1], 1, true), st = num(v[2], 1), mx = num(v[3], 0);
+        if ([price, iv, st, mx].some((x) => x === undefined)) return reopen("§cCheck the numbers.");
+        setMinionSettings({ price, baseInterval: iv, baseStorage: st, maxPerPlayer: mx });
+        return reopen("§aMinion settings saved.");
+      },
+    },
+    ...MINION_UPGRADES.map((u, i) => ({
+      text: `§b§l${u.name.toUpperCase()}`,
+      sub: `§7${u.money.length} lv, +${u.perLevel}`,
+      icon: u.icon,
+      onClick: async () => {
+        const v = await modal(player, `Minion upgrade: ${u.name}`, (f) =>
+          f
+            .textField("Description", u.desc, { defaultValue: u.desc })
+            .textField("Money cost for each level, comma separated", list(u.money), { defaultValue: list(u.money) })
+            .textField(`Effect per level (${u.id === "storage" ? "items" : "%"})`, String(u.perLevel), { defaultValue: String(u.perLevel) })
+        );
+        if (!v) return reopen();
+        const money = parseList(v[1]), per = num(v[2], 0, true);
+        if (!money || per === undefined) return reopen("§cCosts must be a list of numbers, e.g. 1000, 5000, 20000.");
+        const next = MINION_UPGRADES.map((x) => ({ ...x }));
+        next[i] = { ...u, desc: String(v[0]).slice(0, 60), money, perLevel: per };
+        setMinionUpgrades(next);
+        return reopen(`§a${u.name} saved (${money.length} levels).`);
+      },
+    })),
+    {
+      text: "§d§lTIERS",
+      sub: `§7${MINION_TIERS.length} tiers`,
+      icon: "textures/items/diamond_pickaxe",
+      onClick: () => minionTiersMenu(player, () => reopen()),
+    },
+    {
+      text: "§4§lRESET",
+      sub: "§7Defaults",
+      icon: ICON.cancel,
+      onClick: () =>
+        confirm(player, "RESET MINIONS?", "§7Minion price, upgrades and tiers go back to the defaults.\n§8(Placed minions keep their levels.)", () => {
+          resetSection("minionSettings");
+          resetSection("minionUpgrades");
+          resetSection("minionTiers");
+          return reopen("§aMinion settings reset.");
+        }, () => reopen()),
+    },
+    backTile(back),
+  ];
+  return tileMenu(player, {
+    title: "MINION SETTINGS",
+    theme: "orange",
+    body:
+      (msg ? msg + "\n" : "") +
+      `§7Price §a${fmt(M.price)}§7, §f${M.baseInterval}s §7per block, storage §f${M.baseStorage}§7, max §f${M.maxPerPlayer} §7per player.`,
+    tiles,
+  });
+}
+
+function minionTiersMenu(player, back, msg) {
+  const reopen = (m) => minionTiersMenu(player, back, m);
+  const tiles = MINION_TIERS.map((t, i) => ({
+    text: `§e§l${t.name.toUpperCase()}`,
+    sub: i ? `§a${fmt(t.cost)}` : "§7Start tier",
+    icon: ICON.top,
+    onClick: async () => {
+      const v = await modal(player, `Minion tier ${i + 1}: ${t.name}`, (f) => {
+        f.textField("Name", t.name, { defaultValue: t.name });
+        if (i > 0) f.textField("Money to upgrade into this tier", String(t.cost), { defaultValue: String(t.cost) });
+        f.textField(`How many ${t.drop[0].replace("minecraft:", "").replace(/_/g, " ")} per block mined`, String(t.drop[1]), { defaultValue: String(t.drop[1]) });
+      });
+      if (!v) return reopen();
+      const name = String(v[0]).trim().slice(0, 16);
+      const cost = i > 0 ? num(v[1], 0) : 0;
+      const amount = num(v[i > 0 ? 2 : 1], 1);
+      if (!name || cost === undefined || amount === undefined) return reopen("§cCheck the numbers.");
+      const next = MINION_TIERS.map((x) => ({ ...x, drop: [...x.drop] }));
+      next[i] = { ...t, name, cost, drop: [t.drop[0], amount] };
+      setMinionTiers(next);
+      return reopen(`§a${name} saved.`);
+    },
+  }));
+  return pagedMenu(player, {
+    title: "MINION TIERS",
+    theme: "orange",
+    body: (msg ? msg + "\n" : "") + "§7The blocks a minion can mine (Better Blocks upgrade). Tap one to change its name, cost or drop amount.",
+    tiles,
+    back,
   });
 }

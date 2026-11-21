@@ -275,10 +275,10 @@ export const SPAWNER_SETTINGS = {
 // Order of the tiles on the shop's front page. "blocks" opens the block
 // sub-categories; the rest are category ids from prices.js plus kits/spawners/search.
 export const SHOP_LAYOUT = [
-  "blocks", "food", "kits", "spawners", "skilltools", "farming", "buckets", "misc",
+  "blocks", "food", "kits", "spawners", "minions", "skilltools", "farming", "buckets", "misc",
   "ores", "tools", "redstone", "mobs", "brewing", "treasure", "search",
 ];
-export const BADGES = { kits: "NEW", spawners: "HOT", skilltools: "NEW" };
+export const BADGES = { kits: "NEW", spawners: "HOT", skilltools: "NEW", minions: "NEW" };
 
 // ============================================================================
 //  SKILL TOOLS  (Farming Hoe / Slayer Sword)
@@ -528,3 +528,49 @@ export const SKILLS = {
     },
   },
 };
+
+// ============================================================================
+//  MINIONS  (Hypixel-style mining minions)
+// ============================================================================
+export const MINION_SETTINGS = {
+  price: 25000, // Shop > Minions
+  baseInterval: 30, // seconds per block at Speed level 0
+  baseStorage: 64, // items it holds at Storage level 0
+  maxPerPlayer: 10,
+};
+// "Better Blocks" tiers, in order. cost = money to upgrade INTO this tier.
+// drops: what it mines; the Luck upgrade gives the NEXT tier's drop instead.
+// (8 tiers - the display block textures in the resource pack follow this order)
+export const MINION_TIERS = [
+  { name: "Cobblestone", drop: ["minecraft:cobblestone", 1], cost: 0 },
+  { name: "Coal", drop: ["minecraft:coal", 1], cost: 50000 },
+  { name: "Iron", drop: ["minecraft:raw_iron", 1], cost: 150000 },
+  { name: "Gold", drop: ["minecraft:raw_gold", 1], cost: 350000 },
+  { name: "Lapis", drop: ["minecraft:lapis_lazuli", 4], cost: 600000 },
+  { name: "Redstone", drop: ["minecraft:redstone", 4], cost: 1000000 },
+  { name: "Diamond", drop: ["minecraft:diamond", 1], cost: 2500000 },
+  { name: "Emerald", drop: ["minecraft:emerald", 1], cost: 5000000 },
+];
+// Upgrades: money cost per level; perLevel = effect per level
+export const MINION_UPGRADES = [
+  {
+    id: "speed", name: "Speed", icon: "textures/items/sugar", perLevel: 7,
+    desc: "Mines 7% faster per level",
+    money: [2000, 5000, 10000, 20000, 35000, 60000, 100000, 160000, 250000, 400000],
+  },
+  {
+    id: "luck", name: "Luck", icon: "textures/items/emerald", perLevel: 4,
+    desc: "+4% chance per level to get the next tier's block",
+    money: [5000, 15000, 40000, 90000, 200000],
+  },
+  {
+    id: "fortune", name: "Fortune", icon: "textures/items/diamond", perLevel: 20,
+    desc: "+20% chance per level of an extra drop",
+    money: [5000, 15000, 40000, 90000, 200000],
+  },
+  {
+    id: "storage", name: "Storage", icon: "textures/blocks/chest_front", perLevel: 64,
+    desc: "Holds 64 more items per level",
+    money: [3000, 8000, 20000, 45000, 100000],
+  },
+];

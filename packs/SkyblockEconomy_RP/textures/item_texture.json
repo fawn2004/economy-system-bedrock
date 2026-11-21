@@ -106,6 +106,9 @@
     },
     "eco_enchanted_cactus": {
       "textures": "textures/blocks/cactus_side"
+    },
+    "eco_mining_minion": {
+      "textures": "textures/items/eco_mining_minion"
     }
   }
 }

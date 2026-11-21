@@ -63,6 +63,26 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 - Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `TOOL_UPGRADES`, `COLLECTION_TIERS`, `CROPS`
   and `MOB_DROPS` in `config.js`.
 
+## Minions
+
+![Mining minion](docs/minion_render.png)
+
+**Shop > Minions** sells a **Mining Minion**. Place it on a block and it mines the block in
+front of it on a loop. That block is part of the minion, so it can't be broken, blown up
+or pushed. Minions keep working while you're away and catch up when the area loads,
+until their storage is full.
+
+Tap a minion (or its block) to:
+- **Collect** its items or **Sell All** of them at shop prices
+- **Upgrade:** Speed (faster), Luck (chance of the next tier's block), Fortune (extra
+  drops), Storage (holds more), and **Better Blocks**: Cobblestone > Coal > Iron > Gold >
+  Lapis > Redstone > Diamond > Emerald
+- **Pick up** (keeps its upgrades and gives you its storage)
+
+Only the owner (or an admin) can use a minion. Prices, speed, storage, the per-player limit,
+upgrade costs/effects and tier costs are in **Admin > Settings > Minions**
+(`MINION_*` in `config.js`).
+
 ## Skills
 
 Main menu > **Skills**. Skills level up automatically (max 25) as you play; each level pays

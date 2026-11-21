@@ -848,6 +848,270 @@ def make_enchanted_crops():
             f.writelines(lang_lines)
 
 
+# ---------------------------------------------------------------------------
+# Mining minion: custom entity (model, skin, animation) + its display block
+# entity + the minion item. Tier textures must match MINION_TIERS order in
+# scripts/config.js (8 tiers).
+# ---------------------------------------------------------------------------
+MINION_TIER_TEXTURES = [
+    "textures/blocks/cobblestone", "textures/blocks/coal_ore", "textures/blocks/iron_ore",
+    "textures/blocks/gold_ore", "textures/blocks/lapis_ore", "textures/blocks/redstone_ore",
+    "textures/blocks/diamond_ore", "textures/blocks/emerald_ore",
+]
+
+
+def minion_skin():
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    px = img.load()
+
+    def fill(x0, y0, x1, y1, c):
+        for x in range(x0, x1):
+            for y in range(y0, y1):
+                px[x, y] = c
+
+    skin, skin_d = hexc("#e8b07a"), hexc("#c98f5a")
+    helmet, helmet_d = hexc("#f2c12e"), hexc("#c98d12")
+    shirt, overall, overall_d = hexc("#8a5a2b"), hexc("#3f6fd1"), hexc("#2c4f99")
+    boot = hexc("#3a2a1a")
+    # head (box uv at 0,0; 8x8x8)
+    fill(0, 0, 32, 16, skin)
+    fill(8, 0, 16, 8, helmet)                      # top
+    for (x0, x1) in ((0, 8), (8, 16), (16, 24), (24, 32)):   # helmet band on all sides
+        fill(x0, 8, x1, 11, helmet)
+        fill(x0, 10, x1, 11, helmet_d)
+    px[11, 9] = px[12, 9] = hexc("#ffffff")        # lamp
+    px[11, 8] = px[12, 8] = hexc("#fff3a0")
+    fill(9, 12, 11, 13, hexc("#ffffff")); px[10, 12] = hexc("#2b4fa8")   # eyes
+    fill(13, 12, 15, 13, hexc("#ffffff")); px[13, 12] = hexc("#2b4fa8")
+    fill(11, 14, 13, 15, skin_d)                   # mouth
+    # body (16,16; 8x12x4)
+    fill(16, 16, 40, 32, overall)
+    fill(20, 20, 28, 23, shirt)
+    px[21, 23] = px[26, 23] = hexc("#f2c12e")      # buttons
+    fill(16, 30, 40, 32, overall_d)
+    # right arm (40,16) / left arm (32,48): sleeve + hand
+    for (x0, y0) in ((40, 16), (32, 48)):
+        fill(x0, y0, x0 + 16, y0 + 16, shirt)
+        fill(x0, y0 + 12, x0 + 16, y0 + 16, skin)
+    # legs (0,16) / (16,48)
+    for (x0, y0) in ((0, 16), (16, 48)):
+        fill(x0, y0, x0 + 16, y0 + 16, overall)
+        fill(x0, y0 + 12, x0 + 16, y0 + 16, boot)
+    # pickaxe: handle (32,0 18x9), head (52,0 4x8)
+    fill(32, 0, 50, 9, hexc("#8a5a2b"))
+    fill(52, 0, 56, 8, hexc("#5ee6e6"))
+    return img
+
+
+def make_minions():
+    ent_dir = os.path.join(RP, "entity")
+    os.makedirs(ent_dir, exist_ok=True)
+    os.makedirs(os.path.join(RP, "models", "entity"), exist_ok=True)
+    os.makedirs(os.path.join(RP, "animations"), exist_ok=True)
+    os.makedirs(os.path.join(RP, "render_controllers"), exist_ok=True)
+    os.makedirs(os.path.join(BP, "entities"), exist_ok=True)
+    save(minion_skin(), os.path.join(RP, "textures", "entity", "eco_minion.png"))
+
+    # --- minion model (front = -Z) ---
+    geo = {
+        "format_version": "1.12.0",
+        "minecraft:geometry": [{
+            "description": {"identifier": "geometry.eco_minion", "texture_width": 64, "texture_height": 64,
+                            "visible_bounds_width": 2, "visible_bounds_height": 2.5, "visible_bounds_offset": [0, 1, 0]},
+            "bones": [
+                {"name": "root", "pivot": [0, 0, 0]},
+                {"name": "body", "parent": "root", "pivot": [0, 24, 0], "cubes": [{"origin": [-4, 12, -2], "size": [8, 12, 4], "uv": [16, 16]}]},
+                {"name": "head", "parent": "body", "pivot": [0, 24, 0], "cubes": [{"origin": [-4, 24, -4], "size": [8, 8, 8], "uv": [0, 0], "inflate": 1.5}]},
+                {"name": "rightArm", "parent": "body", "pivot": [-5, 22, 0], "cubes": [{"origin": [-8, 12, -2], "size": [4, 12, 4], "uv": [40, 16]}]},
+                {"name": "pickaxe", "parent": "rightArm", "pivot": [-6, 13, 0], "cubes": [
+                    {"origin": [-6.5, 12.5, -10], "size": [1, 1, 8], "uv": [32, 0]},
+                    {"origin": [-6.5, 9.5, -11], "size": [1, 7, 1], "uv": [52, 0]}]},
+                {"name": "leftArm", "parent": "body", "pivot": [5, 22, 0], "cubes": [{"origin": [4, 12, -2], "size": [4, 12, 4], "uv": [32, 48]}]},
+                {"name": "rightLeg", "parent": "root", "pivot": [-1.9, 12, 0], "cubes": [{"origin": [-3.9, 0, -2], "size": [4, 12, 4], "uv": [0, 16]}]},
+                {"name": "leftLeg", "parent": "root", "pivot": [1.9, 12, 0], "cubes": [{"origin": [-0.1, 0, -2], "size": [4, 12, 4], "uv": [16, 48]}]},
+            ],
+        }],
+    }
+    with open(os.path.join(RP, "models", "entity", "eco_minion.geo.json"), "w") as f:
+        json.dump(geo, f, indent=2)
+
+    # --- display block model: a 16x16x16 cube, each face uses the whole texture ---
+    face = {"uv": [0, 0], "uv_size": [16, 16]}
+    block_geo = {
+        "format_version": "1.12.0",
+        "minecraft:geometry": [{
+            "description": {"identifier": "geometry.eco_minion_block", "texture_width": 16, "texture_height": 16,
+                            "visible_bounds_width": 2, "visible_bounds_height": 2, "visible_bounds_offset": [0, 0.5, 0]},
+            "bones": [{"name": "block", "pivot": [0, 0, 0], "cubes": [{
+                "origin": [-8, 0, -8], "size": [16, 16, 16],
+                "uv": {k: dict(face) for k in ("north", "south", "east", "west", "up", "down")}}]}],
+        }],
+    }
+    with open(os.path.join(RP, "models", "entity", "eco_minion_block.geo.json"), "w") as f:
+        json.dump(block_geo, f, indent=2)
+
+    # --- mining animation ---
+    anim = {
+        "format_version": "1.8.0",
+        "animations": {
+            "animation.eco_minion.mine": {
+                "loop": True, "animation_length": 0.8,
+                "bones": {
+                    "rightArm": {"rotation": {"0.0": [-110, 0, 0], "0.3": [-25, 0, 0], "0.8": [-110, 0, 0]}},
+                    "body": {"rotation": {"0.0": [0, 0, 0], "0.3": [6, 0, 0], "0.8": [0, 0, 0]}},
+                    "head": {"rotation": {"0.0": [0, 0, 0], "0.3": [8, 0, 0], "0.8": [0, 0, 0]}},
+                },
+            },
+        },
+    }
+    with open(os.path.join(RP, "animations", "eco_minion.animation.json"), "w") as f:
+        json.dump(anim, f, indent=2)
+
+    # --- client entities ---
+    client = {
+        "format_version": "1.10.0",
+        "minecraft:client_entity": {"description": {
+            "identifier": "eco:minion",
+            "materials": {"default": "entity_alphatest"},
+            "textures": {"default": "textures/entity/eco_minion"},
+            "geometry": {"default": "geometry.eco_minion"},
+            "animations": {"mine": "animation.eco_minion.mine"},
+            "scripts": {"animate": ["mine"]},
+            "render_controllers": ["controller.render.default"],
+        }},
+    }
+    with open(os.path.join(ent_dir, "eco_minion.entity.json"), "w") as f:
+        json.dump(client, f, indent=2)
+    block_client = {
+        "format_version": "1.10.0",
+        "minecraft:client_entity": {"description": {
+            "identifier": "eco:minion_block",
+            "materials": {"default": "entity"},
+            "textures": {f"t{i}": t for i, t in enumerate(MINION_TIER_TEXTURES)},
+            "geometry": {"default": "geometry.eco_minion_block"},
+            "render_controllers": ["controller.render.eco_minion_block"],
+        }},
+    }
+    with open(os.path.join(ent_dir, "eco_minion_block.entity.json"), "w") as f:
+        json.dump(block_client, f, indent=2)
+    rc = {
+        "format_version": "1.8.0",
+        "render_controllers": {"controller.render.eco_minion_block": {
+            "arrays": {"textures": {"Array.tiers": [f"Texture.t{i}" for i in range(len(MINION_TIER_TEXTURES))]}},
+            "geometry": "Geometry.default",
+            "materials": [{"*": "Material.default"}],
+            "textures": ["Array.tiers[query.variant]"],
+        }},
+    }
+    with open(os.path.join(RP, "render_controllers", "eco_minion_block.render_controllers.json"), "w") as f:
+        json.dump(rc, f, indent=2)
+
+    # --- behaviour entities ---
+    common = {
+        "minecraft:health": {"value": 1000, "max": 1000},
+        "minecraft:damage_sensor": {"triggers": [{"cause": "all", "deals_damage": "no"}]},
+        "minecraft:physics": {"has_gravity": False, "has_collision": True},
+        "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
+        "minecraft:knockback_resistance": {"value": 1.0},
+        "minecraft:persistent": {},
+        "minecraft:fire_immune": {},
+        "minecraft:interact": {"interactions": [{
+            "on_interact": {"filters": {"all_of": [{"test": "is_family", "subject": "other", "value": "player"}]}},
+            "interact_text": "action.interact.eco_minion"}]},
+    }
+    minion = {
+        "format_version": "1.21.0",
+        "minecraft:entity": {
+            "description": {"identifier": "eco:minion", "is_spawnable": False, "is_summonable": True},
+            "components": {
+                **common,
+                "minecraft:type_family": {"family": ["eco_minion", "inanimate"]},
+                "minecraft:collision_box": {"width": 0.5, "height": 1.0},
+                "minecraft:scale": {"value": 0.55},
+                "minecraft:nameable": {"always_show": True, "allow_name_tag_renaming": False},
+            },
+        },
+    }
+    with open(os.path.join(BP, "entities", "eco_minion.json"), "w") as f:
+        json.dump(minion, f, indent=2)
+    n = len(MINION_TIER_TEXTURES)
+    groups = {f"eco:tier_{i}": {"minecraft:variant": {"value": i}} for i in range(n)}
+    events = {f"eco:set_tier_{i}": {"add": {"component_groups": [f"eco:tier_{i}"]},
+                                    "remove": {"component_groups": [f"eco:tier_{j}" for j in range(n) if j != i]}}
+              for i in range(n)}
+    block_ent = {
+        "format_version": "1.21.0",
+        "minecraft:entity": {
+            "description": {"identifier": "eco:minion_block", "is_spawnable": False, "is_summonable": True},
+            "component_groups": groups,
+            "events": events,
+            "components": {
+                **common,
+                "minecraft:type_family": {"family": ["eco_minion_block", "inanimate"]},
+                "minecraft:collision_box": {"width": 1.0, "height": 1.0},
+                "minecraft:variant": {"value": 0},
+            },
+        },
+    }
+    with open(os.path.join(BP, "entities", "eco_minion_block.json"), "w") as f:
+        json.dump(block_ent, f, indent=2)
+
+    # --- the minion item (16x16 icon: minion head) ---
+    icon = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    ip = icon.load()
+    art = [
+        "................",
+        "....kkkkkkkk....",
+        "...kyyyyyyyyk...",
+        "..kyyyywwyyyyk..",
+        "..kYYYYYYYYYYk..",
+        "..kssssssssssk..",
+        "..kssssssssssk..",
+        "..kswbsssswbsk..",
+        "..kssssssssssk..",
+        "..ksssssrrsssk..",
+        "..kssssssssssk..",
+        "..kkkkkkkkkkkk..",
+        "...kbbbbbbbbk...",
+        "...kbbnnnnbbk...",
+        "...kbbbbbbbbk...",
+        "...kkkkkkkkkk...",
+    ]
+    cols = {"k": hexc("#161616"), "y": hexc("#f2c12e"), "Y": hexc("#c98d12"), "w": hexc("#ffffff"),
+            "s": hexc("#e8b07a"), "b": hexc("#3f6fd1"), "n": hexc("#8a5a2b"), "r": hexc("#c98f5a")}
+    for y, row in enumerate(art):
+        for x, ch in enumerate(row):
+            if ch in cols:
+                ip[x, y] = cols[ch]
+    save(icon, os.path.join(RP, "textures", "items", "eco_mining_minion.png"))
+    save(icon, os.path.join(UI, "icon_minion.png"), scale=4)
+    tex_path = os.path.join(RP, "textures", "item_texture.json")
+    data = json.load(open(tex_path))
+    data["texture_data"]["eco_mining_minion"] = {"textures": "textures/items/eco_mining_minion"}
+    with open(tex_path, "w") as f:
+        json.dump(data, f, indent=2)
+    item = {
+        "format_version": "1.21.60",
+        "minecraft:item": {
+            "description": {"identifier": "eco:mining_minion", "menu_category": {"category": "items"}},
+            "components": {
+                "minecraft:icon": "eco_mining_minion",
+                "minecraft:display_name": {"value": "§r§eMining Minion"},
+                "minecraft:max_stack_size": 1,
+                "minecraft:glint": True,
+            },
+        },
+    }
+    with open(os.path.join(BP, "items", "mining_minion.json"), "w") as f:
+        json.dump(item, f, indent=2)
+    for lang in ("en_US", "en_GB"):
+        with open(os.path.join(RP, "texts", lang + ".lang"), "a") as f:
+            f.write("item.eco:mining_minion=Mining Minion\n")
+            f.write("entity.eco:minion.name=Mining Minion\n")
+            f.write("entity.eco:minion_block.name=Minion Block\n")
+            f.write("action.interact.eco_minion=Open Minion\n")
+
+
 if __name__ == "__main__":
     make_shapes()
     make_frames()
@@ -858,4 +1122,5 @@ if __name__ == "__main__":
     make_structures()
     make_heads()
     make_enchanted_crops()
+    make_minions()
     print("Assets generated.")

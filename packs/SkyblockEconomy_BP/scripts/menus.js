@@ -1,7 +1,7 @@
 import { ItemStack, world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
-import { BADGES, CONFIG, CROPS, KITS, SHOP_LAYOUT, SKILLS, SKILL_TOOLS, SPAWNERS } from "./config.js";
+import { BADGES, CONFIG, CROPS, KITS, MINION_SETTINGS, SHOP_LAYOUT, SKILLS, SKILL_TOOLS, SPAWNERS } from "./config.js";
 import { addMoney, fmt, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
   applyEnchants,
@@ -14,6 +14,7 @@ import {
   spaceFor,
 } from "./inventory.js";
 import { settingsMenu } from "./adminSettings.js";
+import { makeMinionItem } from "./minions.js";
 import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
 import { clearGroundItems } from "./groundItems.js";
@@ -115,6 +116,8 @@ export async function shopMenu(player, msg) {
       tiles.push({ text: "§e§lKITS", sub: `§7${KITS.filter((k) => !k.disabled).length} kits`, icon: U + "icon_kits", badge: BADGES.kits, onClick: () => kitsMenu(player) });
     } else if (key === "spawners") {
       tiles.push({ text: "§e§lSPAWNERS", sub: `§7${SPAWNERS.filter((s) => !s.disabled).length} mobs`, icon: U + "icon_spawners", badge: BADGES.spawners, onClick: () => spawnersMenu(player) });
+    } else if (key === "minions") {
+      tiles.push({ text: "§e§lMINIONS", sub: "§7They mine for you", icon: U + "icon_minion", badge: BADGES.minions, onClick: () => minionShop(player) });
     } else if (key === "skilltools") {
       tiles.push({ text: "§6§lSKILL TOOLS", sub: "§7Level-up tools", icon: SKILL_TOOL_ICON, badge: BADGES.skilltools, onClick: () => skillToolsMenu(player) });
     } else if (key === "search") {
@@ -272,6 +275,38 @@ function buyItem(player, item, amount) {
   giveItems(player, item.id, amount);
   success(player, `Bought ${amount}x ${item.name} for ${fmt(cost)}.`);
   return `§aBought §f${amount}x ${item.name} §afor §f${fmt(cost)}`;
+}
+
+// ---- minions -------------------------------------------------------------------
+async function minionShop(player, msg) {
+  const price = MINION_SETTINGS.price;
+  await tileMenu(player, {
+    title: "MINIONS",
+    theme: "orange",
+    body:
+      (msg ? msg + "\n" : "") +
+      "§7Minions mine for you - even while you're away (until their storage is full).\n" +
+      `§7Place one, then tap it to collect, sell and upgrade it. §8(max ${MINION_SETTINGS.maxPerPlayer} each)    ${balLine(player)}`,
+    tiles: [
+      {
+        text: "§e§lMINING MINION",
+        sub: `${priceColor(player, price)}${fmtShort(price)}`,
+        icon: U + "icon_minion",
+        onClick: () => {
+          if (getBalance(player) < price) {
+            fail(player, `You need ${fmt(price)}.`);
+            return minionShop(player, `§cYou need §f${fmt(price)}§c.`);
+          }
+          if (freeSlots(player) < 1) return minionShop(player, "§cYou need a free inventory slot!");
+          takeMoney(player, price);
+          player.getComponent("minecraft:inventory").container.addItem(makeMinionItem(0, {}));
+          success(player, "Bought a Mining Minion! Place it on a block.");
+          return minionShop(player, "§aBought a §fMining Minion§a! Place it on a block.");
+        },
+      },
+      backTile(() => shopMenu(player)),
+    ],
+  });
 }
 
 // ---- skill tools -------------------------------------------------------------
