@@ -1,0 +1,7 @@
+{
+  "resource_pack_name": "factions_economy",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "eco_menu_compass": { "textures": "textures/items/eco_menu_compass" }
+  }
+}

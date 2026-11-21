@@ -1,0 +1,985 @@
+// Factions Economy - custom menu layout.
+// Generated layout, but safe to hand-edit.
+//  * Change the server name shown above the menu: $eco_server_name / $eco_server_tag (in eco_screen)
+//  * Textures live in textures/ui/eco/ (regenerate with tools/generate_assets.py)
+//  * Title marker:  §e§c§o§<theme>§r   theme 1 red, 2 gold, 3 green, 4 blue, 5 purple, 6 orange
+//  * Button badges: put [NEW] or [HOT] anywhere in a button's text
+{
+  "namespace": "eco_form",
+  "eco_screen": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "100%"
+    ],
+    "$eco_server_name|default": "§l§fFACTIONS",
+    "$eco_server_tag|default": "§l§6ECONOMY",
+    "controls": [
+      {
+        "layout": {
+          "type": "stack_panel",
+          "orientation": "vertical",
+          "size": [
+            "92%",
+            "94%"
+          ],
+          "max_size": [
+            372,
+            290
+          ],
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "controls": [
+            {
+              "logo@eco_form.logo": {}
+            },
+            {
+              "window@eco_form.window": {}
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "logo": {
+    "type": "panel",
+    "size": [
+      "100%",
+      36
+    ],
+    "controls": [
+      {
+        "name_shadow": {
+          "type": "label",
+          "text": "$eco_server_name",
+          "font_type": "MinecraftTen",
+          "font_scale_factor": 2.0,
+          "color": [
+            0.55,
+            0.05,
+            0.12
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            2,
+            2
+          ],
+          "layer": 1
+        }
+      },
+      {
+        "name": {
+          "type": "label",
+          "text": "$eco_server_name",
+          "font_type": "MinecraftTen",
+          "font_scale_factor": 2.0,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            0
+          ],
+          "layer": 2
+        }
+      },
+      {
+        "tag": {
+          "type": "label",
+          "text": "$eco_server_tag",
+          "font_type": "MinecraftTen",
+          "font_scale_factor": 1.0,
+          "shadow": true,
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_middle",
+          "offset": [
+            0,
+            -2
+          ],
+          "layer": 2
+        }
+      }
+    ]
+  },
+  "window": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "size": [
+      "100%",
+      "fill"
+    ],
+    "controls": [
+      {
+        "header_row": {
+          "type": "panel",
+          "size": [
+            "100%",
+            26
+          ],
+          "controls": [
+            {
+              "header@eco_form.header": {
+                "size": [
+                  "100% - 29px",
+                  "100%"
+                ],
+                "anchor_from": "left_middle",
+                "anchor_to": "left_middle"
+              }
+            },
+            {
+              "close@eco_form.close_button": {
+                "size": [
+                  26,
+                  26
+                ],
+                "anchor_from": "right_middle",
+                "anchor_to": "right_middle"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "gap": {
+          "type": "panel",
+          "size": [
+            "100%",
+            3
+          ]
+        }
+      },
+      {
+        "body@eco_form.body": {}
+      }
+    ]
+  },
+  "header": {
+    "type": "panel",
+    "controls": [
+      {
+        "bar_red": {
+          "type": "image",
+          "texture": "textures/ui/eco/header_red",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§e§c§o§1') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "bar_gold": {
+          "type": "image",
+          "texture": "textures/ui/eco/header_gold",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§e§c§o§2') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "bar_green": {
+          "type": "image",
+          "texture": "textures/ui/eco/header_green",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§e§c§o§3') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "bar_blue": {
+          "type": "image",
+          "texture": "textures/ui/eco/header_blue",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§e§c§o§4') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "bar_purple": {
+          "type": "image",
+          "texture": "textures/ui/eco/header_purple",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§e§c§o§5') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "bar_orange": {
+          "type": "image",
+          "texture": "textures/ui/eco/header_orange",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§e§c§o§6') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "title": {
+          "type": "label",
+          "layer": 5,
+          "font_type": "MinecraftTen",
+          "font_scale_factor": 1.25,
+          "color": [
+            1,
+            1,
+            1
+          ],
+          "shadow": true,
+          "anchor_from": "left_middle",
+          "anchor_to": "left_middle",
+          "offset": [
+            9,
+            1
+          ],
+          "size": [
+            "100% - 18px",
+            "default"
+          ],
+          "text": "#text",
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "((((((#title_text - '§e§c§o§1§r') - '§e§c§o§2§r') - '§e§c§o§3§r') - '§e§c§o§4§r') - '§e§c§o§5§r') - '§e§c§o§6§r')",
+              "target_property_name": "#text"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "close_button": {
+    "type": "button",
+    "default_control": "default",
+    "hover_control": "hover",
+    "pressed_control": "pressed",
+    "sound_name": "random.click",
+    "sound_volume": 1.0,
+    "sound_pitch": 1.0,
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "button.menu_exit",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "button.menu_exit",
+        "mapping_type": "focused"
+      }
+    ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "textures/ui/eco/close"
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "textures/ui/eco/close_hover"
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "textures/ui/eco/close_hover",
+          "offset": [
+            0,
+            1
+          ]
+        }
+      }
+    ]
+  },
+  "body": {
+    "type": "image",
+    "texture": "textures/ui/eco/panel",
+    "size": [
+      "100%",
+      "fill"
+    ],
+    "controls": [
+      {
+        "inner": {
+          "type": "stack_panel",
+          "orientation": "vertical",
+          "size": [
+            "100% - 12px",
+            "100% - 12px"
+          ],
+          "controls": [
+            {
+              "info@eco_form.info_bar": {}
+            },
+            {
+              "gap": {
+                "type": "panel",
+                "size": [
+                  "100%",
+                  5
+                ]
+              }
+            },
+            {
+              "scroll@eco_form.scroll_area": {}
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "info_bar": {
+    "type": "image",
+    "texture": "textures/ui/eco/info",
+    "size": [
+      "100%",
+      "100%c + 10px"
+    ],
+    "bindings": [
+      {
+        "binding_name": "#form_text"
+      },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not (#form_text = ''))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "text": {
+          "type": "label",
+          "size": [
+            "100% - 14px",
+            "default"
+          ],
+          "color": [
+            0.9,
+            0.9,
+            0.9
+          ],
+          "shadow": true,
+          "text_alignment": "center",
+          "text": "#form_text",
+          "bindings": [
+            {
+              "binding_name": "#form_text"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "scroll_area": {
+    "type": "panel",
+    "size": [
+      "100%",
+      "fill"
+    ],
+    "controls": [
+      {
+        "scrolling_panel@common.scrolling_panel": {
+          "anchor_to": "top_left",
+          "anchor_from": "top_left",
+          "$show_background": false,
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "$scrolling_content": "eco_form.grid_content",
+          "$scroll_size": [
+            5,
+            "100% - 4px"
+          ],
+          "$scrolling_pane_size": [
+            "100% - 4px",
+            "100% - 2px"
+          ],
+          "$scrolling_pane_offset": [
+            2,
+            0
+          ],
+          "$scroll_bar_right_padding_size": [
+            0,
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "grid_content": {
+    "type": "panel",
+    "size": [
+      "100% - 6px",
+      "100%c"
+    ],
+    "anchor_from": "top_left",
+    "anchor_to": "top_left",
+    "controls": [
+      {
+        "grid": {
+          "type": "grid",
+          "size": [
+            "100%",
+            "default"
+          ],
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "grid_item_template": "eco_form.tile",
+          "grid_rescaling_type": "horizontal",
+          "collection_name": "form_buttons",
+          "bindings": [
+            {
+              "binding_name": "#form_button_length",
+              "binding_name_override": "#maximum_grid_items"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "tile": {
+    "type": "panel",
+    "size": [
+      84,
+      76
+    ],
+    "controls": [
+      {
+        "button@eco_form.tile_button": {}
+      }
+    ]
+  },
+  "tile_button": {
+    "type": "button",
+    "size": [
+      "100% - 4px",
+      "100% - 4px"
+    ],
+    "default_control": "default",
+    "hover_control": "hover",
+    "pressed_control": "pressed",
+    "sound_name": "random.click",
+    "sound_volume": 1.0,
+    "sound_pitch": 1.0,
+    "button_mappings": [
+      {
+        "from_button_id": "button.menu_select",
+        "to_button_id": "button.form_button_click",
+        "mapping_type": "pressed"
+      },
+      {
+        "from_button_id": "button.menu_ok",
+        "to_button_id": "button.form_button_click",
+        "mapping_type": "focused"
+      }
+    ],
+    "bindings": [
+      {
+        "binding_type": "collection_details",
+        "binding_collection_name": "form_buttons"
+      }
+    ],
+    "controls": [
+      {
+        "default": {
+          "type": "image",
+          "texture": "textures/ui/eco/tile",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "controls": [
+            {
+              "icon": {
+                "type": "image",
+                "size": [
+                  32,
+                  32
+                ],
+                "layer": 2,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  6
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_texture",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name_override": "#texture"
+                  },
+                  {
+                    "binding_name": "#form_button_texture_file_system",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name_override": "#texture_file_system"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#texture = '') or (#texture = 'loading')))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            },
+            {
+              "name": {
+                "type": "label",
+                "layer": 3,
+                "shadow": true,
+                "color": [
+                  1,
+                  1,
+                  1
+                ],
+                "anchor_from": "bottom_middle",
+                "anchor_to": "bottom_middle",
+                "offset": [
+                  0,
+                  -4
+                ],
+                "size": [
+                  "100% - 6px",
+                  "default"
+                ],
+                "text_alignment": "center",
+                "font_scale_factor": 0.85,
+                "text": "#text",
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#form_button_text - '[NEW]') - '[HOT]')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "badge_new": {
+                "type": "image",
+                "texture": "textures/ui/eco/badge_new",
+                "size": [
+                  26,
+                  10
+                ],
+                "layer": 4,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  2,
+                  -3
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#form_button_text - '[NEW]') = #form_button_text))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            },
+            {
+              "badge_hot": {
+                "type": "image",
+                "texture": "textures/ui/eco/badge_hot",
+                "size": [
+                  26,
+                  10
+                ],
+                "layer": 4,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  2,
+                  -3
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#form_button_text - '[HOT]') = #form_button_text))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hover": {
+          "type": "image",
+          "texture": "textures/ui/eco/tile_hover",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "controls": [
+            {
+              "icon": {
+                "type": "image",
+                "size": [
+                  32,
+                  32
+                ],
+                "layer": 2,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  6
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_texture",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name_override": "#texture"
+                  },
+                  {
+                    "binding_name": "#form_button_texture_file_system",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name_override": "#texture_file_system"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#texture = '') or (#texture = 'loading')))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            },
+            {
+              "name": {
+                "type": "label",
+                "layer": 3,
+                "shadow": true,
+                "color": [
+                  1,
+                  1,
+                  1
+                ],
+                "anchor_from": "bottom_middle",
+                "anchor_to": "bottom_middle",
+                "offset": [
+                  0,
+                  -4
+                ],
+                "size": [
+                  "100% - 6px",
+                  "default"
+                ],
+                "text_alignment": "center",
+                "font_scale_factor": 0.85,
+                "text": "#text",
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#form_button_text - '[NEW]') - '[HOT]')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "badge_new": {
+                "type": "image",
+                "texture": "textures/ui/eco/badge_new",
+                "size": [
+                  26,
+                  10
+                ],
+                "layer": 4,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  2,
+                  -3
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#form_button_text - '[NEW]') = #form_button_text))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            },
+            {
+              "badge_hot": {
+                "type": "image",
+                "texture": "textures/ui/eco/badge_hot",
+                "size": [
+                  26,
+                  10
+                ],
+                "layer": 4,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  2,
+                  -3
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#form_button_text - '[HOT]') = #form_button_text))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "pressed": {
+          "type": "image",
+          "texture": "textures/ui/eco/tile_pressed",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "controls": [
+            {
+              "icon": {
+                "type": "image",
+                "size": [
+                  32,
+                  32
+                ],
+                "layer": 2,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  7
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_texture",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name_override": "#texture"
+                  },
+                  {
+                    "binding_name": "#form_button_texture_file_system",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons",
+                    "binding_name_override": "#texture_file_system"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#texture = '') or (#texture = 'loading')))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            },
+            {
+              "name": {
+                "type": "label",
+                "layer": 3,
+                "shadow": true,
+                "color": [
+                  1,
+                  1,
+                  1
+                ],
+                "anchor_from": "bottom_middle",
+                "anchor_to": "bottom_middle",
+                "offset": [
+                  0,
+                  -3
+                ],
+                "size": [
+                  "100% - 6px",
+                  "default"
+                ],
+                "text_alignment": "center",
+                "font_scale_factor": 0.85,
+                "text": "#text",
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#form_button_text - '[NEW]') - '[HOT]')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "badge_new": {
+                "type": "image",
+                "texture": "textures/ui/eco/badge_new",
+                "size": [
+                  26,
+                  10
+                ],
+                "layer": 4,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  2,
+                  -3
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#form_button_text - '[NEW]') = #form_button_text))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            },
+            {
+              "badge_hot": {
+                "type": "image",
+                "texture": "textures/ui/eco/badge_hot",
+                "size": [
+                  26,
+                  10
+                ],
+                "layer": 4,
+                "anchor_from": "top_right",
+                "anchor_to": "top_right",
+                "offset": [
+                  2,
+                  -3
+                ],
+                "bindings": [
+                  {
+                    "binding_name": "#form_button_text",
+                    "binding_type": "collection",
+                    "binding_collection_name": "form_buttons"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#form_button_text - '[HOT]') = #form_button_text))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
