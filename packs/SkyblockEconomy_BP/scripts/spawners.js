@@ -85,6 +85,13 @@ function loadAll() {
   }
 }
 
+/** How many spawners (counting stacks) a player owns. */
+export function ownedSpawnerCount(playerId) {
+  let n = 0;
+  for (const d of spawners.values()) if (d.owner === playerId) n += d.stack;
+  return n;
+}
+
 // ---- spawner items ---------------------------------------------------------
 export function makeSpawnerItem(mob, amount = 1, level = 1) {
   const stack = new ItemStack(SPAWNER_BLOCK, amount);

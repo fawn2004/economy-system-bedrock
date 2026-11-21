@@ -3,6 +3,7 @@
 //  * Change the server name shown above the menu: $eco_server_name / $eco_server_tag (in eco_screen)
 //  * Textures live in textures/ui/eco/ (regenerate with tools/generate_assets.py)
 //  * Title marker:  §e§c§o§<theme>§r   theme 1 red, 2 gold, 3 green, 4 blue, 5 purple, 6 orange
+//    + §d§b§r after it = dashboard layout (player card + option tiles, used by the main menu)
 //  * Button badges: put [NEW] or [HOT] anywhere in a button's text
 //  * Navigation: the first 4 buttons, tagged [NAV1]-[NAV4] (+ [NAVX] fillers), are hidden in
 //    the item grid and drawn by nav_row, a 4-cell grid shifted so the buttons are centred
@@ -309,7 +310,7 @@
             },
             {
               "binding_type": "view",
-              "source_property_name": "((((((#title_text - '§e§c§o§1§r') - '§e§c§o§2§r') - '§e§c§o§3§r') - '§e§c§o§4§r') - '§e§c§o§5§r') - '§e§c§o§6§r')",
+              "source_property_name": "(((((((#title_text - '§e§c§o§1§r') - '§e§c§o§2§r') - '§e§c§o§3§r') - '§e§c§o§4§r') - '§e§c§o§5§r') - '§e§c§o§6§r') - '§d§b§r')",
               "target_property_name": "#text"
             }
           ]
@@ -393,6 +394,30 @@
             },
             {
               "scroll@eco_form.scroll_area": {}
+            }
+          ],
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not (not ((#title_text - '§d§b§r') = #title_text)))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "dash_inner@eco_form.dash_inner": {
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§d§b§r') = #title_text))",
+              "target_property_name": "#visible"
             }
           ]
         }
@@ -1145,6 +1170,148 @@
             }
           ]
         }
+      }
+    ]
+  },
+  "dash_inner": {
+    "type": "stack_panel",
+    "orientation": "horizontal",
+    "size": [
+      "100% - 12px",
+      "100% - 12px"
+    ],
+    "controls": [
+      {
+        "card@eco_form.dash_card": {}
+      },
+      {
+        "gap": {
+          "type": "panel",
+          "size": [
+            6,
+            "100%"
+          ]
+        }
+      },
+      {
+        "options@eco_form.dash_grid": {}
+      }
+    ]
+  },
+  "dash_card": {
+    "type": "image",
+    "texture": "textures/ui/eco/tile",
+    "size": [
+      104,
+      "100%"
+    ],
+    "controls": [
+      {
+        "head": {
+          "type": "image",
+          "texture": "textures/ui/eco/icon_player",
+          "size": [
+            40,
+            40
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            8
+          ],
+          "layer": 2
+        }
+      },
+      {
+        "stats": {
+          "type": "image",
+          "texture": "textures/ui/eco/info",
+          "size": [
+            "100% - 10px",
+            "100% - 58px"
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            52
+          ],
+          "layer": 2,
+          "controls": [
+            {
+              "text": {
+                "type": "label",
+                "size": [
+                  "100% - 8px",
+                  "default"
+                ],
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  5
+                ],
+                "layer": 3,
+                "text_alignment": "center",
+                "shadow": true,
+                "color": [
+                  0.9,
+                  0.9,
+                  0.9
+                ],
+                "font_scale_factor": 0.85,
+                "text": "#form_text",
+                "bindings": [
+                  {
+                    "binding_name": "#form_text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "dash_grid": {
+    "type": "panel",
+    "size": [
+      "fill",
+      "100%"
+    ],
+    "controls": [
+      {
+        "grid": {
+          "type": "grid",
+          "size": [
+            "100%",
+            "default"
+          ],
+          "anchor_from": "top_left",
+          "anchor_to": "top_left",
+          "grid_item_template": "eco_form.dash_tile",
+          "grid_rescaling_type": "horizontal",
+          "collection_name": "form_buttons",
+          "bindings": [
+            {
+              "binding_name": "#form_button_length",
+              "binding_name_override": "#maximum_grid_items"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "dash_tile": {
+    "type": "panel",
+    "size": [
+      102,
+      54
+    ],
+    "controls": [
+      {
+        "button@eco_form.tile_button": {}
       }
     ]
   }

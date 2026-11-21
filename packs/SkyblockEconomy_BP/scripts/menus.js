@@ -26,6 +26,7 @@ import {
   makeSpawnerItem,
   mobIcon,
   mobName,
+  ownedSpawnerCount,
 } from "./spawners.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 
@@ -53,23 +54,28 @@ const priceColor = (player, cost) => (getBalance(player) >= cost ? "§a" : "§c"
 //  MAIN COMPASS MENU
 // ============================================================================
 export async function mainMenu(player) {
-  const bal = getBalance(player);
+  const rank = rankOf(player);
+  const heads = allHeadPoints(player).reduce((n, h) => n + h.points, 0);
   const tiles = [
-    { text: "§6§lSHOP", sub: "§7Buy items", icon: ICON.shop, onClick: () => shopMenu(player) },
+    { text: "§6§lSHOP", sub: "§7Buy any item", icon: ICON.shop, onClick: () => shopMenu(player) },
     { text: "§a§lSELL", sub: "§7Sell your loot", icon: ICON.sell, onClick: () => sellMenu(player) },
-    { text: "§e§lBALANCE", sub: `§a${fmtShort(bal)}`, icon: ICON.bank, onClick: () => balanceMenu(player) },
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
     { text: "§6§lBALTOP", sub: "§7Richest players", icon: ICON.top, onClick: () => topMenu(player, () => mainMenu(player)) },
   ];
   if (player.hasTag(CONFIG.adminTag)) {
     tiles.push({ text: "§c§lADMIN", sub: "§7Settings & tools", icon: ICON.admin, onClick: () => adminMenu(player) });
   }
-  await tileMenu(player, {
-    title: "SKYBLOCK MENU",
-    theme: "blue",
-    body: `§7Welcome back, §f${player.name}§7!    ${balLine(player)}`,
-    tiles,
-  });
+  // The player card on the left of the dashboard shows the form body
+  const card = [
+    `§l§f${clip(player.name, 14)}§r`,
+    "",
+    "§7Balance",
+    `§a${fmt(getBalance(player))}`,
+    `§7Rank §6${rank ? "#" + rank : "-"}`,
+    `§7Heads §d${heads}`,
+    `§7Spawners §b${ownedSpawnerCount(player.id)}`,
+  ].join("\n");
+  await tileMenu(player, { title: "SKYBLOCK MENU", theme: "blue", layout: "dashboard", body: card, tiles });
 }
 
 // ============================================================================

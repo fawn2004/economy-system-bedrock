@@ -21,8 +21,11 @@ export const ICON = {
   search: "textures/ui/eco/icon_search",
 };
 
-export function ecoTitle(text, theme = "red") {
-  return `${MARKER}§${THEME[theme] ?? 1}§r${text}`;
+// Extra marker after the theme = the dashboard layout (player card + tiles)
+const DASHBOARD = "§d§b§r";
+
+export function ecoTitle(text, theme = "red", layout) {
+  return `${MARKER}§${THEME[theme] ?? 1}§r${layout === "dashboard" ? DASHBOARD : ""}${text}`;
 }
 
 /**
@@ -31,8 +34,8 @@ export function ecoTitle(text, theme = "red") {
  * Each tile is "TEXT" on the first line, "sub" (smaller info) on the second.
  * Resolves to the clicked tile, or undefined if the menu was closed.
  */
-export async function tileMenu(player, { title, theme = "red", body = "", tiles }) {
-  const form = new ActionFormData().title(ecoTitle(title, theme)).body(body);
+export async function tileMenu(player, { title, theme = "red", body = "", tiles, layout }) {
+  const form = new ActionFormData().title(ecoTitle(title, theme, layout)).body(body);
   for (const t of tiles) {
     let text = t.text;
     if (t.sub) text += `\n§r${t.sub}`;
