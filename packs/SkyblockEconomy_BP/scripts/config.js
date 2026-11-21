@@ -248,16 +248,16 @@ export const SPAWNER_SETTINGS = {
   //   headChance = % chance a killed mob drops an enchanted head
   //   cost       = heads needed to reach this level (x the spawner's stack size)
   levels: [
-    { interval: 20, headChance: 2, cost: 0 },
-    { interval: 18, headChance: 2.5, cost: 5 },
-    { interval: 16, headChance: 3, cost: 10 },
-    { interval: 14, headChance: 4, cost: 20 },
-    { interval: 12, headChance: 5, cost: 35 },
-    { interval: 10, headChance: 6, cost: 55 },
-    { interval: 9, headChance: 7.5, cost: 80 },
-    { interval: 8, headChance: 9, cost: 110 },
-    { interval: 7, headChance: 11, cost: 150 },
-    { interval: 6, headChance: 13, cost: 200 },
+    { interval: 20, headChance: 10, cost: 0 }, //  1 in 10 kills
+    { interval: 18, headChance: 11, cost: 5 },
+    { interval: 16, headChance: 12, cost: 10 },
+    { interval: 14, headChance: 13.5, cost: 20 },
+    { interval: 12, headChance: 15, cost: 35 },
+    { interval: 10, headChance: 16.5, cost: 55 },
+    { interval: 9, headChance: 18, cost: 80 },
+    { interval: 8, headChance: 20, cost: 110 }, //  1 in 5 kills
+    { interval: 7, headChance: 22.5, cost: 150 },
+    { interval: 6, headChance: 25, cost: 200 }, //  1 in 4 kills
   ],
 };
 
