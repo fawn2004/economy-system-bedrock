@@ -4,6 +4,8 @@
 //  * Textures live in textures/ui/eco/ (regenerate with tools/generate_assets.py)
 //  * Title marker:  §e§c§o§<theme>§r   theme 1 red, 2 gold, 3 green, 4 blue, 5 purple, 6 orange
 //    + §d§b§r after it = dashboard layout (player card + option tiles, used by the main menu)
+//  * Controllers: tile_button / close_button are focusable (gamepad / arrow keys move
+//    between them, A presses) - keep focus_enabled on any new buttons.
 //  * Button badges: put [NEW] or [HOT] anywhere in a button's text
 //  * Navigation: the first 4 buttons, tagged [NAV1]-[NAV4] (+ [NAVX] fillers), are hidden in
 //    the item grid and drawn by nav_row, a 4-cell grid shifted so the buttons are centred
@@ -361,7 +363,11 @@
           ]
         }
       }
-    ]
+    ],
+    "focus_enabled": true,
+    "focus_magnet_enabled": true,
+    "focus_wrap_enabled": true,
+    "default_focus_precedence": 0
   },
   "body": {
     "type": "image",
@@ -1041,7 +1047,11 @@
           ]
         }
       }
-    ]
+    ],
+    "focus_enabled": true,
+    "focus_magnet_enabled": true,
+    "focus_wrap_enabled": true,
+    "default_focus_precedence": 1
   },
   "nav_row": {
     "type": "grid",
