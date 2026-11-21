@@ -602,8 +602,10 @@ def spawner_structure(mob):
         "Delay": (T.SHORT, 20),
         "MinSpawnDelay": (T.SHORT, 200),
         "MaxSpawnDelay": (T.SHORT, 800),
-        "SpawnCount": (T.SHORT, 4),
-        "MaxNearbyEntities": (T.SHORT, 6),
+        # Display only: the add-on's script does the spawning (stacking, upgrades,
+        # mob stacking, heads), so the vanilla spawner itself never spawns.
+        "SpawnCount": (T.SHORT, 0),
+        "MaxNearbyEntities": (T.SHORT, 0),
         "RequiredPlayerRange": (T.SHORT, 16),
         "SpawnRange": (T.SHORT, 4),
         "DisplayEntityWidth": (T.FLOAT, 0.8),
@@ -634,14 +636,106 @@ def spawner_structure(mob):
     return struct.pack("<b", T.COMPOUND) + _str("") + nbt_payload(T.COMPOUND, root)
 
 
-# Keep in sync with the "spawners" category in scripts/config.js
-SPAWNER_MOBS = ["pig", "cow", "chicken", "sheep", "zombie", "skeleton",
-                "spider", "creeper", "blaze", "iron_golem", "enderman", "witch"]
+# ---------------------------------------------------------------------------
+# Spawner mobs.  Keep in sync with SPAWNERS in scripts/config.js.
+#   mob id: (display name, head colours: skin, second colour, eyes, mouth/nose)
+# ---------------------------------------------------------------------------
+MOBS = {
+    "pig":            ("Pig",              "#f0a5a2", "#e08a87", "#2b1d1d", "#c86f6c"),
+    "cow":            ("Cow",              "#4a3426", "#f2f2f2", "#111111", "#b8b0a8"),
+    "chicken":        ("Chicken",          "#f7f7f7", "#e0e0e0", "#111111", "#f2a51b"),
+    "sheep":          ("Sheep",            "#ececec", "#d8c3a5", "#2b2b2b", "#b89d82"),
+    "rabbit":         ("Rabbit",           "#a77d55", "#e8d6c0", "#111111", "#f0a5a2"),
+    "mooshroom":      ("Mooshroom",        "#a62a2a", "#d9d9d9", "#111111", "#b8b0a8"),
+    "zombie":         ("Zombie",           "#4f8a3c", "#3c6e2e", "#1a1a1a", "#2f5524"),
+    "husk":           ("Husk",             "#b39a6b", "#8f7a52", "#1a1a1a", "#6e5c3c"),
+    "drowned":        ("Drowned",          "#4e9c9a", "#3a7a78", "#7ff0ff", "#2b5c5a"),
+    "skeleton":       ("Skeleton",         "#c9c9c9", "#a8a8a8", "#1a1a1a", "#555555"),
+    "stray":          ("Stray",            "#a9c3c6", "#7f9fa3", "#1a1a1a", "#4f6467"),
+    "wither_skeleton": ("Wither Skeleton", "#2b2b2b", "#1e1e1e", "#0a0a0a", "#5a5a5a"),
+    "spider":         ("Spider",           "#3a3330", "#2a2421", "#e53935", "#1a1414"),
+    "cave_spider":    ("Cave Spider",      "#1f4a52", "#16363c", "#e53935", "#0f2429"),
+    "creeper":        ("Creeper",          "#4fb03c", "#3c8f2e", "#111111", "#111111"),
+    "slime":          ("Slime",            "#7cd65f", "#5fb845", "#2a5a1f", "#2a5a1f"),
+    "magma_cube":     ("Magma Cube",       "#5a1f0f", "#e8662a", "#ffd23f", "#ff9a1f"),
+    "witch":          ("Witch",            "#b08c6c", "#5a2d7a", "#3fae3a", "#8f6a4c"),
+    "enderman":       ("Enderman",         "#161616", "#0f0f0f", "#d26bff", "#161616"),
+    "blaze":          ("Blaze",            "#f2c12e", "#c98d12", "#3a2500", "#e8702a"),
+    "ghast":          ("Ghast",            "#f2f2f2", "#d6d6d6", "#3a3a3a", "#9e1d1d"),
+    "guardian":       ("Guardian",         "#5f9e8a", "#e8902a", "#f2e6c8", "#3f6e60"),
+    "zombie_pigman":  ("Zombified Piglin", "#e39a92", "#5f8a3c", "#1a1a1a", "#b86f66"),
+    "iron_golem":     ("Iron Golem",       "#d6cfc4", "#b5ada0", "#8a1d1d", "#7a6a55"),
+}
+SPAWNER_MOBS = list(MOBS)
+
+HEAD_FACE = [
+    "................",
+    ".kkkkkkkkkkkkkk.",
+    ".kSSSSSSSSSSSSk.",
+    ".kSTSSSSSSSSTSk.",
+    ".kSSSSSSSSSSSSk.",
+    ".kSSSSSSSSSSSSk.",
+    ".kSEESSSSSSEESk.",
+    ".kSEESSSSSSEESk.",
+    ".kSSSSSSSSSSSSk.",
+    ".kSSSSMMMMSSSSk.",
+    ".kSSSSMMMMSSSSk.",
+    ".kSSSTSSSSTSSSk.",
+    ".kSSSSSSSSSSSSk.",
+    ".kTTTTTTTTTTTTk.",
+    ".kkkkkkkkkkkkkk.",
+    "................",
+]
+
+
+def make_heads():
+    """An 'Enchanted <Mob> Head' item (texture + item json) for every spawner mob."""
+    tex_dir = os.path.join(RP, "textures", "items", "eco_heads")
+    item_dir = os.path.join(BP, "items", "heads")
+    os.makedirs(item_dir, exist_ok=True)
+    tex_data = {"eco_menu_compass": {"textures": "textures/items/eco_menu_compass"}}
+    for mob, (name, skin, second, eyes, mouth) in MOBS.items():
+        cols = {"k": hexc("#161616"), "S": hexc(skin), "T": hexc(second), "E": hexc(eyes), "M": hexc(mouth)}
+        img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+        px = img.load()
+        for y, row in enumerate(HEAD_FACE):
+            for x, ch in enumerate(row):
+                if ch in cols:
+                    px[x, y] = cols[ch]
+        for (x, y) in ((0, 0), (15, 2), (14, 14)):  # enchant sparkles
+            px[x, y] = hexc("#d98cff")
+        save(img, os.path.join(tex_dir, mob + ".png"))
+        tex_data[f"eco_head_{mob}"] = {"textures": f"textures/items/eco_heads/{mob}"}
+        item = {
+            "format_version": "1.21.60",
+            "minecraft:item": {
+                "description": {"identifier": f"eco:head_{mob}", "menu_category": {"category": "items"}},
+                "components": {
+                    "minecraft:icon": f"eco_head_{mob}",
+                    "minecraft:display_name": {"value": f"§r§dEnchanted {name} Head"},
+                    "minecraft:max_stack_size": 64,
+                    "minecraft:glint": True,
+                },
+            },
+        }
+        with open(os.path.join(item_dir, f"head_{mob}.json"), "w") as f:
+            json.dump(item, f, indent=2, ensure_ascii=False)
+    with open(os.path.join(RP, "textures", "item_texture.json"), "w") as f:
+        json.dump({"resource_pack_name": "skyblock_economy", "texture_name": "atlas.items",
+                   "texture_data": tex_data}, f, indent=2)
+    with open(os.path.join(RP, "texts", "en_US.lang"), "w") as f:
+        f.write("item.eco:menu_compass=Menu Compass\npack.name=Skyblock Economy\npack.description=Custom economy menus\n")
+        for mob, (name, *_r) in MOBS.items():
+            f.write(f"item.eco:head_{mob}=Enchanted {name} Head\n")
+    import shutil
+    shutil.copy(os.path.join(RP, "texts", "en_US.lang"), os.path.join(RP, "texts", "en_GB.lang"))
 
 
 def make_structures():
     out = os.path.join(BP, "structures", "eco")
     os.makedirs(out, exist_ok=True)
+    for old in os.listdir(out):
+        os.remove(os.path.join(out, old))
     for mob in SPAWNER_MOBS:
         with open(os.path.join(out, "spawner_" + mob + ".mcstructure"), "wb") as f:
             f.write(spawner_structure(mob))
@@ -714,4 +808,5 @@ if __name__ == "__main__":
     make_close()
     make_pack_icons()
     make_structures()
+    make_heads()
     print("Assets generated.")

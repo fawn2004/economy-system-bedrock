@@ -23,8 +23,23 @@ Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration),
 
 - Money is stored on the `money` **scoreboard**, so it survives restarts and works on Realms.
 - **Kits** have per-player cooldowns and enchantments. Includes an **Island Kit** for new islands.
-- **Spawners** come pre-set to their mob. Mining one with **Silk Touch** gives it back.
+- **Spawners** for 24 mobs, with stacking, upgrades, mob stacking and enchanted heads (see below).
 - The compass is given on join, kept on death, and can't be dropped or stored.
+
+## Spawners
+
+| | |
+|---|---|
+| **Place** | Place a spawner item like a block. It spins its mob and you become its owner. |
+| **Stack** | Tap your spawner while holding the **same mob and level** to add it (sneak to add the whole stack). Up to 16 per block. |
+| **Menu** | Tap your spawner with an **empty hand** to see its info, upgrade it, add heads, add spawners from your inventory, or pick it up. |
+| **Mob stacking** | Spawned mobs merge into one mob with a counter (e.g. *Zombie x25*). Killing it drops loot for one and the counter goes down. |
+| **Enchanted heads** | Mobs from spawners can drop an **Enchanted <Mob> Head**. Selling heads (or *Add Heads* in the spawner menu) adds them to that mob's **head balance**, separate from money. |
+| **Upgrades** | Spend that mob's heads to level a spawner up (1 to 10): faster spawns and a better head chance each level. Heads only upgrade spawners of the same mob, and the cost is multiplied by the stack size. |
+| **Protection** | Spawners can't be mined or blown up. Only the owner (or an admin) can upgrade or pick them up. Picking up keeps the level and stack. |
+
+Head balances are under **Balance > Heads**. Spawn speeds, head chances, upgrade costs,
+stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js`.
 
 ## Prices: no crafting profit
 

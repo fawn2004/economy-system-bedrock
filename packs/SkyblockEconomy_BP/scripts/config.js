@@ -25,12 +25,6 @@ export const CONFIG = {
     slot: 8, // hotbar slot (0-8) it goes into if that slot is free
   },
 
-  spawners: {
-    // Breaking a shop-bought spawner gives it back only with a Silk Touch pickaxe.
-    // Set to false to always give it back when mined.
-    requireSilkTouch: true,
-  },
-
   pageSize: 20, // items per shop page
 };
 
@@ -201,24 +195,70 @@ export const KITS = [
 ];
 
 // ============================================================================
-//  SPAWNERS  { mob, name, icon, price, badge? }
-//  Each mob needs structures/eco/spawner_<mob>.mcstructure
-//  (tools/generate_assets.py makes them - add the mob to SPAWNER_MOBS there too)
+//  SPAWNERS  { mob, name, price, badge? }
+//  Each mob needs (made by tools/generate_assets.py - add it to MOBS there too):
+//    structures/eco/spawner_<mob>.mcstructure   and the eco:head_<mob> item
 // ============================================================================
+const H = "textures/items/eco_heads/";
 export const SPAWNERS = [
-  { mob: "pig", name: "Pig", icon: I + "porkchop_raw", price: 15000 },
-  { mob: "cow", name: "Cow", icon: I + "beef_raw", price: 20000 },
-  { mob: "chicken", name: "Chicken", icon: I + "feather", price: 15000 },
-  { mob: "sheep", name: "Sheep", icon: B + "wool_colored_white", price: 15000 },
-  { mob: "zombie", name: "Zombie", icon: I + "rotten_flesh", price: 25000 },
-  { mob: "skeleton", name: "Skeleton", icon: I + "bone", price: 30000 },
-  { mob: "spider", name: "Spider", icon: I + "spider_eye", price: 30000 },
-  { mob: "creeper", name: "Creeper", icon: I + "gunpowder", price: 45000 },
-  { mob: "witch", name: "Witch", icon: I + "redstone_dust", price: 60000 },
-  { mob: "enderman", name: "Enderman", icon: I + "ender_pearl", price: 75000 },
-  { mob: "blaze", name: "Blaze", icon: I + "blaze_rod", price: 100000, badge: "HOT" },
-  { mob: "iron_golem", name: "Iron Golem", icon: I + "iron_ingot", price: 250000, badge: "NEW" },
-];
+  { mob: "pig", name: "Pig", price: 15000 },
+  { mob: "chicken", name: "Chicken", price: 15000 },
+  { mob: "sheep", name: "Sheep", price: 15000 },
+  { mob: "rabbit", name: "Rabbit", price: 15000 },
+  { mob: "cow", name: "Cow", price: 20000 },
+  { mob: "mooshroom", name: "Mooshroom", price: 40000 },
+  { mob: "zombie", name: "Zombie", price: 25000 },
+  { mob: "husk", name: "Husk", price: 30000 },
+  { mob: "skeleton", name: "Skeleton", price: 30000 },
+  { mob: "spider", name: "Spider", price: 30000 },
+  { mob: "cave_spider", name: "Cave Spider", price: 30000 },
+  { mob: "drowned", name: "Drowned", price: 35000 },
+  { mob: "stray", name: "Stray", price: 35000 },
+  { mob: "creeper", name: "Creeper", price: 45000 },
+  { mob: "slime", name: "Slime", price: 50000 },
+  { mob: "witch", name: "Witch", price: 60000 },
+  { mob: "magma_cube", name: "Magma Cube", price: 60000 },
+  { mob: "enderman", name: "Enderman", price: 75000 },
+  { mob: "zombie_pigman", name: "Zombified Piglin", price: 80000 },
+  { mob: "blaze", name: "Blaze", price: 100000, badge: "HOT" },
+  { mob: "guardian", name: "Guardian", price: 120000 },
+  { mob: "ghast", name: "Ghast", price: 150000 },
+  { mob: "wither_skeleton", name: "Wither Skeleton", price: 200000, badge: "NEW" },
+  { mob: "iron_golem", name: "Iron Golem", price: 250000, badge: "HOT" },
+].map((s) => ({ icon: H + s.mob, ...s }));
+
+// ============================================================================
+//  SPAWNER BEHAVIOUR & UPGRADES
+//  Mobs from spawners can drop an "Enchanted <Mob> Head". Selling heads adds
+//  them to that mob's head balance (separate from money, per mob type), which
+//  is spent to upgrade spawners of that mob. Upgrade cost = cost x stack size.
+// ============================================================================
+export const SPAWNER_SETTINGS = {
+  maxStack: 16, // spawners that can be stacked into one block
+  mobsPerSpawn: 1, // mobs spawned per spawner in the stack, each cycle
+  activationRange: 24, // a player must be this close for a spawner to run
+  stackMobs: true, // merge spawned mobs into one mob with a counter
+  maxMobStack: 200, // most mobs one stacked mob can hold
+  mergeRadius: 8, // how close a stacked mob must be to the spawner to merge
+  maxLooseMobs: 12, // if stackMobs is false: most loose mobs per spawner
+
+  // Level 1 is what a new spawner starts at.
+  //   interval   = seconds between spawns
+  //   headChance = % chance a killed mob drops an enchanted head
+  //   cost       = heads needed to reach this level (x the spawner's stack size)
+  levels: [
+    { interval: 20, headChance: 2, cost: 0 },
+    { interval: 18, headChance: 2.5, cost: 5 },
+    { interval: 16, headChance: 3, cost: 10 },
+    { interval: 14, headChance: 4, cost: 20 },
+    { interval: 12, headChance: 5, cost: 35 },
+    { interval: 10, headChance: 6, cost: 55 },
+    { interval: 9, headChance: 7.5, cost: 80 },
+    { interval: 8, headChance: 9, cost: 110 },
+    { interval: 7, headChance: 11, cost: 150 },
+    { interval: 6, headChance: 13, cost: 200 },
+  ],
+};
 
 // Order of the tiles on the shop's front page. "blocks" opens the block
 // sub-categories; the rest are category ids from prices.js plus kits/spawners/search.

@@ -2,6 +2,80 @@
   "resource_pack_name": "skyblock_economy",
   "texture_name": "atlas.items",
   "texture_data": {
-    "eco_menu_compass": { "textures": "textures/items/eco_menu_compass" }
+    "eco_menu_compass": {
+      "textures": "textures/items/eco_menu_compass"
+    },
+    "eco_head_pig": {
+      "textures": "textures/items/eco_heads/pig"
+    },
+    "eco_head_cow": {
+      "textures": "textures/items/eco_heads/cow"
+    },
+    "eco_head_chicken": {
+      "textures": "textures/items/eco_heads/chicken"
+    },
+    "eco_head_sheep": {
+      "textures": "textures/items/eco_heads/sheep"
+    },
+    "eco_head_rabbit": {
+      "textures": "textures/items/eco_heads/rabbit"
+    },
+    "eco_head_mooshroom": {
+      "textures": "textures/items/eco_heads/mooshroom"
+    },
+    "eco_head_zombie": {
+      "textures": "textures/items/eco_heads/zombie"
+    },
+    "eco_head_husk": {
+      "textures": "textures/items/eco_heads/husk"
+    },
+    "eco_head_drowned": {
+      "textures": "textures/items/eco_heads/drowned"
+    },
+    "eco_head_skeleton": {
+      "textures": "textures/items/eco_heads/skeleton"
+    },
+    "eco_head_stray": {
+      "textures": "textures/items/eco_heads/stray"
+    },
+    "eco_head_wither_skeleton": {
+      "textures": "textures/items/eco_heads/wither_skeleton"
+    },
+    "eco_head_spider": {
+      "textures": "textures/items/eco_heads/spider"
+    },
+    "eco_head_cave_spider": {
+      "textures": "textures/items/eco_heads/cave_spider"
+    },
+    "eco_head_creeper": {
+      "textures": "textures/items/eco_heads/creeper"
+    },
+    "eco_head_slime": {
+      "textures": "textures/items/eco_heads/slime"
+    },
+    "eco_head_magma_cube": {
+      "textures": "textures/items/eco_heads/magma_cube"
+    },
+    "eco_head_witch": {
+      "textures": "textures/items/eco_heads/witch"
+    },
+    "eco_head_enderman": {
+      "textures": "textures/items/eco_heads/enderman"
+    },
+    "eco_head_blaze": {
+      "textures": "textures/items/eco_heads/blaze"
+    },
+    "eco_head_ghast": {
+      "textures": "textures/items/eco_heads/ghast"
+    },
+    "eco_head_guardian": {
+      "textures": "textures/items/eco_heads/guardian"
+    },
+    "eco_head_zombie_pigman": {
+      "textures": "textures/items/eco_heads/zombie_pigman"
+    },
+    "eco_head_iron_golem": {
+      "textures": "textures/items/eco_heads/iron_golem"
+    }
   }
 }

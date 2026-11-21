@@ -14,7 +14,7 @@ import {
   spaceFor,
 } from "./inventory.js";
 import { editItemMenu, editorMenu } from "./editor.js";
-import { makeSpawnerItem } from "./spawners.js";
+import { allHeadPoints, countHeads, depositHeads, makeSpawnerItem, mobIcon, mobName } from "./spawners.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 
 const U = "textures/ui/eco/";
@@ -321,7 +321,12 @@ async function spawnersMenu(player) {
     onClick: () => spawnerMenu(player, sp),
   }));
   tiles.push(backTile(() => shopMenu(player)));
-  await tileMenu(player, { title: "SPAWNERS", theme: "red", body: `§7Pre-set mob spawners    ${balLine(player)}`, tiles });
+  await tileMenu(player, {
+    title: "SPAWNERS",
+    theme: "red",
+    body: `§7Stack them, upgrade them with enchanted heads    ${balLine(player)}`,
+    tiles,
+  });
 }
 
 async function spawnerMenu(player, sp, msg) {
@@ -340,7 +345,7 @@ async function spawnerMenu(player, sp, msg) {
     theme: "red",
     body:
       `${msgLine(msg)}§f${sp.name} Spawner §7- §a${fmt(sp.price)} §7each\n` +
-      `§7Place it on your island - it's already set to §f${sp.name}§7.    ${balLine(player)}`,
+      `§7Place it on your island, then tap it with an empty hand to\n§7upgrade it with §dEnchanted ${sp.name} Heads§7.    ${balLine(player)}`,
     tiles,
   });
 }
@@ -387,6 +392,33 @@ export async function sellMenu(player, msg) {
       },
     });
   }
+  // Enchanted heads go into that mob's head balance, not money
+  const heads = [...countHeads(player)];
+  if (heads.length) {
+    tiles.push({
+      text: "§d§lSELL HEADS",
+      sub: `§7${heads.reduce((s, [, n]) => s + n, 0)} heads`,
+      icon: mobIcon(heads[0][0]),
+      onClick: () => {
+        const done = depositHeads(player);
+        const list = [...done].map(([m, n]) => `${n} ${mobName(m)}`).join(", ");
+        success(player, `Added heads to your head balance: ${list}`);
+        return sellMenu(player, `§dAdded to head balance: §f${list}`);
+      },
+    });
+    for (const [mob, n] of heads) {
+      tiles.push({
+        text: `§d${clip(mobName(mob) + " Head")}`,
+        sub: `§7x${n} §d+${n} heads`,
+        icon: mobIcon(mob),
+        onClick: () => {
+          const got = depositHeads(player, mob).get(mob) ?? 0;
+          success(player, `Added ${got} ${mobName(mob)} heads to your head balance.`);
+          return sellMenu(player, `§dAdded §f${got} ${mobName(mob)} §dheads to your head balance`);
+        },
+      });
+    }
+  }
   for (const [id, n] of sellable.slice(0, 40)) {
     const e = byId.get(id);
     tiles.push({
@@ -404,8 +436,8 @@ export async function sellMenu(player, msg) {
   }
   tiles.push(backTile(() => mainMenu(player)));
 
-  const info = sellable.length
-    ? "§7Click an item to sell all of it."
+  const info = sellable.length || heads.length
+    ? "§7Click an item to sell all of it. §dHeads §7go to your head balance."
     : "§7You have nothing that can be sold. §8(Kit & renamed items can't be sold)";
   await tileMenu(player, { title: "SELL", theme: "green", body: `${msgLine(msg)}${info}    ${balLine(player)}`, tiles });
 }
@@ -422,7 +454,23 @@ async function balanceMenu(player) {
     tiles: [
       { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => balanceMenu(player)) },
       { text: "§6§lBALTOP", sub: "§7Top 10", icon: ICON.top, onClick: () => topMenu(player, () => balanceMenu(player)) },
+      { text: "§d§lHEADS", sub: "§7Head balances", icon: ICON.bank, onClick: () => headsMenu(player) },
       backTile(() => mainMenu(player)),
+    ],
+  });
+}
+
+async function headsMenu(player) {
+  const heads = allHeadPoints(player);
+  await tileMenu(player, {
+    title: "HEAD BALANCE",
+    theme: "purple",
+    body: heads.length
+      ? "§7Heads can only upgrade spawners of the same mob.\n§8Get them from mobs your spawners spawn, then sell them."
+      : "§7You have no heads yet. Mobs from your spawners can drop §dEnchanted Heads§7 - sell them to add them here.",
+    tiles: [
+      ...heads.map((h) => ({ text: `§d${clip(mobName(h.mob))}`, sub: `§f${h.points} heads`, icon: mobIcon(h.mob), onClick: () => headsMenu(player) })),
+      backTile(() => balanceMenu(player)),
     ],
   });
 }
