@@ -458,7 +458,6 @@ export async function collectionsMenu(player, back) {
       { text: "§e§lFARMING", sub: `§7${commas(farm)} crops`, icon: "textures/ui/eco/icon_farming", onClick: () => colList(player, "crop", reopen) },
       { text: "§c§lCOMBAT", sub: `§7${commas(combat)} kills`, icon: "textures/ui/eco/icon_spawners", onClick: () => colList(player, "mob", reopen) },
       { text: "§6§lSKILL TOOLS", sub: "§7Levels & unlocks", icon: SKILL_TOOLS.farming.icon, onClick: () => toolsInfo(player, reopen) },
-      { text: "§c§lUPGRADE TOOL", sub: "§7Tool in your hand", icon: SKILL_TOOLS.slayer.icon, onClick: () => upgradeMenu(player, reopen) },
       { text: "§a§lENCHANTED", sub: "§7Crop balances", icon: "textures/items/wheat", onClick: () => enchantedMenu(player, reopen) },
       backTile(back),
     ],
@@ -541,6 +540,7 @@ function toolsInfo(player, back) {
       `§7Levels 1-${TOOL_LEVELS.freeLevels} are free; higher levels also need a total collection:\n` +
       `§e${SKILL_TOOLS.farming.name} §7(crops ${commas(collectionTotal(player, "farming"))}): ${fmtLevels("farming")}\n` +
       `§c${SKILL_TOOLS.slayer.name} §7(kills ${commas(collectionTotal(player, "slayer"))}): ${fmtLevels("slayer")}\n` +
+      `§fTo upgrade a tool: hold it, sneak and use it (tap / right-click).\n` +
       `§8Buy them in Shop > Skill Tools.`,
     tiles: [backTile(back)],
   });

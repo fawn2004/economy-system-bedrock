@@ -52,7 +52,7 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 - **Collections** (main menu): every crop and spawner mob has a counter with 5 tiers;
   each tier pays money once and adds a permanent bonus drop chance for that crop/mob.
   Hand-placed melons, pumpkins, sugar cane and cactus don't count.
-- **Upgrades:** sneak + use a skill tool (or Collections > Upgrade Tool) to open its upgrade
+- **Upgrades:** hold a skill tool, sneak and use it to open its upgrade
   menu. Slayer Sword: Sharpness, Looting, Fire Aspect, Head Hunter (+head chance), Plunder
   (+bonus drops), paid with money **and** heads of a set mob. Farming Hoe: Harvester
   (+bonus crops), Cultivating (+XP), Fortune, Efficiency, Replenish (auto-replant at any
