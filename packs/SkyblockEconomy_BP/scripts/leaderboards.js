@@ -152,6 +152,15 @@ function boardMenu(player, board, back) {
   });
 }
 
+/** -> { rank, total } of a player on a board ("skillAvg", "farming", "skill_mining", ...) */
+export function rankOn(player, boardId) {
+  const board = boards().find((b) => b.id === boardId);
+  if (!board) return { rank: undefined, total: 0 };
+  const list = ranking(board);
+  const i = list.findIndex((e) => e.id === player.id);
+  return { rank: i >= 0 ? i + 1 : undefined, total: list.length };
+}
+
 export function registerLeaderboards() {
   world.afterEvents.worldLoad.subscribe(() => {
     system.runInterval(() => {

@@ -143,6 +143,10 @@ money (`moneyPerLevel` x level) and raises the skill's perk by 2%.
 | Fishing | anything caught with a rod | double catch chance |
 | Combat | killing mobs | bonus mob drop chance |
 
+**My Progress** (top of the Skills menu) shows your skill average and server rank, every
+skill's XP to the next level, your 3 weakest skills with how to train them, the collections
+closest to their next reward, and the next Skill Tool unlocks.
+
 Blocks placed by players don't give XP. Tweak everything in **Admin > Settings > Skills**
 (max level, XP curve, money reward, action bar, each skill's perk / XP rate / on-off) and set
 players' levels in **Admin > Skills**. Defaults are `SKILLS` / `SKILL_SETTINGS` in `config.js`.
