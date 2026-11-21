@@ -9,7 +9,7 @@ import {
   search,
   setEdit,
 } from "./catalog.js";
-import { CONFIG } from "./config.js";
+import { CONFIG, SHOP_LAYOUT } from "./config.js";
 import { fmt } from "./economy.js";
 import { ICON, fail, pagedMenu, showForm, success, tileMenu } from "./ui.js";
 
@@ -76,15 +76,79 @@ async function searchItems(player, back) {
   return itemList(player, `SEARCH: ${clip(q.toUpperCase(), 14)}`, items, back);
 }
 
-async function browseCategories(player, back) {
-  const { categories, byCategory } = getCatalog();
-  const tiles = categories.map((c) => ({
-    text: `§e${clip(categoryPath(c.id), 20)}`,
-    sub: `§7${byCategory.get(c.id)?.length ?? 0} items`,
-    icon: c.icon,
-    onClick: () => itemList(player, c.name.toUpperCase(), byCategory.get(c.id) ?? [], () => browseCategories(player, back)),
-  }));
-  return pagedMenu(player, { title: "PICK A CATEGORY", theme: "red", body: "§7Which category do you want to edit?", tiles, back });
+// ---- category tree (same layout as the shop: Blocks > Wood > Stairs ...) ----
+function children(id) {
+  return getCatalog().categories.filter((c) => c.group === id);
+}
+
+function countDeep(id) {
+  const { byCategory } = getCatalog();
+  let n = byCategory.get(id)?.length ?? 0;
+  for (const c of children(id)) n += countDeep(c.id);
+  return n;
+}
+
+/**
+ * Lets the admin walk the category tree.
+ *   onPick(category) is called when a category is chosen.
+ *   pickLabel: text for the "choose this category" tile on categories that have sub-sections.
+ */
+function categoryTree(player, opts, nodeId = null, back = opts.back) {
+  const { categories } = getCatalog();
+  const reopen = () => categoryTree(player, opts, nodeId, back);
+  const tileFor = (c) => {
+    const subs = children(c.id);
+    const current = opts.current === c.id;
+    return {
+      text: `${current ? "§a" : "§e"}§l${clip(c.name.toUpperCase(), 16)}`,
+      sub: current ? "§aCurrent" : subs.length ? `§7${subs.length} sections` : `§7${countDeep(c.id)} items`,
+      icon: c.icon,
+      onClick: () => (subs.length ? categoryTree(player, opts, c.id, reopen) : opts.onPick(c, reopen)),
+    };
+  };
+
+  let tiles = [];
+  let title = opts.title;
+  if (nodeId === null) {
+    const order = [...SHOP_LAYOUT];
+    const top = categories.filter((c) => !c.group).sort((a, b) => rank(order, a.id) - rank(order, b.id));
+    tiles.push({
+      text: "§e§lBLOCKS",
+      sub: `§7${children("blocks").length} sections`,
+      icon: "textures/ui/eco/icon_blocks",
+      onClick: () => categoryTree(player, opts, "blocks", reopen),
+    });
+    tiles.push(...top.map(tileFor));
+  } else if (nodeId === "blocks") {
+    title = "BLOCKS";
+    tiles = children("blocks").map(tileFor);
+  } else {
+    const c = categories.find((x) => x.id === nodeId);
+    title = c.name.toUpperCase();
+    tiles.push({
+      text: `§a§l${opts.pickLabel}`,
+      sub: `§7In ${clip(c.name, 14)}`,
+      icon: ICON.confirm,
+      onClick: () => opts.onPick(c, reopen),
+    });
+    tiles.push(...children(c.id).map(tileFor));
+  }
+  return pagedMenu(player, { title, theme: "red", body: opts.body, tiles, back });
+}
+
+const rank = (order, id) => {
+  const i = order.indexOf(id);
+  return i < 0 ? 999 : i;
+};
+
+function browseCategories(player, back) {
+  return categoryTree(player, {
+    title: "BROWSE",
+    body: "§7Pick the category you want to edit.",
+    pickLabel: "OTHER ITEMS",
+    back,
+    onPick: (c, reopen) => itemList(player, c.name.toUpperCase(), getCatalog().byCategory.get(c.id) ?? [], reopen),
+  });
 }
 
 function itemList(player, title, items, back) {
@@ -131,17 +195,18 @@ export async function editItemMenu(player, id, back, msg) {
 }
 
 function moveMenu(player, e, itemBack, cancel) {
-  const tiles = getCatalog().categories.map((c) => ({
-    text: `${c.id === e.category ? "§a" : "§e"}${clip(categoryPath(c.id), 20)}`,
-    sub: c.id === e.category ? "§aCurrent" : "§7Move here",
-    icon: c.icon,
-    onClick: () => {
+  return categoryTree(player, {
+    title: `MOVE ${clip(e.name.toUpperCase(), 16)}`,
+    body: `§7Where should §f${e.name} §7go?  §8(now: ${categoryPath(e.category)})`,
+    pickLabel: "PUT HERE",
+    current: e.category,
+    back: cancel,
+    onPick: (c) => {
       setEdit(e.id, { cat: c.id === e.defaults.category ? undefined : c.id });
       success(player, `Moved ${e.name} to ${categoryPath(c.id)}.`);
       return editItemMenu(player, e.id, itemBack, `§aMoved to §f${categoryPath(c.id)}`);
     },
-  }));
-  return pagedMenu(player, { title: `MOVE ${clip(e.name.toUpperCase(), 16)}`, theme: "red", body: `§7Where should §f${e.name} §7go?`, tiles, back: cancel });
+  });
 }
 
 async function priceForm(player, e, reopen) {
