@@ -72,6 +72,10 @@ front of it on a loop. That block is part of the minion, so it can't be broken, 
 or pushed. Minions keep working while you're away and catch up when the area loads,
 until their storage is full.
 
+Minions mine **Enchanted** items (Enchanted Cobblestone, Coal, Raw Iron, Raw Gold, Lapis,
+Redstone, Diamond, Emerald) worth **10x** the normal sell price (`lootMultiplier`). They sell
+in the minion's Sell All or the normal Sell menu, and can't be crafted.
+
 Tap a minion (or its block) to:
 - **Collect** its items or **Sell All** of them at shop prices
 - **Upgrade:** Speed (faster), Luck (chance of the next tier's block), Fortune (extra

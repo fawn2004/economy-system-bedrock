@@ -14,7 +14,7 @@ import {
   spaceFor,
 } from "./inventory.js";
 import { settingsMenu } from "./adminSettings.js";
-import { makeMinionItem } from "./minions.js";
+import { isMinionLoot, lootIcon, lootName, lootSellPrice, makeMinionItem } from "./minions.js";
 import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
 import { clearGroundItems } from "./groundItems.js";
@@ -481,9 +481,11 @@ function buySpawner(player, sp, amount) {
 // ============================================================================
 export async function sellMenu(player, msg) {
   const { byId } = getCatalog();
-  const sellable = [...countPlain(player)].filter(([id]) => sellPrice(id) > 0);
-  sellable.sort((a, b) => sellPrice(b[0]) * b[1] - sellPrice(a[0]) * a[1]);
-  const total = sellable.reduce((sum, [id, n]) => sum + sellPrice(id) * n, 0);
+  // shop items + enchanted minion items (worth lootMultiplier x)
+  const priceOf = (id) => sellPrice(id) || lootSellPrice(id);
+  const sellable = [...countPlain(player)].filter(([id]) => priceOf(id) > 0);
+  sellable.sort((a, b) => priceOf(b[0]) * b[1] - priceOf(a[0]) * a[1]);
+  const total = sellable.reduce((sum, [id, n]) => sum + priceOf(id) * n, 0);
 
   const tiles = [];
   if (sellable.length) {
@@ -494,7 +496,7 @@ export async function sellMenu(player, msg) {
       badge: "HOT",
       onClick: () => {
         let earned = 0;
-        for (const [id] of sellable) earned += sellPrice(id) * removeAllPlain(player, id);
+        for (const [id] of sellable) earned += priceOf(id) * removeAllPlain(player, id);
         addMoney(player, earned);
         success(player, `Sold everything for ${fmt(earned)}.`);
         return sellMenu(player, `§aSold everything for §f${fmt(earned)}§a!`);
@@ -557,16 +559,17 @@ export async function sellMenu(player, msg) {
   }
   for (const [id, n] of sellable.slice(0, 40)) {
     const e = byId.get(id);
+    const name = e?.name ?? (isMinionLoot(id) ? lootName(id) : pretty(id));
     tiles.push({
-      text: `§f${clip(e?.name ?? pretty(id))}`,
-      sub: `§7x${n} §a${fmtShort(sellPrice(id) * n)}`,
-      icon: e?.icon ?? ICON.coin,
+      text: `${isMinionLoot(id) ? "§b" : "§f"}${clip(name)}`,
+      sub: `§7x${n} §a${fmtShort(priceOf(id) * n)}`,
+      icon: e?.icon ?? (isMinionLoot(id) ? lootIcon(id) : ICON.coin),
       onClick: () => {
         const sold = removeAllPlain(player, id);
-        const earned = sold * sellPrice(id);
+        const earned = sold * priceOf(id);
         addMoney(player, earned);
-        success(player, `Sold ${sold}x ${e?.name ?? pretty(id)} for ${fmt(earned)}.`);
-        return sellMenu(player, `§aSold §f${sold}x ${e?.name ?? pretty(id)} §afor §f${fmt(earned)}`);
+        success(player, `Sold ${sold}x ${name} for ${fmt(earned)}.`);
+        return sellMenu(player, `§aSold §f${sold}x ${name} §afor §f${fmt(earned)}`);
       },
     });
   }

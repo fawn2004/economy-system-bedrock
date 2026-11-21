@@ -1112,6 +1112,49 @@ def make_minions():
             f.write("action.interact.eco_minion=Open Minion\n")
 
 
+# Enchanted minion loot (worth more than the normal item). id: (base item, name, texture)
+MINION_LOOT = {
+    "cobblestone": ("Cobblestone", "textures/blocks/cobblestone"),
+    "coal": ("Coal", "textures/items/coal"),
+    "raw_iron": ("Raw Iron", "textures/items/raw_iron"),
+    "raw_gold": ("Raw Gold", "textures/items/raw_gold"),
+    "lapis_lazuli": ("Lapis Lazuli", "textures/items/dye_powder_blue"),
+    "redstone": ("Redstone", "textures/items/redstone_dust"),
+    "diamond": ("Diamond", "textures/items/diamond"),
+    "emerald": ("Emerald", "textures/items/emerald"),
+}
+
+
+def make_minion_loot():
+    item_dir = os.path.join(BP, "items", "minion_loot")
+    os.makedirs(item_dir, exist_ok=True)
+    tex_path = os.path.join(RP, "textures", "item_texture.json")
+    data = json.load(open(tex_path))
+    lang = []
+    for base, (name, tex) in MINION_LOOT.items():
+        data["texture_data"][f"eco_mloot_{base}"] = {"textures": tex}
+        item = {
+            "format_version": "1.21.60",
+            "minecraft:item": {
+                "description": {"identifier": f"eco:mloot_{base}", "menu_category": {"category": "items"}},
+                "components": {
+                    "minecraft:icon": f"eco_mloot_{base}",
+                    "minecraft:display_name": {"value": f"§r§bEnchanted {name}"},
+                    "minecraft:max_stack_size": 64,
+                    "minecraft:glint": True,
+                },
+            },
+        }
+        with open(os.path.join(item_dir, f"mloot_{base}.json"), "w") as f:
+            json.dump(item, f, indent=2, ensure_ascii=False)
+        lang.append(f"item.eco:mloot_{base}=Enchanted {name}\n")
+    with open(tex_path, "w") as f:
+        json.dump(data, f, indent=2)
+    for l in ("en_US", "en_GB"):
+        with open(os.path.join(RP, "texts", l + ".lang"), "a") as f:
+            f.writelines(lang)
+
+
 if __name__ == "__main__":
     make_shapes()
     make_frames()
@@ -1123,4 +1166,5 @@ if __name__ == "__main__":
     make_heads()
     make_enchanted_crops()
     make_minions()
+    make_minion_loot()
     print("Assets generated.")

@@ -537,6 +537,7 @@ export const MINION_SETTINGS = {
   baseInterval: 30, // seconds per block at Speed level 0
   baseStorage: 64, // items it holds at Storage level 0
   maxPerPlayer: 10,
+  lootMultiplier: 10, // minions mine "Enchanted" items worth this many times the normal sell price
 };
 // "Better Blocks" tiers, in order. cost = money to upgrade INTO this tier.
 // drops: what it mines; the Luck upgrade gives the NEXT tier's drop instead.

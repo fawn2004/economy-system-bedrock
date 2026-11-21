@@ -109,6 +109,30 @@
     },
     "eco_mining_minion": {
       "textures": "textures/items/eco_mining_minion"
+    },
+    "eco_mloot_cobblestone": {
+      "textures": "textures/blocks/cobblestone"
+    },
+    "eco_mloot_coal": {
+      "textures": "textures/items/coal"
+    },
+    "eco_mloot_raw_iron": {
+      "textures": "textures/items/raw_iron"
+    },
+    "eco_mloot_raw_gold": {
+      "textures": "textures/items/raw_gold"
+    },
+    "eco_mloot_lapis_lazuli": {
+      "textures": "textures/items/dye_powder_blue"
+    },
+    "eco_mloot_redstone": {
+      "textures": "textures/items/redstone_dust"
+    },
+    "eco_mloot_diamond": {
+      "textures": "textures/items/diamond"
+    },
+    "eco_mloot_emerald": {
+      "textures": "textures/items/emerald"
     }
   }
 }

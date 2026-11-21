@@ -29,6 +29,36 @@ const lvl = (d, id) => d.ups?.[id] ?? 0;
 const isAdmin = (p) => p.hasTag(CONFIG.adminTag);
 const canManage = (p, d) => !d.owner || d.owner === p.id || isAdmin(p);
 
+// ---- enchanted loot (worth lootMultiplier x the normal item) -------------------
+const LOOT = "eco:mloot_";
+export const lootIdFor = (base) => LOOT + base.replace(/^minecraft:/, "");
+export const baseFromLoot = (id) => (id?.startsWith(LOOT) ? "minecraft:" + id.slice(LOOT.length) : undefined);
+export const isMinionLoot = (id) => !!baseFromLoot(id);
+export const lootName = (id) => "Enchanted " + pretty(baseFromLoot(id) ?? id);
+export const lootIcon = (id) => {
+  const b = baseFromLoot(id)?.replace("minecraft:", "");
+  return b ? ({ cobblestone: "textures/blocks/cobblestone", lapis_lazuli: "textures/items/dye_powder_blue", redstone: "textures/items/redstone_dust" }[b] ?? `textures/items/${b}`) : ICON.coin;
+};
+/** Sell price of one enchanted minion item (0 if it isn't one). */
+export const lootSellPrice = (id) => {
+  const base = baseFromLoot(id);
+  return base ? sellPrice(base) * (MS.lootMultiplier ?? 1) : 0;
+};
+/** Sell price of one stored item (stored as the base item id). */
+const storedValue = (base) => sellPrice(base) * (MS.lootMultiplier ?? 1);
+
+function lootStack(base, amount) {
+  try {
+    const s = new ItemStack(lootIdFor(base), 1);
+    s.amount = Math.min(s.maxAmount, amount);
+    return s;
+  } catch {
+    const s = new ItemStack(base, 1); // no enchanted version: give the normal item
+    s.amount = Math.min(s.maxAmount, amount);
+    return s;
+  }
+}
+
 // ---- stats -----------------------------------------------------------------
 export const intervalOf = (d) => Math.max(1, MS.baseInterval * Math.max(0.1, 1 - (lvl(d, "speed") * (upDef("speed")?.perLevel ?? 0)) / 100));
 export const capacityOf = (d) => MS.baseStorage + lvl(d, "storage") * (upDef("storage")?.perLevel ?? 0);
@@ -218,12 +248,13 @@ export async function minionMenu(player, e, msg) {
   const next = MINION_TIERS[(d.tier ?? 0) + 1];
   const total = stored(d), cap = capacityOf(d);
   const reopen = (m) => minionMenu(player, e, m);
-  const worth = Object.entries(d.store ?? {}).reduce((n, [id, c]) => n + sellPrice(id) * c, 0);
+  const worth = Object.entries(d.store ?? {}).reduce((n, [id, c]) => n + storedValue(id) * c, 0);
   const lines = [
     msg,
     `§eMining Minion §7- §f${t.name} §8(tier ${(d.tier ?? 0) + 1}/${MINION_TIERS.length})   §7Owner: §f${d.ownerName ?? "?"}`,
     `§7Mines every §f${intervalOf(d).toFixed(1)}s   §7Storage: ${total >= cap ? "§c" : "§f"}${commas(total)}/${commas(cap)}`,
     `§7Luck: §a${luckOf(d)}%${next ? ` §8(${next.name})` : ""}   §7Fortune: §a+${fortuneOf(d)}%`,
+    `§bMines enchanted items worth ${MS.lootMultiplier ?? 1}x the normal price!`,
   ].filter(Boolean);
   const tiles = [];
   if (manage) {
@@ -262,12 +293,11 @@ function collect(player, e) {
     while (left > 0 && !full) {
       let stack;
       try {
-        stack = new ItemStack(id, 1);
+        stack = lootStack(id, left);
       } catch {
         left = 0;
         break;
       }
-      stack.amount = Math.min(stack.maxAmount, left);
       const want = stack.amount;
       const overflow = inv.addItem(stack);
       const got = want - (overflow?.amount ?? 0);
@@ -290,7 +320,7 @@ function sellAll(player, e) {
   if (!d || !canManage(player, d)) return "§cThis isn't your minion.";
   let earned = 0, sold = 0;
   for (const [id, count] of Object.entries(d.store ?? {})) {
-    const price = sellPrice(id);
+    const price = storedValue(id);
     if (price <= 0) continue;
     earned += price * count;
     sold += count;
@@ -316,8 +346,7 @@ function pickUp(player, e) {
     let left = count;
     while (left > 0) {
       try {
-        const s = new ItemStack(id, 1);
-        s.amount = Math.min(s.maxAmount, left);
+        const s = lootStack(id, left);
         left -= s.amount;
         drop(s);
       } catch {

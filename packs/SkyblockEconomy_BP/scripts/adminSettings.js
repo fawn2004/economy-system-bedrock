@@ -780,11 +780,12 @@ function minionSettings(player, back, msg) {
             .textField("Seconds per block (before Speed upgrades)", String(M.baseInterval), { defaultValue: String(M.baseInterval) })
             .textField("Storage (before Storage upgrades)", String(M.baseStorage), { defaultValue: String(M.baseStorage) })
             .textField("Max minions per player", String(M.maxPerPlayer), { defaultValue: String(M.maxPerPlayer) })
+            .textField("Enchanted loot value (x the normal sell price)", String(M.lootMultiplier ?? 1), { defaultValue: String(M.lootMultiplier ?? 1) })
         );
         if (!v) return reopen();
-        const price = num(v[0], 0), iv = num(v[1], 1, true), st = num(v[2], 1), mx = num(v[3], 0);
-        if ([price, iv, st, mx].some((x) => x === undefined)) return reopen("§cCheck the numbers.");
-        setMinionSettings({ price, baseInterval: iv, baseStorage: st, maxPerPlayer: mx });
+        const price = num(v[0], 0), iv = num(v[1], 1, true), st = num(v[2], 1), mx = num(v[3], 0), mult = num(v[4], 0, true);
+        if ([price, iv, st, mx, mult].some((x) => x === undefined)) return reopen("§cCheck the numbers.");
+        setMinionSettings({ price, baseInterval: iv, baseStorage: st, maxPerPlayer: mx, lootMultiplier: mult });
         return reopen("§aMinion settings saved.");
       },
     },
@@ -833,7 +834,7 @@ function minionSettings(player, back, msg) {
     theme: "orange",
     body:
       (msg ? msg + "\n" : "") +
-      `§7Price §a${fmt(M.price)}§7, §f${M.baseInterval}s §7per block, storage §f${M.baseStorage}§7, max §f${M.maxPerPlayer} §7per player.`,
+      `§7Price §a${fmt(M.price)}§7, §f${M.baseInterval}s §7per block, storage §f${M.baseStorage}§7, max §f${M.maxPerPlayer} §7per player,\n§7loot worth §b${M.lootMultiplier ?? 1}x§7.`,
     tiles,
   });
 }
