@@ -16,7 +16,13 @@ const KITS_KEY = "eco:kits";
 
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const DEFAULTS = {
-  config: { startingBalance: CONFIG.startingBalance, currency: CONFIG.currency, pageSize: CONFIG.pageSize, giveOnJoin: CONFIG.compass.giveOnJoin },
+  config: {
+    startingBalance: CONFIG.startingBalance,
+    currency: CONFIG.currency,
+    pageSize: CONFIG.pageSize,
+    giveOnJoin: CONFIG.compass.giveOnJoin,
+    itemStacking: clone(CONFIG.itemStacking),
+  },
   spawner: clone(SPAWNER_SETTINGS),
   mobs: Object.fromEntries(SPAWNERS.map((s) => [s.mob, { price: s.price, disabled: false }])),
   kits: clone(KITS),
@@ -54,6 +60,7 @@ function applyConfig() {
   CONFIG.currency = c.currency;
   CONFIG.pageSize = c.pageSize;
   CONFIG.compass.giveOnJoin = c.giveOnJoin;
+  CONFIG.itemStacking = { ...DEFAULTS.config.itemStacking, ...(c.itemStacking ?? {}) };
 }
 
 function applySpawner() {

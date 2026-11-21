@@ -15,6 +15,7 @@ import {
 } from "./inventory.js";
 import { settingsMenu } from "./adminSettings.js";
 import { editItemMenu, editorMenu } from "./editor.js";
+import { clearGroundItems } from "./groundItems.js";
 import { allHeadPoints, countHeads, depositHeads, makeSpawnerItem, mobIcon, mobName } from "./spawners.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 
@@ -578,6 +579,16 @@ async function adminMenu(player) {
     sub: "§7Move/hide items",
     icon: ICON.shop,
     onClick: () => editorMenu(player, () => adminMenu(player)),
+  });
+  tiles.push({
+    text: "§c§lCLEAR ITEMS",
+    sub: "§7Remove floor items",
+    icon: ICON.cancel,
+    onClick: () => {
+      const n = clearGroundItems();
+      success(player, `Removed ${n} dropped item piles.`);
+      return adminMenu(player);
+    },
   });
   tiles.push({
     text: "§e§lCOMPASS",

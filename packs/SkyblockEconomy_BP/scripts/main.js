@@ -3,6 +3,7 @@ import { CONFIG } from "./config.js";
 import { getBalance, initEconomy, rememberName, setBalance } from "./economy.js";
 import { COMPASS_ID, giveCompass } from "./inventory.js";
 import { mainMenu } from "./menus.js";
+import { registerGroundItems } from "./groundItems.js";
 import { applySavedSettings } from "./settings.js";
 import { registerSpawners } from "./spawners.js";
 
@@ -45,3 +46,4 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, sourceEntity }) => {
 });
 
 registerSpawners();
+registerGroundItems();

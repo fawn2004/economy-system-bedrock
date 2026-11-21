@@ -110,6 +110,11 @@ Edits are saved in the world, so they survive restarts **and add-on updates**.
 - **Kits:** edit name/price/cooldown/badge, hide, delete, **set a kit's items from your
   inventory** (enchantments and names kept), or create a **new kit** from your inventory.
 - **Economy:** starting money, currency symbol, items per shop page, compass on join.
+- **Floor items:** dropped stackable items within a few blocks merge into one pile with a
+  counter (e.g. *Bone x500*) to reduce lag. Non-stackable items are left alone. Piles give
+  64 at a time when picked up and despawn after 5 minutes like normal. Turn it on/off,
+  change the distance or hide the counter here. **Admin > Clear Items** removes all
+  dropped items in loaded areas.
 - **Reset** buttons go back to the defaults in `config.js`.
 
 Settings are saved in the world, so they work on Realms and survive add-on updates.

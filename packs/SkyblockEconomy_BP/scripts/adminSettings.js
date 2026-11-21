@@ -67,6 +67,12 @@ export async function settingsMenu(player, back, msg) {
       { text: "§e§lKITS", sub: `§7${KITS.length} kits`, icon: "textures/ui/eco/icon_kits", onClick: () => kitsSettings(player, () => reopen()) },
       { text: "§a§lECONOMY", sub: "§7Money & menus", icon: ICON.bank, onClick: () => economyForm(player, reopen) },
       {
+        text: "§6§lFLOOR ITEMS",
+        sub: CONFIG.itemStacking.enabled ? "§aStacking on" : "§cStacking off",
+        icon: ICON.coin,
+        onClick: () => floorItemsForm(player, reopen),
+      },
+      {
         text: "§4§lRESET ALL",
         sub: "§7Back to defaults",
         icon: ICON.cancel,
@@ -99,6 +105,23 @@ async function economyForm(player, reopen) {
   setConfig({ startingBalance: start, currency, pageSize: Math.min(40, page), giveOnJoin: !!v[3] });
   success(player, "Economy settings saved.");
   return reopen("§aEconomy settings saved.");
+}
+
+// ---- dropped items --------------------------------------------------------------
+async function floorItemsForm(player, reopen) {
+  const c = CONFIG.itemStacking;
+  const v = await modal(player, "Floor items", (f) =>
+    f
+      .toggle("Merge dropped stackable items into piles (less lag)", { defaultValue: c.enabled })
+      .textField("Merge distance (blocks, 1-16)", String(c.radius), { defaultValue: String(c.radius) })
+      .toggle('Show the count above piles (e.g. "Bone x500")', { defaultValue: c.showCount })
+  );
+  if (!v) return reopen();
+  const radius = num(v[1], 1);
+  if (radius === undefined) return reopen("§cThe merge distance must be a whole number.");
+  setConfig({ itemStacking: { enabled: !!v[0], radius: Math.min(16, radius), showCount: !!v[2] } });
+  success(player, "Floor item settings saved.");
+  return reopen("§aFloor item settings saved.");
 }
 
 // ---- spawners -----------------------------------------------------------------

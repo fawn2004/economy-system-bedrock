@@ -26,6 +26,14 @@ export const CONFIG = {
   },
 
   pageSize: 20, // items per shop page
+
+  // Dropped stackable items near each other merge into one pile with a counter
+  // (less lag). Items that don't stack are left alone.
+  itemStacking: {
+    enabled: true,
+    radius: 4, // blocks
+    showCount: true, // show "Bone x500" above piles
+  },
 };
 
 // Menu colour themes (must match the header textures in the resource pack)
