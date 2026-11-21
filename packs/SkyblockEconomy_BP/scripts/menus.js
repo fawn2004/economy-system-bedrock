@@ -279,11 +279,15 @@ function buyItem(player, item, amount) {
 
 // ---- minions -------------------------------------------------------------------
 async function minionShop(player, msg) {
-  const tiles = MINION_TYPES.map((t) => ({
-    text: `§e§l${t.name.toUpperCase()}`,
-    sub: `${priceColor(player, t.price)}${fmtShort(t.price)}`,
-    icon: U + "icon_minion",
-    onClick: () => minionTypeShop(player, t),
+  const kinds = [
+    { id: "mining", name: "MINING MINIONS", sub: "§7Ores & rare blocks", icon: "textures/items/diamond_pickaxe" },
+    { id: "farming", name: "FARMING MINIONS", sub: "§7Crops & plants", icon: "textures/items/diamond_hoe" },
+  ];
+  const tiles = kinds.map((k) => ({
+    text: `§e§l${k.name}`,
+    sub: k.sub,
+    icon: k.icon,
+    onClick: () => minionKindShop(player, k),
   }));
   tiles.push(backTile(() => shopMenu(player)));
   await tileMenu(player, {
@@ -291,20 +295,31 @@ async function minionShop(player, msg) {
     theme: "orange",
     body:
       (msg ? msg + "\n" : "") +
-      "§7Minions mine enchanted items for you - even while you're away.\n" +
+      "§7Minions collect enchanted items for you - even while you're away.\n" +
       `§7Better minions cost more but pay a lot more. §8(max ${MINION_SETTINGS.maxPerPlayer} each)    ${balLine(player)}`,
     tiles,
   });
 }
 
-async function minionTypeShop(player, t, msg) {
+async function minionKindShop(player, k) {
+  const tiles = MINION_TYPES.filter((t) => (t.kind ?? "mining") === k.id).map((t) => ({
+    text: `§e§l${t.name.toUpperCase()}`,
+    sub: `${priceColor(player, t.price)}${fmtShort(t.price)}`,
+    icon: U + "icon_minion",
+    onClick: () => minionTypeShop(player, t, undefined, () => minionKindShop(player, k)),
+  }));
+  tiles.push(backTile(() => minionShop(player)));
+  await tileMenu(player, { title: k.name, theme: "orange", body: `§7Pick a minion to see what it collects.    ${balLine(player)}`, tiles });
+}
+
+async function minionTypeShop(player, t, msg, back = () => minionShop(player)) {
   const first = t.tiers[0], last = t.tiers[t.tiers.length - 1];
   await tileMenu(player, {
     title: `${t.name.toUpperCase()} MINION`,
     theme: "orange",
     body:
       (msg ? msg + "\n" : "") +
-      `§7Mines: §f${t.tiers.map((x) => x.name).join(" §7> §f")}\n` +
+      `§7${t.kind === "farming" ? "Farms" : "Mines"}: §f${t.tiers.map((x) => x.name).join(" §7> §f")}\n` +
       `§7Each item sells for §a${fmt(lootSellPrice(lootIdFor(first.drop[0])))} §7(${first.name}) up to §a${fmt(lootSellPrice(lootIdFor(last.drop[0])))} §7(${last.name})\n` +
       `§7Upgrades cost §fx${t.upgradeMultiplier}§7.    ${balLine(player)}`,
     tiles: [
@@ -315,16 +330,16 @@ async function minionTypeShop(player, t, msg) {
         onClick: () => {
           if (getBalance(player) < t.price) {
             fail(player, `You need ${fmt(t.price)}.`);
-            return minionTypeShop(player, t, `§cYou need §f${fmt(t.price)}§c.`);
+            return minionTypeShop(player, t, `§cYou need §f${fmt(t.price)}§c.`, back);
           }
-          if (freeSlots(player) < 1) return minionTypeShop(player, t, "§cYou need a free inventory slot!");
+          if (freeSlots(player) < 1) return minionTypeShop(player, t, "§cYou need a free inventory slot!", back);
           takeMoney(player, t.price);
           player.getComponent("minecraft:inventory").container.addItem(makeMinionItem(0, {}, t.id));
           success(player, `Bought a ${t.name} Minion! Place it on a block.`);
-          return minionTypeShop(player, t, `§aBought a §f${t.name} Minion§a! Place it on a block.`);
+          return minionTypeShop(player, t, `§aBought a §f${t.name} Minion§a! Place it on a block.`, back);
         },
       },
-      backTile(() => minionShop(player)),
+      backTile(back),
     ],
   });
 }

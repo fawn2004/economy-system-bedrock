@@ -4,7 +4,7 @@
     "description": {
       "identifier": "eco:minion_block",
       "materials": {
-        "default": "entity"
+        "default": "entity_alphatest"
       },
       "textures": {
         "t0": "textures/blocks/cobblestone",
@@ -46,10 +46,51 @@
         "t36": "textures/blocks/mob_spawner",
         "t37": "textures/blocks/beacon",
         "t38": "textures/blocks/netherite_block",
-        "t39": "textures/blocks/beacon"
+        "t39": "textures/blocks/beacon",
+        "t40": "textures/blocks/wheat_stage_7",
+        "t41": "textures/blocks/carrots_stage_3",
+        "t42": "textures/blocks/potatoes_stage_3",
+        "t43": "textures/blocks/beetroots_stage_3",
+        "t44": "textures/blocks/reeds",
+        "t45": "textures/blocks/cactus_side",
+        "t46": "textures/blocks/melon_side",
+        "t47": "textures/blocks/pumpkin_side",
+        "t48": "textures/blocks/nether_wart_stage_2",
+        "t49": "textures/blocks/crimson_fungus",
+        "t50": "textures/blocks/warped_fungus",
+        "t51": "textures/blocks/crimson_roots",
+        "t52": "textures/blocks/warped_roots",
+        "t53": "textures/blocks/weeping_vines_base",
+        "t54": "textures/blocks/twisting_vines_base",
+        "t55": "textures/blocks/warped_wart_block",
+        "t56": "textures/blocks/sweet_berry_bush_stage3",
+        "t57": "textures/blocks/cave_vines_head_berries",
+        "t58": "textures/blocks/cocoa_stage_2",
+        "t59": "textures/blocks/bamboo_block",
+        "t60": "textures/blocks/kelp_a",
+        "t61": "textures/blocks/sea_pickle",
+        "t62": "textures/blocks/waterlily",
+        "t63": "textures/blocks/big_dripleaf_top",
+        "t64": "textures/blocks/gold_block",
+        "t65": "textures/blocks/melon_side",
+        "t66": "textures/blocks/honeycomb",
+        "t67": "textures/blocks/honey_side",
+        "t68": "textures/blocks/pumpkin_side",
+        "t69": "textures/blocks/cocoa_stage_2",
+        "t70": "textures/blocks/cake_side",
+        "t71": "textures/blocks/gold_block",
+        "t72": "textures/blocks/torchflower",
+        "t73": "textures/blocks/pitcher_crop_side",
+        "t74": "textures/blocks/spore_blossom",
+        "t75": "textures/blocks/chorus_flower",
+        "t76": "textures/blocks/flower_wither_rose",
+        "t77": "textures/blocks/turtle_egg_not_cracked",
+        "t78": "textures/blocks/sniffer_egg_not_cracked_top",
+        "t79": "textures/blocks/gold_block"
       },
       "geometry": {
-        "default": "geometry.eco_minion_block"
+        "cube": "geometry.eco_minion_block",
+        "cross": "geometry.eco_minion_crop"
       },
       "render_controllers": [
         "controller.render.eco_minion_block"

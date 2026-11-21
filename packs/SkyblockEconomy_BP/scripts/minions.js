@@ -109,7 +109,7 @@ export function makeMinionItem(tier = 0, ups = {}, type = "mining") {
   s.nameTag = `§r§e${mt.name} Minion §7[${t.name}]`;
   const lines = [`§7Tier: §f${t.name} §8(${tier + 1}/${mt.tiers.length})`];
   for (const u of MINION_UPGRADES) if (ups[u.id]) lines.push(`§7${u.name}: §a${roman(ups[u.id])}`);
-  lines.push("§7Place it on a block - it mines", "§7the way you are facing.");
+  lines.push(`§7Place it on a block - it ${mt.kind === "farming" ? "farms" : "mines"}`, "§7the way you are facing.");
   lines.push(`${TAG}${tier}:${MINION_UPGRADES.map((u) => ups[u.id] ?? 0).join(",")}:${mt.id}`);
   s.setLore(lines);
   return s;
@@ -249,7 +249,7 @@ function tick() {
           const near = players.some((p) => p.dimension.id === id && (p.location.x - e.location.x) ** 2 + (p.location.z - e.location.z) ** 2 < 256);
           if (near) {
             const at = { x: r.d.block.x + 0.5, y: r.d.block.y + 0.5, z: r.d.block.z + 0.5 };
-            e.dimension.playSound("dig.stone", at, { volume: 0.6 });
+            e.dimension.playSound(typeOf(r.d).kind === "farming" ? "dig.grass" : "dig.stone", at, { volume: 0.6 });
             try {
               e.dimension.spawnParticle("minecraft:critical_hit_emitter", at);
             } catch {}
@@ -277,7 +277,7 @@ export async function minionMenu(player, e, msg) {
   const lines = [
     msg,
     `§e${typeOf(d).name} Minion §7- §f${t.name} §8(tier ${(d.tier ?? 0) + 1}/${tiersOf(d).length})   §7Owner: §f${d.ownerName ?? "?"}`,
-    `§7Mines every §f${intervalOf(d).toFixed(1)}s   §7Storage: ${total >= cap ? "§c" : "§f"}${commas(total)}/${commas(cap)}`,
+    `§7${typeOf(d).kind === "farming" ? "Farms" : "Mines"} every §f${intervalOf(d).toFixed(1)}s   §7Storage: ${total >= cap ? "§c" : "§f"}${commas(total)}/${commas(cap)}`,
     `§7Luck: §a${luckOf(d)}%${next ? ` §8(${next.name})` : ""}   §7Fortune: §a+${fortuneOf(d)}%`,
     `§bEach Enchanted ${t.name} sells for ${fmt(storedValue(t.drop[0]))}!`,
   ].filter(Boolean);
@@ -404,7 +404,7 @@ function upgradesMenu(player, e, back, msg) {
   });
   const next = nextTierOf(d);
   tiles.push({
-    text: "§d§lBETTER BLOCKS",
+    text: typeOf(d).kind === "farming" ? "§d§lBETTER CROPS" : "§d§lBETTER BLOCKS",
     sub: next ? `§7> ${getBalance(player) >= next.cost ? "§a" : "§c"}${next.name}` : "§aMAX",
     icon: "textures/items/diamond_pickaxe",
     onClick: () => tierDetail(player, e, () => reopen()),
@@ -462,7 +462,7 @@ function tierDetail(player, e, back, msg) {
   const next = nextTierOf(d);
   const lines = [
     msg,
-    `§fBetter Blocks   §7Now mining: §f${cur.name} §8(worth ${fmt(storedValue(cur.drop[0]))} each)`,
+    `§fBetter ${typeOf(d).kind === "farming" ? "Crops" : "Blocks"}   §7Now ${typeOf(d).kind === "farming" ? "farming" : "mining"}: §f${cur.name} §8(worth ${fmt(storedValue(cur.drop[0]))} each)`,
     tiersOf(d).map((t, i) => `${i <= (d.tier ?? 0) ? "§a" : "§8"}${t.name}`).join(" §7> "),
   ];
   const tiles = [];
@@ -489,8 +489,9 @@ function tierDetail(player, e, back, msg) {
           world.getEntity(fresh.blockId)?.triggerEvent(`eco:set_tier_${tierOf(fresh).display ?? 0}`);
         } catch {}
         player.playSound("random.levelup");
-        success(player, `Your minion now mines ${nt.name}!`);
-        return reopen(`§aYour minion now mines §f${nt.name}§a!`);
+        const verb = typeOf(fresh).kind === "farming" ? "farms" : "mines";
+        success(player, `Your minion now ${verb} ${nt.name}!`);
+        return reopen(`§aYour minion now ${verb} §f${nt.name}§a!`);
       },
     });
   } else lines.push("§aThis minion mines the best block!");

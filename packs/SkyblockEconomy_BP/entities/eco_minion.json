@@ -31,6 +31,31 @@
         "minecraft:variant": {
           "value": 4
         }
+      },
+      "eco:skin_5": {
+        "minecraft:variant": {
+          "value": 5
+        }
+      },
+      "eco:skin_6": {
+        "minecraft:variant": {
+          "value": 6
+        }
+      },
+      "eco:skin_7": {
+        "minecraft:variant": {
+          "value": 7
+        }
+      },
+      "eco:skin_8": {
+        "minecraft:variant": {
+          "value": 8
+        }
+      },
+      "eco:skin_9": {
+        "minecraft:variant": {
+          "value": 9
+        }
       }
     },
     "events": {
@@ -45,7 +70,12 @@
             "eco:skin_1",
             "eco:skin_2",
             "eco:skin_3",
-            "eco:skin_4"
+            "eco:skin_4",
+            "eco:skin_5",
+            "eco:skin_6",
+            "eco:skin_7",
+            "eco:skin_8",
+            "eco:skin_9"
           ]
         }
       },
@@ -60,7 +90,12 @@
             "eco:skin_0",
             "eco:skin_2",
             "eco:skin_3",
-            "eco:skin_4"
+            "eco:skin_4",
+            "eco:skin_5",
+            "eco:skin_6",
+            "eco:skin_7",
+            "eco:skin_8",
+            "eco:skin_9"
           ]
         }
       },
@@ -75,7 +110,12 @@
             "eco:skin_0",
             "eco:skin_1",
             "eco:skin_3",
-            "eco:skin_4"
+            "eco:skin_4",
+            "eco:skin_5",
+            "eco:skin_6",
+            "eco:skin_7",
+            "eco:skin_8",
+            "eco:skin_9"
           ]
         }
       },
@@ -90,7 +130,12 @@
             "eco:skin_0",
             "eco:skin_1",
             "eco:skin_2",
-            "eco:skin_4"
+            "eco:skin_4",
+            "eco:skin_5",
+            "eco:skin_6",
+            "eco:skin_7",
+            "eco:skin_8",
+            "eco:skin_9"
           ]
         }
       },
@@ -105,7 +150,112 @@
             "eco:skin_0",
             "eco:skin_1",
             "eco:skin_2",
-            "eco:skin_3"
+            "eco:skin_3",
+            "eco:skin_5",
+            "eco:skin_6",
+            "eco:skin_7",
+            "eco:skin_8",
+            "eco:skin_9"
+          ]
+        }
+      },
+      "eco:set_skin_5": {
+        "add": {
+          "component_groups": [
+            "eco:skin_5"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_1",
+            "eco:skin_2",
+            "eco:skin_3",
+            "eco:skin_4",
+            "eco:skin_6",
+            "eco:skin_7",
+            "eco:skin_8",
+            "eco:skin_9"
+          ]
+        }
+      },
+      "eco:set_skin_6": {
+        "add": {
+          "component_groups": [
+            "eco:skin_6"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_1",
+            "eco:skin_2",
+            "eco:skin_3",
+            "eco:skin_4",
+            "eco:skin_5",
+            "eco:skin_7",
+            "eco:skin_8",
+            "eco:skin_9"
+          ]
+        }
+      },
+      "eco:set_skin_7": {
+        "add": {
+          "component_groups": [
+            "eco:skin_7"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_1",
+            "eco:skin_2",
+            "eco:skin_3",
+            "eco:skin_4",
+            "eco:skin_5",
+            "eco:skin_6",
+            "eco:skin_8",
+            "eco:skin_9"
+          ]
+        }
+      },
+      "eco:set_skin_8": {
+        "add": {
+          "component_groups": [
+            "eco:skin_8"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_1",
+            "eco:skin_2",
+            "eco:skin_3",
+            "eco:skin_4",
+            "eco:skin_5",
+            "eco:skin_6",
+            "eco:skin_7",
+            "eco:skin_9"
+          ]
+        }
+      },
+      "eco:set_skin_9": {
+        "add": {
+          "component_groups": [
+            "eco:skin_9"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:skin_0",
+            "eco:skin_1",
+            "eco:skin_2",
+            "eco:skin_3",
+            "eco:skin_4",
+            "eco:skin_5",
+            "eco:skin_6",
+            "eco:skin_7",
+            "eco:skin_8"
           ]
         }
       }

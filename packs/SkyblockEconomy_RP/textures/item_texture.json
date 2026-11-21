@@ -229,6 +229,126 @@
     },
     "eco_mloot_nether_star": {
       "textures": "textures/items/nether_star"
+    },
+    "eco_mloot_wheat": {
+      "textures": "textures/items/wheat"
+    },
+    "eco_mloot_carrot": {
+      "textures": "textures/items/carrot"
+    },
+    "eco_mloot_potato": {
+      "textures": "textures/items/potato"
+    },
+    "eco_mloot_beetroot": {
+      "textures": "textures/items/beetroot"
+    },
+    "eco_mloot_sugar_cane": {
+      "textures": "textures/items/reeds"
+    },
+    "eco_mloot_cactus": {
+      "textures": "textures/blocks/cactus_side"
+    },
+    "eco_mloot_melon_slice": {
+      "textures": "textures/items/melon"
+    },
+    "eco_mloot_pumpkin": {
+      "textures": "textures/blocks/pumpkin_side"
+    },
+    "eco_mloot_nether_wart": {
+      "textures": "textures/items/nether_wart"
+    },
+    "eco_mloot_crimson_fungus": {
+      "textures": "textures/blocks/crimson_fungus"
+    },
+    "eco_mloot_warped_fungus": {
+      "textures": "textures/blocks/warped_fungus"
+    },
+    "eco_mloot_crimson_roots": {
+      "textures": "textures/blocks/crimson_roots"
+    },
+    "eco_mloot_warped_roots": {
+      "textures": "textures/blocks/warped_roots"
+    },
+    "eco_mloot_weeping_vines": {
+      "textures": "textures/blocks/weeping_vines_base"
+    },
+    "eco_mloot_twisting_vines": {
+      "textures": "textures/blocks/twisting_vines_base"
+    },
+    "eco_mloot_warped_wart_block": {
+      "textures": "textures/blocks/warped_wart_block"
+    },
+    "eco_mloot_sweet_berries": {
+      "textures": "textures/items/sweet_berries"
+    },
+    "eco_mloot_glow_berries": {
+      "textures": "textures/items/glow_berries"
+    },
+    "eco_mloot_cocoa_beans": {
+      "textures": "textures/items/dye_powder_brown"
+    },
+    "eco_mloot_bamboo": {
+      "textures": "textures/blocks/bamboo_block"
+    },
+    "eco_mloot_kelp": {
+      "textures": "textures/blocks/kelp_a"
+    },
+    "eco_mloot_sea_pickle": {
+      "textures": "textures/items/sea_pickle"
+    },
+    "eco_mloot_waterlily": {
+      "textures": "textures/blocks/carried_waterlily"
+    },
+    "eco_mloot_big_dripleaf": {
+      "textures": "textures/blocks/big_dripleaf_top"
+    },
+    "eco_mloot_golden_carrot": {
+      "textures": "textures/items/carrot_golden"
+    },
+    "eco_mloot_glistering_melon_slice": {
+      "textures": "textures/items/melon_speckled"
+    },
+    "eco_mloot_honeycomb": {
+      "textures": "textures/items/honeycomb"
+    },
+    "eco_mloot_honey_bottle": {
+      "textures": "textures/items/honey_bottle"
+    },
+    "eco_mloot_pumpkin_pie": {
+      "textures": "textures/items/pumpkin_pie"
+    },
+    "eco_mloot_cookie": {
+      "textures": "textures/items/cookie"
+    },
+    "eco_mloot_cake": {
+      "textures": "textures/items/cake"
+    },
+    "eco_mloot_golden_apple": {
+      "textures": "textures/items/apple_golden"
+    },
+    "eco_mloot_torchflower": {
+      "textures": "textures/blocks/torchflower"
+    },
+    "eco_mloot_pitcher_plant": {
+      "textures": "textures/blocks/pitcher_crop_side"
+    },
+    "eco_mloot_spore_blossom": {
+      "textures": "textures/blocks/spore_blossom"
+    },
+    "eco_mloot_chorus_flower": {
+      "textures": "textures/blocks/chorus_flower"
+    },
+    "eco_mloot_wither_rose": {
+      "textures": "textures/blocks/flower_wither_rose"
+    },
+    "eco_mloot_turtle_egg": {
+      "textures": "textures/items/turtle_egg"
+    },
+    "eco_mloot_sniffer_egg": {
+      "textures": "textures/blocks/sniffer_egg_not_cracked_top"
+    },
+    "eco_mloot_enchanted_golden_apple": {
+      "textures": "textures/items/apple_golden"
     }
   }
 }

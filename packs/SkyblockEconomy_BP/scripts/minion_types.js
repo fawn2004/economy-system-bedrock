@@ -6,6 +6,7 @@ export const MINION_TYPES = [
   {
     "id": "mining",
     "name": "Mining",
+    "kind": "mining",
     "price": 25000,
     "upgradeMultiplier": 1,
     "skin": 0,
@@ -87,6 +88,7 @@ export const MINION_TYPES = [
   {
     "id": "nether",
     "name": "Nether",
+    "kind": "mining",
     "price": 150000,
     "upgradeMultiplier": 3,
     "skin": 1,
@@ -176,6 +178,7 @@ export const MINION_TYPES = [
   {
     "id": "obsidian",
     "name": "Obsidian",
+    "kind": "mining",
     "price": 2000000,
     "upgradeMultiplier": 8,
     "skin": 2,
@@ -265,6 +268,7 @@ export const MINION_TYPES = [
   {
     "id": "end",
     "name": "End",
+    "kind": "mining",
     "price": 10000000,
     "upgradeMultiplier": 20,
     "skin": 3,
@@ -354,6 +358,7 @@ export const MINION_TYPES = [
   {
     "id": "bedrock",
     "name": "Bedrock",
+    "kind": "mining",
     "price": 50000000,
     "upgradeMultiplier": 50,
     "skin": 4,
@@ -436,6 +441,456 @@ export const MINION_TYPES = [
         ],
         "cost": 550000000,
         "display": 39,
+        "value": 450000
+      }
+    ]
+  },
+  {
+    "id": "crop",
+    "name": "Crop",
+    "kind": "farming",
+    "price": 25000,
+    "upgradeMultiplier": 1,
+    "skin": 5,
+    "tiers": [
+      {
+        "name": "Wheat",
+        "drop": [
+          "minecraft:wheat",
+          1
+        ],
+        "cost": 0,
+        "display": 40,
+        "value": 10
+      },
+      {
+        "name": "Carrot",
+        "drop": [
+          "minecraft:carrot",
+          1
+        ],
+        "cost": 50000,
+        "display": 41,
+        "value": 25
+      },
+      {
+        "name": "Potato",
+        "drop": [
+          "minecraft:potato",
+          1
+        ],
+        "cost": 150000,
+        "display": 42,
+        "value": 50
+      },
+      {
+        "name": "Beetroot",
+        "drop": [
+          "minecraft:beetroot",
+          1
+        ],
+        "cost": 350000,
+        "display": 43,
+        "value": 90
+      },
+      {
+        "name": "Sugar Cane",
+        "drop": [
+          "minecraft:sugar_cane",
+          1
+        ],
+        "cost": 600000,
+        "display": 44,
+        "value": 150
+      },
+      {
+        "name": "Cactus",
+        "drop": [
+          "minecraft:cactus",
+          1
+        ],
+        "cost": 1000000,
+        "display": 45,
+        "value": 250
+      },
+      {
+        "name": "Melon",
+        "drop": [
+          "minecraft:melon_slice",
+          1
+        ],
+        "cost": 2500000,
+        "display": 46,
+        "value": 400
+      },
+      {
+        "name": "Pumpkin",
+        "drop": [
+          "minecraft:pumpkin",
+          1
+        ],
+        "cost": 5000000,
+        "display": 47,
+        "value": 700
+      }
+    ]
+  },
+  {
+    "id": "netherfarm",
+    "name": "Nether Farm",
+    "kind": "farming",
+    "price": 150000,
+    "upgradeMultiplier": 3,
+    "skin": 6,
+    "tiers": [
+      {
+        "name": "Nether Wart",
+        "drop": [
+          "minecraft:nether_wart",
+          1
+        ],
+        "cost": 0,
+        "display": 48,
+        "value": 1200
+      },
+      {
+        "name": "Crimson Fungus",
+        "drop": [
+          "minecraft:crimson_fungus",
+          1
+        ],
+        "cost": 300000,
+        "display": 49,
+        "value": 1500
+      },
+      {
+        "name": "Warped Fungus",
+        "drop": [
+          "minecraft:warped_fungus",
+          1
+        ],
+        "cost": 600000,
+        "display": 50,
+        "value": 1900
+      },
+      {
+        "name": "Crimson Roots",
+        "drop": [
+          "minecraft:crimson_roots",
+          1
+        ],
+        "cost": 1200000,
+        "display": 51,
+        "value": 2400
+      },
+      {
+        "name": "Warped Roots",
+        "drop": [
+          "minecraft:warped_roots",
+          1
+        ],
+        "cost": 2000000,
+        "display": 52,
+        "value": 3000
+      },
+      {
+        "name": "Weeping Vines",
+        "drop": [
+          "minecraft:weeping_vines",
+          1
+        ],
+        "cost": 3500000,
+        "display": 53,
+        "value": 3800
+      },
+      {
+        "name": "Twisting Vines",
+        "drop": [
+          "minecraft:twisting_vines",
+          1
+        ],
+        "cost": 6000000,
+        "display": 54,
+        "value": 4800
+      },
+      {
+        "name": "Warped Wart",
+        "drop": [
+          "minecraft:warped_wart_block",
+          1
+        ],
+        "cost": 10000000,
+        "display": 55,
+        "value": 6000
+      }
+    ]
+  },
+  {
+    "id": "garden",
+    "name": "Garden",
+    "kind": "farming",
+    "price": 2000000,
+    "upgradeMultiplier": 8,
+    "skin": 7,
+    "tiers": [
+      {
+        "name": "Sweet Berries",
+        "drop": [
+          "minecraft:sweet_berries",
+          1
+        ],
+        "cost": 0,
+        "display": 56,
+        "value": 7000
+      },
+      {
+        "name": "Glow Berries",
+        "drop": [
+          "minecraft:glow_berries",
+          1
+        ],
+        "cost": 3000000,
+        "display": 57,
+        "value": 8500
+      },
+      {
+        "name": "Cocoa Beans",
+        "drop": [
+          "minecraft:cocoa_beans",
+          1
+        ],
+        "cost": 5000000,
+        "display": 58,
+        "value": 10000
+      },
+      {
+        "name": "Bamboo",
+        "drop": [
+          "minecraft:bamboo",
+          1
+        ],
+        "cost": 8000000,
+        "display": 59,
+        "value": 12500
+      },
+      {
+        "name": "Kelp",
+        "drop": [
+          "minecraft:kelp",
+          1
+        ],
+        "cost": 12000000,
+        "display": 60,
+        "value": 15000
+      },
+      {
+        "name": "Sea Pickle",
+        "drop": [
+          "minecraft:sea_pickle",
+          1
+        ],
+        "cost": 18000000,
+        "display": 61,
+        "value": 18000
+      },
+      {
+        "name": "Lily Pad",
+        "drop": [
+          "minecraft:waterlily",
+          1
+        ],
+        "cost": 26000000,
+        "display": 62,
+        "value": 22000
+      },
+      {
+        "name": "Big Dripleaf",
+        "drop": [
+          "minecraft:big_dripleaf",
+          1
+        ],
+        "cost": 40000000,
+        "display": 63,
+        "value": 27000
+      }
+    ]
+  },
+  {
+    "id": "golden",
+    "name": "Golden Harvest",
+    "kind": "farming",
+    "price": 10000000,
+    "upgradeMultiplier": 20,
+    "skin": 8,
+    "tiers": [
+      {
+        "name": "Golden Carrot",
+        "drop": [
+          "minecraft:golden_carrot",
+          1
+        ],
+        "cost": 0,
+        "display": 64,
+        "value": 30000
+      },
+      {
+        "name": "Glistering Melon",
+        "drop": [
+          "minecraft:glistering_melon_slice",
+          1
+        ],
+        "cost": 12000000,
+        "display": 65,
+        "value": 36000
+      },
+      {
+        "name": "Honeycomb",
+        "drop": [
+          "minecraft:honeycomb",
+          1
+        ],
+        "cost": 18000000,
+        "display": 66,
+        "value": 43000
+      },
+      {
+        "name": "Honey Bottle",
+        "drop": [
+          "minecraft:honey_bottle",
+          1
+        ],
+        "cost": 26000000,
+        "display": 67,
+        "value": 52000
+      },
+      {
+        "name": "Pumpkin Pie",
+        "drop": [
+          "minecraft:pumpkin_pie",
+          1
+        ],
+        "cost": 38000000,
+        "display": 68,
+        "value": 62000
+      },
+      {
+        "name": "Cookie",
+        "drop": [
+          "minecraft:cookie",
+          1
+        ],
+        "cost": 55000000,
+        "display": 69,
+        "value": 75000
+      },
+      {
+        "name": "Cake",
+        "drop": [
+          "minecraft:cake",
+          1
+        ],
+        "cost": 80000000,
+        "display": 70,
+        "value": 90000
+      },
+      {
+        "name": "Golden Apple",
+        "drop": [
+          "minecraft:golden_apple",
+          1
+        ],
+        "cost": 120000000,
+        "display": 71,
+        "value": 110000
+      }
+    ]
+  },
+  {
+    "id": "mythic",
+    "name": "Mythic Grove",
+    "kind": "farming",
+    "price": 50000000,
+    "upgradeMultiplier": 50,
+    "skin": 9,
+    "tiers": [
+      {
+        "name": "Torchflower",
+        "drop": [
+          "minecraft:torchflower",
+          1
+        ],
+        "cost": 0,
+        "display": 72,
+        "value": 125000
+      },
+      {
+        "name": "Pitcher Plant",
+        "drop": [
+          "minecraft:pitcher_plant",
+          1
+        ],
+        "cost": 60000000,
+        "display": 73,
+        "value": 150000
+      },
+      {
+        "name": "Spore Blossom",
+        "drop": [
+          "minecraft:spore_blossom",
+          1
+        ],
+        "cost": 90000000,
+        "display": 74,
+        "value": 180000
+      },
+      {
+        "name": "Chorus Flower",
+        "drop": [
+          "minecraft:chorus_flower",
+          1
+        ],
+        "cost": 130000000,
+        "display": 75,
+        "value": 215000
+      },
+      {
+        "name": "Wither Rose",
+        "drop": [
+          "minecraft:wither_rose",
+          1
+        ],
+        "cost": 190000000,
+        "display": 76,
+        "value": 260000
+      },
+      {
+        "name": "Turtle Egg",
+        "drop": [
+          "minecraft:turtle_egg",
+          1
+        ],
+        "cost": 270000000,
+        "display": 77,
+        "value": 310000
+      },
+      {
+        "name": "Sniffer Egg",
+        "drop": [
+          "minecraft:sniffer_egg",
+          1
+        ],
+        "cost": 380000000,
+        "display": 78,
+        "value": 375000
+      },
+      {
+        "name": "Enchanted Golden Apple",
+        "drop": [
+          "minecraft:enchanted_golden_apple",
+          1
+        ],
+        "cost": 550000000,
+        "display": 79,
         "value": 450000
       }
     ]

@@ -82,6 +82,19 @@ cheapest block is worth more than the previous minion's best.
 
 Upgrades cost x1 / x3 / x8 / x20 / x50 for each minion.
 
+**Farming minions** (straw hats, swing a hoe; crops are shown as plants) match the mining
+minion at the same price and value:
+
+![Farming minions](docs/farming_minions.png)
+
+| Minion | Price | Farms | Each item worth |
+|---|---|---|---|
+| Crop | $25k | Wheat > Carrot > Potato > Beetroot > Sugar Cane > Cactus > Melon > Pumpkin | $10 - $700 |
+| Nether Farm | $150k | Nether Wart > Crimson Fungus > Warped Fungus > Crimson Roots > Warped Roots > Weeping Vines > Twisting Vines > Warped Wart | $1,200 - $6,000 |
+| Garden | $2M | Sweet Berries > Glow Berries > Cocoa > Bamboo > Kelp > Sea Pickle > Lily Pad > Big Dripleaf | $7,000 - $27,000 |
+| Golden Harvest | $10M | Golden Carrot > Glistering Melon > Honeycomb > Honey Bottle > Pumpkin Pie > Cookie > Cake > Golden Apple | $30,000 - $110,000 |
+| Mythic Grove | $50M | Torchflower > Pitcher Plant > Spore Blossom > Chorus Flower > Wither Rose > Turtle Egg > Sniffer Egg > Enchanted Golden Apple | $125,000 - $450,000 |
+
 Place a minion on a block and it mines the block in
 front of it on a loop. That block is part of the minion, so it can't be broken, blown up
 or pushed. Minions keep working while you're away and catch up when the area loads,

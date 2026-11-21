@@ -919,20 +919,115 @@ MINION_TYPES = [
          ("Nether Star", "nether_star", 1, 450000, 550000000, B + "beacon", I + "nether_star"),
      ]},
 ]
-DISPLAY_TEXTURES = [t[5] for mt in MINION_TYPES for t in mt["tiers"]]
+# Farming minions: same prices / values / costs as the mining minion at the same
+# position, so every type earns about the same. "cross" = drawn as a plant.
+X = "cross"
+MINION_TYPES += [
+    {"id": "crop", "name": "Crop", "kind": "farming", "price": 25000, "upgradeMultiplier": 1,
+     "skin": ("#e3c770", "#b39a4c", "#3f8f3a", "#2c6629"), "tool": "#cfcfcf",
+     "tiers": [
+         ("Wheat", "wheat", 1, 10, 0, B + "wheat_stage_7", I + "wheat", X),
+         ("Carrot", "carrot", 1, 25, 50000, B + "carrots_stage_3", I + "carrot", X),
+         ("Potato", "potato", 1, 50, 150000, B + "potatoes_stage_3", I + "potato", X),
+         ("Beetroot", "beetroot", 1, 90, 350000, B + "beetroots_stage_3", I + "beetroot", X),
+         ("Sugar Cane", "sugar_cane", 1, 150, 600000, B + "reeds", I + "reeds", X),
+         ("Cactus", "cactus", 1, 250, 1000000, B + "cactus_side", B + "cactus_side"),
+         ("Melon", "melon_slice", 1, 400, 2500000, B + "melon_side", I + "melon"),
+         ("Pumpkin", "pumpkin", 1, 700, 5000000, B + "pumpkin_side", B + "pumpkin_side"),
+     ]},
+    {"id": "netherfarm", "name": "Nether Farm", "kind": "farming", "price": 150000, "upgradeMultiplier": 3,
+     "skin": ("#d9a441", "#a8782a", "#7a1f2b", "#521520"), "tool": "#5a5a5a",
+     "tiers": [
+         ("Nether Wart", "nether_wart", 1, 1200, 0, B + "nether_wart_stage_2", I + "nether_wart", X),
+         ("Crimson Fungus", "crimson_fungus", 1, 1500, 300000, B + "crimson_fungus", B + "crimson_fungus", X),
+         ("Warped Fungus", "warped_fungus", 1, 1900, 600000, B + "warped_fungus", B + "warped_fungus", X),
+         ("Crimson Roots", "crimson_roots", 1, 2400, 1200000, B + "crimson_roots", B + "crimson_roots", X),
+         ("Warped Roots", "warped_roots", 1, 3000, 2000000, B + "warped_roots", B + "warped_roots", X),
+         ("Weeping Vines", "weeping_vines", 1, 3800, 3500000, B + "weeping_vines_base", B + "weeping_vines_base", X),
+         ("Twisting Vines", "twisting_vines", 1, 4800, 6000000, B + "twisting_vines_base", B + "twisting_vines_base", X),
+         ("Warped Wart", "warped_wart_block", 1, 6000, 10000000, B + "warped_wart_block", B + "warped_wart_block"),
+     ]},
+    {"id": "garden", "name": "Garden", "kind": "farming", "price": 2000000, "upgradeMultiplier": 8,
+     "skin": ("#e3c770", "#b39a4c", "#2f7f8f", "#1f5966"), "tool": "#f2c12e",
+     "tiers": [
+         ("Sweet Berries", "sweet_berries", 1, 7000, 0, B + "sweet_berry_bush_stage3", I + "sweet_berries", X),
+         ("Glow Berries", "glow_berries", 1, 8500, 3000000, B + "cave_vines_head_berries", I + "glow_berries", X),
+         ("Cocoa Beans", "cocoa_beans", 1, 10000, 5000000, B + "cocoa_stage_2", I + "dye_powder_brown", X),
+         ("Bamboo", "bamboo", 1, 12500, 8000000, B + "bamboo_block", B + "bamboo_block"),
+         ("Kelp", "kelp", 1, 15000, 12000000, B + "kelp_a", B + "kelp_a", X),
+         ("Sea Pickle", "sea_pickle", 1, 18000, 18000000, B + "sea_pickle", I + "sea_pickle", X),
+         ("Lily Pad", "waterlily", 1, 22000, 26000000, B + "waterlily", B + "carried_waterlily", X),
+         ("Big Dripleaf", "big_dripleaf", 1, 27000, 40000000, B + "big_dripleaf_top", B + "big_dripleaf_top", X),
+     ]},
+    {"id": "golden", "name": "Golden Harvest", "kind": "farming", "price": 10000000, "upgradeMultiplier": 20,
+     "skin": ("#f2c12e", "#c98d12", "#e8e8e8", "#bdbdbd"), "tool": "#f2c12e",
+     "tiers": [
+         ("Golden Carrot", "golden_carrot", 1, 30000, 0, B + "gold_block", I + "carrot_golden"),
+         ("Glistering Melon", "glistering_melon_slice", 1, 36000, 12000000, B + "melon_side", I + "melon_speckled"),
+         ("Honeycomb", "honeycomb", 1, 43000, 18000000, B + "honeycomb", I + "honeycomb"),
+         ("Honey Bottle", "honey_bottle", 1, 52000, 26000000, B + "honey_side", I + "honey_bottle"),
+         ("Pumpkin Pie", "pumpkin_pie", 1, 62000, 38000000, B + "pumpkin_side", I + "pumpkin_pie"),
+         ("Cookie", "cookie", 1, 75000, 55000000, B + "cocoa_stage_2", I + "cookie", X),
+         ("Cake", "cake", 1, 90000, 80000000, B + "cake_side", I + "cake"),
+         ("Golden Apple", "golden_apple", 1, 110000, 120000000, B + "gold_block", I + "apple_golden"),
+     ]},
+    {"id": "mythic", "name": "Mythic Grove", "kind": "farming", "price": 50000000, "upgradeMultiplier": 50,
+     "skin": ("#8a3fc7", "#5f2a8a", "#1f6b4a", "#144a33"), "tool": "#5ee6e6",
+     "tiers": [
+         ("Torchflower", "torchflower", 1, 125000, 0, B + "torchflower", B + "torchflower", X),
+         ("Pitcher Plant", "pitcher_plant", 1, 150000, 60000000, B + "pitcher_crop_side", B + "pitcher_crop_side", X),
+         ("Spore Blossom", "spore_blossom", 1, 180000, 90000000, B + "spore_blossom", B + "spore_blossom", X),
+         ("Chorus Flower", "chorus_flower", 1, 215000, 130000000, B + "chorus_flower", B + "chorus_flower"),
+         ("Wither Rose", "wither_rose", 1, 260000, 190000000, B + "flower_wither_rose", B + "flower_wither_rose", X),
+         ("Turtle Egg", "turtle_egg", 1, 310000, 270000000, B + "turtle_egg_not_cracked", I + "turtle_egg"),
+         ("Sniffer Egg", "sniffer_egg", 1, 375000, 380000000, B + "sniffer_egg_not_cracked_top", B + "sniffer_egg_not_cracked_top"),
+         ("Enchanted Golden Apple", "enchanted_golden_apple", 1, 450000, 550000000, B + "gold_block", I + "apple_golden"),
+     ]},
+]
+for _mt in MINION_TYPES:
+    _mt.setdefault("kind", "mining")
+    _mt.setdefault("tool", "#5ee6e6")
+    _mt["tiers"] = [t if len(t) == 8 else t + ("cube",) for t in _mt["tiers"]]
+DISPLAY = [(t[5], t[7]) for mt in MINION_TYPES for t in mt["tiers"]]
+DISPLAY_TEXTURES = [d[0] for d in DISPLAY]
+
+
+def check_minion_textures():
+    vb = os.environ.get("BEDROCK_SAMPLES")
+    if not vb:
+        return
+    import re as _re
+    tex = set()
+
+    def col(o):
+        if isinstance(o, str) and o.startswith("textures/"):
+            tex.add(o)
+        elif isinstance(o, dict):
+            [col(v) for v in o.values()]
+        elif isinstance(o, list):
+            [col(v) for v in o]
+    for f in ("item_texture.json", "terrain_texture.json"):
+        txt = open(os.path.join(vb, "resource_pack", "textures", f), encoding="utf-8-sig").read()
+        col(json.loads(_re.sub(r"^\s*//.*$", "", txt, flags=_re.M)))
+    for mt in MINION_TYPES:
+        for t in mt["tiers"]:
+            for path in (t[5], t[6]):
+                if path not in tex:
+                    print("MISSING TEXTURE:", mt["id"], t[0], path)
 
 
 def write_minion_types_js():
+    check_minion_textures()
     out, idx = [], 0
     for si, mt in enumerate(MINION_TYPES):
         tiers = []
-        for (name, base, count, value, cost, _disp, _icon) in mt["tiers"]:
+        for (name, base, count, value, cost, _disp, _icon, _shape) in mt["tiers"]:
             t = {"name": name, "drop": ["minecraft:" + base, count], "cost": cost, "display": idx}
             if value is not None:
                 t["value"] = value
             tiers.append(t)
             idx += 1
-        out.append({"id": mt["id"], "name": mt["name"], "price": mt["price"],
+        out.append({"id": mt["id"], "name": mt["name"], "kind": mt["kind"], "price": mt["price"],
                     "upgradeMultiplier": mt["upgradeMultiplier"], "skin": si, "tiers": tiers})
     path = os.path.join(BP, "scripts", "minion_types.js")
     with open(path, "w") as f:
@@ -945,7 +1040,7 @@ def write_minion_types_js():
 
 
 
-def minion_skin(colors=("#f2c12e", "#c98d12", "#3f6fd1", "#2c4f99")):
+def minion_skin(colors=("#f2c12e", "#c98d12", "#3f6fd1", "#2c4f99"), tool="#5ee6e6"):
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     px = img.load()
 
@@ -984,7 +1079,7 @@ def minion_skin(colors=("#f2c12e", "#c98d12", "#3f6fd1", "#2c4f99")):
         fill(x0, y0 + 12, x0 + 16, y0 + 16, boot)
     # pickaxe: handle (32,0 18x9), head (52,0 4x8)
     fill(32, 0, 50, 9, hexc("#8a5a2b"))
-    fill(52, 0, 56, 8, hexc("#5ee6e6"))
+    fill(52, 0, 56, 8, hexc(tool))
     return img
 
 
@@ -997,7 +1092,7 @@ def make_minions():
     os.makedirs(os.path.join(BP, "entities"), exist_ok=True)
     save(minion_skin(), os.path.join(RP, "textures", "entity", "eco_minion.png"))
     for si, mt in enumerate(MINION_TYPES):
-        save(minion_skin(mt["skin"]), os.path.join(RP, "textures", "entity", f"eco_minion_{mt['id']}.png"))
+        save(minion_skin(mt["skin"], mt["tool"]), os.path.join(RP, "textures", "entity", f"eco_minion_{mt['id']}.png"))
     write_minion_types_js()
 
     # --- minion model (front = -Z) ---
@@ -1037,6 +1132,20 @@ def make_minions():
     }
     with open(os.path.join(RP, "models", "entity", "eco_minion_block.geo.json"), "w") as f:
         json.dump(block_geo, f, indent=2)
+    plane = {"north": {"uv": [0, 0], "uv_size": [16, 16]}, "south": {"uv": [16, 0], "uv_size": [-16, 16]}}
+    cross_geo = {
+        "format_version": "1.12.0",
+        "minecraft:geometry": [{
+            "description": {"identifier": "geometry.eco_minion_crop", "texture_width": 16, "texture_height": 16,
+                            "visible_bounds_width": 2, "visible_bounds_height": 2, "visible_bounds_offset": [0, 0.5, 0]},
+            "bones": [{"name": "plant", "pivot": [0, 0, 0], "cubes": [
+                {"origin": [-8, 0, 0], "size": [16, 16, 0], "pivot": [0, 0, 0], "rotation": [0, 45, 0], "uv": plane},
+                {"origin": [-8, 0, 0], "size": [16, 16, 0], "pivot": [0, 0, 0], "rotation": [0, -45, 0], "uv": plane},
+            ]}],
+        }],
+    }
+    with open(os.path.join(RP, "models", "entity", "eco_minion_crop.geo.json"), "w") as f:
+        json.dump(cross_geo, f, indent=2)
 
     # --- mining animation ---
     anim = {
@@ -1074,9 +1183,9 @@ def make_minions():
         "format_version": "1.10.0",
         "minecraft:client_entity": {"description": {
             "identifier": "eco:minion_block",
-            "materials": {"default": "entity"},
+            "materials": {"default": "entity_alphatest"},
             "textures": {f"t{i}": t for i, t in enumerate(DISPLAY_TEXTURES)},
-            "geometry": {"default": "geometry.eco_minion_block"},
+            "geometry": {"cube": "geometry.eco_minion_block", "cross": "geometry.eco_minion_crop"},
             "render_controllers": ["controller.render.eco_minion_block"],
         }},
     }
@@ -1086,8 +1195,11 @@ def make_minions():
         "format_version": "1.8.0",
         "render_controllers": {
             "controller.render.eco_minion_block": {
-                "arrays": {"textures": {"Array.tiers": [f"Texture.t{i}" for i in range(len(DISPLAY_TEXTURES))]}},
-                "geometry": "Geometry.default",
+                "arrays": {
+                    "textures": {"Array.tiers": [f"Texture.t{i}" for i in range(len(DISPLAY_TEXTURES))]},
+                    "geometries": {"Array.shapes": [f"Geometry.{d[1]}" for d in DISPLAY]},
+                },
+                "geometry": "Array.shapes[query.variant]",
                 "materials": [{"*": "Material.default"}],
                 "textures": ["Array.tiers[query.variant]"],
             },
@@ -1217,7 +1329,7 @@ def make_minions():
 # Enchanted minion loot: one item per minion drop (see MINION_TYPES)
 MINION_LOOT = {}
 for _mt in MINION_TYPES:
-    for (_name, _base, _c, _v, _cost, _disp, _icon) in _mt["tiers"]:
+    for (_name, _base, _c, _v, _cost, _disp, _icon, _shape) in _mt["tiers"]:
         MINION_LOOT[_base] = (" ".join(w.capitalize() for w in _base.split("_")) if _base not in ("mob_spawner", "dragon_breath") else {"mob_spawner": "Spawner", "dragon_breath": "Dragon's Breath"}[_base], _icon)
 
 

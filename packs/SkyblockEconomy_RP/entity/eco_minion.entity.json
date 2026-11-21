@@ -11,7 +11,12 @@
         "s1": "textures/entity/eco_minion_nether",
         "s2": "textures/entity/eco_minion_obsidian",
         "s3": "textures/entity/eco_minion_end",
-        "s4": "textures/entity/eco_minion_bedrock"
+        "s4": "textures/entity/eco_minion_bedrock",
+        "s5": "textures/entity/eco_minion_crop",
+        "s6": "textures/entity/eco_minion_netherfarm",
+        "s7": "textures/entity/eco_minion_garden",
+        "s8": "textures/entity/eco_minion_golden",
+        "s9": "textures/entity/eco_minion_mythic"
       },
       "geometry": {
         "default": "geometry.eco_minion"
