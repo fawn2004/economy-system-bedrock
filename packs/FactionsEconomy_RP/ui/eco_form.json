@@ -9,8 +9,8 @@
   "eco_screen": {
     "type": "panel",
     "size": [
-      "100%",
-      "100%"
+      330,
+      236
     ],
     "$eco_server_name|default": "§l§fFACTIONS",
     "$eco_server_tag|default": "§l§6ECONOMY",
@@ -20,12 +20,8 @@
           "type": "stack_panel",
           "orientation": "vertical",
           "size": [
-            "92%",
-            "94%"
-          ],
-          "max_size": [
-            372,
-            290
+            "100%",
+            "100%"
           ],
           "anchor_from": "center",
           "anchor_to": "center",
@@ -45,7 +41,7 @@
     "type": "panel",
     "size": [
       "100%",
-      36
+      30
     ],
     "controls": [
       {
@@ -119,13 +115,13 @@
           "type": "panel",
           "size": [
             "100%",
-            26
+            24
           ],
           "controls": [
             {
               "header@eco_form.header": {
                 "size": [
-                  "100% - 29px",
+                  "100% - 27px",
                   "100%"
                 ],
                 "anchor_from": "left_middle",
@@ -135,8 +131,8 @@
             {
               "close@eco_form.close_button": {
                 "size": [
-                  26,
-                  26
+                  24,
+                  24
                 ],
                 "anchor_from": "right_middle",
                 "anchor_to": "right_middle"
@@ -287,7 +283,7 @@
           "type": "label",
           "layer": 5,
           "font_type": "MinecraftTen",
-          "font_scale_factor": 1.25,
+          "font_scale_factor": 1.1,
           "color": [
             1,
             1,
@@ -514,8 +510,8 @@
   "tile": {
     "type": "panel",
     "size": [
-      84,
-      76
+      74,
+      68
     ],
     "controls": [
       {
@@ -567,15 +563,15 @@
               "icon": {
                 "type": "image",
                 "size": [
-                  32,
-                  32
+                  30,
+                  30
                 ],
                 "layer": 2,
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
                 "offset": [
                   0,
-                  6
+                  5
                 ],
                 "bindings": [
                   {
@@ -619,7 +615,7 @@
                   "default"
                 ],
                 "text_alignment": "center",
-                "font_scale_factor": 0.85,
+                "font_scale_factor": 0.8,
                 "text": "#text",
                 "bindings": [
                   {
@@ -709,15 +705,15 @@
               "icon": {
                 "type": "image",
                 "size": [
-                  32,
-                  32
+                  30,
+                  30
                 ],
                 "layer": 2,
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
                 "offset": [
                   0,
-                  6
+                  5
                 ],
                 "bindings": [
                   {
@@ -761,7 +757,7 @@
                   "default"
                 ],
                 "text_alignment": "center",
-                "font_scale_factor": 0.85,
+                "font_scale_factor": 0.8,
                 "text": "#text",
                 "bindings": [
                   {
@@ -851,15 +847,15 @@
               "icon": {
                 "type": "image",
                 "size": [
-                  32,
-                  32
+                  30,
+                  30
                 ],
                 "layer": 2,
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
                 "offset": [
                   0,
-                  7
+                  6
                 ],
                 "bindings": [
                   {
@@ -903,7 +899,7 @@
                   "default"
                 ],
                 "text_alignment": "center",
-                "font_scale_factor": 0.85,
+                "font_scale_factor": 0.8,
                 "text": "#text",
                 "bindings": [
                   {

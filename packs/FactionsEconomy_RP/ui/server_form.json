@@ -6,7 +6,8 @@
   // vanilla look, so other add-ons on your realm are not affected.
   "long_form": {
     "type": "panel",
-    "size": [ "100%", "100%" ],
+    // sized from its children: the form factory has no size of its own, so % sizes collapse to 0
+    "size": [ "100%c", "100%c" ],
     "controls": [
       {
         "vanilla_long_form": {
