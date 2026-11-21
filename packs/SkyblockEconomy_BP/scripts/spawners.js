@@ -2,6 +2,7 @@ import { ItemStack, system, world } from "@minecraft/server";
 import { CONFIG, SPAWNERS, SPAWNER_SETTINGS as S } from "./config.js";
 import { container } from "./inventory.js";
 import { headChanceBonus } from "./tools.js";
+import { addHeadsCollected } from "./leaderboards.js";
 import { ICON, fail, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -161,7 +162,10 @@ export function depositHeads(player, mob) {
     done.set(m, (done.get(m) ?? 0) + it.amount);
     inv.setItem(i, undefined);
   }
-  for (const [m, n] of done) addHeadPoints(player, m, n);
+  for (const [m, n] of done) {
+    addHeadPoints(player, m, n);
+    addHeadsCollected(player, n); // lifetime heads (leaderboard)
+  }
   return done;
 }
 

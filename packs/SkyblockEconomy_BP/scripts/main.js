@@ -9,6 +9,7 @@ import { registerSpawners } from "./spawners.js";
 import { registerTools } from "./tools.js";
 import { registerSkills } from "./skills.js";
 import { registerMinions } from "./minions.js";
+import { registerLeaderboards } from "./leaderboards.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -53,3 +54,4 @@ registerGroundItems();
 registerTools();
 registerSkills();
 registerMinions();
+registerLeaderboards();

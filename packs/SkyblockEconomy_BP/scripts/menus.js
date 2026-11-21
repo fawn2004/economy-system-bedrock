@@ -14,6 +14,7 @@ import {
   spaceFor,
 } from "./inventory.js";
 import { settingsMenu } from "./adminSettings.js";
+import { leaderboardsMenu } from "./leaderboards.js";
 import { isMinionLoot, lootIcon, lootIdFor, lootName, lootSellPrice, makeMinionItem } from "./minions.js";
 import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
@@ -74,7 +75,7 @@ export async function mainMenu(player) {
     { text: "§6§lSHOP", sub: "§7Buy any item", icon: ICON.shop, onClick: () => shopMenu(player) },
     { text: "§a§lSELL", sub: "§7Sell your loot", icon: ICON.sell, onClick: () => sellMenu(player) },
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
-    { text: "§6§lBALTOP", sub: "§7Richest players", icon: ICON.top, onClick: () => topMenu(player, () => mainMenu(player)) },
+    { text: "§6§lLEADERBOARDS", sub: "§7Who's on top", icon: ICON.top, onClick: () => leaderboardsMenu(player, () => mainMenu(player)) },
     {
       text: "§b§lSKILLS",
       sub: "§7Skills & collections",

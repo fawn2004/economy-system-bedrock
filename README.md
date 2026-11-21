@@ -14,7 +14,7 @@ custom-styled menus: dark panels, coloured header bars, icon tiles and NEW!/HOT!
 | **Sell** | Sell anything from your inventory, one type at a time or *Sell All* |
 | **Balance** | Your money and leaderboard rank |
 | **Pay** | Send money to online players |
-| **Baltop** | Top 10 richest players (offline players included) |
+| **Leaderboards** | Top 10 for balance, heads collected, farming, combat, skill average, every skill, spawners and minions (offline players included) |
 | **Admin** | Only for players tagged `admin`: **Money** and **Heads** (per player), **Settings**, **Shop Editor**, **Clear Items**, **Compass** |
 
 Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration), **Food**,
