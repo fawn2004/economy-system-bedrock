@@ -1,7 +1,8 @@
 import { BlockPermutation, EnchantmentTypes, ItemStack, system, world } from "@minecraft/server";
-import { COLLECTION_TIERS, CROPS, MOB_DROPS, SKILL_TOOLS, SPAWNERS, TOOL_LEVELS } from "./config.js";
-import { addMoney, fmt } from "./economy.js";
-import { backTile, tileMenu, withNav } from "./ui.js";
+import { COLLECTION_TIERS, CROPS, MOB_DROPS, SKILL_TOOLS, SPAWNERS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { addMoney, fmt, getBalance, takeMoney } from "./economy.js";
+import { addHeadPoints, getHeadPoints, mobName } from "./spawners.js";
+import { ICON, backTile, fail, success, tileMenu, withNav } from "./ui.js";
 
 // ============================================================================
 //  SKILL TOOLS & COLLECTIONS
@@ -13,6 +14,7 @@ import { backTile, tileMenu, withNav } from "./ui.js";
 // ============================================================================
 
 const TAG = "§8eco:tool:";
+const UP_TAG = "§8eco:up:";
 const MAX_LEVEL = () => TOOL_LEVELS.xpNeeded.length;
 const commas = (n) => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const mobKey = (typeId) => typeId.replace(/^minecraft:/, "");
@@ -56,7 +58,15 @@ export function readTool(item) {
   if (!line) return undefined;
   const [kind, lvl, xp] = line.slice(TAG.length).split(":");
   if (!SKILL_TOOLS[kind]) return undefined;
-  return { kind, level: Math.max(1, Number(lvl) || 1), xp: Math.max(0, Number(xp) || 0) };
+  const ups = {};
+  const upLine = item.getLore().find((l) => l.startsWith(UP_TAG));
+  if (upLine) {
+    for (const part of upLine.slice(UP_TAG.length).split(",")) {
+      const [k, v] = part.split("=");
+      if (k) ups[k] = Number(v) || 0;
+    }
+  }
+  return { kind, level: Math.max(1, Number(lvl) || 1), xp: Math.max(0, Number(xp) || 0), ups };
 }
 
 /** Highest level the player's collection allows for this tool. */
@@ -81,7 +91,7 @@ function bar(cur, next) {
   return "§a" + "|".repeat(filled) + "§8" + "|".repeat(10 - filled);
 }
 
-function writeTool(stack, kind, level, xp, player) {
+function writeTool(stack, kind, level, xp, player, ups = {}) {
   const t = SKILL_TOOLS[kind];
   const next = TOOL_LEVELS.xpNeeded[level];
   const lore = [`§7Level: §e${level}§7/§e${MAX_LEVEL()}`];
@@ -90,31 +100,40 @@ function writeTool(stack, kind, level, xp, player) {
   else lore.push(`§7XP: §b${commas(xp)}§7/§b${commas(next)} ${bar(xp, next)}`);
   lore.push(`§7Bonus drops: §a+${level * t.bonusPerLevel}%`);
   if (kind === "farming") lore.push(`§7Auto-replant: ${level >= t.replantLevel ? "§aYes" : `§cLv ${t.replantLevel}`}`);
-  if (kind === "slayer") lore.push(`§7Head chance: §d+${level * t.headBonusPerLevel}%`);
+  const upBonus = (id) => (ups[id] ?? 0) * (upgradeDef(kind, id)?.perLevel ?? 0);
+  if (kind === "slayer") {
+    lore[lore.length - 1] = `§7Bonus drops: §a+${level * t.bonusPerLevel + upBonus("plunder")}%`;
+    lore.push(`§7Head chance: §d+${level * t.headBonusPerLevel + upBonus("head_hunter")}%`);
+  }
+  const owned = (TOOL_UPGRADES[kind] ?? []).filter((u) => ups[u.id] > 0);
+  if (owned.length) lore.push("§9" + owned.map((u) => `${u.name} ${roman(ups[u.id])}`).join("§7, §9"));
+  lore.push("§8Sneak + use to upgrade");
   if (player && next !== undefined && levelFromXp(xp) > level) {
     const need = TOOL_LEVELS.collectionNeeded[level] ?? 0;
     lore.push(`§cLv ${level + 1} needs ${commas(need)} ${kind === "farming" ? "crops" : "kills"}`);
   }
   lore.push(`${TAG}${kind}:${level}:${xp}`);
+  const upStr = Object.entries(ups).filter(([, v]) => v > 0).map(([k, v]) => `${k}=${v}`).join(",");
+  if (upStr) lore.push(UP_TAG + upStr);
   stack.setLore(lore);
   stack.nameTag = `§r§6${t.name} §e[Lv ${level}]`;
   try {
     const dur = stack.getComponent("minecraft:durability");
     if (dur) dur.damage = 0; // never breaks
   } catch {}
-  if (kind === "slayer") {
-    try {
-      const ench = stack.getComponent("minecraft:enchantable");
-      const sharp = Math.min(5, Math.floor(level / 2));
-      const type = EnchantmentTypes.get("sharpness");
-      if (ench && type) {
-        try {
-          ench.removeEnchantment(type);
-        } catch {}
-        if (sharp > 0) ench.addEnchantment({ type, level: sharp });
-      }
-    } catch {}
-  }
+  // vanilla enchantments bought in the upgrade menu
+  try {
+    const ench = stack.getComponent("minecraft:enchantable");
+    for (const u of TOOL_UPGRADES[kind] ?? []) {
+      if (!u.enchant || !ench) continue;
+      const type = EnchantmentTypes.get(u.enchant);
+      if (!type) continue;
+      try {
+        ench.removeEnchantment(type);
+      } catch {}
+      if (ups[u.id] > 0) ench.addEnchantment({ type, level: ups[u.id] });
+    }
+  } catch {}
 }
 
 export function makeTool(kind, player) {
@@ -137,7 +156,7 @@ function addToolXp(player, held) {
   const xp = held.xp + SKILL_TOOLS[kind].xpPerUse;
   const target = Math.min(levelFromXp(xp), levelCap(player, kind));
   const level = Math.max(held.level, target);
-  writeTool(held.item, kind, level, xp, player);
+  writeTool(held.item, kind, level, xp, player, held.ups);
   held.inv.setItem(held.slot, held.item);
   if (level > held.level) {
     player.sendMessage(`§6§l⬆ LEVEL UP! §r§6${SKILL_TOOLS[kind].name} §7is now §eLevel ${level}§7!`);
@@ -150,7 +169,8 @@ function addToolXp(player, held) {
 export function headChanceBonus(player) {
   try {
     const held = heldTool(player, "slayer");
-    return held ? held.level * SKILL_TOOLS.slayer.headBonusPerLevel : 0;
+    if (!held) return 0;
+    return held.level * SKILL_TOOLS.slayer.headBonusPerLevel + (held.ups.head_hunter ?? 0) * (upgradeDef("slayer", "head_hunter")?.perLevel ?? 0);
   } catch {
     return 0;
   }
@@ -163,8 +183,85 @@ function rollExtra(pct) {
   return n;
 }
 
+// ---- upgrades -----------------------------------------------------------------
+const upgradeDef = (kind, id) => (TOOL_UPGRADES[kind] ?? []).find((u) => u.id === id);
+
+/** Opens the upgrade menu for the skill tool in the player's hand. */
+export async function upgradeMenu(player, back, msg) {
+  const held = ["slayer", "farming"].map((k) => heldTool(player, k)).find(Boolean);
+  if (!held) {
+    fail(player, "Hold your skill tool in your hand to upgrade it.");
+    return back?.();
+  }
+  const kind = held.kind;
+  const t = SKILL_TOOLS[kind];
+  const defs = TOOL_UPGRADES[kind] ?? [];
+  const reopen = (m) => upgradeMenu(player, back, m);
+  const tiles = defs.map((u) => {
+    const cur = held.ups[u.id] ?? 0;
+    if (cur >= u.max) return { text: `§a§l${u.name.toUpperCase()}`, sub: `§a${roman(cur)} §7MAX`, icon: u.icon, onClick: () => reopen(`§a${u.name} is already maxed.`) };
+    const money = u.money[cur], heads = u.heads[cur];
+    const okMoney = getBalance(player) >= money, okHeads = getHeadPoints(player, u.headMob) >= heads;
+    return {
+      text: `§e§l${u.name.toUpperCase()} ${roman(cur + 1)}`,
+      sub: `${okMoney ? "§a" : "§c"}${fmt(money)} ${okHeads ? "§d" : "§c"}${heads}h`,
+      icon: u.icon,
+      onClick: () => reopen(buyUpgrade(player, kind, u)),
+    };
+  });
+  if (back) tiles.push(backTile(back));
+  const lines = defs.map((u) => {
+    const cur = held.ups[u.id] ?? 0;
+    const next = cur < u.max ? `next: §a${fmt(u.money[cur])} §7+ §d${u.heads[cur]} ${mobName(u.headMob)} heads` : "§aMAX";
+    return `§f${u.name} §6${cur ? roman(cur) : "-"}§7/${roman(u.max)} §8(${u.desc}) §7${next}`;
+  });
+  await tileMenu(player, {
+    title: `UPGRADE ${t.name.toUpperCase()}`,
+    theme: kind === "slayer" ? "red" : "green",
+    body:
+      (msg ? msg + "\n" : "") +
+      `§6${t.name} §eLv ${held.level}  §7Balance: §a${fmt(getBalance(player))}\n` +
+      (lines.length ? lines.join("\n") : "§7No upgrades for this tool yet."),
+    tiles,
+  });
+}
+
+function buyUpgrade(player, kind, u) {
+  const held = heldTool(player, kind);
+  if (!held) return "§cHold the tool in your hand.";
+  const cur = held.ups[u.id] ?? 0;
+  if (cur >= u.max) return `§a${u.name} is already maxed.`;
+  const money = u.money[cur], heads = u.heads[cur];
+  const have = getHeadPoints(player, u.headMob);
+  if (have < heads) {
+    fail(player, `You need ${heads} ${mobName(u.headMob)} heads (you have ${have}).`);
+    return `§cYou need §f${heads} ${mobName(u.headMob)} §cheads §7(you have ${have})`;
+  }
+  if (!takeMoney(player, money)) {
+    fail(player, `You need ${fmt(money)}.`);
+    return `§cYou need §f${fmt(money)}§c.`;
+  }
+  addHeadPoints(player, u.headMob, -heads);
+  held.ups[u.id] = cur + 1;
+  writeTool(held.item, kind, held.level, held.xp, player, held.ups);
+  held.inv.setItem(held.slot, held.item);
+  success(player, `${SKILL_TOOLS[kind].name}: ${u.name} ${roman(cur + 1)}!`);
+  player.playSound("random.anvil_use");
+  return `§aUpgraded §f${u.name} §ato §f${roman(cur + 1)}§a!`;
+}
+
 // ---- events ------------------------------------------------------------------
 export function registerTools() {
+  // sneak + use (tap the air or a block) with a skill tool -> upgrade menu
+  const open = (player) => upgradeMenu(player).catch((e) => console.warn("[eco] " + e));
+  world.afterEvents.itemUse.subscribe(({ source, itemStack }) => {
+    if (source.isSneaking && readTool(itemStack)) open(source);
+  });
+  world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
+    if (!ev.player.isSneaking || !readTool(ev.itemStack) || ev.block.typeId === "minecraft:mob_spawner") return;
+    ev.cancel = true;
+    if (ev.isFirstEvent) system.run(() => open(ev.player));
+  });
   const tracked = new Set(CROPS.filter((c) => c.grown).map((c) => c.block));
 
   world.afterEvents.playerPlaceBlock.subscribe(({ block }) => {
@@ -229,7 +326,8 @@ export function registerTools() {
     const held = heldTool(killer, "slayer");
     let level = 0;
     if (held) level = addToolXp(killer, held);
-    const pct = level * SKILL_TOOLS.slayer.bonusPerLevel + tierOf(getCol(killer, "mob", key)) * COLLECTION_TIERS.bonusPerTier;
+    const plunder = held ? (held.ups.plunder ?? 0) * (upgradeDef("slayer", "plunder")?.perLevel ?? 0) : 0;
+    const pct = level * SKILL_TOOLS.slayer.bonusPerLevel + plunder + tierOf(getCol(killer, "mob", key)) * COLLECTION_TIERS.bonusPerTier;
     const sets = rollExtra(pct);
     for (let s = 0; s < sets; s++) {
       for (const [item, min, max] of MOB_DROPS[key] ?? []) {
@@ -260,6 +358,7 @@ export async function collectionsMenu(player, back) {
       { text: "§e§lFARMING", sub: `§7${commas(farm)} crops`, icon: "textures/ui/eco/icon_farming", onClick: () => colList(player, "crop", reopen) },
       { text: "§c§lCOMBAT", sub: `§7${commas(combat)} kills`, icon: "textures/ui/eco/icon_spawners", onClick: () => colList(player, "mob", reopen) },
       { text: "§6§lSKILL TOOLS", sub: "§7Levels & unlocks", icon: SKILL_TOOLS.farming.icon, onClick: () => toolsInfo(player, reopen) },
+      { text: "§c§lUPGRADE TOOL", sub: "§7Tool in your hand", icon: SKILL_TOOLS.slayer.icon, onClick: () => upgradeMenu(player, reopen) },
       backTile(back),
     ],
   });

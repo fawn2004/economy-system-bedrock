@@ -36,6 +36,7 @@ Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration),
 | **Mob stacking** | Spawned mobs merge into one mob with a counter (e.g. *Zombie x25*), with no limit. They stand still on their spot and don't burn in daylight. Killing it drops loot for one and the counter goes down. |
 | **Enchanted heads** | Mobs from spawners can drop an **Enchanted <Mob> Head**. Selling heads (or *Add Heads* in the spawner menu) adds them to that mob's **head balance**, separate from money. |
 | **Upgrades** | Spend that mob's heads to level a spawner up (1 to 10): faster spawns and a better head chance each level. Heads only upgrade spawners of the same mob, and the cost is multiplied by the stack size. |
+| **Slimes & magma cubes** | Spawner slimes spawn small and magma cubes medium (the sizes that drop loot), and the pieces a stacked one splits into are removed, so they don't pile up beside the stack. |
 | **Protection** | Spawners can't be mined or blown up. Only the owner (or an admin) can upgrade or pick them up. Picking up keeps the level and stack. |
 
 Head balances are under **Balance > Heads**. Spawn speeds, head chances, upgrade costs,
@@ -51,8 +52,11 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 - **Collections** (main menu): every crop and spawner mob has a counter with 5 tiers;
   each tier pays money once and adds a permanent bonus drop chance for that crop/mob.
   Hand-placed melons, pumpkins, sugar cane and cactus don't count.
-- Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `COLLECTION_TIERS`, `CROPS` and `MOB_DROPS`
-  in `config.js`.
+- **Upgrades:** sneak + use a skill tool (or Collections > Upgrade Tool) to open its upgrade
+  menu. The Slayer Sword has Sharpness, Looting, Fire Aspect, Head Hunter (+head chance) and
+  Plunder (+bonus drops), each paid with money **and** heads of a specific mob.
+- Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `TOOL_UPGRADES`, `COLLECTION_TIERS`, `CROPS`
+  and `MOB_DROPS` in `config.js`.
 
 ## Prices: no crafting profit
 

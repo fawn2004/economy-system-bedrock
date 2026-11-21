@@ -392,6 +392,37 @@ function holdMobs() {
   }
 }
 
+// Slimes & magma cubes split when they die. Spawner ones spawn at the size
+// that drops loot without splitting into loot-less pieces (small slime,
+// medium magma cube), and any split pieces next to a stack are removed.
+const SIZE_EVENT = { "minecraft:slime": "spawn_small", "minecraft:magma_cube": "spawn_medium" };
+const SIZE_VALUE = { "minecraft:slime": 1, "minecraft:magma_cube": 2 };
+const recentSplits = []; // where stacked slimes/magma cubes just died
+
+function spawnMob(dim, type, loc) {
+  const event = SIZE_EVENT[type];
+  if (!event) return dim.spawnEntity(type, loc);
+  let e;
+  try {
+    e = dim.spawnEntity(type, loc, { spawnEvent: event });
+  } catch {
+    e = dim.spawnEntity(type, loc);
+  }
+  try {
+    if (e.getComponent("minecraft:variant")?.value === SIZE_VALUE[type]) return e;
+  } catch {}
+  // older versions: /summon supports spawn events
+  try {
+    e.remove();
+    dim.runCommand(`summon ${type} ${loc.x} ${loc.y} ${loc.z} 0 0 ${event}`);
+    const found = dim
+      .getEntities({ type, location: loc, maxDistance: 1.5 })
+      .find((x) => x.getDynamicProperty("eco:sp") === undefined);
+    if (found) return found;
+  } catch {}
+  return dim.spawnEntity(type, loc);
+}
+
 function findSpot(dim, d) {
   for (let i = 0; i < 8; i++) {
     const x = d.x + Math.floor(Math.random() * 5) - 2;
@@ -424,13 +455,13 @@ function spawnFor(dim, key, d, count) {
     }
     if (near.length) return; // full stack nearby
     const spot = findSpot(dim, d);
-    tagMob(dim.spawnEntity(type, spot), key, d.mob, capStack(count), spot);
+    tagMob(spawnMob(dim, type, spot), key, d.mob, capStack(count), spot);
     return;
   }
   const room = Math.min(count, S.maxLooseMobs - near.length);
   for (let i = 0; i < room; i++) {
     const spot = findSpot(dim, d);
-    tagMob(dim.spawnEntity(type, spot), key, d.mob, 1, spot);
+    tagMob(spawnMob(dim, type, spot), key, d.mob, 1, spot);
   }
 }
 
@@ -525,6 +556,20 @@ export function registerSpawners() {
     if (keep.length !== blocks.length) ev.setImpactedBlocks(keep);
   });
 
+  // remove the pieces a stacked slime / magma cube splits into
+  world.afterEvents.entitySpawn.subscribe(({ entity }) => {
+    try {
+      if (!SIZE_EVENT[entity.typeId] || entity.getDynamicProperty("eco:sp")) return;
+      const now = system.currentTick;
+      const l = entity.location;
+      const split = recentSplits.some(
+        (r) => r.type === entity.typeId && r.dim === entity.dimension.id && now - r.tick <= 40 &&
+          (r.x - l.x) ** 2 + (r.y - l.y) ** 2 + (r.z - l.z) ** 2 <= 9
+      );
+      if (split) entity.remove();
+    } catch {}
+  });
+
   // stacked mobs: killing one leaves the rest; maybe drop an enchanted head
   world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
     let key, mob, stack, loc, dim, type, anchor;
@@ -541,6 +586,10 @@ export function registerSpawners() {
     } catch {
       return;
     }
+    if (SIZE_EVENT[type]) {
+      recentSplits.push({ type, dim: dim.id, x: loc.x, y: loc.y, z: loc.z, tick: system.currentTick });
+      if (recentSplits.length > 50) recentSplits.shift();
+    }
     const d = spawners.get(key);
     const killer = damageSource?.damagingEntity;
     const bonus = killer?.typeId === "minecraft:player" ? headChanceBonus(killer) : 0;
@@ -551,7 +600,7 @@ export function registerSpawners() {
     }
     if (S.stackMobs && stack > 1) {
       try {
-        tagMob(dim.spawnEntity(type, anchor), key, mob, stack - 1, anchor);
+        tagMob(spawnMob(dim, type, anchor), key, mob, stack - 1, anchor);
       } catch {}
     }
   });

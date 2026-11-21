@@ -363,3 +363,38 @@ export const MOB_DROPS = {
   ghast: [["minecraft:ghast_tear", 0, 1], ["minecraft:gunpowder", 0, 2]],
   iron_golem: [["minecraft:iron_ingot", 3, 5], ["minecraft:poppy", 0, 2]],
 };
+
+// ============================================================================
+//  TOOL UPGRADES  (sneak + use a skill tool to open its upgrade menu)
+//  Each level costs money + heads of one mob (from your head balance).
+//  enchant = vanilla enchantment it sets;  perLevel = custom bonus per level
+// ============================================================================
+export const TOOL_UPGRADES = {
+  slayer: [
+    {
+      id: "sharpness", name: "Sharpness", enchant: "sharpness", max: 5, icon: "textures/items/diamond_sword",
+      desc: "More damage", headMob: "zombie",
+      money: [2000, 5000, 12000, 25000, 50000], heads: [5, 10, 20, 40, 80],
+    },
+    {
+      id: "looting", name: "Looting", enchant: "looting", max: 3, icon: "textures/items/gold_ingot",
+      desc: "More vanilla mob drops", headMob: "skeleton",
+      money: [5000, 15000, 40000], heads: [10, 25, 50],
+    },
+    {
+      id: "fire_aspect", name: "Fire Aspect", enchant: "fire_aspect", max: 2, icon: "textures/items/blaze_powder",
+      desc: "Sets mobs on fire", headMob: "blaze",
+      money: [8000, 20000], heads: [10, 30],
+    },
+    {
+      id: "head_hunter", name: "Head Hunter", max: 5, perLevel: 2, icon: "textures/items/eco_heads/wither_skeleton",
+      desc: "+2% enchanted head chance per level", headMob: "wither_skeleton",
+      money: [10000, 20000, 40000, 75000, 150000], heads: [5, 10, 20, 35, 50],
+    },
+    {
+      id: "plunder", name: "Plunder", max: 5, perLevel: 10, icon: "textures/items/eco_heads/spider",
+      desc: "+10% bonus drop chance per level", headMob: "spider",
+      money: [5000, 10000, 20000, 40000, 80000], heads: [10, 20, 40, 60, 100],
+    },
+  ],
+};
