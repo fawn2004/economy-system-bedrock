@@ -1,6 +1,6 @@
 import { ModalFormData } from "@minecraft/server-ui";
 import { getCatalog } from "./catalog.js";
-import { CONFIG, KITS, SPAWNERS, SPAWNER_SETTINGS as S } from "./config.js";
+import { COLLECTION_TIERS, CONFIG, KITS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 import { fmt } from "./economy.js";
 import { container } from "./inventory.js";
 import {
@@ -12,8 +12,12 @@ import {
   saveKits,
   setConfig,
   setLevels,
+  setCollections,
   setMob,
   setSpawner,
+  setTool,
+  setToolLevels,
+  setUpgrades,
 } from "./settings.js";
 import { mobIcon } from "./spawners.js";
 import { ICON, backTile, fail, pagedMenu, showForm, success, tileMenu } from "./ui.js";
@@ -65,6 +69,8 @@ export async function settingsMenu(player, back, msg) {
     tiles: [
       { text: "§b§lSPAWNERS", sub: "§7Upgrades & rules", icon: "textures/ui/eco/icon_spawners", onClick: () => spawnerSettings(player, () => reopen()) },
       { text: "§e§lKITS", sub: `§7${KITS.length} kits`, icon: "textures/ui/eco/icon_kits", onClick: () => kitsSettings(player, () => reopen()) },
+      { text: "§6§lSKILL TOOLS", sub: "§7Hoe, sword, upgrades", icon: "textures/items/diamond_hoe", onClick: () => skillToolsSettings(player, () => reopen()) },
+      { text: "§d§lCOLLECTIONS", sub: "§7Tiers & rewards", icon: "textures/ui/eco/icon_farming", onClick: () => collectionsSettings(player, () => reopen()) },
       { text: "§a§lECONOMY", sub: "§7Money & menus", icon: ICON.bank, onClick: () => economyForm(player, reopen) },
       {
         text: "§6§lFLOOR ITEMS",
@@ -402,3 +408,268 @@ function readInventory(player) {
 }
 
 const iconFor = (id) => getCatalog().all.get(id)?.icon;
+
+// ---- skill tools ----------------------------------------------------------------
+const ENCHANT_MAX = { sharpness: 5, looting: 3, fire_aspect: 2, fortune: 3, efficiency: 5, smite: 5, knockback: 2, unbreaking: 3 };
+const list = (arr) => arr.join(", ");
+function parseList(v) {
+  const out = String(v).split(/[,\s]+/).filter(Boolean).map((x) => num(x, 0));
+  return out.length && out.every((x) => x !== undefined) ? out : undefined;
+}
+
+function skillToolsSettings(player, back, msg) {
+  const reopen = (m) => skillToolsSettings(player, back, m);
+  const tiles = Object.entries(SKILL_TOOLS).map(([kind, t]) => ({
+    text: `§6§l${t.name.toUpperCase()}`,
+    sub: `§a${fmt(t.price)} §7${(TOOL_UPGRADES[kind] ?? []).length} upgr.`,
+    icon: t.icon,
+    onClick: () => toolSettings(player, kind, () => reopen()),
+  }));
+  tiles.push({ text: "§b§lTOOL LEVELS", sub: "§7XP & unlocks", icon: ICON.top, onClick: () => toolLevelsMenu(player, () => reopen()) });
+  tiles.push({
+    text: "§4§lRESET",
+    sub: "§7Tool defaults",
+    icon: ICON.cancel,
+    onClick: () =>
+      confirm(player, "RESET SKILL TOOLS?", "§7Tool stats, upgrades and tool levels go back to the defaults.\n§8(Tools players already own keep their upgrades.)", () => {
+        resetSection("tools");
+        resetSection("upgrades");
+        resetSection("toolLevels");
+        return reopen("§aSkill tools reset to defaults.");
+      }, () => reopen()),
+  });
+  tiles.push(backTile(back));
+  return tileMenu(player, { title: "SKILL TOOL SETTINGS", theme: "gold", body: (msg ? msg + "\n" : "") + "§7Pick a tool to change its stats and upgrades.", tiles });
+}
+
+function toolSettings(player, kind, back, msg) {
+  const t = SKILL_TOOLS[kind];
+  const reopen = (m) => toolSettings(player, kind, back, m);
+  const extra = kind === "farming" ? `§7Auto-replant from level: §f${t.replantLevel}` : `§7Head chance per level: §d+${t.headBonusPerLevel}%`;
+  return tileMenu(player, {
+    title: t.name.toUpperCase(),
+    theme: "gold",
+    body:
+      (msg ? msg + "\n" : "") +
+      `§7Price: §a${fmt(t.price)}   §7XP per use: §b${t.xpPerUse}   §7Bonus drops per level: §a+${t.bonusPerLevel}%\n${extra}`,
+    tiles: [
+      { text: "§e§lGENERAL", sub: "§7Price, XP, bonus", icon: ICON.admin, onClick: () => toolForm(player, kind, reopen) },
+      { text: "§d§lUPGRADES", sub: `§7${(TOOL_UPGRADES[kind] ?? []).length} upgrades`, icon: ICON.top, onClick: () => upgradesMenu(player, kind, () => reopen()) },
+      backTile(back),
+    ],
+  });
+}
+
+async function toolForm(player, kind, reopen) {
+  const t = SKILL_TOOLS[kind];
+  const v = await modal(player, `${t.name} settings`, (f) => {
+    f.textField("Name", t.name, { defaultValue: t.name });
+    f.textField("Shop price", String(t.price), { defaultValue: String(t.price) });
+    f.textField(kind === "farming" ? "XP per fully grown crop" : "XP per mob kill", String(t.xpPerUse), { defaultValue: String(t.xpPerUse) });
+    f.textField("Bonus drop chance per tool level (%)", String(t.bonusPerLevel), { defaultValue: String(t.bonusPerLevel) });
+    if (kind === "farming") f.textField("Auto-replant from tool level", String(t.replantLevel), { defaultValue: String(t.replantLevel) });
+    else f.textField("Extra head chance per tool level (%)", String(t.headBonusPerLevel), { defaultValue: String(t.headBonusPerLevel) });
+  });
+  if (!v) return reopen();
+  const name = String(v[0]).trim().slice(0, 24);
+  const price = num(v[1], 0), xp = num(v[2], 1), bonus = num(v[3], 0, true), last = num(v[4], 0, true);
+  if (!name || [price, xp, bonus, last].some((x) => x === undefined)) return reopen("§cCheck the numbers and try again.");
+  setTool(kind, { name, price, xpPerUse: xp, bonusPerLevel: bonus, ...(kind === "farming" ? { replantLevel: Math.max(1, Math.floor(last)) } : { headBonusPerLevel: last }) });
+  success(player, `${name} saved.`);
+  return reopen(`§a${name} saved.`);
+}
+
+function upgradesMenu(player, kind, back, msg) {
+  const reopen = (m) => upgradesMenu(player, kind, back, m);
+  const ups = TOOL_UPGRADES[kind] ?? [];
+  const tiles = ups.map((u, i) => ({
+    text: `${u.disabled ? "§c" : "§e"}§l${clip(u.name.toUpperCase(), 14)}`,
+    sub: u.disabled ? "§cOff" : `§7Max ${u.max} §d${clip(mobNameOf(u.headMob), 9)}`,
+    icon: u.icon,
+    onClick: () => upgradeForm(player, kind, i, reopen),
+  }));
+  tiles.push({
+    text: "§4§lRESET",
+    sub: "§7Default upgrades",
+    icon: ICON.cancel,
+    onClick: () =>
+      confirm(player, "RESET UPGRADES?", `§7${SKILL_TOOLS[kind].name} upgrades go back to the defaults.`, () => {
+        const defaults = defaultsFor("upgrades");
+        setUpgrades(kind, defaults[kind] ?? []);
+        return reopen("§aUpgrades reset to defaults.");
+      }, () => reopen()),
+  });
+  return tileMenu(player, {
+    title: `${SKILL_TOOLS[kind].name.toUpperCase()} UPGRADES`,
+    theme: "gold",
+    body: (msg ? msg + "\n" : "") + "§7Tap an upgrade to change its costs, head mob, bonus or turn it off.",
+    tiles: [...tiles, backTile(back)],
+  });
+}
+
+const mobNameOf = (mob) => SPAWNERS.find((s) => s.mob === mob)?.name ?? mob;
+
+async function upgradeForm(player, kind, i, reopen) {
+  const u = TOOL_UPGRADES[kind][i];
+  const mobIdx = Math.max(0, SPAWNERS.findIndex((s) => s.mob === u.headMob));
+  const v = await modal(player, `Upgrade: ${u.name}`, (f) => {
+    f.textField("Name", u.name, { defaultValue: u.name });
+    f.textField("Description", u.desc ?? "", { defaultValue: u.desc ?? "" });
+    f.dropdown("Paid with heads of", SPAWNERS.map((s) => s.name), { defaultValueIndex: mobIdx });
+    f.textField(`Money cost for each level, comma separated${u.enchant ? ` (max ${ENCHANT_MAX[u.enchant] ?? 5} levels)` : ""}`, list(u.money), { defaultValue: list(u.money) });
+    f.textField("Head cost for each level (same number of levels)", list(u.heads), { defaultValue: list(u.heads) });
+    if (!u.enchant) f.textField("Bonus per level (% or levels)", String(u.perLevel ?? 0), { defaultValue: String(u.perLevel ?? 0) });
+    f.toggle("Enabled (shown in the upgrade menu)", { defaultValue: !u.disabled });
+  });
+  if (!v) return reopen();
+  const name = String(v[0]).trim().slice(0, 20);
+  const desc = String(v[1]).trim().slice(0, 50);
+  const money = parseList(v[3]), heads = parseList(v[4]);
+  const perLevel = u.enchant ? undefined : num(v[5], 0, true);
+  const enabled = !!v[u.enchant ? 5 : 6];
+  if (!name || !money || !heads || money.length !== heads.length || (!u.enchant && perLevel === undefined)) {
+    fail(player, "Money and head costs must be lists of numbers with the same number of levels.");
+    return reopen("§cMoney and head costs need the same number of levels (e.g. 1000, 5000, 20000).");
+  }
+  const maxLv = u.enchant ? Math.min(money.length, ENCHANT_MAX[u.enchant] ?? 5) : money.length;
+  const next = TOOL_UPGRADES[kind].map((x) => ({ ...x }));
+  next[i] = {
+    ...u, name, desc, headMob: SPAWNERS[v[2]]?.mob ?? u.headMob,
+    money: money.slice(0, maxLv), heads: heads.slice(0, maxLv), max: maxLv,
+    ...(u.enchant ? {} : { perLevel }), disabled: !enabled,
+  };
+  setUpgrades(kind, next);
+  success(player, `${name} saved (${maxLv} levels).`);
+  return reopen(`§a${name} saved - ${maxLv} levels.`);
+}
+
+function toolLevelsMenu(player, back, msg) {
+  const reopen = (m) => toolLevelsMenu(player, back, m);
+  const L = TOOL_LEVELS;
+  const tiles = L.xpNeeded.map((xp, i) => ({
+    text: `§6§lLEVEL ${i + 1}`,
+    sub: `§b${xp}xp${i + 1 > L.freeLevels ? ` §7${L.collectionNeeded[i] ?? 0}` : ""}`,
+    icon: ICON.top,
+    onClick: () => toolLevelForm(player, i, reopen),
+  }));
+  tiles.push({
+    text: "§a§lFREE LEVELS",
+    sub: `§7Lv 1-${L.freeLevels}`,
+    icon: ICON.confirm,
+    onClick: async () => {
+      const v = await modal(player, "Free tool levels", (f) =>
+        f.textField("Levels that only need XP (no collection needed)", String(L.freeLevels), { defaultValue: String(L.freeLevels) })
+      );
+      if (!v) return reopen();
+      const n = num(v[0], 1);
+      if (n === undefined) return reopen("§cEnter a whole number.");
+      setToolLevels({ freeLevels: Math.min(n, L.xpNeeded.length) });
+      return reopen(`§aLevels 1-${Math.min(n, L.xpNeeded.length)} now only need XP.`);
+    },
+  });
+  return pagedMenu(player, {
+    title: "TOOL LEVELS",
+    theme: "gold",
+    body:
+      (msg ? msg + "\n" : "") +
+      `§7XP a tool needs for each level, and (above level ${L.freeLevels}) the total collection needed\n§8(all crops for the hoe, all mob kills for the sword).`,
+    tiles,
+    back,
+  });
+}
+
+async function toolLevelForm(player, i, reopen) {
+  const L = TOOL_LEVELS;
+  const v = await modal(player, `Tool level ${i + 1}`, (f) => {
+    if (i > 0) f.textField("Total XP needed for this level", String(L.xpNeeded[i]), { defaultValue: String(L.xpNeeded[i]) });
+    f.textField(`Collection needed${i + 1 <= L.freeLevels ? " (only used above the free levels)" : ""}`, String(L.collectionNeeded[i] ?? 0), { defaultValue: String(L.collectionNeeded[i] ?? 0) });
+  });
+  if (!v) return reopen();
+  const xp = i > 0 ? num(v[0], 1) : 0;
+  const col = num(v[i > 0 ? 1 : 0], 0);
+  if (xp === undefined || col === undefined) return reopen("§cEnter whole numbers.");
+  const xpNeeded = [...L.xpNeeded], collectionNeeded = [...L.collectionNeeded];
+  xpNeeded[i] = xp;
+  collectionNeeded[i] = col;
+  setToolLevels({ xpNeeded, collectionNeeded });
+  success(player, `Tool level ${i + 1}: ${xp} XP, ${col} collection.`);
+  return reopen(`§aLevel ${i + 1} saved.`);
+}
+
+// ---- collections -------------------------------------------------------------------
+function collectionsSettings(player, back, msg) {
+  const reopen = (m) => collectionsSettings(player, back, m);
+  const C = COLLECTION_TIERS;
+  const tiles = C.amounts.map((a, i) => ({
+    text: `§6§lTIER ${i + 1}`,
+    sub: `§7${a} §a${fmt(C.rewards[i] ?? 0)}`,
+    icon: ICON.top,
+    onClick: async () => {
+      const v = await modal(player, `Collection tier ${i + 1}`, (f) =>
+        f
+          .textField("Amount needed (crops harvested / mobs killed)", String(a), { defaultValue: String(a) })
+          .textField("Money reward (paid once)", String(C.rewards[i] ?? 0), { defaultValue: String(C.rewards[i] ?? 0) })
+      );
+      if (!v) return reopen();
+      const amount = num(v[0], 1), reward = num(v[1], 0);
+      if (amount === undefined || reward === undefined) return reopen("§cEnter whole numbers.");
+      const amounts = [...C.amounts], rewards = [...C.rewards];
+      amounts[i] = amount;
+      rewards[i] = reward;
+      setCollections({ amounts, rewards });
+      return reopen(`§aTier ${i + 1} saved.`);
+    },
+  }));
+  tiles.push({
+    text: "§a§lADD TIER",
+    sub: `§7Tier ${C.amounts.length + 1}`,
+    icon: ICON.confirm,
+    onClick: () => {
+      setCollections({ amounts: [...C.amounts, (C.amounts.at(-1) ?? 100) * 4], rewards: [...C.rewards, (C.rewards.at(-1) ?? 500) * 3] });
+      return reopen(`§aAdded tier ${C.amounts.length}. Tap it to set its numbers.`);
+    },
+  });
+  if (C.amounts.length > 1) {
+    tiles.push({
+      text: "§c§lREMOVE LAST",
+      sub: `§7Tier ${C.amounts.length}`,
+      icon: ICON.cancel,
+      onClick: () => {
+        setCollections({ amounts: C.amounts.slice(0, -1), rewards: C.rewards.slice(0, -1) });
+        return reopen("§aRemoved the last tier.");
+      },
+    });
+  }
+  tiles.push({
+    text: "§d§lBONUS",
+    sub: `§a+${C.bonusPerTier}% §7/tier`,
+    icon: ICON.coin,
+    onClick: async () => {
+      const v = await modal(player, "Collection bonus", (f) =>
+        f.textField("Bonus drop chance per tier (%)", String(C.bonusPerTier), { defaultValue: String(C.bonusPerTier) })
+      );
+      if (!v) return reopen();
+      const n = num(v[0], 0, true);
+      if (n === undefined) return reopen("§cEnter a number.");
+      setCollections({ bonusPerTier: n });
+      return reopen(`§aEach tier now gives +${n}% bonus drops.`);
+    },
+  });
+  tiles.push({
+    text: "§4§lRESET",
+    sub: "§7Defaults",
+    icon: ICON.cancel,
+    onClick: () =>
+      confirm(player, "RESET COLLECTIONS?", "§7Collection tiers and rewards go back to the defaults.\n§8(Players keep their collection counts.)", () => {
+        resetSection("collections");
+        return reopen("§aCollections reset to defaults.");
+      }, () => reopen()),
+  });
+  return pagedMenu(player, {
+    title: "COLLECTION SETTINGS",
+    theme: "gold",
+    body: (msg ? msg + "\n" : "") + "§7Tiers every crop & mob collection goes through. Each pays money once and adds bonus drops.",
+    tiles,
+    back,
+  });
+}

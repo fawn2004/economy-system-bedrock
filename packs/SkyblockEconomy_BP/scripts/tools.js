@@ -99,8 +99,9 @@ function writeTool(stack, kind, level, xp, player, ups = {}) {
   else if (xp >= next) lore.push(`§7XP: §b${commas(xp)} §6READY TO LEVEL UP`);
   else lore.push(`§7XP: §b${commas(xp)}§7/§b${commas(next)} ${bar(xp, next)}`);
   lore.push(`§7Bonus drops: §a+${level * t.bonusPerLevel}%`);
-  if (kind === "farming") lore.push(`§7Auto-replant: ${level >= t.replantLevel ? "§aYes" : `§cLv ${t.replantLevel}`}`);
+  if (kind === "farming") lore.push(`§7Auto-replant: ${level >= t.replantLevel || ups.replenish > 0 ? "§aYes" : `§cLv ${t.replantLevel}`}`);
   const upBonus = (id) => (ups[id] ?? 0) * (upgradeDef(kind, id)?.perLevel ?? 0);
+  if (kind === "farming") lore[2] = `§7Bonus drops: §a+${level * t.bonusPerLevel + upBonus("harvester")}%`;
   if (kind === "slayer") {
     lore[lore.length - 1] = `§7Bonus drops: §a+${level * t.bonusPerLevel + upBonus("plunder")}%`;
     lore.push(`§7Head chance: §d+${level * t.headBonusPerLevel + upBonus("head_hunter")}%`);
@@ -153,7 +154,8 @@ function heldTool(player, kind) {
 
 function addToolXp(player, held) {
   const kind = held.kind;
-  const xp = held.xp + SKILL_TOOLS[kind].xpPerUse;
+  const boost = 1 + ((held.ups.cultivating ?? 0) * (upgradeDef(kind, "cultivating")?.perLevel ?? 0)) / 100;
+  const xp = held.xp + Math.max(1, Math.round(SKILL_TOOLS[kind].xpPerUse * boost));
   const target = Math.min(levelFromXp(xp), levelCap(player, kind));
   const level = Math.max(held.level, target);
   writeTool(held.item, kind, level, xp, player, held.ups);
@@ -195,7 +197,7 @@ export async function upgradeMenu(player, back, msg) {
   }
   const kind = held.kind;
   const t = SKILL_TOOLS[kind];
-  const defs = TOOL_UPGRADES[kind] ?? [];
+  const defs = (TOOL_UPGRADES[kind] ?? []).filter((u) => !u.disabled);
   const reopen = (m) => upgradeMenu(player, back, m);
   const tiles = defs.map((u) => {
     const cur = held.ups[u.id] ?? 0;
@@ -285,7 +287,8 @@ export function registerTools() {
     const held = heldTool(player, "farming");
     let level = 0;
     if (held) level = addToolXp(player, held);
-    const pct = level * SKILL_TOOLS.farming.bonusPerLevel + tierOf(getCol(player, "crop", crop.id)) * COLLECTION_TIERS.bonusPerTier;
+    const harvester = held ? (held.ups.harvester ?? 0) * (upgradeDef("farming", "harvester")?.perLevel ?? 0) : 0;
+    const pct = level * SKILL_TOOLS.farming.bonusPerLevel + harvester + tierOf(getCol(player, "crop", crop.id)) * COLLECTION_TIERS.bonusPerTier;
     const extra = rollExtra(pct);
     const at = { x: ev.block.x + 0.5, y: ev.block.y + 0.5, z: ev.block.z + 0.5 };
     if (extra > 0) {
@@ -294,7 +297,7 @@ export function registerTools() {
       } catch {}
     }
     // auto-replant (crops that grow in stages only)
-    if (held && !crop.grown && level >= SKILL_TOOLS.farming.replantLevel) {
+    if (held && !crop.grown && (level >= SKILL_TOOLS.farming.replantLevel || held.ups.replenish > 0)) {
       const dim = ev.dimension, loc = ev.block.location;
       system.run(() => {
         try {

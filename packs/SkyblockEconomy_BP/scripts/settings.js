@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import { CONFIG, KITS, SPAWNERS, SPAWNER_SETTINGS } from "./config.js";
+import { COLLECTION_TIERS, CONFIG, KITS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 
 // ============================================================================
 //  IN-GAME SETTINGS
@@ -27,6 +27,10 @@ const DEFAULTS = {
   spawner: clone(SPAWNER_SETTINGS),
   mobs: Object.fromEntries(SPAWNERS.map((s) => [s.mob, { price: s.price, disabled: false }])),
   kits: clone(KITS),
+  tools: clone(SKILL_TOOLS),
+  upgrades: clone(TOOL_UPGRADES),
+  toolLevels: clone(TOOL_LEVELS),
+  collections: clone(COLLECTION_TIERS),
 };
 
 // Spawner settings that are simple numbers / switches (shown in the settings form)
@@ -89,6 +93,23 @@ function applyKits() {
   KITS.push(...clone(kits));
 }
 
+function replaceObject(target, values) {
+  for (const k of Object.keys(target)) delete target[k];
+  Object.assign(target, clone(values));
+}
+
+function applyTools() {
+  for (const kind of Object.keys(SKILL_TOOLS)) {
+    replaceObject(SKILL_TOOLS[kind], { ...DEFAULTS.tools[kind], ...(saved.tools?.[kind] ?? {}) });
+  }
+  for (const kind of Object.keys(DEFAULTS.upgrades)) {
+    TOOL_UPGRADES[kind].length = 0;
+    TOOL_UPGRADES[kind].push(...clone(saved.upgrades?.[kind] ?? DEFAULTS.upgrades[kind]));
+  }
+  replaceObject(TOOL_LEVELS, { ...DEFAULTS.toolLevels, ...(saved.toolLevels ?? {}) });
+  replaceObject(COLLECTION_TIERS, { ...DEFAULTS.collections, ...(saved.collections ?? {}) });
+}
+
 /** Call once when the world loads. */
 export function applySavedSettings() {
   saved = readSaved();
@@ -96,6 +117,33 @@ export function applySavedSettings() {
   applySpawner();
   applyMobs();
   applyKits();
+  applyTools();
+}
+
+export function setTool(kind, values) {
+  saved.tools = saved.tools ?? {};
+  saved.tools[kind] = { ...(saved.tools[kind] ?? {}), ...values };
+  store();
+  applyTools();
+}
+
+export function setUpgrades(kind, list) {
+  saved.upgrades = saved.upgrades ?? {};
+  saved.upgrades[kind] = clone(list);
+  store();
+  applyTools();
+}
+
+export function setToolLevels(values) {
+  saved.toolLevels = { ...clone(TOOL_LEVELS), ...values };
+  store();
+  applyTools();
+}
+
+export function setCollections(values) {
+  saved.collections = { ...clone(COLLECTION_TIERS), ...values };
+  store();
+  applyTools();
 }
 
 function store() {

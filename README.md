@@ -53,8 +53,10 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
   each tier pays money once and adds a permanent bonus drop chance for that crop/mob.
   Hand-placed melons, pumpkins, sugar cane and cactus don't count.
 - **Upgrades:** sneak + use a skill tool (or Collections > Upgrade Tool) to open its upgrade
-  menu. The Slayer Sword has Sharpness, Looting, Fire Aspect, Head Hunter (+head chance) and
-  Plunder (+bonus drops), each paid with money **and** heads of a specific mob.
+  menu. Slayer Sword: Sharpness, Looting, Fire Aspect, Head Hunter (+head chance), Plunder
+  (+bonus drops). Farming Hoe: Harvester (+bonus crops), Cultivating (+XP), Fortune,
+  Efficiency, Replenish (auto-replant at any level). Each level costs money **and** heads
+  of a specific mob.
 - Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `TOOL_UPGRADES`, `COLLECTION_TIERS`, `CROPS`
   and `MOB_DROPS` in `config.js`.
 
@@ -126,6 +128,10 @@ Edits are saved in the world, so they survive restarts **and add-on updates**.
 - **Spawners > Mob Prices:** each spawner's price, or hide it from the shop.
 - **Kits:** edit name/price/cooldown/badge, hide, delete, **set a kit's items from your
   inventory** (enchantments and names kept), or create a **new kit** from your inventory.
+- **Skill Tools:** each tool's name, price, XP per use, bonus per level, replant level /
+  head bonus; every **upgrade's** money and head costs per level, which mob's heads it
+  uses, its bonus and on/off; and **Tool Levels** (XP and collection needed per level).
+- **Collections:** tier amounts, money rewards, bonus drop % per tier; add/remove tiers.
 - **Economy:** starting money, currency symbol, items per shop page, compass on join.
 - **Floor items:** dropped stackable items within a few blocks merge into one pile with a
   counter (e.g. *Bone x500*) to reduce lag. Non-stackable items are left alone. Piles give

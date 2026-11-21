@@ -370,6 +370,33 @@ export const MOB_DROPS = {
 //  enchant = vanilla enchantment it sets;  perLevel = custom bonus per level
 // ============================================================================
 export const TOOL_UPGRADES = {
+  farming: [
+    {
+      id: "harvester", name: "Harvester", max: 5, perLevel: 10, icon: "textures/items/wheat",
+      desc: "+10% bonus crop drops per level", headMob: "cow",
+      money: [2000, 5000, 12000, 25000, 50000], heads: [5, 10, 20, 40, 80],
+    },
+    {
+      id: "cultivating", name: "Cultivating", max: 4, perLevel: 25, icon: "textures/items/experience_bottle",
+      desc: "+25% hoe XP per level", headMob: "sheep",
+      money: [3000, 8000, 20000, 45000], heads: [5, 15, 30, 60],
+    },
+    {
+      id: "fortune", name: "Fortune", enchant: "fortune", max: 3, icon: "textures/items/emerald",
+      desc: "Vanilla Fortune", headMob: "pig",
+      money: [5000, 15000, 40000], heads: [10, 25, 50],
+    },
+    {
+      id: "efficiency", name: "Efficiency", enchant: "efficiency", max: 5, icon: "textures/items/gold_hoe",
+      desc: "Breaks melons & pumpkins faster", headMob: "chicken",
+      money: [1000, 3000, 7000, 15000, 30000], heads: [3, 6, 12, 25, 50],
+    },
+    {
+      id: "replenish", name: "Replenish", max: 1, perLevel: 1, icon: "textures/items/seeds_wheat",
+      desc: "Auto-replant at any tool level", headMob: "rabbit",
+      money: [15000], heads: [20],
+    },
+  ],
   slayer: [
     {
       id: "sharpness", name: "Sharpness", enchant: "sharpness", max: 5, icon: "textures/items/diamond_sword",
