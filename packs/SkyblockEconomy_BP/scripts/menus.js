@@ -1,4 +1,4 @@
-import { world } from "@minecraft/server";
+import { ItemStack, world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
 import { BADGES, CONFIG, KITS, SHOP_LAYOUT, SPAWNERS } from "./config.js";
@@ -16,7 +16,17 @@ import {
 import { settingsMenu } from "./adminSettings.js";
 import { editItemMenu, editorMenu } from "./editor.js";
 import { clearGroundItems } from "./groundItems.js";
-import { allHeadPoints, countHeads, depositHeads, makeSpawnerItem, mobIcon, mobName } from "./spawners.js";
+import {
+  addHeadPoints,
+  allHeadPoints,
+  countHeads,
+  depositHeads,
+  getHeadPoints,
+  headItemId,
+  makeSpawnerItem,
+  mobIcon,
+  mobName,
+} from "./spawners.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 
 const U = "textures/ui/eco/";
@@ -560,57 +570,63 @@ async function topMenu(player, back) {
 // ============================================================================
 //  ADMIN  (players with the "admin" tag)
 // ============================================================================
-async function adminMenu(player) {
+async function adminMenu(player, msg) {
+  if (!player.hasTag(CONFIG.adminTag)) return;
+  const back = () => adminMenu(player);
+  await tileMenu(player, {
+    title: "ADMIN PANEL",
+    theme: "red",
+    body: (msg ? msg + "\n" : "") + "§7Admin tools. §8Only players with the admin tag see this.",
+    tiles: [
+      { text: "§a§lMONEY", sub: "§7Player balances", icon: ICON.bank, onClick: () => adminMoneyMenu(player) },
+      { text: "§d§lHEADS", sub: "§7Player head balances", icon: mobIcon("zombie"), onClick: () => adminHeadsMenu(player) },
+      { text: "§b§lSETTINGS", sub: "§7Spawners, kits...", icon: ICON.admin, onClick: () => settingsMenu(player, back) },
+      { text: "§6§lSHOP EDITOR", sub: "§7Move/hide items", icon: ICON.shop, onClick: () => editorMenu(player, back) },
+      {
+        text: "§c§lCLEAR ITEMS",
+        sub: "§7Remove floor items",
+        icon: ICON.cancel,
+        onClick: () => {
+          const n = clearGroundItems();
+          success(player, `Removed ${n} dropped item piles.`);
+          return adminMenu(player, `§aRemoved §f${n} §adropped item piles.`);
+        },
+      },
+      {
+        text: "§e§lCOMPASS",
+        sub: "§7Give to all",
+        icon: ICON.confirm,
+        onClick: () => {
+          for (const p of world.getPlayers()) giveCompass(p, CONFIG.compass.slot);
+          success(player, "Gave a menu compass to everyone who was missing one.");
+          return adminMenu(player, "§aGave compasses to everyone missing one.");
+        },
+      },
+      backTile(() => mainMenu(player)),
+    ],
+  });
+}
+
+// ---- admin: money ------------------------------------------------------------
+async function adminMoneyMenu(player) {
   if (!player.hasTag(CONFIG.adminTag)) return;
   const tiles = world.getPlayers().map((p) => ({
-    text: `§f${p.name}`,
+    text: `§f${clip(p.name)}`,
     sub: `§a${fmtShort(getBalance(p))}`,
     icon: ICON.player,
     onClick: () => adminPlayerMenu(player, p),
   }));
-  tiles.push({
-    text: "§b§lSETTINGS",
-    sub: "§7Spawners, kits...",
-    icon: ICON.admin,
-    onClick: () => settingsMenu(player, () => adminMenu(player)),
-  });
-  tiles.push({
-    text: "§6§lSHOP EDITOR",
-    sub: "§7Move/hide items",
-    icon: ICON.shop,
-    onClick: () => editorMenu(player, () => adminMenu(player)),
-  });
-  tiles.push({
-    text: "§c§lCLEAR ITEMS",
-    sub: "§7Remove floor items",
-    icon: ICON.cancel,
-    onClick: () => {
-      const n = clearGroundItems();
-      success(player, `Removed ${n} dropped item piles.`);
-      return adminMenu(player);
-    },
-  });
-  tiles.push({
-    text: "§e§lCOMPASS",
-    sub: "§7Give to all",
-    icon: ICON.confirm,
-    onClick: () => {
-      for (const p of world.getPlayers()) giveCompass(p, CONFIG.compass.slot);
-      success(player, "Gave a menu compass to everyone who was missing one.");
-      return adminMenu(player);
-    },
-  });
-  tiles.push(backTile(() => mainMenu(player)));
+  tiles.push(backTile(() => adminMenu(player)));
   await tileMenu(player, {
-    title: "ADMIN PANEL",
-    theme: "red",
-    body: "§7Pick a player to manage their money.\n§8Tip: /scoreboard players add <name> money <amount> also works",
+    title: "PLAYER MONEY",
+    theme: "green",
+    body: "§7Pick a player to add, remove or set their money.\n§8Tip: /scoreboard players add <name> money <amount> also works",
     tiles,
   });
 }
 
 async function adminPlayerMenu(player, target, msg) {
-  if (!target.isValid) return adminMenu(player);
+  if (!target.isValid) return adminMoneyMenu(player);
   const change = (delta) => () => {
     const now = delta === null ? setBalance(target, 0) : addMoney(target, delta);
     success(player, `${target.name} now has ${fmt(now)}.`);
@@ -639,19 +655,110 @@ async function adminPlayerMenu(player, target, msg) {
           fail(player, "Enter a whole number.");
           return adminPlayerMenu(player, target);
         }
-        if (!target.isValid) return adminMenu(player);
+        if (!target.isValid) return adminMoneyMenu(player);
         const now =
           action === 0 ? addMoney(target, amount) : action === 1 ? addMoney(target, -amount) : setBalance(target, amount);
         success(player, `${target.name} now has ${fmt(now)}.`);
         return adminPlayerMenu(player, target, `§a${target.name} now has §f${fmt(now)}`);
       },
     },
-    backTile(() => adminMenu(player)),
+    backTile(() => adminMoneyMenu(player)),
   ];
   await tileMenu(player, {
     title: target.name.toUpperCase(),
     theme: "red",
     body: `${msgLine(msg)}§7Balance of §f${target.name}§7: §a${fmt(getBalance(target))}`,
     tiles,
+  });
+}
+
+// ---- admin: heads ------------------------------------------------------------
+async function adminHeadsMenu(player) {
+  if (!player.hasTag(CONFIG.adminTag)) return;
+  const tiles = world.getPlayers().map((p) => {
+    const total = allHeadPoints(p).reduce((n, h) => n + h.points, 0);
+    return { text: `§f${clip(p.name)}`, sub: `§d${total} heads`, icon: ICON.player, onClick: () => adminHeadsPlayer(player, p) };
+  });
+  tiles.push(backTile(() => adminMenu(player)));
+  await tileMenu(player, {
+    title: "PLAYER HEADS",
+    theme: "purple",
+    body: "§7Pick a player to give or take enchanted heads.\n§8Heads are per mob and upgrade that mob's spawners.",
+    tiles,
+  });
+}
+
+async function adminHeadsPlayer(player, target) {
+  if (!target.isValid) return adminHeadsMenu(player);
+  const tiles = SPAWNERS.map((sp) => ({
+    text: `§f${clip(sp.name)}`,
+    sub: `§d${getHeadPoints(target, sp.mob)} heads`,
+    icon: mobIcon(sp.mob),
+    onClick: () => adminHeadsMob(player, target, sp.mob),
+  }));
+  tiles.push(backTile(() => adminHeadsMenu(player)));
+  await tileMenu(player, {
+    title: `${clip(target.name.toUpperCase(), 16)}: HEADS`,
+    theme: "purple",
+    body: `§7Pick a mob to change §f${target.name}§7's heads for it.`,
+    tiles: withNav(tiles.slice(0, -1), { back: () => adminHeadsMenu(player) }),
+  });
+}
+
+async function adminHeadsMob(player, target, mob, msg) {
+  if (!target.isValid) return adminHeadsMenu(player);
+  const name = mobName(mob);
+  const change = (delta) => () => {
+    const now = delta === null ? 0 : Math.max(0, getHeadPoints(target, mob) + delta);
+    addHeadPoints(target, mob, now - getHeadPoints(target, mob));
+    success(player, `${target.name} now has ${now} ${name} heads.`);
+    return adminHeadsMob(player, target, mob, `§a${target.name} now has §f${now} §a${name} heads`);
+  };
+  await tileMenu(player, {
+    title: `${clip(name.toUpperCase(), 16)} HEADS`,
+    theme: "purple",
+    body: `${msg ? msg + "\n" : ""}§f${target.name}§7 has §d${getHeadPoints(target, mob)} ${name} heads§7.`,
+    tiles: [
+      { text: "§a§l+10", sub: "§7Add", icon: mobIcon(mob), onClick: change(10) },
+      { text: "§a§l+50", sub: "§7Add", icon: mobIcon(mob), onClick: change(50) },
+      { text: "§a§l+100", sub: "§7Add", icon: mobIcon(mob), onClick: change(100) },
+      { text: "§c§l-10", sub: "§7Remove", icon: mobIcon(mob), onClick: change(-10) },
+      { text: "§c§l-50", sub: "§7Remove", icon: mobIcon(mob), onClick: change(-50) },
+      { text: "§4§lRESET", sub: "§7Set to 0", icon: ICON.cancel, onClick: change(null) },
+      {
+        text: "§b§lCUSTOM",
+        sub: "§7Add/Remove/Set",
+        icon: ICON.admin,
+        onClick: async () => {
+          const res = await showForm(
+            player,
+            new ModalFormData().title(`${name} heads: ${target.name}`).dropdown("Action", ["Add", "Remove", "Set"]).textField("Amount", "100")
+          );
+          if (!res || res.canceled) return adminHeadsMob(player, target, mob);
+          const [action, raw] = res.formValues;
+          const amount = Math.floor(Number(String(raw).replace(/[,\s]/g, "")));
+          if (!Number.isFinite(amount) || amount < 0) {
+            fail(player, "Enter a whole number.");
+            return adminHeadsMob(player, target, mob);
+          }
+          const cur = getHeadPoints(target, mob);
+          return change(action === 0 ? amount : action === 1 ? -amount : amount - cur)();
+        },
+      },
+      {
+        text: "§d§lGIVE ITEMS",
+        sub: "§7Head items x64",
+        icon: ICON.shop,
+        onClick: () => {
+          try {
+            const overflow = target.getComponent("minecraft:inventory").container.addItem(new ItemStack(headItemId(mob), 64));
+            if (overflow) target.dimension.spawnItem(overflow, target.location);
+          } catch {}
+          success(player, `Gave ${target.name} 64 Enchanted ${name} Heads (items).`);
+          return adminHeadsMob(player, target, mob, `§aGave §f64 §aEnchanted ${name} Head items`);
+        },
+      },
+      backTile(() => adminHeadsPlayer(player, target)),
+    ],
   });
 }

@@ -15,7 +15,7 @@ custom-styled menus: dark panels, coloured header bars, icon tiles and NEW!/HOT!
 | **Balance** | Your money and leaderboard rank |
 | **Pay** | Send money to online players |
 | **Baltop** | Top 10 richest players (offline players included) |
-| **Admin** | Only for players tagged `admin`: add/remove/set money, give compasses |
+| **Admin** | Only for players tagged `admin`: **Money** and **Heads** (per player), **Settings**, **Shop Editor**, **Clear Items**, **Compass** |
 
 Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration), **Food**,
 **Kits**, **Spawners**, **Farming**, **Ores**, **Tools & Armor**, **Redstone**, **Mob Drops**,
