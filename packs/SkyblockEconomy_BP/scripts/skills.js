@@ -1,6 +1,7 @@
 import { ItemStack, system, world } from "@minecraft/server";
 import { COLLECTION_TIERS, CROPS, SKILLS, SKILL_SETTINGS as SS, SKILL_TOOLS, SPAWNERS, TOOL_LEVELS } from "./config.js";
 import { rankOn } from "./leaderboards.js";
+import { pref } from "./playerSettings.js";
 import { collectionTotal, getCol } from "./tools.js";
 import { addMoney, fmt } from "./economy.js";
 import { backTile, tileMenu } from "./ui.js";
@@ -56,7 +57,7 @@ export function addSkillXp(player, id, amount) {
   const total = getSkillXp(player, id) + gain;
   player.setDynamicProperty(`eco:skill:${id}`, total);
   const info = levelInfo(total);
-  if (SS.showActionBar) {
+  if (SS.showActionBar && pref(player, "xpbar", true)) {
     try {
       player.onScreenDisplay.setActionBar(
         info.need ? `§3+${gain} ${s.name} XP §7(${commas(info.into)}/${commas(info.need)})` : `§3+${gain} ${s.name} XP §6MAX`

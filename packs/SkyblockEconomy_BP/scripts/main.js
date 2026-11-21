@@ -12,6 +12,7 @@ import { registerMinions } from "./minions.js";
 import { registerLeaderboards } from "./leaderboards.js";
 import { registerChunkHoppers } from "./chunkHopper.js";
 import { registerNpcs } from "./npc.js";
+import { registerPlayerSettings } from "./playerSettings.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -60,3 +61,4 @@ registerMinions();
 registerLeaderboards();
 registerChunkHoppers();
 registerNpcs();
+registerPlayerSettings();

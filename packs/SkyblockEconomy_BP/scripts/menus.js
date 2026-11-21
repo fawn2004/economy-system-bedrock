@@ -17,6 +17,7 @@ import { settingsMenu } from "./adminSettings.js";
 import { leaderboardsMenu } from "./leaderboards.js";
 import { makeHopperItem } from "./chunkHopper.js";
 import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
+import { playerSettingsMenu } from "./playerSettings.js";
 import { isMinionLoot, lootIcon, lootIdFor, lootName, lootSellPrice, makeMinionItem } from "./minions.js";
 import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
@@ -88,6 +89,12 @@ export async function mainMenu(player) {
         ]),
     },
   ];
+  tiles.push({
+    text: "§9§lPLAYER SETTINGS",
+    sub: "§7Chunk borders...",
+    icon: "textures/items/clock_item",
+    onClick: () => playerSettingsMenu(player, () => mainMenu(player)),
+  });
   if (player.hasTag(CONFIG.adminTag)) {
     tiles.push({ text: "§c§lADMIN", sub: "§7Settings & tools", icon: ICON.admin, onClick: () => adminMenu(player) });
   }
