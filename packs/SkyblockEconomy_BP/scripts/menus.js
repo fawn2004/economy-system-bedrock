@@ -13,6 +13,7 @@ import {
   removeAllPlain,
   spaceFor,
 } from "./inventory.js";
+import { editItemMenu, editorMenu } from "./editor.js";
 import { makeSpawnerItem } from "./spawners.js";
 import { ICON, backTile, fail, showForm, success, tileMenu } from "./ui.js";
 
@@ -177,6 +178,14 @@ async function buyItemMenu(player, item, back, msg) {
       onClick: () => buyItemMenu(player, item, back, buyItem(player, item, n)),
     };
   });
+  if (player.hasTag(CONFIG.adminTag)) {
+    tiles.push({
+      text: "§c§lEDIT",
+      sub: "§7Admin only",
+      icon: ICON.admin,
+      onClick: () => editItemMenu(player, item.id, () => buyItemMenu(player, getCatalog().all.get(item.id) ?? item, back)),
+    });
+  }
   tiles.push(backTile(back));
   const sellInfo = item.sell > 0 ? `§7Sells for: §6${fmt(item.sell)}` : "§8Can't be sold";
   await tileMenu(player, {
@@ -489,6 +498,12 @@ async function adminMenu(player) {
     icon: ICON.player,
     onClick: () => adminPlayerMenu(player, p),
   }));
+  tiles.push({
+    text: "§6§lSHOP EDITOR",
+    sub: "§7Move/hide items",
+    icon: ICON.shop,
+    onClick: () => editorMenu(player, () => adminMenu(player)),
+  });
   tiles.push({
     text: "§e§lCOMPASS",
     sub: "§7Give to all",

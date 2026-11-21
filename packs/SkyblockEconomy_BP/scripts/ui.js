@@ -68,3 +68,19 @@ export function fail(player, msg) {
   player.sendMessage(`§c§l✘ §r§c${msg}`);
   player.playSound("note.bass", { pitch: 0.7 });
 }
+
+/**
+ * tileMenu with automatic pages: shows `perPage` tiles plus PREV / NEXT / BACK.
+ *   opts: { title, theme, body, tiles, back, perPage? }
+ */
+export async function pagedMenu(player, opts, page = 0) {
+  const per = opts.perPage ?? 20;
+  const pages = Math.max(1, Math.ceil(opts.tiles.length / per));
+  page = Math.min(Math.max(0, page), pages - 1);
+  const tiles = opts.tiles.slice(page * per, page * per + per);
+  if (page > 0) tiles.push({ text: "§e§l< PREV", sub: `§7Page ${page}`, icon: ICON.back, onClick: () => pagedMenu(player, opts, page - 1) });
+  if (page < pages - 1) tiles.push({ text: "§e§lNEXT >", sub: `§7Page ${page + 2}`, icon: ICON.confirm, onClick: () => pagedMenu(player, opts, page + 1) });
+  if (opts.back) tiles.push(backTile(opts.back));
+  const info = pages > 1 ? `\n§7Page §f${page + 1}§7/§f${pages}` : "";
+  return tileMenu(player, { title: opts.title, theme: opts.theme, body: (opts.body ?? "") + info, tiles });
+}

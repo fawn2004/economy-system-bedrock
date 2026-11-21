@@ -45,6 +45,51 @@ export const PRICE_OVERRIDES = {
   // "minecraft:diamond": { buy: 250, sell: 100 },
 };
 
+// ----------------------------------------------------------------------------
+//  Move items to a different shop category:  "minecraft:item": "category id"
+//  (You can also do this in-game: Admin > Shop Editor, or the EDIT button on
+//   any item's buy screen. In-game edits win over this list.)
+//
+//  Category ids:
+//    stone            Blocks > Stone
+//    wood             Blocks > Wood
+//    natural          Blocks > Dirt & Natural
+//    colored          Blocks > Colours
+//    wood_logs        Wood > Logs
+//    wood_planks      Wood > Planks
+//    wood_leaves      Wood > Leaves
+//    wood_stairs      Wood > Stairs
+//    wood_slabs       Wood > Slabs
+//    wood_doors       Wood > Doors
+//    wood_trapdoors   Wood > Trapdoors
+//    wood_fences      Wood > Fences
+//    wood_signs       Wood > Signs
+//    wood_boats       Wood > Boats
+//    stone_stairs     Stone > Stairs
+//    stone_slabs      Stone > Slabs
+//    stone_walls      Stone > Walls
+//    stone_bricks     Stone > Bricks
+//    stone_polished   Stone > Polished
+//    stone_copper     Stone > Copper
+//    nether           Blocks > Nether
+//    end              Blocks > The End
+//    decor            Blocks > Decoration
+//    treasure         Treasure
+//    ores             Ores
+//    tools            Tools & Armor
+//    redstone         Redstone
+//    food             Food
+//    farming          Farming
+//    misc             Misc
+//    saplings         Farming > Saplings
+//    buckets          Buckets
+//    mobs             Mob Drops
+//    brewing          Brewing
+// ----------------------------------------------------------------------------
+export const CATEGORY_MOVES = {
+  // "minecraft:egg": "mobs",
+};
+
 // Items that never appear in the shop and can't be sold
 export const DISABLED_ITEMS = [
   // "minecraft:elytra",

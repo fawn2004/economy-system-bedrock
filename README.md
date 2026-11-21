@@ -67,10 +67,26 @@ trees and so on.
 /execute as @p run scriptevent eco:menu    open the menu (e.g. from an NPC/command block)
 ```
 
+## Shop Editor (in-game, no files needed)
+
+Admins (`/tag <name> add admin`) can rearrange the shop live, even on a Realm:
+
+- **EDIT button:** open any item in the shop and press **EDIT**.
+- **Admin > Shop Editor:** search for an item, browse a category, or see hidden/edited items.
+
+For each item you can:
+- **Move** it to any category or sub-section (e.g. *Wood > Stairs*).
+- **Hide** it (gone from the shop and can't be sold) or **Show** it again.
+- **Price:** set its buy and sell price (sell can't be higher than buy).
+- **Reset** it back to normal. *Reset All* undoes every edit.
+
+Edits are saved in the world, so they survive restarts **and add-on updates**.
+
 ## Customising
 
 - **Kits, spawners, starting money, shop tile order:** `packs/SkyblockEconomy_BP/scripts/config.js`
-- **One-off price changes / hiding items:** `PRICE_OVERRIDES` / `DISABLED_ITEMS` in `config.js`.
+- **Moving / hiding / repricing items in a file instead:** `CATEGORY_MOVES`, `DISABLED_ITEMS` and
+  `PRICE_OVERRIDES` in `config.js` (the category ids are listed there).
   Overrides skip the anti-profit check, so keep sell prices below buy prices.
 - **All prices at once:** edit `BASE` / `SELL_RATIO` in `tools/generate_prices.py`, then:
   ```
