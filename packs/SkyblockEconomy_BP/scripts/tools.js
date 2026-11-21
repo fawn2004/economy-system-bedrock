@@ -2,6 +2,8 @@ import { BlockPermutation, EnchantmentTypes, ItemStack, system, world } from "@m
 import { COLLECTION_TIERS, CROPS, MOB_DROPS, SKILL_TOOLS, SPAWNERS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 import { addMoney, fmt, getBalance, takeMoney } from "./economy.js";
 import { addHeadPoints, getHeadPoints, mobName } from "./spawners.js";
+import { addSkillXp, skillPerk } from "./skills.js";
+import { SKILLS } from "./config.js";
 import { ICON, backTile, fail, success, tileMenu, withNav } from "./ui.js";
 
 // ============================================================================
@@ -338,8 +340,11 @@ export function registerTools() {
     const held = heldTool(player, "farming");
     let level = 0;
     if (held) level = addToolXp(player, held);
+    addSkillXp(player, "farming", SKILLS.farming.xp?.[crop.id] ?? 1);
     const harvester = held ? (held.ups.harvester ?? 0) * (upgradeDef("farming", "harvester")?.perLevel ?? 0) : 0;
-    const pct = level * SKILL_TOOLS.farming.bonusPerLevel + harvester + tierOf(getCol(player, "crop", crop.id)) * COLLECTION_TIERS.bonusPerTier;
+    const pct =
+      level * SKILL_TOOLS.farming.bonusPerLevel + harvester + skillPerk(player, "farming") +
+      tierOf(getCol(player, "crop", crop.id)) * COLLECTION_TIERS.bonusPerTier;
     const extra = rollExtra(pct);
     const at = { x: ev.block.x + 0.5, y: ev.block.y + 0.5, z: ev.block.z + 0.5 };
     const ft = SKILL_TOOLS.farming;
@@ -386,8 +391,11 @@ export function registerTools() {
     const held = heldTool(killer, "slayer");
     let level = 0;
     if (held) level = addToolXp(killer, held);
+    addSkillXp(killer, "combat", SKILLS.combat.xp?.[key] ?? SKILLS.combat.xpDefault ?? 1);
     const plunder = held ? (held.ups.plunder ?? 0) * (upgradeDef("slayer", "plunder")?.perLevel ?? 0) : 0;
-    const pct = level * SKILL_TOOLS.slayer.bonusPerLevel + plunder + tierOf(getCol(killer, "mob", key)) * COLLECTION_TIERS.bonusPerTier;
+    const pct =
+      level * SKILL_TOOLS.slayer.bonusPerLevel + plunder + skillPerk(killer, "combat") +
+      tierOf(getCol(killer, "mob", key)) * COLLECTION_TIERS.bonusPerTier;
     const sets = rollExtra(pct);
     for (let s = 0; s < sets; s++) {
       for (const [item, min, max] of MOB_DROPS[key] ?? []) {

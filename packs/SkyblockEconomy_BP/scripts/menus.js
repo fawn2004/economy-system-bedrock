@@ -1,7 +1,7 @@
 import { ItemStack, world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
-import { BADGES, CONFIG, CROPS, KITS, SHOP_LAYOUT, SKILL_TOOLS, SPAWNERS } from "./config.js";
+import { BADGES, CONFIG, CROPS, KITS, SHOP_LAYOUT, SKILLS, SKILL_TOOLS, SPAWNERS } from "./config.js";
 import { addMoney, fmt, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
   applyEnchants,
@@ -14,6 +14,7 @@ import {
   spaceFor,
 } from "./inventory.js";
 import { settingsMenu } from "./adminSettings.js";
+import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
 import { clearGroundItems } from "./groundItems.js";
 import {
@@ -73,7 +74,15 @@ export async function mainMenu(player) {
     { text: "§a§lSELL", sub: "§7Sell your loot", icon: ICON.sell, onClick: () => sellMenu(player) },
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
     { text: "§6§lBALTOP", sub: "§7Richest players", icon: ICON.top, onClick: () => topMenu(player, () => mainMenu(player)) },
-    { text: "§e§lCOLLECTIONS", sub: "§7Farming & combat", icon: "textures/ui/eco/icon_farming", onClick: () => collectionsMenu(player, () => mainMenu(player)) },
+    {
+      text: "§b§lSKILLS",
+      sub: "§7Skills & collections",
+      icon: "textures/items/iron_pickaxe",
+      onClick: () =>
+        skillsMenu(player, () => mainMenu(player), [
+          { text: "§e§lCOLLECTIONS", sub: "§7Crops & mobs", icon: "textures/ui/eco/icon_farming", onClick: (back) => collectionsMenu(player, back) },
+        ]),
+    },
   ];
   if (player.hasTag(CONFIG.adminTag)) {
     tiles.push({ text: "§c§lADMIN", sub: "§7Settings & tools", icon: ICON.admin, onClick: () => adminMenu(player) });
@@ -661,6 +670,7 @@ async function adminMenu(player, msg) {
       { text: "§a§lMONEY", sub: "§7Player balances", icon: ICON.bank, onClick: () => adminMoneyMenu(player) },
       { text: "§d§lHEADS", sub: "§7Player head balances", icon: mobIcon("zombie"), onClick: () => adminHeadsMenu(player) },
       { text: "§a§lCROPS", sub: "§7Enchanted crops", icon: "textures/items/wheat", onClick: () => adminCropsMenu(player) },
+      { text: "§b§lSKILLS", sub: "§7Player skill levels", icon: "textures/items/iron_pickaxe", onClick: () => adminSkillsMenu(player) },
       { text: "§b§lSETTINGS", sub: "§7Spawners, kits...", icon: ICON.admin, onClick: () => settingsMenu(player, back) },
       { text: "§6§lSHOP EDITOR", sub: "§7Move/hide items", icon: ICON.shop, onClick: () => editorMenu(player, back) },
       {
@@ -754,6 +764,47 @@ async function adminPlayerMenu(player, target, msg) {
 }
 
 // ---- admin: heads ------------------------------------------------------------
+// ---- admin: skills ------------------------------------------------------------
+async function adminSkillsMenu(player) {
+  if (!player.hasTag(CONFIG.adminTag)) return;
+  const tiles = world.getPlayers().map((p) => ({
+    text: `§f${clip(p.name)}`,
+    sub: "§7Set skill levels",
+    icon: ICON.player,
+    onClick: () => adminSkillsPlayer(player, p),
+  }));
+  tiles.push(backTile(() => adminMenu(player)));
+  await tileMenu(player, { title: "PLAYER SKILLS", theme: "blue", body: "§7Pick a player to set their skill levels.", tiles });
+}
+
+async function adminSkillsPlayer(player, target, msg) {
+  if (!target.isValid) return adminSkillsMenu(player);
+  const tiles = Object.entries(SKILLS).map(([id, sk]) => ({
+    text: `§b§l${sk.name.toUpperCase()}`,
+    sub: `§fLv ${skillLevelInfo(getSkillXp(target, id)).level}`,
+    icon: sk.icon,
+    onClick: async () => {
+      const res = await showForm(
+        player,
+        new ModalFormData().title(`${sk.name}: ${target.name}`).textField("Set level to", String(skillLevelInfo(getSkillXp(target, id)).level))
+      );
+      if (!res || res.canceled) return adminSkillsPlayer(player, target);
+      const lvl = Math.floor(Number(res.formValues[0]));
+      if (!Number.isFinite(lvl) || lvl < 0) return adminSkillsPlayer(player, target, "§cEnter a whole number.");
+      target.setDynamicProperty(`eco:skill:${id}`, xpToReach(lvl));
+      success(player, `${target.name}'s ${sk.name} is now level ${skillLevelInfo(getSkillXp(target, id)).level}.`);
+      return adminSkillsPlayer(player, target, `§a${sk.name} set to level ${skillLevelInfo(getSkillXp(target, id)).level}`);
+    },
+  }));
+  tiles.push(backTile(() => adminSkillsMenu(player)));
+  await tileMenu(player, {
+    title: `${clip(target.name.toUpperCase(), 16)}: SKILLS`,
+    theme: "blue",
+    body: `${msg ? msg + "\n" : ""}§7Tap a skill to set §f${target.name}§7's level. §8(No level-up rewards are paid.)`,
+    tiles,
+  });
+}
+
 // ---- admin: enchanted crops --------------------------------------------------
 async function adminCropsMenu(player) {
   if (!player.hasTag(CONFIG.adminTag)) return;

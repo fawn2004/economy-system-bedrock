@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import { COLLECTION_TIERS, CONFIG, KITS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { COLLECTION_TIERS, CONFIG, KITS, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 
 // ============================================================================
 //  IN-GAME SETTINGS
@@ -31,6 +31,8 @@ const DEFAULTS = {
   upgrades: clone(TOOL_UPGRADES),
   toolLevels: clone(TOOL_LEVELS),
   collections: clone(COLLECTION_TIERS),
+  skills: clone(SKILLS),
+  skillSettings: clone(SKILL_SETTINGS),
 };
 
 // Spawner settings that are simple numbers / switches (shown in the settings form)
@@ -118,6 +120,27 @@ export function applySavedSettings() {
   applyMobs();
   applyKits();
   applyTools();
+  applySkills();
+}
+
+function applySkills() {
+  replaceObject(SKILL_SETTINGS, { ...DEFAULTS.skillSettings, ...(saved.skillSettings ?? {}) });
+  for (const id of Object.keys(DEFAULTS.skills)) {
+    replaceObject(SKILLS[id], { ...DEFAULTS.skills[id], ...(saved.skills?.[id] ?? {}) });
+  }
+}
+
+export function setSkill(id, values) {
+  saved.skills = saved.skills ?? {};
+  saved.skills[id] = { ...(saved.skills[id] ?? {}), ...values };
+  store();
+  applySkills();
+}
+
+export function setSkillSettings(values) {
+  saved.skillSettings = { ...(saved.skillSettings ?? {}), ...values };
+  store();
+  applySkills();
 }
 
 export function setTool(kind, values) {

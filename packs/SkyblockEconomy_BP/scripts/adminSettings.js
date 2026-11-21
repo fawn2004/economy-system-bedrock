@@ -1,6 +1,6 @@
 import { ModalFormData } from "@minecraft/server-ui";
 import { getCatalog } from "./catalog.js";
-import { COLLECTION_TIERS, CONFIG, CROPS, KITS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { COLLECTION_TIERS, CONFIG, CROPS, KITS, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 import { fmt } from "./economy.js";
 import { container } from "./inventory.js";
 import {
@@ -14,6 +14,8 @@ import {
   setLevels,
   setCollections,
   setMob,
+  setSkill,
+  setSkillSettings,
   setSpawner,
   setTool,
   setToolLevels,
@@ -71,6 +73,7 @@ export async function settingsMenu(player, back, msg) {
       { text: "§e§lKITS", sub: `§7${KITS.length} kits`, icon: "textures/ui/eco/icon_kits", onClick: () => kitsSettings(player, () => reopen()) },
       { text: "§6§lSKILL TOOLS", sub: "§7Hoe, sword, upgrades", icon: "textures/items/diamond_hoe", onClick: () => skillToolsSettings(player, () => reopen()) },
       { text: "§d§lCOLLECTIONS", sub: "§7Tiers & rewards", icon: "textures/ui/eco/icon_farming", onClick: () => collectionsSettings(player, () => reopen()) },
+      { text: "§b§lSKILLS", sub: "§7XP, perks, rewards", icon: "textures/items/iron_pickaxe", onClick: () => skillsSettings(player, () => reopen()) },
       { text: "§a§lECONOMY", sub: "§7Money & menus", icon: ICON.bank, onClick: () => economyForm(player, reopen) },
       {
         text: "§6§lFLOOR ITEMS",
@@ -689,5 +692,70 @@ function collectionsSettings(player, back, msg) {
     body: (msg ? msg + "\n" : "") + "§7Tiers every crop & mob collection goes through. Each pays money once and adds bonus drops.",
     tiles,
     back,
+  });
+}
+
+// ---- skills ------------------------------------------------------------------------
+function skillsSettings(player, back, msg) {
+  const reopen = (m) => skillsSettings(player, back, m);
+  const SS = SKILL_SETTINGS;
+  const tiles = Object.entries(SKILLS).map(([id, sk]) => ({
+    text: `${sk.disabled ? "§c" : "§b"}§l${sk.name.toUpperCase()}`,
+    sub: sk.disabled ? "§cOff" : `§a+${sk.perkPerLevel}%/lv §7x${sk.xpMultiplier ?? 1}`,
+    icon: sk.icon,
+    onClick: async () => {
+      const v = await modal(player, `${sk.name} skill`, (f) =>
+        f
+          .toggle("Skill enabled", { defaultValue: !sk.disabled })
+          .textField(`Perk per level (%) - ${sk.perk}`, String(sk.perkPerLevel), { defaultValue: String(sk.perkPerLevel) })
+          .textField("XP multiplier (1 = normal, 2 = double XP)", String(sk.xpMultiplier ?? 1), { defaultValue: String(sk.xpMultiplier ?? 1) })
+      );
+      if (!v) return reopen();
+      const perk = num(v[1], 0, true), mult = num(v[2], 0, true);
+      if (perk === undefined || mult === undefined) return reopen("§cEnter numbers.");
+      setSkill(id, { disabled: !v[0], perkPerLevel: perk, xpMultiplier: mult });
+      success(player, `${sk.name} skill saved.`);
+      return reopen(`§a${sk.name} saved.`);
+    },
+  }));
+  tiles.push({
+    text: "§e§lGENERAL",
+    sub: `§7Max Lv ${SS.maxLevel}`,
+    icon: ICON.admin,
+    onClick: async () => {
+      const v = await modal(player, "Skill settings", (f) =>
+        f
+          .textField("Max skill level", String(SS.maxLevel), { defaultValue: String(SS.maxLevel) })
+          .textField("XP curve base (XP for level L = base x L^exponent)", String(SS.xpBase), { defaultValue: String(SS.xpBase) })
+          .textField("XP curve exponent (higher = slower later levels)", String(SS.xpExponent), { defaultValue: String(SS.xpExponent) })
+          .textField("Money reward per level (x the new level)", String(SS.moneyPerLevel), { defaultValue: String(SS.moneyPerLevel) })
+          .toggle('Show "+XP" on the action bar', { defaultValue: SS.showActionBar })
+      );
+      if (!v) return reopen();
+      const max = num(v[0], 1), base = num(v[1], 1), exp = num(v[2], 0, true), money = num(v[3], 0);
+      if ([max, base, exp, money].some((x) => x === undefined)) return reopen("§cCheck the numbers.");
+      setSkillSettings({ maxLevel: Math.min(100, max), xpBase: base, xpExponent: exp, moneyPerLevel: money, showActionBar: !!v[4] });
+      return reopen("§aSkill settings saved.");
+    },
+  });
+  tiles.push({
+    text: "§4§lRESET",
+    sub: "§7Defaults",
+    icon: ICON.cancel,
+    onClick: () =>
+      confirm(player, "RESET SKILLS?", "§7Skill settings go back to the defaults.\n§8(Players keep their skill XP.)", () => {
+        resetSection("skills");
+        resetSection("skillSettings");
+        return reopen("§aSkill settings reset.");
+      }, () => reopen()),
+  });
+  tiles.push(backTile(back));
+  return tileMenu(player, {
+    title: "SKILL SETTINGS",
+    theme: "blue",
+    body:
+      (msg ? msg + "\n" : "") +
+      `§7Max level §f${SS.maxLevel}§7, level L needs §f${SS.xpBase} x L^${SS.xpExponent} §7XP, reward §a${fmt(SS.moneyPerLevel)} x level§7.\n§8Tap a skill to change its perk, XP rate or turn it off.`,
+    tiles,
   });
 }

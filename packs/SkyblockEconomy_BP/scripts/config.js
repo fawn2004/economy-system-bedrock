@@ -429,3 +429,102 @@ export const TOOL_UPGRADES = {
     },
   ],
 };
+
+// ============================================================================
+//  SKILLS  (Hypixel-style). Doing things earns skill XP; skills level up
+//  automatically. Each level pays money and raises the skill's perk.
+//  XP to go from level L to L+1 = xpBase * L ^ xpExponent
+// ============================================================================
+export const SKILL_SETTINGS = {
+  maxLevel: 25,
+  xpBase: 25,
+  xpExponent: 2,
+  moneyPerLevel: 1000, // reward on level up = moneyPerLevel x new level
+  showActionBar: true, // "+3 Mining XP (120/400)" on the action bar
+};
+export const SKILLS = {
+  farming: {
+    name: "Farming", icon: "textures/items/wheat", how: "Harvest fully grown crops",
+    perk: "Double crop chance", perkPerLevel: 2, xpMultiplier: 1,
+    // xp per fully grown crop (collection id)
+    xp: { wheat: 2, carrot: 2, potato: 2, beetroot: 2, nether_wart: 3, cocoa: 3, melon: 2, pumpkin: 4, sugar_cane: 1, cactus: 1 },
+  },
+  mining: {
+    name: "Mining", icon: "textures/items/iron_pickaxe", how: "Mine stone, cobblestone & ores",
+    perk: "Double ore chance", perkPerLevel: 2, xpMultiplier: 1,
+    // block: [xp, item the double-drop perk gives, how many]
+    blocks: {
+      "minecraft:stone": [1, "minecraft:cobblestone", 1],
+      "minecraft:cobblestone": [1, "minecraft:cobblestone", 1],
+      "minecraft:deepslate": [1, "minecraft:cobbled_deepslate", 1],
+      "minecraft:cobbled_deepslate": [1, "minecraft:cobbled_deepslate", 1],
+      "minecraft:netherrack": [1, "minecraft:netherrack", 1],
+      "minecraft:end_stone": [2, "minecraft:end_stone", 1],
+      "minecraft:basalt": [1, "minecraft:basalt", 1],
+      "minecraft:blackstone": [1, "minecraft:blackstone", 1],
+      "minecraft:obsidian": [8, "minecraft:obsidian", 1],
+      "minecraft:coal_ore": [5, "minecraft:coal", 1],
+      "minecraft:deepslate_coal_ore": [5, "minecraft:coal", 1],
+      "minecraft:copper_ore": [4, "minecraft:raw_copper", 2],
+      "minecraft:deepslate_copper_ore": [4, "minecraft:raw_copper", 2],
+      "minecraft:iron_ore": [10, "minecraft:raw_iron", 1],
+      "minecraft:deepslate_iron_ore": [10, "minecraft:raw_iron", 1],
+      "minecraft:gold_ore": [10, "minecraft:raw_gold", 1],
+      "minecraft:deepslate_gold_ore": [10, "minecraft:raw_gold", 1],
+      "minecraft:lapis_ore": [8, "minecraft:lapis_lazuli", 4],
+      "minecraft:deepslate_lapis_ore": [8, "minecraft:lapis_lazuli", 4],
+      "minecraft:redstone_ore": [6, "minecraft:redstone", 4],
+      "minecraft:lit_redstone_ore": [6, "minecraft:redstone", 4],
+      "minecraft:deepslate_redstone_ore": [6, "minecraft:redstone", 4],
+      "minecraft:lit_deepslate_redstone_ore": [6, "minecraft:redstone", 4],
+      "minecraft:diamond_ore": [25, "minecraft:diamond", 1],
+      "minecraft:deepslate_diamond_ore": [25, "minecraft:diamond", 1],
+      "minecraft:emerald_ore": [30, "minecraft:emerald", 1],
+      "minecraft:deepslate_emerald_ore": [30, "minecraft:emerald", 1],
+      "minecraft:quartz_ore": [8, "minecraft:quartz", 1],
+      "minecraft:nether_gold_ore": [8, "minecraft:gold_nugget", 3],
+      "minecraft:ancient_debris": [50, "minecraft:ancient_debris", 1],
+      "minecraft:amethyst_cluster": [5, "minecraft:amethyst_shard", 2],
+    },
+  },
+  foraging: {
+    name: "Foraging", icon: "textures/items/diamond_axe", how: "Chop logs",
+    perk: "Double log chance", perkPerLevel: 2, xpMultiplier: 1,
+    xpPerLog: 3,
+  },
+  excavating: {
+    name: "Excavating", icon: "textures/items/diamond_shovel", how: "Dig dirt, sand, gravel & clay",
+    perk: "Double drop chance", perkPerLevel: 2, xpMultiplier: 1,
+    blocks: {
+      "minecraft:dirt": [1, "minecraft:dirt", 1],
+      "minecraft:grass_block": [1, "minecraft:dirt", 1],
+      "minecraft:coarse_dirt": [1, "minecraft:coarse_dirt", 1],
+      "minecraft:podzol": [1, "minecraft:dirt", 1],
+      "minecraft:mycelium": [1, "minecraft:dirt", 1],
+      "minecraft:dirt_with_roots": [1, "minecraft:dirt_with_roots", 1],
+      "minecraft:sand": [1, "minecraft:sand", 1],
+      "minecraft:red_sand": [1, "minecraft:red_sand", 1],
+      "minecraft:gravel": [1, "minecraft:gravel", 1],
+      "minecraft:clay": [2, "minecraft:clay_ball", 4],
+      "minecraft:mud": [1, "minecraft:mud", 1],
+      "minecraft:soul_sand": [1, "minecraft:soul_sand", 1],
+      "minecraft:soul_soil": [1, "minecraft:soul_soil", 1],
+    },
+  },
+  fishing: {
+    name: "Fishing", icon: "textures/items/fishing_rod_uncast", how: "Catch anything with a fishing rod",
+    perk: "Double catch chance", perkPerLevel: 2, xpMultiplier: 1,
+    xpPerCatch: 20,
+  },
+  combat: {
+    name: "Combat", icon: "textures/items/iron_sword", how: "Kill mobs",
+    perk: "Bonus mob drop chance", perkPerLevel: 2, xpMultiplier: 1,
+    xpDefault: 4,
+    xp: {
+      pig: 2, cow: 2, chicken: 2, sheep: 2, rabbit: 2, mooshroom: 3,
+      zombie: 5, husk: 5, drowned: 6, skeleton: 5, stray: 6, spider: 5, cave_spider: 6,
+      creeper: 8, slime: 6, magma_cube: 7, witch: 10, enderman: 12, zombie_pigman: 8,
+      blaze: 12, guardian: 14, ghast: 16, wither_skeleton: 18, iron_golem: 20,
+    },
+  },
+};
