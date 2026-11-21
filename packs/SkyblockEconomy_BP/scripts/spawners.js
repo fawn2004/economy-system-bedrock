@@ -1,6 +1,7 @@
 import { ItemStack, system, world } from "@minecraft/server";
 import { CONFIG, SPAWNERS, SPAWNER_SETTINGS as S } from "./config.js";
 import { container } from "./inventory.js";
+import { headChanceBonus } from "./tools.js";
 import { ICON, fail, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -525,7 +526,7 @@ export function registerSpawners() {
   });
 
   // stacked mobs: killing one leaves the rest; maybe drop an enchanted head
-  world.afterEvents.entityDie.subscribe(({ deadEntity }) => {
+  world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
     let key, mob, stack, loc, dim, type, anchor;
     try {
       key = deadEntity.getDynamicProperty("eco:sp");
@@ -541,7 +542,9 @@ export function registerSpawners() {
       return;
     }
     const d = spawners.get(key);
-    if (d && Math.random() * 100 < levelInfo(d.level).headChance) {
+    const killer = damageSource?.damagingEntity;
+    const bonus = killer?.typeId === "minecraft:player" ? headChanceBonus(killer) : 0;
+    if (d && Math.random() * 100 < levelInfo(d.level).headChance + bonus) {
       try {
         dim.spawnItem(new ItemStack(headItemId(mob), 1), loc);
       } catch {}

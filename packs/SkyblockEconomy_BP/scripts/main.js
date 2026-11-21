@@ -6,6 +6,7 @@ import { mainMenu } from "./menus.js";
 import { registerGroundItems } from "./groundItems.js";
 import { applySavedSettings } from "./settings.js";
 import { registerSpawners } from "./spawners.js";
+import { registerTools } from "./tools.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -47,3 +48,4 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, sourceEntity }) => {
 
 registerSpawners();
 registerGroundItems();
+registerTools();

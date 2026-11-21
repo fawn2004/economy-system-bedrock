@@ -1,7 +1,7 @@
 import { ItemStack, world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
-import { BADGES, CONFIG, KITS, SHOP_LAYOUT, SPAWNERS } from "./config.js";
+import { BADGES, CONFIG, KITS, SHOP_LAYOUT, SKILL_TOOLS, SPAWNERS } from "./config.js";
 import { addMoney, fmt, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
   applyEnchants,
@@ -28,6 +28,7 @@ import {
   mobName,
   ownedSpawnerCount,
 } from "./spawners.js";
+import { collectionsMenu, makeTool, skillToolTiles } from "./tools.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 
 const U = "textures/ui/eco/";
@@ -61,6 +62,7 @@ export async function mainMenu(player) {
     { text: "§a§lSELL", sub: "§7Sell your loot", icon: ICON.sell, onClick: () => sellMenu(player) },
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
     { text: "§6§lBALTOP", sub: "§7Richest players", icon: ICON.top, onClick: () => topMenu(player, () => mainMenu(player)) },
+    { text: "§e§lCOLLECTIONS", sub: "§7Farming & combat", icon: "textures/ui/eco/icon_farming", onClick: () => collectionsMenu(player, () => mainMenu(player)) },
   ];
   if (player.hasTag(CONFIG.adminTag)) {
     tiles.push({ text: "§c§lADMIN", sub: "§7Settings & tools", icon: ICON.admin, onClick: () => adminMenu(player) });
@@ -93,6 +95,8 @@ export async function shopMenu(player, msg) {
       tiles.push({ text: "§e§lKITS", sub: `§7${KITS.filter((k) => !k.disabled).length} kits`, icon: U + "icon_kits", badge: BADGES.kits, onClick: () => kitsMenu(player) });
     } else if (key === "spawners") {
       tiles.push({ text: "§e§lSPAWNERS", sub: `§7${SPAWNERS.filter((s) => !s.disabled).length} mobs`, icon: U + "icon_spawners", badge: BADGES.spawners, onClick: () => spawnersMenu(player) });
+    } else if (key === "skilltools") {
+      tiles.push({ text: "§6§lSKILL TOOLS", sub: "§7Level-up tools", icon: SKILL_TOOL_ICON, badge: BADGES.skilltools, onClick: () => skillToolsMenu(player) });
     } else if (key === "search") {
       tiles.push({ text: "§b§lSEARCH", sub: "§7Find any item", icon: U + "icon_coin", onClick: () => searchMenu(player) });
     } else if (cat(key)) {
@@ -248,6 +252,38 @@ function buyItem(player, item, amount) {
   giveItems(player, item.id, amount);
   success(player, `Bought ${amount}x ${item.name} for ${fmt(cost)}.`);
   return `§aBought §f${amount}x ${item.name} §afor §f${fmt(cost)}`;
+}
+
+// ---- skill tools -------------------------------------------------------------
+const SKILL_TOOL_ICON = "textures/items/diamond_hoe";
+
+async function skillToolsMenu(player, msg) {
+  const tiles = skillToolTiles(player, (kind) => {
+    const t = SKILL_TOOLS[kind];
+    if (getBalance(player) < t.price) {
+      fail(player, `You need ${fmt(t.price)}.`);
+      return skillToolsMenu(player, `§cYou need §f${fmt(t.price)}§c.`);
+    }
+    if (freeSlots(player) < 1) {
+      fail(player, "You need a free inventory slot.");
+      return skillToolsMenu(player, "§cYou need a free inventory slot!");
+    }
+    takeMoney(player, t.price);
+    player.getComponent("minecraft:inventory").container.addItem(makeTool(kind, player));
+    success(player, `Bought a ${t.name}! It levels up as you use it.`);
+    return skillToolsMenu(player, `§aBought a §f${t.name}§a!`);
+  });
+  tiles.push(backTile(() => shopMenu(player)));
+  await tileMenu(player, {
+    title: "SKILL TOOLS",
+    theme: "gold",
+    body:
+      (msg ? msg + "\n" : "") +
+      "§7Tools that §fgain XP and level up§7 as you use them: more bonus drops,\n" +
+      "§7auto-replant (hoe) and better head chance (sword). They never break.\n" +
+      `§8Higher levels need collections - see Collections > Skill Tools.    ${balLine(player)}`,
+    tiles,
+  });
 }
 
 // ---- kits ------------------------------------------------------------------

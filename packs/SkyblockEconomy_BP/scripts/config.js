@@ -275,7 +275,91 @@ export const SPAWNER_SETTINGS = {
 // Order of the tiles on the shop's front page. "blocks" opens the block
 // sub-categories; the rest are category ids from prices.js plus kits/spawners/search.
 export const SHOP_LAYOUT = [
-  "blocks", "food", "kits", "spawners", "farming", "buckets", "misc",
+  "blocks", "food", "kits", "spawners", "skilltools", "farming", "buckets", "misc",
   "ores", "tools", "redstone", "mobs", "brewing", "treasure", "search",
 ];
-export const BADGES = { kits: "NEW", spawners: "HOT" };
+export const BADGES = { kits: "NEW", spawners: "HOT", skilltools: "NEW" };
+
+// ============================================================================
+//  SKILL TOOLS  (Farming Hoe / Slayer Sword)
+//  Tools gain XP when used and level up automatically. Levels above
+//  `freeLevels` also need a total collection (all crops for the hoe, all mob
+//  kills for the sword) - see `collectionNeeded`.
+// ============================================================================
+export const SKILL_TOOLS = {
+  farming: {
+    name: "Farming Hoe",
+    item: "minecraft:diamond_hoe",
+    price: 5000,
+    icon: "textures/items/diamond_hoe",
+    xpPerUse: 1, // per fully grown crop harvested
+    bonusPerLevel: 10, // % chance of an extra drop, per level
+    replantLevel: 3, // crops replant themselves from this level
+  },
+  slayer: {
+    name: "Slayer Sword",
+    item: "minecraft:diamond_sword",
+    price: 10000,
+    icon: "textures/items/diamond_sword",
+    xpPerUse: 2, // per mob killed
+    bonusPerLevel: 10, // % chance of extra mob drops, per level
+    headBonusPerLevel: 1, // extra % enchanted head chance, per level
+  },
+};
+export const TOOL_LEVELS = {
+  //          level: 1    2    3    4     5     6     7      8      9      10
+  xpNeeded: [0, 100, 300, 700, 1500, 3000, 6000, 12000, 25000, 50000],
+  freeLevels: 3,
+  collectionNeeded: [0, 0, 0, 1000, 2500, 5000, 10000, 25000, 50000, 100000],
+};
+
+// ============================================================================
+//  COLLECTIONS  (Hypixel-style). Each tier: one-time money reward and a
+//  permanent +bonusPerTier % extra-drop chance for that crop / mob.
+// ============================================================================
+export const COLLECTION_TIERS = {
+  amounts: [100, 500, 2500, 10000, 50000],
+  rewards: [500, 2000, 7500, 25000, 100000],
+  bonusPerTier: 5,
+};
+const I2 = "textures/items/";
+export const CROPS = [
+  // block id -> collection; drop = extra item for bonus drops; mature = block state that means fully grown
+  { id: "wheat", name: "Wheat", block: "minecraft:wheat", drop: "minecraft:wheat", icon: I2 + "wheat", mature: ["growth", 7] },
+  { id: "carrot", name: "Carrot", block: "minecraft:carrots", drop: "minecraft:carrot", icon: I2 + "carrot", mature: ["growth", 7] },
+  { id: "potato", name: "Potato", block: "minecraft:potatoes", drop: "minecraft:potato", icon: I2 + "potato", mature: ["growth", 7] },
+  { id: "beetroot", name: "Beetroot", block: "minecraft:beetroot", drop: "minecraft:beetroot", icon: I2 + "beetroot", mature: ["growth", 7] },
+  { id: "nether_wart", name: "Nether Wart", block: "minecraft:nether_wart", drop: "minecraft:nether_wart", icon: I2 + "nether_wart", mature: ["age", 3] },
+  { id: "cocoa", name: "Cocoa", block: "minecraft:cocoa", drop: "minecraft:cocoa_beans", icon: I2 + "dye_powder_brown", mature: ["age", 2] },
+  { id: "melon", name: "Melon", block: "minecraft:melon_block", drop: "minecraft:melon_slice", icon: I2 + "melon", grown: true },
+  { id: "pumpkin", name: "Pumpkin", block: "minecraft:pumpkin", drop: "minecraft:pumpkin", icon: "textures/blocks/pumpkin_face_off", grown: true },
+  { id: "sugar_cane", name: "Sugar Cane", block: "minecraft:sugar_cane", drop: "minecraft:sugar_cane", icon: I2 + "reeds", grown: true },
+  { id: "cactus", name: "Cactus", block: "minecraft:cactus", drop: "minecraft:cactus", icon: "textures/blocks/cactus_side", grown: true },
+];
+// Extra drops the Slayer Sword / combat collections can give: [item, min, max]
+export const MOB_DROPS = {
+  pig: [["minecraft:porkchop", 1, 3]],
+  cow: [["minecraft:beef", 1, 3], ["minecraft:leather", 0, 2]],
+  mooshroom: [["minecraft:beef", 1, 3], ["minecraft:leather", 0, 2]],
+  chicken: [["minecraft:chicken", 1, 1], ["minecraft:feather", 0, 2]],
+  sheep: [["minecraft:mutton", 1, 2], ["minecraft:white_wool", 1, 1]],
+  rabbit: [["minecraft:rabbit", 0, 1], ["minecraft:rabbit_hide", 0, 1]],
+  zombie: [["minecraft:rotten_flesh", 0, 2]],
+  husk: [["minecraft:rotten_flesh", 0, 2]],
+  drowned: [["minecraft:rotten_flesh", 0, 2]],
+  skeleton: [["minecraft:bone", 0, 2], ["minecraft:arrow", 0, 2]],
+  stray: [["minecraft:bone", 0, 2], ["minecraft:arrow", 0, 2]],
+  wither_skeleton: [["minecraft:bone", 0, 2], ["minecraft:coal", 0, 1]],
+  spider: [["minecraft:string", 0, 2], ["minecraft:spider_eye", 0, 1]],
+  cave_spider: [["minecraft:string", 0, 2], ["minecraft:spider_eye", 0, 1]],
+  creeper: [["minecraft:gunpowder", 0, 2]],
+  slime: [["minecraft:slime_ball", 0, 2]],
+  magma_cube: [["minecraft:magma_cream", 0, 1]],
+  witch: [["minecraft:redstone", 0, 2], ["minecraft:glowstone_dust", 0, 2], ["minecraft:sugar", 0, 2]],
+  enderman: [["minecraft:ender_pearl", 0, 1]],
+  zombie_pigman: [["minecraft:rotten_flesh", 0, 1], ["minecraft:gold_nugget", 0, 1]],
+  blaze: [["minecraft:blaze_rod", 0, 1]],
+  guardian: [["minecraft:prismarine_shard", 0, 2], ["minecraft:cod", 0, 1]],
+  ghast: [["minecraft:ghast_tear", 0, 1], ["minecraft:gunpowder", 0, 2]],
+  iron_golem: [["minecraft:iron_ingot", 3, 5], ["minecraft:poppy", 0, 2]],
+};
