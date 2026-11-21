@@ -76,12 +76,34 @@ export async function shopMenu(player, msg) {
         sub: `§7${byCategory.get(c.id)?.length ?? 0} items`,
         icon: c.icon,
         badge: BADGES[c.id],
-        onClick: () => itemListMenu(player, { title: c.name.toUpperCase(), theme: c.theme, desc: c.desc, items: byCategory.get(c.id) ?? [], back: () => shopMenu(player) }),
+        onClick: () => categoryMenu(player, c, () => shopMenu(player)),
       });
     }
   }
   tiles.push(backTile(() => mainMenu(player)));
   await tileMenu(player, { title: "SHOP", theme: "gold", body: `${msgLine(msg)}§7Pick a category    ${balLine(player)}`, tiles });
+}
+
+/** A category's items, with any sub-categories (e.g. Farming > Saplings) shown first. */
+function categoryMenu(player, c, back) {
+  const { categories, byCategory } = getCatalog();
+  const reopen = () => categoryMenu(player, c, back);
+  const children = categories
+    .filter((sub) => sub.group === c.id)
+    .map((sub) => ({
+      text: `§e§l${sub.name.toUpperCase()}`,
+      sub: `§7${byCategory.get(sub.id)?.length ?? 0} items`,
+      icon: sub.icon,
+      onClick: () => categoryMenu(player, sub, reopen),
+    }));
+  return itemListMenu(player, {
+    title: c.name.toUpperCase(),
+    theme: c.theme,
+    desc: c.desc,
+    items: byCategory.get(c.id) ?? [],
+    children,
+    back,
+  });
 }
 
 async function blocksMenu(player) {
@@ -92,8 +114,7 @@ async function blocksMenu(player) {
       text: `§e§l${c.name.toUpperCase()}`,
       sub: `§7${byCategory.get(c.id)?.length ?? 0} items`,
       icon: c.icon,
-      onClick: () =>
-        itemListMenu(player, { title: c.name.toUpperCase(), theme: c.theme, desc: c.desc, items: byCategory.get(c.id) ?? [], back: () => blocksMenu(player) }),
+      onClick: () => categoryMenu(player, c, () => blocksMenu(player)),
     }));
   tiles.push(backTile(() => shopMenu(player)));
   await tileMenu(player, { title: "BLOCKS", theme: "blue", body: `§7Pick a type of block    ${balLine(player)}`, tiles });
@@ -105,7 +126,8 @@ async function itemListMenu(player, list, page = 0) {
   const pages = Math.max(1, Math.ceil(list.items.length / size));
   page = Math.min(Math.max(0, page), pages - 1);
   const reopen = () => itemListMenu(player, list, page);
-  const tiles = list.items
+  const tiles = page === 0 ? [...(list.children ?? [])] : [];
+  tiles.push(...list.items
     .filter((e) => e.buy > 0)
     .slice(page * size, page * size + size)
     .map((e) => ({
@@ -113,7 +135,7 @@ async function itemListMenu(player, list, page = 0) {
       sub: `${priceColor(player, e.buy)}${fmtShort(e.buy)}`,
       icon: e.icon,
       onClick: () => buyItemMenu(player, e, reopen),
-    }));
+    })));
   if (page > 0) tiles.push({ text: "§e§l< PREV", sub: `§7Page ${page}`, icon: ICON.back, onClick: () => itemListMenu(player, list, page - 1) });
   if (page < pages - 1) tiles.push({ text: "§e§lNEXT >", sub: `§7Page ${page + 2}`, icon: ICON.confirm, onClick: () => itemListMenu(player, list, page + 1) });
   tiles.push(backTile(list.back));

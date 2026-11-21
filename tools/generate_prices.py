@@ -47,6 +47,7 @@ WOODS6 = ["oak", "spruce", "birch", "jungle", "acacia", "dark_oak"]
 #  Items that can't be obtained in survival (or are technical) - never sold
 # ---------------------------------------------------------------------------
 EXCLUDE_EXACT = {
+    "bee_nest",  # removed from the shop on request
     "allow", "deny", "border_block", "barrier", "bedrock", "command_block", "chain_command_block",
     "repeating_command_block", "command_block_minecart", "structure_block", "structure_void", "jigsaw",
     "end_portal_frame", "reinforced_deepslate", "budding_amethyst", "frosted_ice", "mob_spawner",
@@ -174,6 +175,10 @@ CATEGORY_RULES = [
                  r"^enchanted_book$|^sponge$|^wet_sponge$|^conduit$|^dragon_egg$|^heart_of_the_sea$|^nether_star$|"
                  r"^totem_of_undying$|^enchanted_golden_apple$|^heavy_core$|^echo_shard$|^ominous_bottle$)"),
     ("tools", r"_spear$"),
+    ("buckets", r"(_bucket$|^bucket$)"),
+    ("saplings", r"(_sapling$|^mangrove_propagule$|^azalea$|^flowering_azalea$|^crimson_fungus$|^warped_fungus$)"),
+    ("stone", r"^coarse_dirt$"),
+    ("mobs", r"^(blue|brown)_egg$"),
     ("ores", r"(_ore$|^raw_|_ingot$|^diamond$|^emerald$|^coal$|^charcoal$|^redstone$|^lapis_lazuli$|^quartz$|"
              r"amethyst|_nugget$|netherite_scrap|ancient_debris|^(iron|gold|copper|diamond|emerald|coal|"
              r"redstone|lapis|netherite|raw_iron|raw_gold|raw_copper)_block$|^flint$|glowstone_dust|prismarine_(shard|crystals))"),
@@ -192,8 +197,8 @@ CATEGORY_RULES = [
              r"^sweet_berries$|^glow_berries$|^melon_slice$|^poisonous_potato$|^rotten_flesh$|^spider_eye$|^sugar$)"),
     ("farming", r"(seeds$|^wheat$|^carrot$|^potato$|^beetroot$|^pumpkin$|^melon_block$|^sugar_cane$|^cactus$|"
                 r"^cocoa_beans$|^nether_wart$|^bone_meal$|^bone_block$|^hay_block$|_sapling$|^mangrove_propagule$|"
-                r"^bamboo$|^kelp$|^composter$|^beehive$|^bee_nest$|^honeycomb$|^egg$|_egg$|^pitcher_pod$|"
-                r"_bucket$|^bucket$|^dirt$|^grass_block$|^podzol$|^mycelium$|^coarse_dirt$|^rooted_dirt$|"
+                r"^bamboo$|^kelp$|^composter$|^beehive$|^honeycomb$|^egg$|_egg$|^pitcher_pod$|"
+                r"^dirt$|^grass_block$|^podzol$|^mycelium$|^rooted_dirt$|"
                 r"^dirt_with_roots$|^moss_block$|^mud$|_fungus$|^sea_pickle$|^cactus_flower$)"),
     ("mobs", r"(^bone$|^string$|^gunpowder$|^ender_pearl$|^ender_eye$|^blaze_rod$|^blaze_powder$|^breeze_rod$|"
              r"^slime_ball$|^leather$|^feather$|^ink_sac$|^glow_ink_sac$|^ghast_tear$|^phantom_membrane$|"
@@ -216,7 +221,9 @@ CATEGORY_RULES = [
     ("decor", r"."),
 ]
 CATEGORY_INFO = {
-    # id: (name, description, icon, theme, group)   group "blocks" = shown inside the Blocks tile
+    # id: (name, description, icon, theme, group)
+    #   group "blocks"  = shown inside the Blocks tile
+    #   group "<category id>" = a sub-category tile shown at the top of that category
     "stone":    ("Stone",        "Stone, bricks & building blocks", "textures/blocks/stonebrick", "blue", "blocks"),
     "wood":     ("Wood",         "Logs, planks & wooden things",    "textures/blocks/log_oak", "orange", "blocks"),
     "colored":  ("Colours",      "Wool, glass, concrete & dyes",     "textures/blocks/wool_colored_red", "purple", "blocks"),
@@ -229,6 +236,8 @@ CATEGORY_INFO = {
     "redstone": ("Redstone",     "Redstone parts & machines",        "textures/items/redstone_dust", "red", None),
     "food":     ("Food",         "Keep your island fed",            "textures/ui/eco/icon_food", "orange", None),
     "farming":  ("Farming",      "Seeds, crops & farm gear",         "textures/ui/eco/icon_farming", "green", None),
+    "saplings": ("Saplings",     "A sapling for every tree type",    "textures/blocks/sapling_oak", "green", "farming"),
+    "buckets":  ("Buckets",      "Water, lava, milk & mob buckets",  "textures/items/bucket_water", "blue", None),
     "mobs":     ("Mob Drops",    "Loot from mobs",                   "textures/items/rotten_flesh", "green", None),
     "brewing":  ("Brewing",      "Potions & ingredients",            "textures/items/potion_bottle_empty", "purple", None),
 }

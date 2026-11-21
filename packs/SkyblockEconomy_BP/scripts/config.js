@@ -178,7 +178,7 @@ export const SPAWNERS = [
 // Order of the tiles on the shop's front page. "blocks" opens the block
 // sub-categories; the rest are category ids from prices.js plus kits/spawners/search.
 export const SHOP_LAYOUT = [
-  "blocks", "food", "kits", "spawners", "farming",
+  "blocks", "food", "kits", "spawners", "farming", "buckets",
   "ores", "tools", "redstone", "mobs", "brewing", "treasure", "search",
 ];
 export const BADGES = { kits: "NEW", spawners: "HOT" };
