@@ -242,11 +242,13 @@ export const SPAWNER_SETTINGS = {
   freezeMobs: true, // spawner mobs stand still (and don't burn in daylight)
   mergeRadius: 8, // how close a stacked mob must be to the spawner to merge
   maxLooseMobs: 12, // if stackMobs is false: most loose mobs per spawner
+  costTimesStack: true, // upgrade cost is multiplied by the stack size (stops upgrade-then-stack tricks)
 
   // Level 1 is what a new spawner starts at.
   //   interval   = seconds between spawns
   //   headChance = % chance a killed mob drops an enchanted head
-  //   cost       = heads needed to reach this level (x the spawner's stack size)
+  //   cost       = heads needed to reach this level (x the stack size if costTimesStack)
+  // (All of this can also be changed in-game: Admin > Settings > Spawners.)
   levels: [
     { interval: 20, headChance: 10, cost: 0 }, //  1 in 10 kills
     { interval: 18, headChance: 11, cost: 5 },

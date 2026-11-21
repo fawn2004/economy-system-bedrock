@@ -13,6 +13,7 @@ import {
   removeAllPlain,
   spaceFor,
 } from "./inventory.js";
+import { settingsMenu } from "./adminSettings.js";
 import { editItemMenu, editorMenu } from "./editor.js";
 import { allHeadPoints, countHeads, depositHeads, makeSpawnerItem, mobIcon, mobName } from "./spawners.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
@@ -50,7 +51,7 @@ export async function mainMenu(player) {
     { text: "§6§lBALTOP", sub: "§7Richest players", icon: ICON.top, onClick: () => topMenu(player, () => mainMenu(player)) },
   ];
   if (player.hasTag(CONFIG.adminTag)) {
-    tiles.push({ text: "§c§lADMIN", sub: "§7Manage money", icon: ICON.admin, onClick: () => adminMenu(player) });
+    tiles.push({ text: "§c§lADMIN", sub: "§7Settings & tools", icon: ICON.admin, onClick: () => adminMenu(player) });
   }
   await tileMenu(player, {
     title: "SKYBLOCK MENU",
@@ -72,9 +73,9 @@ export async function shopMenu(player, msg) {
       const n = countDeep("blocks");
       tiles.push({ text: "§e§lBLOCKS", sub: `§7${n} items`, icon: U + "icon_blocks", onClick: () => blocksMenu(player) });
     } else if (key === "kits") {
-      tiles.push({ text: "§e§lKITS", sub: `§7${KITS.length} kits`, icon: U + "icon_kits", badge: BADGES.kits, onClick: () => kitsMenu(player) });
+      tiles.push({ text: "§e§lKITS", sub: `§7${KITS.filter((k) => !k.disabled).length} kits`, icon: U + "icon_kits", badge: BADGES.kits, onClick: () => kitsMenu(player) });
     } else if (key === "spawners") {
-      tiles.push({ text: "§e§lSPAWNERS", sub: `§7${SPAWNERS.length} mobs`, icon: U + "icon_spawners", badge: BADGES.spawners, onClick: () => spawnersMenu(player) });
+      tiles.push({ text: "§e§lSPAWNERS", sub: `§7${SPAWNERS.filter((s) => !s.disabled).length} mobs`, icon: U + "icon_spawners", badge: BADGES.spawners, onClick: () => spawnersMenu(player) });
     } else if (key === "search") {
       tiles.push({ text: "§b§lSEARCH", sub: "§7Find any item", icon: U + "icon_coin", onClick: () => searchMenu(player) });
     } else if (cat(key)) {
@@ -249,7 +250,7 @@ function formatTime(sec) {
 }
 
 async function kitsMenu(player) {
-  const tiles = KITS.map((kit) => {
+  const tiles = KITS.filter((k) => !k.disabled).map((kit) => {
     const wait = kitCooldownLeft(player, kit);
     return {
       text: `§f${kit.name}`,
@@ -313,7 +314,7 @@ function buyKit(player, kit) {
 
 // ---- spawners --------------------------------------------------------------
 async function spawnersMenu(player) {
-  const tiles = SPAWNERS.map((sp) => ({
+  const tiles = SPAWNERS.filter((s) => !s.disabled).map((sp) => ({
     text: `§f${sp.name}`,
     sub: `${priceColor(player, sp.price)}${fmtShort(sp.price)}`,
     icon: sp.icon,
@@ -566,6 +567,12 @@ async function adminMenu(player) {
     icon: ICON.player,
     onClick: () => adminPlayerMenu(player, p),
   }));
+  tiles.push({
+    text: "§b§lSETTINGS",
+    sub: "§7Spawners, kits...",
+    icon: ICON.admin,
+    onClick: () => settingsMenu(player, () => adminMenu(player)),
+  });
   tiles.push({
     text: "§6§lSHOP EDITOR",
     sub: "§7Move/hide items",

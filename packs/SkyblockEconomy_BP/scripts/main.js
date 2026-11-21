@@ -3,9 +3,11 @@ import { CONFIG } from "./config.js";
 import { getBalance, initEconomy, rememberName, setBalance } from "./economy.js";
 import { COMPASS_ID, giveCompass } from "./inventory.js";
 import { mainMenu } from "./menus.js";
+import { applySavedSettings } from "./settings.js";
 import { registerSpawners } from "./spawners.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
+  applySavedSettings(); // in-game Admin > Settings changes
   initEconomy();
   for (const p of world.getPlayers()) setupPlayer(p);
 });

@@ -19,7 +19,7 @@ import { ICON, fail, success, tileMenu } from "./ui.js";
 const TAG = "§8eco:spawner:";
 const KEY_PREFIX = "eco:sp:";
 const SPAWNER_BLOCK = "minecraft:mob_spawner";
-const MAX_LEVEL = S.levels.length;
+const maxLevel = () => S.levels.length; // can change in-game (Admin > Settings)
 
 const spawners = new Map(); // key -> { mob, level, stack, owner, ownerName, dim, x, y, z, timer, legacy }
 
@@ -39,7 +39,8 @@ const mobInfo = (mob) => SPAWNERS.find((s) => s.mob === mob);
 export const mobName = (mob) => mobInfo(mob)?.name ?? pretty(mob);
 export const mobIcon = (mob) => mobInfo(mob)?.icon ?? ICON.coin;
 const entityType = (mob) => (mob.includes(":") ? mob : "minecraft:" + mob);
-export const levelInfo = (lvl) => S.levels[Math.min(Math.max(1, lvl), MAX_LEVEL) - 1];
+export const levelInfo = (lvl) => S.levels[Math.min(Math.max(1, lvl), maxLevel()) - 1];
+export const upgradeCost = (d) => levelInfo(d.level + 1).cost * (S.costTimesStack === false ? 1 : d.stack);
 
 const keyOf = (dimId, l) => `${KEY_PREFIX}${dimId}:${l.x},${l.y},${l.z}`;
 function parseKey(key) {
@@ -90,7 +91,7 @@ export function makeSpawnerItem(mob, amount = 1, level = 1) {
   stack.nameTag = `§r§d${mobName(mob)} Spawner${level > 1 ? ` §6[Lv ${level}]` : ""}`;
   stack.setLore([
     `§7Mob: §f${mobName(mob)}`,
-    `§7Level: §f${level}§7/§f${MAX_LEVEL}`,
+    `§7Level: §f${level}§7/§f${maxLevel()}`,
     "§7Place it, then sneak and tap",
     "§7it to open its menu",
     `${TAG}${mob}:${level}`,
@@ -104,7 +105,7 @@ export function spawnerFromItem(item) {
   const line = item.getLore().find((l) => l.startsWith(TAG));
   if (!line) return undefined;
   const [mob, lvl] = line.slice(TAG.length).split(":");
-  return { mob, level: Math.min(MAX_LEVEL, Math.max(1, Number(lvl) || 1)) };
+  return { mob, level: Math.min(maxLevel(), Math.max(1, Number(lvl) || 1)) };
 }
 
 function takeFromHand(player, count = 1) {
@@ -245,8 +246,8 @@ function upgrade(player, key) {
   const d = spawners.get(key);
   if (!d) return "§cThat spawner is gone.";
   if (!canManage(player, d)) return "§cThis isn't your spawner.";
-  if (d.level >= MAX_LEVEL) return "§aThis spawner is already max level!";
-  const cost = levelInfo(d.level + 1).cost * d.stack;
+  if (d.level >= maxLevel()) return "§aThis spawner is already max level!";
+  const cost = upgradeCost(d);
   const have = getHeadPoints(player, d.mob);
   if (have < cost) {
     fail(player, `You need ${cost} ${mobName(d.mob)} heads (you have ${have}).`);
@@ -266,8 +267,8 @@ export async function spawnerMenu(player, key, msg) {
   if (!d) return;
   const name = mobName(d.mob);
   const lvl = levelInfo(d.level);
-  const next = d.level < MAX_LEVEL ? levelInfo(d.level + 1) : undefined;
-  const cost = next ? next.cost * d.stack : 0;
+  const next = d.level < maxLevel() ? levelInfo(d.level + 1) : undefined;
+  const cost = next ? upgradeCost(d) : 0;
   const points = getHeadPoints(player, d.mob);
   const inBag = countHeads(player).get(d.mob) ?? 0;
   const manage = canManage(player, d);
@@ -276,7 +277,7 @@ export async function spawnerMenu(player, key, msg) {
   const lines = [
     msg,
     `§f${name} Spawner   §7Owner: §f${d.ownerName ?? "?"}`,
-    `§7Stack: §f${d.stack}§7/§f${S.maxStack}    §7Level: §6${d.level}§7/§6${MAX_LEVEL}`,
+    `§7Stack: §f${d.stack}§7/§f${S.maxStack}    §7Level: §6${d.level}§7/§6${maxLevel()}`,
     `§7Spawns §f${perCycle} §7mob${perCycle > 1 ? "s" : ""} every §f${lvl.interval}s   §7Head chance: §d${lvl.headChance}%`,
     next ? `§8Next level: every ${next.interval}s, ${next.headChance}% heads - costs ${cost} heads` : "§aMax level!",
     `§7Your ${name} heads: §d${points}${inBag ? `  §8(+${inBag} in your bag)` : ""}`,
@@ -287,7 +288,7 @@ export async function spawnerMenu(player, key, msg) {
   if (manage) {
     tiles.push({
       text: next ? "§a§lUPGRADE" : "§a§lMAX LEVEL",
-      sub: next ? `${points >= cost ? "§d" : "§c"}${cost} heads` : "§7Level 10",
+      sub: next ? `${points >= cost ? "§d" : "§c"}${cost} heads` : `§7Level ${maxLevel()}`,
       icon: ICON.confirm,
       onClick: () => reopen(upgrade(player, key)),
     });

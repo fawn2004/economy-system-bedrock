@@ -97,6 +97,23 @@ For each item you can:
 
 Edits are saved in the world, so they survive restarts **and add-on updates**.
 
+## Settings (in-game, no files needed)
+
+**Admin > Settings** lets admins change the whole pack from inside the world:
+
+- **Spawners > Levels:** each level's head drop chance, seconds between spawns and head
+  cost to upgrade. Add or remove levels.
+- **Spawners > Rules:** stack limit, mobs per spawn, activation range, mob stack limit,
+  merge radius, mob stacking on/off, freeze mobs on/off, and whether the upgrade cost is
+  multiplied by the stack size.
+- **Spawners > Mob Prices:** each spawner's price, or hide it from the shop.
+- **Kits:** edit name/price/cooldown/badge, hide, delete, **set a kit's items from your
+  inventory** (enchantments and names kept), or create a **new kit** from your inventory.
+- **Economy:** starting money, currency symbol, items per shop page, compass on join.
+- **Reset** buttons go back to the defaults in `config.js`.
+
+Settings are saved in the world, so they work on Realms and survive add-on updates.
+
 ## Customising
 
 - **Kits, spawners, starting money, shop tile order:** `packs/SkyblockEconomy_BP/scripts/config.js`
