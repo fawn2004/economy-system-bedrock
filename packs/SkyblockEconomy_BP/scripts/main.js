@@ -1,6 +1,6 @@
 import { system, world } from "@minecraft/server";
 import { CONFIG } from "./config.js";
-import { getBalance, initEconomy, rememberName, setBalance } from "./economy.js";
+import { getBalance, initEconomy, rememberName, setBalance, syncBalances } from "./economy.js";
 import { COMPASS_ID, giveCompass } from "./inventory.js";
 import { mainMenu } from "./menus.js";
 import { registerGroundItems } from "./groundItems.js";
@@ -14,6 +14,7 @@ import { registerLeaderboards } from "./leaderboards.js";
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
   initEconomy();
+  system.runInterval(syncBalances, 100); // pick up /scoreboard money commands
   for (const p of world.getPlayers()) setupPlayer(p);
 });
 

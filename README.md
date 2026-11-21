@@ -21,7 +21,9 @@ Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration),
 **Kits**, **Spawners**, **Farming**, **Ores**, **Tools & Armor**, **Redstone**, **Mob Drops**,
 **Brewing**, **Treasure**, **Search**.
 
-- Money is stored on the `money` **scoreboard**, so it survives restarts and works on Realms.
+- Balances can go up to **1 quadrillion**. They're stored on the player; the `money`
+  **scoreboard** mirrors them (showing up to 2.1 billion) for the sidebar, and
+  `/scoreboard players add/remove/set <name> money` commands still change the real balance.
 - **Kits** have per-player cooldowns and enchantments. Includes an **Island Kit** for new islands.
 - **Spawners** for 24 mobs, with stacking, upgrades, mob stacking and enchanted heads (see below).
 - The compass is given on join, kept on death, and can't be dropped or stored.

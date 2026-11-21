@@ -16,7 +16,7 @@ export const CONFIG = {
   currency: "$",
 
   startingBalance: 500,
-  maxBalance: 2000000000, // scoreboard limit is ~2.1 billion
+  maxBalance: 1000000000000000, // 1 quadrillion (the "money" scoreboard just shows up to 2.1 billion)
 
   adminTag: "admin", // /tag <player> add admin  -> shows the Admin tile
 
