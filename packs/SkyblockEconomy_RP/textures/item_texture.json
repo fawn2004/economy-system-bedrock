@@ -349,6 +349,9 @@
     },
     "eco_mloot_enchanted_golden_apple": {
       "textures": "textures/items/apple_golden"
+    },
+    "eco_chunk_hopper": {
+      "textures": "textures/items/hopper"
     }
   }
 }

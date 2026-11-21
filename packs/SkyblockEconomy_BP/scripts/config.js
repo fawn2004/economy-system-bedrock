@@ -275,10 +275,10 @@ export const SPAWNER_SETTINGS = {
 // Order of the tiles on the shop's front page. "blocks" opens the block
 // sub-categories; the rest are category ids from prices.js plus kits/spawners/search.
 export const SHOP_LAYOUT = [
-  "blocks", "food", "kits", "spawners", "minions", "skilltools", "farming", "buckets", "misc",
+  "blocks", "food", "kits", "spawners", "minions", "chunkhopper", "skilltools", "farming", "buckets", "misc",
   "ores", "tools", "redstone", "mobs", "brewing", "treasure", "search",
 ];
-export const BADGES = { kits: "NEW", spawners: "HOT", skilltools: "NEW", minions: "NEW" };
+export const BADGES = { kits: "NEW", spawners: "HOT", skilltools: "NEW", minions: "NEW", chunkhopper: "NEW" };
 
 // ============================================================================
 //  SKILL TOOLS  (Farming Hoe / Slayer Sword)
@@ -569,3 +569,13 @@ export const MINION_UPGRADES = [
     money: [3000, 8000, 20000, 45000, 100000],
   },
 ];
+
+// ============================================================================
+//  CHUNK HOPPER  - collects every dropped item in its chunk into storage
+// ============================================================================
+export const CHUNK_HOPPER = {
+  price: 50000,
+  baseStorage: 1000, // items it holds at storage level 0
+  storagePerLevel: 1000, // extra items per storage upgrade
+  upgradeCosts: [10000, 25000, 50000, 100000, 200000, 400000, 750000, 1500000], // one per level
+};

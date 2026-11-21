@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import { COLLECTION_TIERS, CONFIG, KITS, MINION_SETTINGS, MINION_TYPES, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { CHUNK_HOPPER, COLLECTION_TIERS, CONFIG, KITS, MINION_SETTINGS, MINION_TYPES, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 
 // ============================================================================
 //  IN-GAME SETTINGS
@@ -36,6 +36,7 @@ const DEFAULTS = {
   minionSettings: clone(MINION_SETTINGS),
   minionUpgrades: clone(MINION_UPGRADES),
   minionTypes: clone(MINION_TYPES),
+  chunkHopper: clone(CHUNK_HOPPER),
 };
 
 // Spawner settings that are simple numbers / switches (shown in the settings form)
@@ -125,6 +126,13 @@ export function applySavedSettings() {
   applyTools();
   applySkills();
   applyMinions();
+  replaceObject(CHUNK_HOPPER, { ...DEFAULTS.chunkHopper, ...(saved.chunkHopper ?? {}) });
+}
+
+export function setChunkHopper(values) {
+  saved.chunkHopper = { ...(saved.chunkHopper ?? {}), ...clone(values) };
+  store();
+  replaceObject(CHUNK_HOPPER, { ...DEFAULTS.chunkHopper, ...saved.chunkHopper });
 }
 
 function applyMinions() {

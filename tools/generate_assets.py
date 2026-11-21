@@ -1363,6 +1363,23 @@ def make_minion_loot():
             f.writelines(lang)
 
 
+def make_chunk_hopper():
+    item = {"format_version": "1.21.60", "minecraft:item": {
+        "description": {"identifier": "eco:chunk_hopper", "menu_category": {"category": "items"}},
+        "components": {"minecraft:icon": "eco_chunk_hopper", "minecraft:display_name": {"value": "§r§6Chunk Hopper"},
+                       "minecraft:max_stack_size": 1, "minecraft:glint": True}}}
+    with open(os.path.join(BP, "items", "chunk_hopper.json"), "w") as f:
+        json.dump(item, f, indent=2, ensure_ascii=False)
+    tex_path = os.path.join(RP, "textures", "item_texture.json")
+    data = json.load(open(tex_path))
+    data["texture_data"]["eco_chunk_hopper"] = {"textures": "textures/items/hopper"}
+    with open(tex_path, "w") as f:
+        json.dump(data, f, indent=2)
+    for lang in ("en_US", "en_GB"):
+        with open(os.path.join(RP, "texts", lang + ".lang"), "a") as f:
+            f.write("item.eco:chunk_hopper=Chunk Hopper\n")
+
+
 if __name__ == "__main__":
     make_shapes()
     make_frames()
@@ -1375,4 +1392,5 @@ if __name__ == "__main__":
     make_enchanted_crops()
     make_minions()
     make_minion_loot()
+    make_chunk_hopper()
     print("Assets generated.")

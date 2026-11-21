@@ -1,6 +1,6 @@
 import { ModalFormData } from "@minecraft/server-ui";
 import { getCatalog } from "./catalog.js";
-import { COLLECTION_TIERS, CONFIG, CROPS, KITS, MINION_SETTINGS, MINION_TYPES, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { CHUNK_HOPPER, COLLECTION_TIERS, CONFIG, CROPS, KITS, MINION_SETTINGS, MINION_TYPES, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 import { fmt } from "./economy.js";
 import { container } from "./inventory.js";
 import {
@@ -12,6 +12,7 @@ import {
   saveKits,
   setConfig,
   setLevels,
+  setChunkHopper,
   setCollections,
   setMinionSettings,
   setMinionType,
@@ -78,6 +79,26 @@ export async function settingsMenu(player, back, msg) {
       { text: "§d§lCOLLECTIONS", sub: "§7Tiers & rewards", icon: "textures/ui/eco/icon_farming", onClick: () => collectionsSettings(player, () => reopen()) },
       { text: "§b§lSKILLS", sub: "§7XP, perks, rewards", icon: "textures/items/iron_pickaxe", onClick: () => skillsSettings(player, () => reopen()) },
       { text: "§e§lMINIONS", sub: "§7Price, upgrades, tiers", icon: "textures/ui/eco/icon_minion", onClick: () => minionSettings(player, () => reopen()) },
+      {
+        text: "§6§lCHUNK HOPPER",
+        sub: `§a${fmt(CHUNK_HOPPER.price)}`,
+        icon: "textures/items/hopper",
+        onClick: async () => {
+          const H = CHUNK_HOPPER;
+          const v = await modal(player, "Chunk Hopper", (f) =>
+            f
+              .textField("Shop price", String(H.price), { defaultValue: String(H.price) })
+              .textField("Storage before upgrades (items)", String(H.baseStorage), { defaultValue: String(H.baseStorage) })
+              .textField("Extra storage per upgrade (items)", String(H.storagePerLevel), { defaultValue: String(H.storagePerLevel) })
+              .textField("Upgrade cost for each level, comma separated", list(H.upgradeCosts), { defaultValue: list(H.upgradeCosts) })
+          );
+          if (!v) return reopen();
+          const price = num(v[0], 0), base = num(v[1], 1), per = num(v[2], 0), costs = parseList(v[3]);
+          if ([price, base, per].some((x) => x === undefined) || !costs) return reopen("§cCheck the numbers (costs like 10000, 25000, 50000).");
+          setChunkHopper({ price, baseStorage: base, storagePerLevel: per, upgradeCosts: costs });
+          return reopen(`§aChunk Hopper saved (${costs.length} upgrade levels).`);
+        },
+      },
       { text: "§a§lECONOMY", sub: "§7Money & menus", icon: ICON.bank, onClick: () => economyForm(player, reopen) },
       {
         text: "§6§lFLOOR ITEMS",

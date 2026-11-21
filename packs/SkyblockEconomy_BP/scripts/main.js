@@ -10,6 +10,7 @@ import { registerTools } from "./tools.js";
 import { registerSkills } from "./skills.js";
 import { registerMinions } from "./minions.js";
 import { registerLeaderboards } from "./leaderboards.js";
+import { registerChunkHoppers } from "./chunkHopper.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -56,3 +57,4 @@ registerTools();
 registerSkills();
 registerMinions();
 registerLeaderboards();
+registerChunkHoppers();

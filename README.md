@@ -119,6 +119,16 @@ upgrade costs/effects, are in **Admin > Settings > Minions** (defaults: `MINION_
 `tools/generate_assets.py` > `scripts/minion_types.js`, `MINION_SETTINGS` / `MINION_UPGRADES`
 in `config.js`).
 
+## Chunk Hopper
+
+**Shop > Chunk Hopper** ($50k). Place it and it collects **every dropped item in its chunk**
+(16x16, top to bottom) into its own storage about once a second, including whole floor-item
+piles. Renamed / enchanted / special items are left alone. It's a locked hopper, so it never
+moves items itself. Tap it to **Sell All** (minion items at their value; heads and enchanted
+crops go to your balances), **Collect All**, **Upgrade Storage** (1,000 items + 1,000 per
+level) or **Pick Up** (keeps its level). One per chunk; owner/admin only; can't be mined or
+blown up. Price, storage and upgrade costs: **Admin > Settings > Chunk Hopper**.
+
 ## Skills
 
 Main menu > **Skills**. Skills level up automatically (max 25) as you play; each level pays

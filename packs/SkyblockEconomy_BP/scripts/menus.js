@@ -1,7 +1,7 @@
 import { ItemStack, world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
-import { BADGES, CONFIG, CROPS, KITS, MINION_SETTINGS, MINION_TYPES, SHOP_LAYOUT, SKILLS, SKILL_TOOLS, SPAWNERS } from "./config.js";
+import { BADGES, CHUNK_HOPPER, CONFIG, CROPS, KITS, MINION_SETTINGS, MINION_TYPES, SHOP_LAYOUT, SKILLS, SKILL_TOOLS, SPAWNERS } from "./config.js";
 import { addMoney, fmt, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
   applyEnchants,
@@ -15,6 +15,7 @@ import {
 } from "./inventory.js";
 import { settingsMenu } from "./adminSettings.js";
 import { leaderboardsMenu } from "./leaderboards.js";
+import { makeHopperItem } from "./chunkHopper.js";
 import { isMinionLoot, lootIcon, lootIdFor, lootName, lootSellPrice, makeMinionItem } from "./minions.js";
 import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
@@ -117,6 +118,8 @@ export async function shopMenu(player, msg) {
       tiles.push({ text: "§e§lKITS", sub: `§7${KITS.filter((k) => !k.disabled).length} kits`, icon: U + "icon_kits", badge: BADGES.kits, onClick: () => kitsMenu(player) });
     } else if (key === "spawners") {
       tiles.push({ text: "§e§lSPAWNERS", sub: `§7${SPAWNERS.filter((s) => !s.disabled).length} mobs`, icon: U + "icon_spawners", badge: BADGES.spawners, onClick: () => spawnersMenu(player) });
+    } else if (key === "chunkhopper") {
+      tiles.push({ text: "§6§lCHUNK HOPPER", sub: `${priceColor(player, CHUNK_HOPPER.price)}${fmtShort(CHUNK_HOPPER.price)}`, icon: "textures/items/hopper", badge: BADGES.chunkhopper, onClick: () => chunkHopperShop(player) });
     } else if (key === "minions") {
       tiles.push({ text: "§e§lMINIONS", sub: "§7They mine for you", icon: U + "icon_minion", badge: BADGES.minions, onClick: () => minionShop(player) });
     } else if (key === "skilltools") {
@@ -276,6 +279,38 @@ function buyItem(player, item, amount) {
   giveItems(player, item.id, amount);
   success(player, `Bought ${amount}x ${item.name} for ${fmt(cost)}.`);
   return `§aBought §f${amount}x ${item.name} §afor §f${fmt(cost)}`;
+}
+
+// ---- chunk hopper ---------------------------------------------------------------
+async function chunkHopperShop(player, msg) {
+  const H = CHUNK_HOPPER;
+  await tileMenu(player, {
+    title: "CHUNK HOPPER",
+    theme: "gold",
+    body:
+      (msg ? msg + "\n" : "") +
+      "§7Collects §fevery dropped item in its chunk §7into its own storage.\n" +
+      `§7Tap it to §6sell all§7, §acollect all §7or §bupgrade storage §7(${String(H.baseStorage).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} items to start). One per chunk.    ${balLine(player)}`,
+    tiles: [
+      {
+        text: "§a§lBUY",
+        sub: `${priceColor(player, H.price)}${fmtShort(H.price)}`,
+        icon: "textures/items/hopper",
+        onClick: () => {
+          if (getBalance(player) < H.price) {
+            fail(player, `You need ${fmt(H.price)}.`);
+            return chunkHopperShop(player, `§cYou need §f${fmt(H.price)}§c.`);
+          }
+          if (freeSlots(player) < 1) return chunkHopperShop(player, "§cYou need a free inventory slot!");
+          takeMoney(player, H.price);
+          player.getComponent("minecraft:inventory").container.addItem(makeHopperItem(0));
+          success(player, "Bought a Chunk Hopper! Place it anywhere in the chunk you want to collect.");
+          return chunkHopperShop(player, "§aBought a §fChunk Hopper§a! Place it in the chunk you want to collect.");
+        },
+      },
+      backTile(() => shopMenu(player)),
+    ],
+  });
 }
 
 // ---- minions -------------------------------------------------------------------
