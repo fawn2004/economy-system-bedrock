@@ -147,6 +147,14 @@ The party is teleported to a dungeon built in the sky far away (x 30000+, y 200)
   dungeons and levels up every run. Your Dungeon level adds Defense and damage in dungeons.
 - **Essence** buys dungeon gear (Essence Shop) and **stars** for dungeon items (+10% stats per
   star, up to 5).
+- **Reward chests** show their loot table with the chance per roll (**... Loot** tile) and,
+  once opened, what you got. Each floor has better loot:
+  - **Dungeon-only island tools** in 3 tiers (Floors I-II, III-IV, V): Gravebloom Hoe / Phantom
+    Scythe / Sovereign Sickle, Crypt Pick / Phantom Drill / Sovereign Excavator, Rotwood Axe /
+    Spectral Hatchet / Sovereign Timberaxe, Drowned / Phantom / Sovereign Rod, plus Crypt and
+    Sovereign Lantern accessories. All can be starred, reforged and enchanted.
+  - **Treasures** to sell (Sell menu) or auction: Ancient Coin $4k, Crypt Relic $12k, Bone Idol
+    $30k (F2+), Hollow Crown Shard $70k (F3+), Ashen Ember $140k (F4+), Sovereign Jewel $350k (F5).
 - Items you drop if you die in a dungeon stay there, so be careful!
 
 ## Quests, Daily Reward, Spirits, Election, Wardrobe, Sea Creatures
@@ -337,8 +345,10 @@ Price, storage, speed and upgrade costs: **Admin > Settings > Chunk Hopper**.
 
 ## Skills
 
-Main menu > **Skills**. Skills level up automatically (max 25) as you play; each level pays
-money (`moneyPerLevel` x level) and raises the skill's perk by 2%.
+Main menu > **Skills**. Skills level up automatically (max 25) as you play; each level raises
+the skill's perk by 2% straight away and gives a coin reward (`moneyPerLevel` x level, triple
+every 5th level) that you **claim in the Skills menu** (per skill or Claim All). The main menu's
+Skills tile shows how many rewards are waiting.
 
 | Skill | XP from | Perk |
 |---|---|---|

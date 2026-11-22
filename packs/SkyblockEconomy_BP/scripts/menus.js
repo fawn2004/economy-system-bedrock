@@ -14,12 +14,14 @@ import {
   spaceFor,
 } from "./inventory.js";
 import { settingsMenu } from "./adminSettings.js";
+import { itemIcon } from "./itemData.js";
 import { auctionMenu } from "./auction.js";
 import { bankMenu, getBank } from "./bank.js";
 import { bazaarMenu } from "./bazaar.js";
 import { itemShopMenu } from "./forge.js";
 import { adminRpgMenu, profileMenu } from "./profile.js";
-import { slayerMenu } from "./slayer.js";
+import { countCustom, slayerMenu, takeCustom } from "./slayer.js";
+import { ITEMS as CUSTOM_ITEMS, readItem } from "./items.js";
 import { getStats } from "./stats.js";
 import { petsMenu } from "./pets.js";
 import { dungeonMenu, inDungeon, leaveRun } from "./dungeons.js";
@@ -31,7 +33,7 @@ import { makeHopperItem } from "./chunkHopper.js";
 import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
 import { playerSettingsMenu } from "./playerSettings.js";
 import { isMinionLoot, lootIcon, lootIdFor, lootName, lootSellPrice, makeMinionItem } from "./minions.js";
-import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
+import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, totalUnclaimed, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
 import { clearGroundItems } from "./groundItems.js";
 import {
@@ -118,7 +120,8 @@ export async function mainMenu(player) {
     { text: "§6§lRANKINGS", sub: "§7Who's on top", icon: ICON.top, onClick: () => leaderboardsMenu(player, () => mainMenu(player)) },
     {
       text: "§b§lSKILLS",
-      sub: "§7Collections",
+      sub: totalUnclaimed(player) ? `§e${totalUnclaimed(player)} to claim!` : "§7Collections",
+      badge: totalUnclaimed(player) ? "NEW" : undefined,
       icon: "textures/items/iron_pickaxe",
       onClick: () =>
         skillsMenu(player, () => mainMenu(player), [
@@ -623,10 +626,20 @@ export async function sellMenu(player, msg) {
   const headCount = heads.reduce((n, [, c]) => n + c, 0);
   const cropCount = enchanted.reduce((n, [, c]) => n + c, 0);
 
+  // dungeon treasures (custom items with a sell value)
+  const treasureIds = new Set();
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  for (let i = 0; i < (inv?.size ?? 0); i++) {
+    const info = readItem(inv.getItem(i));
+    if (info?.def?.value && !info.kit) treasureIds.add(info.id);
+  }
+  const treasures = [...treasureIds].map((id) => [id, countCustom(player, id)]).filter(([, n]) => n > 0);
+  const treasureTotal = treasures.reduce((n, [id, c]) => n + CUSTOM_ITEMS[id].value * c, 0);
+
   const tiles = [];
-  if (sellable.length || heads.length || enchanted.length) {
+  if (sellable.length || heads.length || enchanted.length || treasures.length) {
     const parts = [];
-    if (total) parts.push(`§a${fmtShort(total)}`);
+    if (total + treasureTotal) parts.push(`§a${fmtShort(total + treasureTotal)}`);
     if (headCount) parts.push(`§d+${headCount}h`);
     if (cropCount) parts.push(`§2+${cropCount}e`);
     tiles.push({
@@ -637,6 +650,7 @@ export async function sellMenu(player, msg) {
       onClick: () => {
         let earned = 0;
         for (const [id] of sellable) earned += priceOf(id) * removeAllPlain(player, id);
+        for (const [id, n] of treasures) earned += CUSTOM_ITEMS[id].value * takeCustom(player, id, n);
         earned = Math.floor(earned * sellBonus(player));
         if (earned) addMoney(player, earned);
         const h = [...depositHeads(player).values()].reduce((n, c) => n + c, 0);
@@ -647,6 +661,21 @@ export async function sellMenu(player, msg) {
         if (c) done.push(`§2${c} enchanted crops §7added to your balance`);
         success(player, `Sold everything: ${done.map((x) => x.replace(/§./g, "")).join(", ")}.`);
         return sellMenu(player, `§aSold everything: ${done.join("§a, ")}§a.`);
+      },
+    });
+  }
+  for (const [id, n] of treasures) {
+    const d = CUSTOM_ITEMS[id];
+    tiles.push({
+      text: `§6${clip(d.name)}`,
+      sub: `§7x${n} §a${fmtShort(d.value * n)}`,
+      icon: itemIcon(d.item),
+      onClick: () => {
+        const sold = takeCustom(player, id, n);
+        const earned = Math.floor(sold * d.value * sellBonus(player));
+        addMoney(player, earned);
+        success(player, `Sold ${sold}x ${d.name} for ${fmt(earned)}.`);
+        return sellMenu(player, `§aSold §f${sold}x ${d.name} §afor §f${fmt(earned)}`);
       },
     });
   }
@@ -692,7 +721,7 @@ export async function sellMenu(player, msg) {
   }
   tiles.push(backTile(() => mainMenu(player)));
 
-  const info = sellable.length || heads.length || enchanted.length
+  const info = sellable.length || heads.length || enchanted.length || treasures.length
     ? "§7Click an item to sell all of it. §dHeads §7and §2enchanted crops §7aren't worth money -\n§7they're added to your head count / crop balance for upgrades."
     : "§7You have nothing that can be sold. §8(Kit & renamed items can't be sold)";
   await tileMenu(player, { title: "SELL", theme: "green", body: `${msgLine(msg)}${info}    ${balLine(player)}`, tiles });

@@ -195,6 +195,30 @@ export const ITEMS = {
   ash_crown: { name: "Crown of Ash", item: "minecraft:blaze_rod", rarity: 4, kind: "accessory", family: "ash", tier: 1, stats: { str: 20, cd: 20 }, dungeon: true },
   crypt_ring: { name: "Crypt Ring", item: "minecraft:bone_meal", rarity: 2, kind: "accessory", family: "crypt", tier: 1, stats: { def: 8, str: 4 }, dungeon: true },
 
+  // ---- dungeon island tools (only from dungeon reward chests; star them with Essence) ----
+  gravebloom_hoe: { name: "Gravebloom Hoe", item: "minecraft:iron_hoe", rarity: 2, stats: { ffo: 35, ms: 15 }, dungeon: true, desc: "Grows crops from the crypt's soil" },
+  phantom_scythe: { name: "Phantom Scythe", item: "minecraft:diamond_hoe", rarity: 3, stats: { ffo: 60, ms: 25, spd: 5 }, dungeon: true },
+  sovereign_sickle: { name: "Sovereign Sickle", item: "minecraft:netherite_hoe", rarity: 4, stats: { ffo: 100, ms: 40, spd: 10 }, dungeon: true },
+  crypt_pick: { name: "Crypt Pick", item: "minecraft:iron_pickaxe", rarity: 2, stats: { mfo: 35, ms: 40 }, dungeon: true },
+  phantom_drill: { name: "Phantom Drill", item: "minecraft:diamond_pickaxe", rarity: 3, stats: { mfo: 60, ms: 70 }, dungeon: true },
+  sovereign_excavator: { name: "Sovereign Excavator", item: "minecraft:netherite_pickaxe", rarity: 4, stats: { mfo: 100, ms: 100 }, dungeon: true },
+  rotwood_axe: { name: "Rotwood Axe", item: "minecraft:iron_axe", rarity: 2, kind: "axe", stats: { wfo: 35, ms: 20 }, dungeon: true },
+  spectral_hatchet: { name: "Spectral Hatchet", item: "minecraft:diamond_axe", rarity: 3, kind: "axe", stats: { wfo: 60, ms: 35, str: 10 }, dungeon: true },
+  sovereign_timberaxe: { name: "Sovereign Timberaxe", item: "minecraft:netherite_axe", rarity: 4, kind: "axe", stats: { wfo: 100, ms: 50, str: 20 }, dungeon: true },
+  drowned_rod: { name: "Drowned Rod", item: "minecraft:fishing_rod", rarity: 2, stats: { scc: 4, int: 30 }, dungeon: true },
+  phantom_rod: { name: "Phantom Rod", item: "minecraft:fishing_rod", rarity: 3, stats: { scc: 7, int: 60, mf: 2 }, dungeon: true },
+  sovereign_rod: { name: "Sovereign Rod", item: "minecraft:fishing_rod", rarity: 4, stats: { scc: 10, int: 100, mf: 4 }, dungeon: true },
+  crypt_lantern: { name: "Crypt Lantern", item: "minecraft:soul_lantern", rarity: 2, kind: "accessory", family: "lantern", tier: 1, stats: { mf: 3, int: 15 }, dungeon: true, desc: "Accessory: helps you find treasure" },
+  sovereign_lantern: { name: "Sovereign Lantern", item: "minecraft:soul_lantern", rarity: 4, kind: "accessory", family: "lantern", tier: 2, stats: { mf: 8, int: 40 }, dungeon: true, desc: "Accessory: helps you find treasure" },
+
+  // ---- dungeon treasures (sell them in the Sell menu, or trade them on the Auction House) ----
+  ancient_coin: { name: "Ancient Coin", item: "minecraft:gold_nugget", rarity: 1, kind: "material", value: 4000, desc: "An old coin from the crypts" },
+  crypt_relic: { name: "Crypt Relic", item: "minecraft:clay_ball", rarity: 2, kind: "material", value: 12000, desc: "Collectors pay well for these" },
+  bone_idol: { name: "Bone Idol", item: "minecraft:bone_block", rarity: 2, kind: "material", value: 30000, desc: "A carved idol from Floor II and up" },
+  hollow_crown_shard: { name: "Hollow Crown Shard", item: "minecraft:amethyst_shard", rarity: 3, kind: "material", value: 70000, desc: "A piece of the Hollow King's crown" },
+  ashen_ember: { name: "Ashen Ember", item: "minecraft:fire_charge", rarity: 3, kind: "material", value: 140000, desc: "Still warm, years later" },
+  sovereign_jewel: { name: "Sovereign Jewel", item: "minecraft:emerald", rarity: 4, kind: "material", value: 350000, desc: "The rarest treasure of the crypts" },
+
   // ---- materials (boss / dungeon drops, used in shops) ----
   rotten_core: { name: "Rotten Core", item: "minecraft:rotten_flesh", rarity: 1, kind: "material", desc: "Dropped by Rotting Tyrants" },
   tyrant_fang: { name: "Tyrant Fang", item: "minecraft:bone", rarity: 3, kind: "material", desc: "Rare Rotting Tyrant drop" },
@@ -366,6 +390,7 @@ export function renderItem(stack, info) {
     lines.push(...wrap(def.desc));
   }
   if (def?.set) lines.push(`§8Part of the ${def.set[0].toUpperCase() + def.set.slice(1)} set`);
+  if (def?.value) lines.push(`§7Sell price: §6$${String(def.value).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} §8(Sell menu)`);
   if (def?.dungeon) lines.push(`§8Dungeon item${info.stars ? ` §6(${info.stars}/5 stars)` : " - star it with essence"}`);
   if (info.kit) lines.push("§8Kit item - can't be sold or traded");
   lines.push("");

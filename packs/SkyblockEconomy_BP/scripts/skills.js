@@ -55,6 +55,40 @@ export function xpToReach(level) {
   return t;
 }
 
+// ---- level rewards are claimed in the Skills menu ---------------------------------
+/** Coins for reaching level `l` (every 5th level pays triple). */
+export const levelReward = (l) => SS.moneyPerLevel * l * (l % 5 === 0 ? 3 : 1);
+
+/** Highest level whose reward the player has claimed (players from before this update start fully claimed). */
+export function claimedLevel(player, id) {
+  const v = player.getDynamicProperty(`eco:skclaim:${id}`);
+  if (typeof v === "number") return v;
+  const now = skillLevel(player, id);
+  player.setDynamicProperty(`eco:skclaim:${id}`, now);
+  return now;
+}
+
+/** Levels waiting to be claimed for one skill: [levels] */
+export function unclaimed(player, id) {
+  const from = claimedLevel(player, id);
+  const to = skillLevel(player, id);
+  const out = [];
+  for (let l = from + 1; l <= to; l++) out.push(l);
+  return out;
+}
+
+export const totalUnclaimed = (player) => skillIds().filter((id) => !SKILLS[id].disabled).reduce((n, id) => n + unclaimed(player, id).length, 0);
+
+/** Pays every unclaimed level of a skill. Returns the coins paid. */
+export function claimSkill(player, id) {
+  const levels = unclaimed(player, id);
+  if (!levels.length) return 0;
+  const coins = levels.reduce((n, l) => n + levelReward(l), 0);
+  player.setDynamicProperty(`eco:skclaim:${id}`, levels[levels.length - 1]);
+  if (coins > 0) addMoney(player, coins);
+  return coins;
+}
+
 /** Perk % for a skill (e.g. 2% per level) */
 export function skillPerk(player, id) {
   const s = SKILLS[id];
@@ -72,6 +106,7 @@ export function addSkillXp(player, id, amount) {
     } catch {}
   }
   const before = levelInfo(getSkillXp(player, id)).level;
+  claimedLevel(player, id); // older players start fully claimed (before this XP is added)
   const total = getSkillXp(player, id) + gain;
   player.setDynamicProperty(`eco:skill:${id}`, total);
   const info = levelInfo(total);
@@ -83,15 +118,14 @@ export function addSkillXp(player, id, amount) {
     } catch {}
   }
   for (let l = before + 1; l <= info.level; l++) {
-    const reward = SS.moneyPerLevel * l;
-    if (reward > 0) addMoney(player, reward);
+    const reward = levelReward(l);
     player.sendMessage(
-      `§b§l⬆ SKILL UP! §r§f${s.name} §blevel ${l}§7! ` +
-        `${reward ? `§a+${fmt(reward)}§7, ` : ""}§a${s.perk} +${s.perkPerLevel}% §7(now ${l * s.perkPerLevel}%)`
+      `§b§l⬆ SKILL UP! §r§f${s.name} §blevel ${l}§7! §a${s.perk} +${s.perkPerLevel}% §7(now ${l * s.perkPerLevel}%)` +
+        (reward ? `\n§e§l! §r§eClaim §a${fmt(reward)} §ein §fMenu > Skills§e!` : "")
     );
     if (pref(player, "titles", true)) try {
       pauseSidebar(player, 60);
-      player.onScreenDisplay.setTitle(`§b${s.name} ${l}`, { subtitle: "§7Skill level up!", fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 });
+      player.onScreenDisplay.setTitle(`§b${s.name} ${l}`, { subtitle: "§eReward ready to claim in Skills!", fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 });
     } catch {}
     player.playSound("random.levelup");
   }
@@ -223,13 +257,30 @@ export async function skillsMenu(player, back, extraTiles = []) {
     const s = SKILLS[id];
     const info = levelInfo(getSkillXp(player, id));
     const pct = info.need ? Math.floor((info.into / info.need) * 100) : 100;
+    const ready = unclaimed(player, id).length;
     return {
       text: `§b§l${s.name.toUpperCase()}`,
-      sub: info.level >= SS.maxLevel ? `§fLv ${info.level} §6MAX` : `§fLv ${info.level} §7· §a${pct}%`,
+      sub: (info.level >= SS.maxLevel ? `§fLv ${info.level} §6MAX` : `§fLv ${info.level} §7· §a${pct}%`) + (ready ? `\n§e${ready} reward${ready > 1 ? "s" : ""} to claim!` : ""),
       icon: s.icon,
+      badge: ready ? "NEW" : undefined,
       onClick: () => skillDetail(player, id, reopen),
     };
   });
+  const waiting = totalUnclaimed(player);
+  if (waiting) {
+    tiles.unshift({
+      text: "§a§lCLAIM ALL",
+      sub: `§e${waiting} level reward${waiting > 1 ? "s" : ""}`,
+      icon: "textures/items/gold_ingot",
+      badge: "NEW",
+      onClick: () => {
+        const coins = ids.reduce((n, id) => n + claimSkill(player, id), 0);
+        player.sendMessage(`§a§l✔ §r§aClaimed ${waiting} skill level reward${waiting > 1 ? "s" : ""}: §f${fmt(coins)}§a!`);
+        player.playSound("random.levelup");
+        return reopen();
+      },
+    });
+  }
   tiles.unshift({
     text: "§e§lMY PROGRESS",
     sub: "§7What to improve",
@@ -239,7 +290,7 @@ export async function skillsMenu(player, back, extraTiles = []) {
   await tileMenu(player, {
     title: "SKILLS",
     theme: "blue",
-    body: `§7Level skills by playing. Each level pays money and boosts a perk.\n§7Skill average: §b${avg.toFixed(1)}`,
+    body: `§7Level skills by playing. Each level boosts a perk and gives a coin reward you §eclaim here§7 (every 5th level pays triple).\n§7Skill average: §b${avg.toFixed(1)}`,
     tiles: [...tiles, ...extraTiles.map((t) => ({ ...t, onClick: () => t.onClick(reopen) })), backTile(back)],
   });
 }
@@ -321,6 +372,26 @@ function skillDetail(player, id, back) {
   const s = SKILLS[id];
   const info = levelInfo(getSkillXp(player, id));
   const next = info.level < SS.maxLevel;
+  const again = () => skillDetail(player, id, back);
+  const ready = unclaimed(player, id);
+  const tiles = [];
+  if (ready.length) {
+    const coins = ready.reduce((n, l) => n + levelReward(l), 0);
+    tiles.push({
+      text: "§a§lCLAIM REWARDS",
+      sub: ready.map((l) => `§7Level ${l}: §a${fmt(levelReward(l))}${l % 5 === 0 ? " §6(x3!)" : ""}`).slice(-8).join("\n") + `\n§fTotal: §a${fmt(coins)}`,
+      icon: "textures/items/gold_ingot",
+      badge: "NEW",
+      onClick: () => {
+        const got = claimSkill(player, id);
+        player.sendMessage(`§a§l✔ §r§aClaimed ${s.name} level reward${ready.length > 1 ? "s" : ""}: §f${fmt(got)}§a!`);
+        player.playSound("random.levelup");
+        return again();
+      },
+    });
+  }
+  const nextL = info.level + 1;
+  tiles.push(backTile(back));
   return tileMenu(player, {
     title: `${s.name.toUpperCase()} SKILL`,
     theme: "blue",
@@ -329,7 +400,8 @@ function skillDetail(player, id, back) {
       (next ? `${bar(info.into, info.need)} §7${commas(info.into)}/${commas(info.need)}\n` : "§6Max level!\n") +
       `§7How to earn XP: §f${s.how}\n` +
       `§7Perk: §a${s.perk} ${info.level * s.perkPerLevel}%` +
-      (next ? `  §8(next level: ${(info.level + 1) * s.perkPerLevel}%, +${fmt(SS.moneyPerLevel * (info.level + 1))})` : ""),
-    tiles: [backTile(back)],
+      (next ? `  §8(next level: ${nextL * s.perkPerLevel}%, reward ${fmt(levelReward(nextL))}${nextL % 5 === 0 ? " x3" : ""})` : "") +
+      (ready.length ? `\n§e${ready.length} level reward${ready.length > 1 ? "s" : ""} ready to claim!` : "\n§7All rewards claimed."),
+    tiles,
   });
 }

@@ -36,35 +36,35 @@ const FLOORS = [
     boss: { type: "minecraft:zombie", name: "§4§lThe Gravekeeper", hp: 2000, atk: 4 },
     pal: { wall: "stone_bricks", floor: "mossy_stone_bricks", accent: "cracked_stone_bricks", light: "sea_lantern" },
     xp: 40, essence: [5, 15], coins: 5000, chests: [25000, 75000],
-    loot: [["crypt_blade", 5], ["crypt_helmet", 4], ["crypt_chestplate", 3], ["crypt_leggings", 3], ["crypt_boots", 4], ["crypt_ring", 2], ["@essence", 20, 10, 30], ["@coins", 20, 5000, 15000]],
+    loot: [["crypt_blade", 5], ["crypt_helmet", 4], ["crypt_chestplate", 3], ["crypt_leggings", 3], ["crypt_boots", 4], ["crypt_ring", 2], ["gravebloom_hoe", 3], ["crypt_pick", 3], ["rotwood_axe", 3], ["drowned_rod", 2], ["crypt_lantern", 1], ["ancient_coin", 18], ["crypt_relic", 6], ["@essence", 20, 10, 30], ["@coins", 20, 5000, 15000]],
   },
   {
     name: "Floor II", level: 2, fee: 5000, rooms: 6, mobHp: 150, atk: 4, mobs: ["minecraft:zombie", "minecraft:skeleton", "minecraft:spider"], count: [4, 6],
     boss: { type: "minecraft:skeleton", name: "§4§lThe Bone Regent", hp: 6000, atk: 7 },
     pal: { wall: "deepslate_bricks", floor: "deepslate_tiles", accent: "cracked_deepslate_bricks", light: "sea_lantern" },
     xp: 90, essence: [10, 25], coins: 15000, chests: [75000, 200000],
-    loot: [["crypt_blade", 4], ["crypt_chestplate", 4], ["crypt_leggings", 4], ["crypt_ring", 3], ["bonebreaker", 2], ["spirit_staff", 1], ["phantom_helmet", 1], ["phantom_boots", 1], ["@essence", 20, 20, 50], ["@coins", 20, 10000, 30000]],
+    loot: [["crypt_chestplate", 3], ["crypt_leggings", 3], ["crypt_ring", 3], ["bonebreaker", 2], ["spirit_staff", 1], ["phantom_helmet", 1], ["phantom_boots", 1], ["gravebloom_hoe", 3], ["crypt_pick", 3], ["rotwood_axe", 3], ["drowned_rod", 3], ["crypt_lantern", 1.5], ["ancient_coin", 12], ["crypt_relic", 10], ["bone_idol", 4], ["@essence", 20, 20, 50], ["@coins", 18, 10000, 30000]],
   },
   {
     name: "Floor III", level: 5, fee: 25000, rooms: 7, mobHp: 400, atk: 7, mobs: ["minecraft:zombie", "minecraft:stray", "minecraft:wither_skeleton"], count: [4, 7],
     boss: { type: "minecraft:wither_skeleton", name: "§4§lThe Hollow King", hp: 18000, atk: 11 },
     pal: { wall: "polished_blackstone_bricks", floor: "blackstone", accent: "gilded_blackstone", light: "shroomlight" },
     xp: 180, essence: [20, 45], coins: 40000, chests: [200000, 600000],
-    loot: [["bonebreaker", 3], ["spirit_staff", 2], ["phantom_helmet", 3], ["phantom_chestplate", 2], ["phantom_leggings", 2], ["phantom_boots", 3], ["ash_crown", 0.5], ["@essence", 20, 40, 90], ["@coins", 15, 30000, 80000]],
+    loot: [["bonebreaker", 3], ["spirit_staff", 2], ["phantom_helmet", 3], ["phantom_chestplate", 2], ["phantom_leggings", 2], ["phantom_boots", 3], ["phantom_scythe", 2], ["phantom_drill", 2], ["spectral_hatchet", 2], ["phantom_rod", 1.5], ["crypt_lantern", 2], ["ash_crown", 0.5], ["crypt_relic", 10], ["bone_idol", 8], ["hollow_crown_shard", 3], ["@essence", 20, 40, 90], ["@coins", 15, 30000, 80000]],
   },
   {
     name: "Floor IV", level: 9, fee: 100000, rooms: 8, mobHp: 1000, atk: 11, mobs: ["minecraft:husk", "minecraft:wither_skeleton", "minecraft:vindicator"], count: [5, 7],
     boss: { type: "minecraft:ravager", name: "§4§lThe Ash Warden", hp: 50000, atk: 16 },
     pal: { wall: "nether_bricks", floor: "red_nether_bricks", accent: "chiseled_nether_bricks", light: "shroomlight" },
     xp: 350, essence: [40, 90], coins: 100000, chests: [600000, 2000000],
-    loot: [["phantom_chestplate", 3], ["phantom_leggings", 3], ["sovereign_helmet", 1], ["sovereign_boots", 1], ["ash_crown", 1], ["kingsbane", 0.3], ["spirit_staff", 2], ["@essence", 20, 80, 160], ["@coins", 15, 80000, 200000]],
+    loot: [["phantom_chestplate", 3], ["phantom_leggings", 3], ["phantom_scythe", 3], ["phantom_drill", 3], ["spectral_hatchet", 3], ["phantom_rod", 2.5], ["sovereign_helmet", 1], ["sovereign_boots", 1], ["ash_crown", 1], ["kingsbane", 0.3], ["spirit_staff", 2], ["sovereign_lantern", 0.5], ["bone_idol", 8], ["hollow_crown_shard", 6], ["ashen_ember", 3], ["@essence", 20, 80, 160], ["@coins", 15, 80000, 200000]],
   },
   {
     name: "Floor V", level: 14, fee: 500000, rooms: 9, mobHp: 2500, atk: 16, mobs: ["minecraft:wither_skeleton", "minecraft:vindicator", "minecraft:blaze", "minecraft:enderman"], count: [5, 8],
     boss: { type: "minecraft:wither_skeleton", name: "§4§lThe Undying Sovereign", hp: 150000, atk: 24 },
     pal: { wall: "end_stone_bricks", floor: "purpur_block", accent: "purpur_pillar", light: "sea_lantern" },
     xp: 700, essence: [80, 180], coins: 250000, chests: [2000000, 6000000],
-    loot: [["sovereign_helmet", 2], ["sovereign_chestplate", 1.5], ["sovereign_leggings", 1.5], ["sovereign_boots", 2], ["kingsbane", 1], ["ash_crown", 2], ["@pet", 0.2, "drake"], ["@essence", 20, 150, 300], ["@coins", 15, 200000, 500000]],
+    loot: [["sovereign_helmet", 2], ["sovereign_chestplate", 1.5], ["sovereign_leggings", 1.5], ["sovereign_boots", 2], ["kingsbane", 1], ["ash_crown", 2], ["sovereign_sickle", 1.5], ["sovereign_excavator", 1.5], ["sovereign_timberaxe", 1.5], ["sovereign_rod", 1.2], ["sovereign_lantern", 1], ["@pet", 0.2, "drake"], ["hollow_crown_shard", 8], ["ashen_ember", 6], ["sovereign_jewel", 2], ["@essence", 20, 150, 300], ["@coins", 15, 200000, 500000]],
   },
 ];
 
@@ -484,13 +484,42 @@ function pendingReward(p) {
   }
 }
 
-function rollLoot(p, F, rolls, rich) {
-  const mf = Math.max(0, stat(p, "mf"));
-  const table = F.loot.map((e) => {
+const CHESTS = [
+  { id: "wood", name: "Wooden Chest", cost: () => 0, rolls: 1, rich: false, icon: "textures/blocks/planks_oak" },
+  { id: "gold", name: "Gold Chest", cost: (F) => F.chests[0], rolls: 2, rich: false, icon: "textures/blocks/gold_block" },
+  { id: "diamond", name: "Diamond Chest", cost: (F) => F.chests[1], rolls: 3, rich: true, icon: "textures/blocks/diamond_block", needGood: true },
+];
+const GOOD_GRADES = ["S+", "S", "A"];
+
+/** Loot table weights for a chest (rare entries x3 in the Diamond Chest, Magic Find boosts rare ones). */
+function lootWeights(F, rich, mf) {
+  return F.loot.map((e) => {
     let w = e[1];
     if (w < 3) w *= (rich ? 3 : 1) * (1 + mf / 100);
     return [e, w];
   });
+}
+
+function lootName(e) {
+  if (e[0] === "@essence") return `§d${e[2]}-${e[3]} Essence`;
+  if (e[0] === "@coins") return `§6${fmtShort(e[2])}-${fmtShort(e[3])} coins`;
+  if (e[0] === "@pet") return "§6Drakeling Pet";
+  const d = ITEMS[e[0]];
+  return d ? `${RARITIES[d.rarity].color}${d.name}` : e[0];
+}
+
+/** "Possible loot" lines with the chance per roll, rarest first. */
+function chanceLines(p, F, chest) {
+  const table = lootWeights(F, chest.rich, Math.max(0, stat(p, "mf")));
+  const total = table.reduce((n, [, w]) => n + w, 0);
+  return table
+    .map(([e, w]) => [e, (w / total) * 100])
+    .sort((a, b) => a[1] - b[1])
+    .map(([e, pct]) => `${lootName(e)} §7${pct < 1 ? pct.toFixed(2) : pct.toFixed(1)}%`);
+}
+
+function rollLoot(p, F, rolls, rich) {
+  const table = lootWeights(F, rich, Math.max(0, stat(p, "mf")));
   const total = table.reduce((n, [, w]) => n + w, 0);
   const got = [];
   for (let r = 0; r < rolls; r++) {
@@ -505,7 +534,8 @@ function rollLoot(p, F, rolls, rich) {
       addMoney(p, n);
       got.push(`§6${fmt(n)}`);
     } else if (e[0] === "@pet") {
-      if (addPet(p, e[2], 4, 0)) got.push("§6§lDRAKELING PET");
+      if (addPet(p, e[2], 4, 0)) got.push("§6§lDrakeling Pet");
+      else got.push("§c(Pet Menu full)");
     } else if (ITEMS[e[0]]) {
       const st = makeItem(e[0]);
       if (!st) continue;
@@ -522,51 +552,88 @@ function rollLoot(p, F, rolls, rich) {
   return got;
 }
 
+/** What's left to do with the pending reward: { free, paid, done } */
+function rewardState(p) {
+  const r = pendingReward(p);
+  if (!r) return undefined;
+  const good = GOOD_GRADES.includes(r.grade);
+  const avail = CHESTS.filter((c) => !c.needGood || good);
+  const left = avail.filter((c) => !r.opened.includes(c.id));
+  return { r, free: left.some((c) => c.id === "wood"), paid: left.filter((c) => c.id !== "wood").length, done: left.length === 0 };
+}
+
+async function chestContents(player, F, chest, back) {
+  await tileMenu(player, {
+    title: chest.name,
+    theme: "gold",
+    body: [`§6§l${chest.name}§r §7- ${chest.rolls} roll${chest.rolls > 1 ? "s" : ""}${chest.rich ? ", rare loot x3" : ""}`, "§7Chance per roll (with your Magic Find):", ...chanceLines(player, F, chest)].join("\n"),
+    tiles: [backTile(back)],
+  });
+}
+
 async function rewardsMenu(player, back) {
   const again = () => rewardsMenu(player, back);
-  const r = pendingReward(player);
-  if (!r) return tileMenu(player, { title: "REWARDS", theme: "gold", body: "§7No reward chests waiting. Clear a dungeon floor first!", tiles: [backTile(back)] });
+  const st = rewardState(player);
+  if (!st) {
+    return tileMenu(player, { title: "Rewards", theme: "gold", body: "§7No reward chests waiting. Clear a dungeon floor first!", tiles: [backTile(back)] });
+  }
+  const { r } = st;
   const F = FLOORS[r.floor];
-  const good = ["S+", "S", "A"].includes(r.grade);
-  const chests = [
-    { id: "wood", name: "Wooden Chest", cost: 0, rolls: 1, rich: false, icon: "textures/blocks/planks_oak" },
-    { id: "gold", name: "Gold Chest", cost: F.chests[0], rolls: 2, rich: false, icon: "textures/blocks/gold_block" },
-    { id: "diamond", name: "Diamond Chest", cost: F.chests[1], rolls: 3, rich: true, icon: "textures/blocks/diamond_block", needGood: true },
-  ];
+  const good = GOOD_GRADES.includes(r.grade);
+  const tiles = [];
+  for (const c of CHESTS) {
+    const opened = r.opened.includes(c.id);
+    const locked = c.needGood && !good;
+    const cost = c.cost(F);
+    if (opened) {
+      // already opened: show what came out, no click
+      tiles.push({ text: `§8${c.name} §7(opened)`, sub: (r.loot?.[c.id] ?? []).map((x) => "§7- " + x).join("\n") || "§7Opened", icon: c.icon, noClick: true, onClick: again });
+      continue;
+    }
+    tiles.push({
+      text: `§6${c.name}`,
+      sub: locked ? "§cNeeds grade A or better" : `${cost ? `${getBalance(player) >= cost ? "§a" : "§c"}${fmt(cost)}` : "§aFree"} §7- ${c.rolls} roll${c.rolls > 1 ? "s" : ""}`,
+      icon: c.icon,
+      onClick: async () => {
+        if (locked) {
+          fail(player, "The Diamond Chest needs grade A or better.");
+          return again();
+        }
+        if (freeSlots(player) < c.rolls) {
+          fail(player, `You need ${c.rolls} free inventory slots.`);
+          return again();
+        }
+        const cur = pendingReward(player);
+        if (!cur || cur.opened.includes(c.id)) return again();
+        if (cost && !takeMoney(player, cost)) {
+          fail(player, `You need ${fmt(cost)}.`);
+          return again();
+        }
+        const got = rollLoot(player, F, c.rolls, c.rich);
+        cur.opened.push(c.id);
+        cur.loot = { ...(cur.loot ?? {}), [c.id]: got };
+        const avail = CHESTS.filter((x) => !x.needGood || good);
+        if (avail.every((x) => cur.opened.includes(x.id))) player.setDynamicProperty("eco:dgReward", undefined); // all done
+        else player.setDynamicProperty("eco:dgReward", JSON.stringify(cur));
+        player.playSound("random.chestopen");
+        success(player, `${c.name}: ${got.join(", ").replace(/§./g, "")}`);
+        // show what came out
+        await tileMenu(player, {
+          title: c.name,
+          theme: "gold",
+          body: `§6§lYou got:§r\n${got.map((x) => "§7- " + x).join("\n")}\n\n§8The items are in your inventory.`,
+          tiles: [backTile(() => (pendingReward(player) ? again() : back()))],
+        });
+      },
+    });
+    tiles.push({ text: `§b${c.name} Loot`, sub: "§7See the chances", icon: "textures/items/book_writable", onClick: () => chestContents(player, F, c, again) });
+  }
+  tiles.push(backTile(back));
   await tileMenu(player, {
-    title: `${F.name.toUpperCase()} REWARDS`,
+    title: `${F.name} Rewards`,
     theme: "gold",
-    body: `§7Grade: §6§l${r.grade}§r    §7Purse: §a${fmtShort(getBalance(player))}\n§7Open as many chests as you like (each once). The Diamond Chest needs grade A or better and has the best odds.\n§8Unopened chests are lost when you start your next run.`,
-    tiles: [
-      ...chests.map((c) => {
-        const opened = r.opened.includes(c.id);
-        const locked = c.needGood && !good;
-        return {
-          text: `${opened ? "§8" : "§6"}§l${c.name.toUpperCase()}`,
-          sub: opened ? "§8Opened" : locked ? "§cNeeds grade A" : c.cost ? `${getBalance(player) >= c.cost ? "§a" : "§c"}${fmtShort(c.cost)}` : "§aFree",
-          icon: c.icon,
-          onClick: () => {
-            if (opened || locked) return again();
-            if (freeSlots(player) < c.rolls) {
-              fail(player, `You need ${c.rolls} free inventory slots.`);
-              return again();
-            }
-            if (c.cost && !takeMoney(player, c.cost)) {
-              fail(player, `You need ${fmt(c.cost)}.`);
-              return again();
-            }
-            const cur = pendingReward(player);
-            cur.opened.push(c.id);
-            player.setDynamicProperty("eco:dgReward", JSON.stringify(cur));
-            const got = rollLoot(player, F, c.rolls, c.rich);
-            success(player, `${c.name}: ${got.join(", ").replace(/§./g, "")}`);
-            player.playSound("random.chestopen");
-            return again();
-          },
-        };
-      }),
-      backTile(back),
-    ],
+    body: `§7Grade: §6§l${r.grade}§r    §7Purse: §a${fmtShort(getBalance(player))}\n§7Open each chest once. The loot goes straight into your inventory.\n§7Gold and Diamond chests cost coins; the Diamond Chest needs grade A+ and has 3x rare odds.\n§8Unopened chests are lost when you start your next run.`,
+    tiles,
   });
 }
 
@@ -725,7 +792,7 @@ export async function dungeonMenu(player, back) {
   const again = () => dungeonMenu(player, back);
   const info = levelFrom(dungeonXp(player));
   const run = runOf(player);
-  const reward = pendingReward(player);
+  const reward = rewardState(player);
   const tiles = [];
   if (run) {
     tiles.push({
@@ -737,7 +804,13 @@ export async function dungeonMenu(player, back) {
   } else tiles.push({ text: "§5§lPLAY", sub: "§7Choose a floor", icon: "textures/items/ender_eye", badge: "HOT", onClick: () => playMenu(player, again) });
   tiles.push(
     { text: "§b§lCLASS", sub: `§7${CLASSES[getClass(player)].name}`, icon: CLASSES[getClass(player)].icon, onClick: () => classMenu(player, again) },
-    { text: "§6§lREWARDS", sub: reward ? `§aGrade ${reward.grade} chests` : "§7None waiting", icon: "textures/blocks/chest_front", badge: reward ? "NEW" : undefined, onClick: () => rewardsMenu(player, again) },
+    {
+      text: "§6§lREWARDS",
+      sub: !reward ? "§7None waiting" : reward.free ? `§aGrade ${reward.r.grade} - free chest!` : `§7${reward.paid} paid chest${reward.paid === 1 ? "" : "s"} left`,
+      icon: "textures/blocks/chest_front",
+      badge: reward?.free ? "NEW" : undefined,
+      onClick: () => rewardsMenu(player, again),
+    },
     { text: "§d§lESSENCE SHOP", sub: `§d${getEssence(player)} Essence`, icon: "textures/items/amethyst_shard", onClick: () => essenceShop(player, again) },
     { text: "§6§lSTAR ITEM", sub: "§7Held dungeon item", icon: "textures/items/nether_star", onClick: () => starMenu(player, again) },
     backTile(back)

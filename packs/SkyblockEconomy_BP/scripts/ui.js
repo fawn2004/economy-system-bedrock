@@ -52,7 +52,7 @@ function tooltipText(t) {
   if (t.badge === "NEW") text += " §a§lNEW";
   if (t.sub) text += `\n§r${t.sub}`;
   if (t.lore) text += `\n${t.lore}`;
-  if ((t.onClick || t.id) && !t.nav) text += "\n§eClick!";
+  if ((t.onClick || t.id) && !t.nav && !t.noClick) text += "\n§eClick!";
   return text;
 }
 
