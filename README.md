@@ -79,7 +79,10 @@ reforged and enchanted too.
   Insight, **Regrowth** (heals over time), **Retaliate** (hits attackers back), **Last Stand**
   (more Defense under 30% health), **Nightsight** (helmet: night vision). Tools: Harvesting,
   Swiftswing, Lure Master.
-  - Every attempt has a **chance to work**: level I 90%, II 75%, III 60%, IV 45%, V 30%.
+  - Custom enchantments go up to **XV** (Nightsight is on/off). Levels above V give half as much as
+    levels I-V (XV = twice as strong as V). Last Stand, Retaliate and Regrowth totals are capped.
+  - Every attempt has a **chance to work**: I 90%, II 75%, III 60%, IV 45%, V 30%, then 28% at VI down
+    to 10% at XV. XP cost is capped at 30 levels.
     **A failed attempt still costs** and the item doesn't change.
   - Dungeon gear (reward chest items) pays **Essence** plus some coins; everything else pays
     coins and XP levels. Armor enchantment effects add up across all the pieces you wear.

@@ -1,6 +1,6 @@
 import { EquipmentSlot, system, world } from "@minecraft/server";
 import { addMoney } from "./economy.js";
-import { ITEMS, RARITIES, STATS, STAT_ORDER, isArmorKind, isToolKind, isWeaponKind, itemStats, readItem } from "./items.js";
+import { ITEMS, RARITIES, STATS, STAT_ORDER, enchEff, isArmorKind, isToolKind, isWeaponKind, itemStats, readItem } from "./items.js";
 import { skillHooks, skillLevel } from "./skills.js";
 import { backTile, fail, tileMenu } from "./ui.js";
 
@@ -99,7 +99,7 @@ export function computeStats(player) {
     if (!info || !isArmorKind(info.kind)) continue;
     parts.push({ label: item.nameTag?.replace(/§./g, "") || info.kind, stats: itemStats(info) });
     addPassive(info.def?.passive);
-    for (const [c, l] of Object.entries(info.ench)) passive["arm_" + c] = (passive["arm_" + c] ?? 0) + l;
+    for (const [c, l] of Object.entries(info.ench)) passive["arm_" + c] = (passive["arm_" + c] ?? 0) + enchEff(l);
     if (info.def?.set) sets[info.def.set] = (sets[info.def.set] ?? 0) + 1;
   }
   for (const [set, n] of Object.entries(sets)) if (n >= 4 && SETS[set]) parts.push({ label: `${SETS[set].name} set bonus`, stats: SETS[set].stats });
@@ -108,7 +108,7 @@ export function computeStats(player) {
   if (heldInfo && (isWeaponKind(heldInfo.kind) || isToolKind(heldInfo.kind))) {
     parts.push({ label: held.nameTag?.replace(/§./g, "") || "Held item", stats: itemStats(heldInfo) });
     addPassive(heldInfo.def?.passive);
-    for (const [c, l] of Object.entries(heldInfo.ench)) passive["en_" + c] = l;
+    for (const [c, l] of Object.entries(heldInfo.ench)) passive["en_" + c] = enchEff(l);
   }
   for (const b of buffs.get(player.id) ?? []) if (b.until > Date.now()) parts.push({ label: "Ability buff", stats: b.stats });
   for (const src of statSources) {
@@ -382,7 +382,7 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
     if (!h || h.currentValue <= 0) return;
     const pas = getStats(target).passive;
     let def = Math.max(0, stat(target, "def"));
-    if (pas.arm_lt && h.currentValue < h.effectiveMax * 0.3) def *= 1 + 0.15 * pas.arm_lt; // Last Stand
+    if (pas.arm_lt && h.currentValue < h.effectiveMax * 0.3) def *= 1 + 0.15 * Math.min(10, pas.arm_lt); // Last Stand (max +150%)
     const red = def / (def + 100);
     let extra = 0;
     const src = damageSource?.damagingEntity;
@@ -396,7 +396,7 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
     // Retaliate: hit the attacker back
     if (pas.arm_rf && src && src.typeId !== "minecraft:player" && cause !== "thorns") {
       try {
-        src.applyDamage(Math.max(1, damage * 0.04 * pas.arm_rf), { cause: "thorns", damagingEntity: target });
+        src.applyDamage(Math.max(1, damage * 0.04 * Math.min(15, pas.arm_rf)), { cause: "thorns", damagingEntity: target });
       } catch {}
     }
     for (const f of combatHooks.playerHurt) {
@@ -446,7 +446,7 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
   }
   if (p.en_vn || p.venom) {
     try {
-      target.addEffect("poison", 60, { amplifier: Math.max(0, (p.en_vn ?? 1) - 1) });
+      target.addEffect("poison", 40 + Math.round((p.en_vn ?? 1) * 10), { amplifier: Math.max(0, Math.min(4, Math.floor((p.en_vn ?? 1) - 1))) });
     } catch {}
   }
   const steal = (p.en_ls ?? 0) + (p.lifesteal ?? 0);
@@ -582,7 +582,7 @@ export function registerStats() {
           const rg = getStats(p).passive.arm_rg;
           if (rg && system.currentTick % 100 < 20) {
             const h = p.getComponent("minecraft:health");
-            if (h && h.currentValue > 0 && h.currentValue < h.effectiveMax) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + 0.5 * rg));
+            if (h && h.currentValue > 0 && h.currentValue < h.effectiveMax) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + Math.min(5, 0.25 * rg)));
           }
           const info = readItem(heldItem(p));
           if (info?.def?.ability) p.onScreenDisplay.setActionBar(`§b✎ ${Math.floor(getMana(p))}/${maxMana(p)} Mana`);

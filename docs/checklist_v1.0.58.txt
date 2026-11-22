@@ -1,0 +1,14 @@
+SKYBLOCK ECONOMY v1.0.58 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+CUSTOM ENCHANTS UP TO XV
+[ ] Enchanting lets you go past V on every custom enchant, up to XV (Nightsight stays on/off)
+[ ] Works on kit gear (e.g. a kit sword with Keen Edge V can go to Keen Edge VI, VII...)
+[ ] The item tooltip shows the level in roman numerals (VI ... XV)
+[ ] Levels above V show "(Levels above V give half as much as levels I-V.)" on the confirm screen
+[ ] Success chance keeps dropping: VI 28%, VII 26%, VIII 24% ... XV 10%
+[ ] A failed attempt still costs and doesn't change the item
+[ ] XP cost never goes above 30 levels per attempt (dungeon gear pays Essence instead)
+[ ] Reforge screen shows "(max XV)" next to enchants that can still go higher
+[ ] Stats go up with the higher levels (e.g. Vitality XV on armor gives more Health than Vitality V)
+[ ] Last Stand / Retaliate / Regrowth don't get silly when stacked on all 4 pieces (they're capped)

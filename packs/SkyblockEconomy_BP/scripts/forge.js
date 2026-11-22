@@ -135,7 +135,7 @@ export async function reforgeMenu(player, back, pickSlot) {
 /** Cost of enchanting to `next`: dungeon gear pays Essence + some coins, everything else coins + XP levels. */
 function enchantCost(e, next, dungeonItem) {
   if (dungeonItem) return { coins: Math.round((e.cost * next * next) / 4), xp: 0, essence: Math.round((e.cost / 100) * next) };
-  return { coins: e.cost * next * next, xp: e.xp * next, essence: 0 };
+  return { coins: e.cost * next * next, xp: Math.min(30, e.xp * next), essence: 0 };
 }
 
 function costText(c) {
@@ -191,6 +191,7 @@ export async function enchantMenu(player, back, pickSlot) {
           theme: "purple",
           body:
             `§7${e.desc}\n` +
+            (next > 5 ? "§8(Levels above V give half as much as levels I-V.)\n" : "") +
             `§7Chance to work: §e§l${chance}%§r\n` +
             `§7Cost: ${costText(c)} §8(you have ${fmtShort(getBalance(player))}${c.xp ? `, ${player.level}L` : ""}${c.essence ? `, ${essence} Essence` : ""})\n` +
             "§cIf it fails you still pay, and the item stays the same.",
@@ -241,7 +242,7 @@ export async function enchantMenu(player, back, pickSlot) {
     body:
       `§7Item: ${RARITIES[info.rarity].color}${item.nameTag?.replace(/§./g, "") || item.typeId}\n` +
       (dungeonItem ? `§7Dungeon gear: pays §dEssence§7 (you have §d${essence}§7)\n` : `§7XP levels: §b${player.level}\n`) +
-      "§7Every attempt has a §echance to work§7 (lower at higher levels). §cA failed attempt still costs.",
+      "§7Enchants go up to §dXV§7. Every attempt has a §echance to work§7 (lower at higher levels). §cA failed attempt still costs.",
     tiles,
   });
 }
