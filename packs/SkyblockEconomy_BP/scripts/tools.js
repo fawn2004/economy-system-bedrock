@@ -1,7 +1,7 @@
 import { BlockPermutation, EnchantmentTypes, ItemStack, system, world } from "@minecraft/server";
 import { COLLECTION_TIERS, CROPS, MOB_DROPS, SKILL_TOOLS, SPAWNERS, TOOL_KIT_BONUS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
 import { readItem } from "./items.js";
-import { combatHooks } from "./stats.js";
+import { combatHooks, statSources } from "./stats.js";
 import { addMoney, fmt, fmtMoney, getBalance, takeMoney } from "./economy.js";
 import { addHeadPoints, getHeadPoints, mobName } from "./spawners.js";
 import { addSkillXp, skillPerk } from "./skills.js";
@@ -205,6 +205,7 @@ function writeTool(stack, kind, level, xp, player, ups = {}, uses = 0) {
   if (kind === "farming") lore[2] = `§7Bonus drops: §a+${level * t.bonusPerLevel + upBonus("harvester")}%`;
   if (kind === "slayer") {
     lore[lore.length - 1] = `§7Bonus drops: §a+${level * t.bonusPerLevel + upBonus("plunder")}%`;
+    lore.splice(2, 0, `§7Damage: §c+${swordDamage(level, ups)}`);
     lore.push(`§7Head chance: §d+${level * t.headBonusPerLevel + upBonus("head_hunter")}%`);
   }
   const owned = (TOOL_UPGRADES[kind] ?? []).filter((u) => ups[u.id] > 0);
@@ -473,7 +474,17 @@ function repairHeldTool(player) {
   } catch {}
 }
 
+/** Flat damage of a Slayer Sword: grows with its level and Sharpness. */
+export function swordDamage(level, ups = {}) {
+  const t = SKILL_TOOLS.slayer;
+  return level * (t.damagePerLevel ?? 0) + (ups.sharpness ?? 0) * (t.damagePerSharpness ?? 0);
+}
+
 export function registerTools() {
+  statSources.push((player) => {
+    const held = heldTool(player, "slayer");
+    return held ? { label: SKILL_TOOLS.slayer.name, stats: { dmg: swordDamage(held.level, held.ups) } } : undefined;
+  });
   combatHooks.damageBonus.push((player) => {
     const held = heldTool(player, "slayer");
     if (!held) return 0;

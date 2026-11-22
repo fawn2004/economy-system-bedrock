@@ -315,6 +315,8 @@ export const SKILL_TOOLS = {
     xpPerUse: 2, // per mob killed
     bonusPerLevel: 10, // % chance of extra mob drops, per level
     headBonusPerLevel: 1, // extra % enchanted head chance, per level
+    damagePerLevel: 4, // flat damage added per sword level
+    damagePerSharpness: 3, // flat damage added per Sharpness upgrade level
   },
 };
 export const TOOL_LEVELS = {

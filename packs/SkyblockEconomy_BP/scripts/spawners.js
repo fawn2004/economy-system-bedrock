@@ -353,6 +353,11 @@ function setStack(e, mob, n) {
 function freeze(e) {
   if (!S.freezeMobs) return;
   try {
+    // movement speed 0 = can't walk at all (iron golems ignored the Slowness on its own)
+    const mv = e.getComponent("minecraft:movement");
+    if (mv && mv.currentValue !== 0) mv.setCurrentValue(0);
+  } catch {}
+  try {
     if (!e.getEffect("slowness")) e.addEffect("slowness", 20000000, { amplifier: 255, showParticles: false });
     if (!e.getEffect("fire_resistance")) e.addEffect("fire_resistance", 20000000, { amplifier: 0, showParticles: false });
   } catch {}

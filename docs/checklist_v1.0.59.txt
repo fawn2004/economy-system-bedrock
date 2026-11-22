@@ -1,0 +1,15 @@
+SKYBLOCK ECONOMY v1.0.59 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+IRON GOLEMS (spawner mobs)
+[ ] Iron golems from spawners can't walk around (they stay on their spot)
+[ ] Other spawner mobs still stand still too
+[ ] Iron golems you build yourself / iron farms still work normally (not frozen)
+
+SLAYER SWORD DAMAGE
+[ ] The sword tooltip shows "Damage: +X"
+[ ] Damage goes up when the sword levels up (+4 per level)
+[ ] Damage goes up with each Sharpness upgrade (+3 per level)
+[ ] A maxed sword (level 15, Sharpness XV) kills an iron golem in one hit
+[ ] A low level sword still needs several hits on an iron golem
+[ ] Profile > Stats shows the sword's damage under "Damage" while you hold it

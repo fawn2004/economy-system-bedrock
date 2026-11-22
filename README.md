@@ -247,7 +247,7 @@ the bank is a separate account.
 | **Place** | Place a spawner item like a block. It spins its mob and you become its owner. |
 | **Stack** | Tap your spawner while holding the **same mob and level** to add it (sneak to add the whole stack). Up to 16 per block. |
 | **Menu** | **Sneak and tap** your spawner to see its info, upgrade it, add heads, add spawners from your inventory, or pick it up. |
-| **Mob stacking** | Spawned mobs merge into one mob with a counter (e.g. *Zombie x25*), with no limit. They stand still on their spot and don't burn in daylight. Killing it drops loot for one and the counter goes down. |
+| **Mob stacking** | Spawned mobs merge into one mob with a counter (e.g. *Zombie x25*), with no limit. They can't walk (movement speed 0 + pulled back to their spot) and don't burn in daylight. Killing it drops loot for one and the counter goes down. |
 | **Enchanted heads** | Mobs from spawners can drop an **Enchanted <Mob> Head**. Selling heads (or *Add Heads* in the spawner menu) adds them to that mob's **head balance**, separate from money. |
 | **Upgrades** | Spend that mob's heads to level a spawner up (1 to 10): faster spawns and a better head chance each level. Heads only upgrade spawners of the same mob, and the cost is multiplied by the stack size. |
 | **Slimes & magma cubes** | Spawner slimes spawn small and magma cubes medium (the sizes that drop loot), and the pieces a stacked one splits into are removed, so they don't pile up beside the stack. |
@@ -276,6 +276,8 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 - **Enchanted crops:** fully grown crops have an 8% chance (+0.75% per hoe level) to drop an
   *Enchanted <Crop>*. Selling them adds them to that crop's enchanted balance
   (Collections > Enchanted). Admins can give them under Admin > Crops.
+- **Slayer Sword damage:** +4 flat damage per sword level and +3 per Sharpness level (a maxed sword
+  has +105, enough to one-hit an iron golem).
 - **Upgrades go to level 15.** Vanilla enchantments stop at their normal maximum (Sharpness V,
   Looting III, Fire Aspect II, Fortune III, Efficiency V); the levels above give bonus damage, drops
   or Enchanted crop chance instead.
