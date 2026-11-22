@@ -1,7 +1,8 @@
 import { fmt, fmtShort, getBalance, takeMoney } from "./economy.js";
 import { itemIcon } from "./itemData.js";
+import { addEssence, getEssence } from "./dungeons.js";
 import { container, freeSlots } from "./inventory.js";
-import { ENCHANTS, ITEMS, RARITIES, REFORGES, REFORGE_COST, STATS, availableItems, enchantsFor, itemStats, makeItem, readItem, reforgesFor, renderItem, roman } from "./items.js";
+import { ENCHANTS, ITEMS, RARITIES, enchantChance, REFORGES, REFORGE_COST, STATS, availableItems, enchantsFor, itemStats, makeItem, readItem, reforgesFor, renderItem, roman } from "./items.js";
 import { ICON, backTile, fail, pagedMenu, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -80,6 +81,19 @@ export async function reforgeMenu(player, back) {
   });
 }
 
+/** Cost of enchanting to `next`: dungeon gear pays Essence + some coins, everything else coins + XP levels. */
+function enchantCost(e, next, dungeonItem) {
+  if (dungeonItem) return { coins: Math.round((e.cost * next * next) / 4), xp: 0, essence: Math.round((e.cost / 100) * next) };
+  return { coins: e.cost * next * next, xp: e.xp * next, essence: 0 };
+}
+
+function costText(c) {
+  const parts = [`§a${fmtShort(c.coins)}`];
+  if (c.xp) parts.push(`§b${c.xp}L`);
+  if (c.essence) parts.push(`§d${c.essence} Ess`);
+  return parts.join(" ");
+}
+
 export async function enchantMenu(player, back) {
   const again = () => enchantMenu(player, back);
   const { inv, slot, item, info } = held(player);
@@ -87,52 +101,71 @@ export async function enchantMenu(player, back) {
     return tileMenu(player, {
       title: "ENCHANTING",
       theme: "purple",
-      body: "§7Hold a §fweapon§7, §farmor piece§7, §ftool§7 or §ffishing rod§7 and open this again.\n§7Custom enchantments cost coins and XP levels.",
+      body:
+        "§7Hold a §fweapon§7, §farmor piece§7, §ftool§7 or §ffishing rod§7 and open this again.\n" +
+        "§7Each custom enchantment has a §echance to work§7 - higher levels are riskier. You pay either way.\n" +
+        "§7Dungeon gear costs §dEssence§7, everything else coins and XP levels.",
       tiles: [backTile(back)],
     });
   }
+  const dungeonItem = !!info.def?.dungeon;
+  const essence = getEssence(player);
   const tiles = enchantsFor(info.kind).map((code) => {
     const e = ENCHANTS[code];
     const lvl = info.ench[code] ?? 0;
-    if (lvl >= e.max) return { text: `§5${clip(e.name)}`, sub: `§6${roman(lvl)} MAX`, icon: "textures/items/book_enchanted", onClick: again };
+    if (lvl >= e.max) return { text: `§5${clip(e.name)}`, sub: `§6${roman(lvl)} MAX\n§7${e.desc}`, icon: "textures/items/book_enchanted", noClick: true, onClick: again };
     const next = lvl + 1;
-    const coins = e.cost * next * next;
-    const xp = e.xp * next;
-    const can = getBalance(player) >= coins && player.level >= xp;
+    const c = enchantCost(e, next, dungeonItem);
+    const chance = Math.round(enchantChance(next) * 100);
+    const can = getBalance(player) >= c.coins && player.level >= c.xp && essence >= c.essence;
     return {
       text: `§d${clip(e.name)} ${roman(next)}`,
-      sub: `${can ? "§a" : "§c"}${fmtShort(coins)} §b${xp}L`,
+      sub: `${can ? "" : "§c"}${costText(c)}\n§e${chance}% chance\n§7${e.desc}`,
       icon: "textures/items/book_enchanted",
       onClick: async () => {
         const ok = await tileMenu(player, {
           title: `${e.name.toUpperCase()} ${roman(next)}`,
           theme: "purple",
-          body: `§7${e.desc}\n§7Cost: §a${fmt(coins)} §7and §b${xp} XP levels §8(you have ${player.level})`,
+          body:
+            `§7${e.desc}\n` +
+            `§7Chance to work: §e§l${chance}%§r\n` +
+            `§7Cost: ${costText(c)} §8(you have ${fmtShort(getBalance(player))}${c.xp ? `, ${player.level}L` : ""}${c.essence ? `, ${essence} Essence` : ""})\n` +
+            "§cIf it fails you still pay, and the item stays the same.",
           tiles: [
-            { text: "§a§lENCHANT", sub: `§a${fmtShort(coins)} §b${xp}L`, icon: ICON.confirm, id: "yes" },
+            { text: "§a§lTRY ENCHANT", sub: `${costText(c)} §e${chance}%`, icon: ICON.confirm, id: "yes" },
             { text: "§c§lCANCEL", sub: "§7Go back", icon: ICON.cancel },
           ],
         });
         if (ok?.id !== "yes") return again();
         const now = inv.getItem(slot);
-        if (!now || now.typeId !== item.typeId) {
+        if (!now || now.typeId !== item.typeId || now.nameTag !== item.nameTag) {
           fail(player, "Keep holding the item.");
           return again();
         }
-        if (player.level < xp) {
-          fail(player, `You need ${xp} XP levels.`);
+        if (player.level < c.xp) {
+          fail(player, `You need ${c.xp} XP levels.`);
           return again();
         }
-        if (!takeMoney(player, coins)) {
-          fail(player, `You need ${fmt(coins)}.`);
+        if (getEssence(player) < c.essence) {
+          fail(player, `You need ${c.essence} Essence.`);
           return again();
         }
-        player.addLevels(-xp);
+        if (!takeMoney(player, c.coins)) {
+          fail(player, `You need ${fmt(c.coins)}.`);
+          return again();
+        }
+        if (c.xp) player.addLevels(-c.xp);
+        if (c.essence) addEssence(player, -c.essence);
+        if (Math.random() >= enchantChance(next)) {
+          fail(player, `The ${e.name} ${roman(next)} enchantment failed! Your payment was used up and the item didn't change.`);
+          player.playSound("random.anvil_break");
+          return again();
+        }
         const ni = readItem(now);
         ni.ench[code] = next;
         renderItem(now, ni);
         inv.setItem(slot, now);
-        success(player, `Enchanted with ${e.name} ${roman(next)}!`);
+        success(player, `Success! ${e.name} ${roman(next)} was added.`);
         player.playSound("random.levelup");
         return again();
       },
@@ -142,7 +175,10 @@ export async function enchantMenu(player, back) {
   await tileMenu(player, {
     title: "ENCHANTING",
     theme: "purple",
-    body: `§7Item: ${RARITIES[info.rarity].color}${item.nameTag?.replace(/§./g, "") || item.typeId}\n§7XP levels: §b${player.level}    §7Tap an enchantment to add or level it up.`,
+    body:
+      `§7Item: ${RARITIES[info.rarity].color}${item.nameTag?.replace(/§./g, "") || item.typeId}\n` +
+      (dungeonItem ? `§7Dungeon gear: pays §dEssence§7 (you have §d${essence}§7)\n` : `§7XP levels: §b${player.level}\n`) +
+      "§7Every attempt has a §echance to work§7 (lower at higher levels). §cA failed attempt still costs.",
     tiles,
   });
 }

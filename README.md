@@ -72,9 +72,15 @@ reforged and enchanted too.
   Kingsbane (+100 Strength). They cost mana; your mana shows while you hold one.
 - **Reforge** (Profile > Reforge): a random reforge for the held item. 14 reforges for weapons,
   armor and tools. Bigger rarity = bigger stats and price.
-- **Enchanting** (Profile > Enchanting): 14 custom enchantments (Keen Edge, Life Drain,
-  Finisher, Precision, Venom, Storm Call, Scavenger, Vitality, Bulwark, Fleetfoot, Insight,
-  Harvesting, Swiftswing, Lure Master) for coins and XP levels.
+- **Enchanting** (Profile > Enchanting): 18 custom enchantments. Weapons: Keen Edge, Life
+  Drain, Finisher, Precision, Venom, Storm Call, Scavenger. Armor: Vitality, Bulwark, Fleetfoot,
+  Insight, **Regrowth** (heals over time), **Retaliate** (hits attackers back), **Last Stand**
+  (more Defense under 30% health), **Nightsight** (helmet: night vision). Tools: Harvesting,
+  Swiftswing, Lure Master.
+  - Every attempt has a **chance to work**: level I 90%, II 75%, III 60%, IV 45%, V 30%.
+    **A failed attempt still costs** and the item doesn't change.
+  - Dungeon gear (reward chest items) pays **Essence** plus some coins; everything else pays
+    coins and XP levels. Armor enchantment effects add up across all the pieces you wear.
 - **Tough mobs**: slayer bosses, dungeon mobs and sea creatures have a big health pool shown in
   their name (e.g. *Rotting Tyrant I 400/400❤*).
 

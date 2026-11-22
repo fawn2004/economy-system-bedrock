@@ -99,6 +99,7 @@ export function computeStats(player) {
     if (!info || !isArmorKind(info.kind)) continue;
     parts.push({ label: item.nameTag?.replace(/§./g, "") || info.kind, stats: itemStats(info) });
     addPassive(info.def?.passive);
+    for (const [c, l] of Object.entries(info.ench)) passive["arm_" + c] = (passive["arm_" + c] ?? 0) + l;
     if (info.def?.set) sets[info.def.set] = (sets[info.def.set] ?? 0) + 1;
   }
   for (const [set, n] of Object.entries(sets)) if (n >= 4 && SETS[set]) parts.push({ label: `${SETS[set].name} set bonus`, stats: SETS[set].stats });
@@ -142,7 +143,8 @@ function applyEffects(player) {
   const hb = hp >= 4 ? Math.min(60, Math.floor(hp / 4) - 1) : -1;
   const sp = (t.spd ?? 0) >= 20 ? Math.min(6, Math.floor(t.spd / 20) - 1) : -1;
   const hs = (t.ms ?? 0) >= 25 ? Math.min(4, Math.floor(t.ms / 25) - 1) : -1;
-  const key = `${hb}:${sp}:${hs}`;
+  const nv = getStats(player).passive.arm_nv ? 1 : 0;
+  const key = `${hb}:${sp}:${hs}:${nv}`;
   const refresh = system.currentTick % 200 < 20;
   if (applied.get(player.id) === key && !refresh) return;
   applied.set(player.id, key);
@@ -160,6 +162,7 @@ function applyEffects(player) {
   set("health_boost", hb);
   set("speed", sp);
   set("haste", hs);
+  if (nv) set("night_vision", 0); // only ever adds it (Full Bright in Player Settings uses it too); it runs out when the helmet comes off
 }
 
 // ---- mana & abilities ------------------------------------------------------------------
@@ -377,7 +380,9 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
   if (target.typeId === "minecraft:player") {
     const h = target.getComponent("minecraft:health");
     if (!h || h.currentValue <= 0) return;
-    const def = Math.max(0, stat(target, "def"));
+    const pas = getStats(target).passive;
+    let def = Math.max(0, stat(target, "def"));
+    if (pas.arm_lt && h.currentValue < h.effectiveMax * 0.3) def *= 1 + 0.15 * pas.arm_lt; // Last Stand
     const red = def / (def + 100);
     let extra = 0;
     const src = damageSource?.damagingEntity;
@@ -387,6 +392,12 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
     const net = -damage * red + extra * (1 - red);
     if (net !== 0 && cause !== "override" && cause !== "void" && cause !== "selfDestruct") {
       h.setCurrentValue(Math.max(1, Math.min(h.effectiveMax, h.currentValue - net)));
+    }
+    // Retaliate: hit the attacker back
+    if (pas.arm_rf && src && src.typeId !== "minecraft:player" && cause !== "thorns") {
+      try {
+        src.applyDamage(Math.max(1, damage * 0.04 * pas.arm_rf), { cause: "thorns", damagingEntity: target });
+      } catch {}
     }
     for (const f of combatHooks.playerHurt) {
       try {
@@ -398,7 +409,7 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
 
   const tough = isTough(target);
   const raw = tough ? damage / TOUGH_RES : damage;
-  if (!attacker || cause === "magic") {
+  if (!attacker || cause === "magic" || cause === "thorns") {
     if (tough) damageTough(target, raw, attacker);
     return;
   }
@@ -553,6 +564,11 @@ export function registerStats() {
           invalidate(p);
           applyEffects(p);
           regenMana(p);
+          const rg = getStats(p).passive.arm_rg;
+          if (rg && system.currentTick % 100 < 20) {
+            const h = p.getComponent("minecraft:health");
+            if (h && h.currentValue > 0 && h.currentValue < h.effectiveMax) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + 0.5 * rg));
+          }
           const info = readItem(heldItem(p));
           if (info?.def?.ability) p.onScreenDisplay.setActionBar(`§b✎ ${Math.floor(getMana(p))}/${maxMana(p)} Mana`);
         } catch {}

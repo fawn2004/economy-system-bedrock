@@ -267,6 +267,10 @@ export const ENCHANTS = {
   bw: { name: "Bulwark", for: "armor", max: 5, cost: 3000, xp: 3, desc: "+4 Defense per level" },
   sw: { name: "Fleetfoot", for: "armor", max: 3, cost: 3000, xp: 3, desc: "+2 Speed per level" },
   in: { name: "Insight", for: "armor", max: 5, cost: 3000, xp: 3, desc: "+5 Intelligence per level" },
+  rg: { name: "Regrowth", for: "armor", max: 3, cost: 8000, xp: 5, desc: "Heals 0.5 health per level every 5 seconds (adds up across pieces)" },
+  rf: { name: "Retaliate", for: "armor", max: 5, cost: 6000, xp: 4, desc: "Hits back 4% of the damage you take per level" },
+  lt: { name: "Last Stand", for: "armor", max: 3, cost: 10000, xp: 6, desc: "+15% Defense per level while under 30% health" },
+  nv: { name: "Nightsight", for: "armor", kinds: ["helmet"], max: 1, cost: 15000, xp: 5, desc: "Night vision while worn (helmet only)" },
   hv: { name: "Harvesting", for: "tool", max: 5, cost: 2500, xp: 2, desc: "+5 Fortune per level" },
   ef: { name: "Swiftswing", for: "tool", max: 5, cost: 2500, xp: 2, desc: "+10 Mining Speed per level" },
   an: { name: "Lure Master", for: "rod", max: 5, cost: 5000, xp: 4, desc: "+1% Sea Creature Chance per level" },
@@ -282,7 +286,10 @@ export function slotGroup(kind) {
 const fits = (forWhat, kind) => forWhat === slotGroup(kind) || (forWhat === "tool" && kind === "rod");
 
 export const reforgesFor = (kind) => Object.entries(REFORGES).filter(([, r]) => fits(r.for, kind)).map(([id]) => id);
-export const enchantsFor = (kind) => Object.entries(ENCHANTS).filter(([, e]) => fits(e.for, kind)).map(([id]) => id);
+export const enchantsFor = (kind) => Object.entries(ENCHANTS).filter(([, e]) => fits(e.for, kind) && (!e.kinds || e.kinds.includes(kind))).map(([id]) => id);
+
+/** Chance (0-1) that enchanting to `level` works. */
+export const enchantChance = (level) => [0.9, 0.75, 0.6, 0.45, 0.3][Math.max(0, Math.min(4, level - 1))];
 
 /** Fortune stat of a tool kind. */
 const fortuneStat = (kind) => ({ pickaxe: "mfo", axe: "wfo", hoe: "ffo", rod: "scc" })[kind] ?? "mfo";
