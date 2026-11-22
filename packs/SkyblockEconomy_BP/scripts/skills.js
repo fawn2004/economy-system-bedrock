@@ -71,7 +71,7 @@ export function addSkillXp(player, id, amount) {
       `§b§l⬆ SKILL UP! §r§f${s.name} §blevel ${l}§7! ` +
         `${reward ? `§a+${fmt(reward)}§7, ` : ""}§a${s.perk} +${s.perkPerLevel}% §7(now ${l * s.perkPerLevel}%)`
     );
-    try {
+    if (pref(player, "titles", true)) try {
       player.onScreenDisplay.setTitle(`§b${s.name} ${l}`, { subtitle: "§7Skill level up!", fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 });
     } catch {}
     player.playSound("random.levelup");

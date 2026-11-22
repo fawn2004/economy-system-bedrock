@@ -145,6 +145,11 @@ export function fmt(n) {
   return (n < 0 ? "-" : "") + CONFIG.currency + withCommas;
 }
 
+/** Balances: exact below $1M, short above ($2.4M, $15.3B, $7.2T). */
+export function fmtMoney(n) {
+  return n >= 1e6 ? fmtShort(n) : fmt(n);
+}
+
 /** Short form for tiles: $1.2k, $15k, $2.5M */
 export function fmtShort(n) {
   const c = CONFIG.currency;

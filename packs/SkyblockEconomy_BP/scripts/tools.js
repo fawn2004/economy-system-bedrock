@@ -1,6 +1,6 @@
 import { BlockPermutation, EnchantmentTypes, ItemStack, system, world } from "@minecraft/server";
 import { COLLECTION_TIERS, CROPS, MOB_DROPS, SKILL_TOOLS, SPAWNERS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
-import { addMoney, fmt, getBalance, takeMoney } from "./economy.js";
+import { addMoney, fmt, fmtMoney, getBalance, takeMoney } from "./economy.js";
 import { addHeadPoints, getHeadPoints, mobName } from "./spawners.js";
 import { addSkillXp, skillPerk } from "./skills.js";
 import { SKILLS } from "./config.js";
@@ -269,7 +269,7 @@ export async function upgradeMenu(player, back, msg) {
     theme: kind === "slayer" ? "red" : "green",
     body:
       (msg ? msg + "\n" : "") +
-      `§6${t.name} §eLv ${held.level}   §7Balance: §a${fmt(getBalance(player))}\n` +
+      `§6${t.name} §eLv ${held.level}   §7Balance: §a${fmtMoney(getBalance(player))}\n` +
       (defs.length ? "§7Tap an upgrade to see what it does and buy it. §8(green = you can afford it)" : "§7No upgrades for this tool yet."),
     tiles,
   });
@@ -297,7 +297,7 @@ async function upgradeDetail(player, kind, u, back, msg) {
     lines.push(
       `§7Next: §e${u.name} ${roman(cur + 1)}`,
       `§7Cost: ${getBalance(player) >= money ? "§a" : "§c"}${fmt(money)} §7+ ${c.have >= need ? "§d" : "§c"}${need} ${c.label}`,
-      `§8You have ${fmt(getBalance(player))} and ${c.have} ${c.label}`
+      `§8You have ${fmtMoney(getBalance(player))} and ${c.have} ${c.label}`
     );
   }
   const tiles = [];

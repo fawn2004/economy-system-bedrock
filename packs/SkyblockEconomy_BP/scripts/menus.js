@@ -2,7 +2,7 @@ import { ItemStack, world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
 import { BADGES, CHUNK_HOPPER, CONFIG, CROPS, KITS, MINION_SETTINGS, MINION_TYPES, SHOP_LAYOUT, SKILLS, SKILL_TOOLS, SPAWNERS } from "./config.js";
-import { addMoney, fmt, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
+import { addMoney, fmt, fmtMoney, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
   applyEnchants,
   countPlain,
@@ -64,7 +64,7 @@ function countDeep(id) {
   return n;
 }
 
-const balLine = (player) => `§7Balance: §a${fmt(getBalance(player))}`;
+const balLine = (player) => `§7Balance: §a${fmtMoney(getBalance(player))}`;
 const msgLine = (msg) => (msg ? `${msg}\n` : "");
 const priceColor = (player, cost) => (getBalance(player) >= cost ? "§a" : "§c");
 
@@ -103,7 +103,7 @@ export async function mainMenu(player) {
     `§l§f${clip(player.name, 14)}§r`,
     "",
     "§7Balance",
-    `§a${fmt(getBalance(player))}`,
+    `§a${fmtMoney(getBalance(player))}`,
     `§7Rank §6${rank ? "#" + rank : "-"}`,
     `§7Heads §d${heads}`,
     `§7Spawners §b${ownedSpawnerCount(player.id)}`,
@@ -276,7 +276,7 @@ async function buyItemMenu(player, item, back, msg) {
 function buyItem(player, item, amount) {
   const cost = item.buy * amount;
   if (getBalance(player) < cost) {
-    fail(player, `You need ${fmt(cost)} but only have ${fmt(getBalance(player))}.`);
+    fail(player, `You need ${fmt(cost)} but only have ${fmtMoney(getBalance(player))}.`);
     return `§cYou can't afford that! (§f${fmt(cost)}§c)`;
   }
   if (spaceFor(player, item.id) < amount) {
@@ -655,7 +655,7 @@ async function balanceMenu(player) {
   await tileMenu(player, {
     title: "BALANCE",
     theme: "gold",
-    body: `§7Your balance: §a§l${fmt(getBalance(player))}§r\n§7Leaderboard rank: §6${rank ? "#" + rank : "-"}`,
+    body: `§7Your balance: §a§l${fmtMoney(getBalance(player))}§r\n§7Leaderboard rank: §6${rank ? "#" + rank : "-"}`,
     tiles: [
       { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => balanceMenu(player)) },
       { text: "§6§lBALTOP", sub: "§7Top 10", icon: ICON.top, onClick: () => topMenu(player, () => balanceMenu(player)) },
@@ -863,7 +863,7 @@ async function adminPlayerMenu(player, target, msg) {
   await tileMenu(player, {
     title: target.name.toUpperCase(),
     theme: "red",
-    body: `${msgLine(msg)}§7Balance of §f${target.name}§7: §a${fmt(getBalance(target))}`,
+    body: `${msgLine(msg)}§7Balance of §f${target.name}§7: §a${fmtMoney(getBalance(target))}`,
     tiles,
   });
 }

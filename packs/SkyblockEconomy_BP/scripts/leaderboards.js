@@ -1,6 +1,6 @@
 import { system, world } from "@minecraft/server";
 import { SKILLS } from "./config.js";
-import { fmt, getBalance, rankOf, topBalances } from "./economy.js";
+import { fmt, fmtMoney, getBalance, rankOf, topBalances } from "./economy.js";
 import { getSkillXp, levelInfo, skillIds } from "./skills.js";
 import { collectionTotal } from "./tools.js";
 import { backTile, tileMenu } from "./ui.js";
@@ -108,7 +108,7 @@ function ranking(board) {
 }
 
 function show(board, v) {
-  if (board.id === "balance") return fmt(v);
+  if (board.id === "balance") return fmtMoney(v);
   if (board.skill) return `Lv ${levelInfo(v).level} §8(${commas(v)} xp)`;
   if (board.decimals) return String(v);
   const unit = board.unit ?? "";
@@ -139,7 +139,7 @@ function boardMenu(player, board, back) {
   let mine;
   if (board.id === "balance") {
     const r = rankOf(player);
-    mine = r ? `§7You: §6#${r} §7- §a${fmt(getBalance(player))}` : "§7You're not ranked yet.";
+    mine = r ? `§7You: §6#${r} §7- §a${fmtMoney(getBalance(player))}` : "§7You're not ranked yet.";
   } else {
     const i = list.findIndex((e) => e.id === player.id);
     mine = i >= 0 ? `§7You: §6#${i + 1} §7- §a${show(board, list[i].value)}` : "§7You're not ranked yet.";

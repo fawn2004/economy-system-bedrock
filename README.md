@@ -15,7 +15,8 @@ custom-styled menus: dark panels, coloured header bars, icon tiles and NEW!/HOT!
 | **Balance** | Your money and leaderboard rank |
 | **Pay** | Send money to online players |
 | **Leaderboards** | Top 10 for balance, heads collected, farming, combat, skill average, every skill, spawners and minions (offline players included) |
-| **Player Settings** | Per-player toggles: **Chunk Borders** (particle outline of your chunk, only you see it, plus the chunk's position when you enter it) and **XP Popups** |
+| **Player Settings** | Per-player toggles: **Chunk Borders** (particle outline of your chunk, only you see it), **Full Bright** (night vision, no particles), **Coordinates** (X / Y / Z + facing on the action bar), **Death Location** (chat message where you died), **XP Popups** and **Level-up Titles** |
+| **Balance display** | Balances under $1M show exactly ($523,410); bigger ones are shortened ($2.4M, $2.4B, $7.2T) |
 | **Admin** | Only for players tagged `admin`: **Money** and **Heads** (per player), **Settings**, **Shop Editor**, **Clear Items**, **Compass** |
 
 Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration), **Food**,

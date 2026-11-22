@@ -1,7 +1,7 @@
 import { ItemStack, system, world } from "@minecraft/server";
 import { sellPrice } from "./catalog.js";
 import { CONFIG, MINION_SETTINGS as MS, MINION_TYPES, MINION_UPGRADES } from "./config.js";
-import { addMoney, fmt, getBalance, takeMoney } from "./economy.js";
+import { addMoney, fmt, fmtMoney, getBalance, takeMoney } from "./economy.js";
 import { ICON, backTile, fail, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -413,7 +413,7 @@ function upgradesMenu(player, e, back, msg) {
   return tileMenu(player, {
     title: "MINION UPGRADES",
     theme: "orange",
-    body: (msg ? msg + "\n" : "") + `§7Balance: §a${fmt(getBalance(player))}\n§7Tap an upgrade to see it. §8(green = you can afford it)`,
+    body: (msg ? msg + "\n" : "") + `§7Balance: §a${fmtMoney(getBalance(player))}\n§7Tap an upgrade to see it. §8(green = you can afford it)`,
     tiles,
   });
 }
@@ -426,7 +426,7 @@ function upgradeDetail(player, e, u, back, msg) {
   const tiles = [];
   const lines = [msg, `§f${u.name} §6${cur ? roman(cur) : "-"}§7/§6${roman(max)}`, `§7${u.desc}`];
   if (cur < max) {
-    lines.push(`§7Cost: ${getBalance(player) >= upCost(d, u, cur) ? "§a" : "§c"}${fmt(upCost(d, u, cur))}   §8(you have ${fmt(getBalance(player))})`);
+    lines.push(`§7Cost: ${getBalance(player) >= upCost(d, u, cur) ? "§a" : "§c"}${fmt(upCost(d, u, cur))}   §8(you have ${fmtMoney(getBalance(player))})`);
     tiles.push({
       text: `§a§lBUY ${roman(cur + 1)}`,
       sub: `§a${fmtShortish(upCost(d, u, cur))}`,
