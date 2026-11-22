@@ -248,7 +248,7 @@ async function itemListMenu(player, list, page = 0) {
   const to = page === 0 ? first : from + size;
   content.push(
     ...items.slice(from, to).map((e) => ({
-      text: `§f${clip(e.name)}`,
+      text: `§f${e.name}`,
       sub: `${priceColor(player, e.buy)}${fmtShort(e.buy)}`,
       icon: e.icon,
       onClick: () => buyItemMenu(player, e, reopen),

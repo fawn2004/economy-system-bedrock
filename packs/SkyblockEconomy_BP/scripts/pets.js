@@ -266,6 +266,53 @@ function isNight() {
   }
 }
 
+// ---- pet that follows you ----------------------------------------------------
+const PET_ENTITY = "eco:pet";
+const followers = new Map(); // player id -> pet entity
+
+function despawnFollower(playerId) {
+  const e = followers.get(playerId);
+  followers.delete(playerId);
+  try {
+    if (e?.isValid) e.remove();
+  } catch {}
+}
+
+function followTick() {
+  const t = system.currentTick;
+  for (const pl of world.getAllPlayers()) {
+    const pet = activePet(pl);
+    let e = followers.get(pl.id);
+    if (!pet) {
+      if (e) despawnFollower(pl.id);
+      continue;
+    }
+    try {
+      const yaw = (pl.getRotation().y * Math.PI) / 180;
+      const l = pl.location;
+      // behind your right shoulder, gently bobbing
+      const right = { x: -Math.cos(yaw), z: -Math.sin(yaw) };
+      const back = { x: Math.sin(yaw), z: -Math.cos(yaw) };
+      const target = { x: l.x + right.x * 0.7 + back.x * 0.5, y: l.y + 1.55 + Math.sin(t / 12) * 0.12, z: l.z + right.z * 0.7 + back.z * 0.5 };
+      const idx = Object.keys(PET_TYPES).indexOf(pet.t);
+      const want = `${pet.u}:${idx}`;
+      if (!e?.isValid || e.dimension.id !== pl.dimension.id || e.getDynamicProperty("eco:pettag") !== want) {
+        despawnFollower(pl.id);
+        e = pl.dimension.spawnEntity(PET_ENTITY, target);
+        e.triggerEvent(`eco:set_pet_${Math.max(0, idx)}`);
+        e.setDynamicProperty("eco:petowner", pl.id);
+        e.setDynamicProperty("eco:pettag", want);
+        followers.set(pl.id, e);
+      }
+      e.nameTag = `§7[Lv${petLevel(pet.xp, pet.r).level}] ${RARITIES[pet.r].color}${PET_TYPES[pet.t].name}`;
+      const cur = e.location;
+      const far = (cur.x - target.x) ** 2 + (cur.y - target.y) ** 2 + (cur.z - target.z) ** 2 > 100;
+      const k = far ? 1 : 0.35; // glide towards the spot (snap if far behind, e.g. after a teleport)
+      e.teleport({ x: cur.x + (target.x - cur.x) * k, y: cur.y + (target.y - cur.y) * k, z: cur.z + (target.z - cur.z) * k }, { rotation: { x: 0, y: pl.getRotation().y } });
+    } catch {}
+  }
+}
+
 export function registerPets() {
   statSources.push((player) => {
     const p = activePet(player);
@@ -316,17 +363,28 @@ export function registerPets() {
   world.beforeEvents.playerInteractWithEntity?.subscribe((ev) => {
     if (readPetItem(ev.itemStack)) ev.cancel = true;
   });
-  // a small sparkle above you shows your active pet
-  world.afterEvents.worldLoad.subscribe(() =>
-    system.runInterval(() => {
-      for (const pl of world.getAllPlayers()) {
-        if (!pl.getDynamicProperty("eco:petOn")) continue;
-        try {
-          const l = pl.location;
-          const a = (system.currentTick / 20) % (Math.PI * 2);
-          pl.dimension.spawnParticle("minecraft:villager_happy", { x: l.x + Math.cos(a) * 0.8, y: l.y + 2.1, z: l.z + Math.sin(a) * 0.8 });
-        } catch {}
-      }
-    }, 10)
-  );
+  // the active pet floats next to you (eco:pet entity, see tools/generate_pets.py)
+  world.afterEvents.worldLoad.subscribe(() => {
+    system.runInterval(followTick, 2);
+    // pets left over from before a restart are removed; new ones are spawned as needed
+    for (const id of ["minecraft:overworld", "minecraft:nether", "minecraft:the_end"]) {
+      try {
+        for (const e of world.getDimension(id).getEntities({ type: PET_ENTITY })) e.remove();
+      } catch {}
+    }
+  });
+  world.afterEvents.entityLoad?.subscribe(({ entity }) => {
+    try {
+      if (entity.typeId === PET_ENTITY && followers.get(String(entity.getDynamicProperty("eco:petowner")))?.id !== entity.id) entity.remove();
+    } catch {}
+  });
+  world.beforeEvents.playerLeave.subscribe(({ player }) => {
+    const e = followers.get(player.id);
+    followers.delete(player.id);
+    if (e) system.run(() => {
+      try {
+        e.remove();
+      } catch {}
+    });
+  });
 }

@@ -13,11 +13,39 @@ import { ICON, backTile, fail, pagedMenu, success, tileMenu } from "./ui.js";
 
 const clip = (s, n = 18) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 
-function held(player) {
+function held(player, slot = player.selectedSlotIndex) {
   const inv = container(player);
-  const slot = player.selectedSlotIndex;
   const item = inv?.getItem(slot);
   return { inv, slot, item, info: readItem(item) };
+}
+
+/**
+ * Lists the items in the player's inventory that `fits(info)` accepts, so they can pick one
+ * (you can't hold an item while the menu is open). Calls onPick(slot).
+ */
+export async function pickItem(player, { title, theme, body, fits, onPick, back }) {
+  const inv = container(player);
+  const tiles = [];
+  for (let i = 0; i < (inv?.size ?? 0); i++) {
+    const it = inv.getItem(i);
+    const info = readItem(it);
+    if (!it || !info || !fits(info)) continue;
+    const name = it.nameTag?.replace(/§./g, "") || it.typeId.replace(/^minecraft:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const ench = Object.entries(info.ench).map(([c, l]) => `${ENCHANTS[c]?.name} ${roman(l)}`).join(", ");
+    tiles.push({
+      text: `${RARITIES[info.rarity].color}${name.slice(0, 22)}`,
+      sub: [REFORGES[info.reforge] ? `§7Reforge: §f${REFORGES[info.reforge].name}` : "", ench ? `§9${ench.slice(0, 40)}` : "", i < 9 ? `§8Hotbar slot ${i + 1}` : "§8Inventory"].filter(Boolean).join("\n"),
+      icon: itemIcon(it.typeId),
+      onClick: () => onPick(i),
+    });
+  }
+  tiles.push(backTile(back));
+  return tileMenu(player, {
+    title,
+    theme,
+    body: tiles.length > 1 ? body : `${body}\n\n§cYou don't have anything that can be used here.`,
+    tiles,
+  });
 }
 
 const statsLine = (st) =>
@@ -26,14 +54,26 @@ const statsLine = (st) =>
     .map(([k, v]) => `${STATS[k]?.color ?? "§7"}+${v}${STATS[k]?.pct ? "%" : ""} ${STATS[k]?.name ?? k}`)
     .join("§7, ") || "§8none";
 
-export async function reforgeMenu(player, back) {
-  const again = () => reforgeMenu(player, back);
-  const { inv, slot, item, info } = held(player);
+export async function reforgeMenu(player, back, pickSlot) {
+  if (pickSlot === undefined) {
+    return pickItem(player, {
+      title: "Reforge - Pick an Item",
+      theme: "orange",
+      body: "§7Pick a §fweapon§7, §farmor piece§7 or §ftool§7 from your inventory to reforge.\n§7Reforging gives it a random reforge with extra stats. Better rarity = bigger stats (and cost).",
+      fits: (info) => reforgesFor(info.kind).length > 0,
+      onPick: (slot) => reforgeMenu(player, back, slot),
+      back,
+    });
+  }
+  const pickAgain = () => reforgeMenu(player, back);
+  const again = () => reforgeMenu(player, back, pickSlot);
+  const { inv, slot, item, info } = held(player, pickSlot);
+  back = pickAgain;
   if (!item || !info || !reforgesFor(info.kind).length) {
     return tileMenu(player, {
       title: "REFORGE ANVIL",
       theme: "orange",
-      body: "§7Hold a §fweapon§7, §farmor piece§7 or §ftool§7 and open this again.\n§7Reforging gives it a random reforge with extra stats. Better rarity = bigger stats (and cost).\n\n§7Reforges: " +
+      body: "§cThat item isn't in that slot any more - go back and pick it again.\n§7Reforging gives it a random reforge with extra stats. Better rarity = bigger stats (and cost).\n\n§7Reforges: " +
         Object.values(REFORGES).map((r) => `§f${r.name} §8(${r.for})`).join("§7, "),
       tiles: [backTile(back)],
     });
@@ -58,8 +98,8 @@ export async function reforgeMenu(player, back) {
         onClick: () => {
           const now = inv.getItem(slot);
           if (!now || now.typeId !== item.typeId || now.nameTag !== item.nameTag) {
-            fail(player, "Keep holding the item.");
-            return again();
+            fail(player, "That item moved - pick it again.");
+            return pickAgain();
           }
           if (!takeMoney(player, cost)) {
             fail(player, `You need ${fmt(cost)}.`);
@@ -94,15 +134,27 @@ function costText(c) {
   return parts.join(" ");
 }
 
-export async function enchantMenu(player, back) {
-  const again = () => enchantMenu(player, back);
-  const { inv, slot, item, info } = held(player);
+export async function enchantMenu(player, back, pickSlot) {
+  if (pickSlot === undefined) {
+    return pickItem(player, {
+      title: "Enchanting - Pick an Item",
+      theme: "purple",
+      body: "§7Pick a §fweapon§7, §farmor piece§7, §ftool§7 or §ffishing rod§7 from your inventory to enchant.\n§7Each custom enchantment has a §echance to work§7 - you pay either way.",
+      fits: (info) => enchantsFor(info.kind).length > 0,
+      onPick: (slot) => enchantMenu(player, back, slot),
+      back,
+    });
+  }
+  const pickAgain = () => enchantMenu(player, back);
+  const again = () => enchantMenu(player, back, pickSlot);
+  const { inv, slot, item, info } = held(player, pickSlot);
+  back = pickAgain;
   if (!item || !info || !enchantsFor(info.kind).length) {
     return tileMenu(player, {
       title: "ENCHANTING",
       theme: "purple",
       body:
-        "§7Hold a §fweapon§7, §farmor piece§7, §ftool§7 or §ffishing rod§7 and open this again.\n" +
+        "§cThat item isn't in that slot any more - go back and pick it again.\n" +
         "§7Each custom enchantment has a §echance to work§7 - higher levels are riskier. You pay either way.\n" +
         "§7Dungeon gear costs §dEssence§7, everything else coins and XP levels.",
       tiles: [backTile(back)],
@@ -139,8 +191,8 @@ export async function enchantMenu(player, back) {
         if (ok?.id !== "yes") return again();
         const now = inv.getItem(slot);
         if (!now || now.typeId !== item.typeId || now.nameTag !== item.nameTag) {
-          fail(player, "Keep holding the item.");
-          return again();
+          fail(player, "That item moved - pick it again.");
+          return pickAgain();
         }
         if (player.level < c.xp) {
           fail(player, `You need ${c.xp} XP levels.`);

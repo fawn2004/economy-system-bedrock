@@ -70,9 +70,10 @@ reforged and enchanted too.
 - **Abilities** (right click): Blink Blade (teleport), Ember Staff / Spirit Staff (fire bolt),
   Mending Wand (heal the party), Quake Hammer (shockwave), Voidedge (teleport + Strength),
   Kingsbane (+100 Strength). They cost mana; your mana shows while you hold one.
-- **Reforge** (Profile > Reforge): a random reforge for the held item. 14 reforges for weapons,
+- **Reforge** (Profile > Reforge): pick a weapon, armor piece or tool from your inventory (the
+  menu lists everything that can be reforged) and get a random reforge. 14 reforges for weapons,
   armor and tools. Bigger rarity = bigger stats and price.
-- **Enchanting** (Profile > Enchanting): 18 custom enchantments. Weapons: Keen Edge, Life
+- **Enchanting** (Profile > Enchanting): pick an item from your inventory; 18 custom enchantments. Weapons: Keen Edge, Life
   Drain, Finisher, Precision, Venom, Storm Call, Scavenger. Armor: Vitality, Bulwark, Fleetfoot,
   Insight, **Regrowth** (heals over time), **Retaliate** (hits attackers back), **Last Stand**
   (more Defense under 30% health), **Nightsight** (helmet: night vision). Tools: Harvesting,
@@ -113,7 +114,8 @@ Main menu > **Kits** (or Shop > Kits > Upgradable Kits). Six kit lines, each lev
 with its level (1-100) and rarity, and it levels up from the skill XP you earn (its own skill
 full XP, others a third). Pets: Wolf, Rabbit, Bee, Silverfish, Fox, Dolphin, Allay, Bat, and
 the Drakeling (rare slayer / dungeon drop). **Upgrade Rarity** for coins once it's levelled
-enough. **To Item** turns a pet into a spawn egg to trade or auction; using it adds it back.
+enough. Your active pet floats next to you as a little head (the `eco:pet` entity, made by
+`tools/generate_pets.py`). **To Item** turns a pet into a spawn egg to trade or auction; using it adds it back.
 
 ## Accessory Bag
 
@@ -461,7 +463,9 @@ Settings are saved in the world, so they work on Realms and survive add-on updat
 - **Moving / hiding / repricing items in a file instead:** `CATEGORY_MOVES`, `DISABLED_ITEMS` and
   `PRICE_OVERRIDES` in `config.js` (the category ids are listed there).
   Overrides skip the anti-profit check, so keep sell prices below buy prices.
-- **All prices at once:** edit `BASE` / `SELL_RATIO` in `tools/generate_prices.py`, then:
+- **All prices / shop categories at once:** edit `BASE` / `SELL_RATIO` / `CATEGORY_RULES` in
+  `tools/generate_prices.py`, then run it (it also draws the 3D shop icons for stairs, slabs,
+  walls, carpets, glass, wool, concrete and terracotta with `tools/iso_icons.py`):
   ```
   git clone --depth 1 https://github.com/Mojang/bedrock-samples.git /tmp/bs
   python3 tools/generate_prices.py /tmp/bs

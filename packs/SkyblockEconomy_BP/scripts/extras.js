@@ -430,12 +430,27 @@ export function adminSpiritTiles(player, back) {
   return [
     {
       text: "§b§lPLACE SPIRIT",
-      sub: "§7Where you stand",
+      sub: "§7On the block you stand on",
       icon: "textures/items/nether_star",
       onClick: () => {
         const all = spirits();
         const l = player.location;
-        all.push({ id: Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36), x: Math.floor(l.x) + 0.5, y: Math.floor(l.y) + 0.5, z: Math.floor(l.z) + 0.5, dim: player.dimension.id });
+        // spirits sit on a block: find the solid block under you (up to 6 blocks down)
+        let ground;
+        for (let y = Math.floor(l.y); y >= Math.floor(l.y) - 6; y--) {
+          try {
+            const b = player.dimension.getBlock({ x: Math.floor(l.x), y, z: Math.floor(l.z) });
+            if (b && !b.isAir && !b.isLiquid) {
+              ground = y;
+              break;
+            }
+          } catch {}
+        }
+        if (ground === undefined) {
+          fail(player, "Stand on a block to place a Spirit (there's no block under you).");
+          return back();
+        }
+        all.push({ id: Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36), x: Math.floor(l.x) + 0.5, y: ground + 1.5, z: Math.floor(l.z) + 0.5, dim: player.dimension.id });
         world.setDynamicProperty(SP_KEY, JSON.stringify(all.slice(-300)));
         success(player, `Placed a Spirit (${all.length} in the world).`);
         return back();

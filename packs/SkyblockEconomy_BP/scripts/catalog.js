@@ -49,8 +49,10 @@ export function getCatalog() {
   const all = new Map(); // every item, including hidden ones
   const catIds = new Set(CATEGORIES.map((c) => c.id));
   const disabled = new Set(DISABLED_ITEMS);
+  let order = 0; // keep prices.js order (alphabetical, with e.g. empty/water/lava buckets first)
   for (const cat of CATEGORIES) {
     for (const [id, name, icon, buy, sell] of ITEMS[cat.id] ?? []) {
+      order++;
       let exists = true;
       try {
         exists = !!ItemTypes.get(id);
@@ -68,6 +70,7 @@ export function getCatalog() {
         defaults: { category: cat.id, buy, sell },
         category: moved && catIds.has(moved) ? moved : cat.id,
         hidden: disabled.has(id),
+        order,
       });
     }
   }
@@ -91,7 +94,7 @@ export function getCatalog() {
     byId.set(e.id, e);
     byCategory.get(e.category).push(e);
   }
-  for (const list of byCategory.values()) list.sort((a, b) => a.name.localeCompare(b.name));
+  for (const list of byCategory.values()) list.sort((a, b) => a.order - b.order);
   catalog = { all, byId, byCategory, categories: CATEGORIES };
   return catalog;
 }

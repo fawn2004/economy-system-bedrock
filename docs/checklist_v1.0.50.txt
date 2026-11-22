@@ -1,0 +1,68 @@
+SKYBLOCK ECONOMY v1.0.50 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+MENUS
+[ ] Reforge: opening it lists the items in your inventory that can be reforged - pick one to reforge it
+[ ] Enchanting: opening it lists the items in your inventory that can be enchanted - pick one to enchant it
+[ ] Star Item (Dungeons): opening it lists your dungeon items - pick one to add a star
+[ ] Pets: summoning a pet makes it float next to you (behind your right shoulder) and follow you around
+[ ] Pets: despawning the pet (or picking another) removes / swaps the one following you
+[ ] Spirits: Admin > RPG > Place Spirit puts the spirit on top of the block you stand on
+[ ] Spirits: trying to place one with no block under you says "Stand on a block" and places nothing
+
+SHOP - BUCKETS
+[ ] Order is: Bucket (empty), Water Bucket, Lava Bucket, then the fish buckets (Cod, Salmon, Tropical Fish, Pufferfish, Axolotl, Tadpole), then the rest
+
+SHOP - BLOCKS > STONE
+[ ] Stairs category icon looks like a stone brick stair
+[ ] Stairs inside the Stairs category look like stairs (not blocks)
+[ ] Slabs inside the Slabs category look like slabs
+[ ] Walls inside the Walls category look like walls
+[ ] Brick and Resin Brick (the ingots) are gone from Bricks and are now in Ores
+[ ] Copper category: chains and lanterns show their proper item icons
+[ ] Pointed Dripstone is gone from Stone (now in Nature)
+[ ] Snowball is gone from Stone (now in Misc)
+[ ] Resin Clump is gone from Stone (now in Mob Drops)
+
+SHOP - BLOCKS > WOOD
+[ ] Shelf icons show the shelf properly
+[ ] Bowl moved to Misc
+[ ] Campfire moved to Misc
+[ ] Soul Campfire moved to Misc
+[ ] Stick moved to Misc
+[ ] Mangrove Roots moved to Nature
+[ ] Muddy Mangrove Roots moved to Nature
+[ ] Trapdoor (oak) is in Wood > Trapdoors
+
+SHOP - BLOCKS > COLOURS
+[ ] Colours has one category per colour (White, Orange, Magenta ... Black)
+[ ] Each colour category has everything of that colour (wool, carpet, concrete, concrete powder, terracotta, glazed terracotta, dye, candle, slabs, stairs...)
+[ ] Beds moved to Misc (with chests, crafting tables...)
+[ ] Torches (torch, soul torch, copper torch) moved to Misc
+[ ] Blue Ice moved out of Colours into Blocks > Stone (with the other ice)
+[ ] Coloured items have their own icons (wool = wool block, carpet = flat carpet, slab = slab, stairs = stairs...)
+[ ] Flowers moved to their own Flowers category inside Blocks > Nature
+[ ] Brown Mushroom moved to Farming
+[ ] Red Mushroom moved to Farming
+[ ] Glass and glass panes (every colour) moved to a new Blocks > Glass category
+[ ] Shulker boxes are removed from the shop completely
+[ ] Bundles are removed from the shop completely
+[ ] Red Shrub moved to Nature
+[ ] Yellow (and orange / red) Poplar Leaves moved to Nature
+
+SHOP - BLOCKS > NETHER
+[ ] Nether stairs, slabs and walls have proper stair / slab / wall icons
+[ ] Only one Nether Brick entry now (the $1 one is gone; the block shows as "Nether Bricks")
+[ ] Soul Lantern icon fixed
+[ ] Wither Rose moved to Nature > Flowers
+
+SHOP - BLOCKS > THE END
+[ ] End Rod icon fixed
+[ ] End Brick stairs, slabs and walls have proper icons
+
+SHOP - OTHER
+[ ] Cinnabar stairs, slabs and wall have proper icons
+[ ] Firework Rocket removed from the shop
+[ ] Paper is in Misc (not Decoration)
+[ ] Trapdoor moved to the Wood category
+[ ] Writable Book is in Misc

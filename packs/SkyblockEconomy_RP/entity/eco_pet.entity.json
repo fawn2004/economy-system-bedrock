@@ -1,0 +1,28 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "eco:pet",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "wolf": "textures/entity/eco_pets/wolf",
+        "rabbit": "textures/entity/eco_pets/rabbit",
+        "bee": "textures/entity/eco_pets/bee",
+        "silverfish": "textures/entity/eco_pets/silverfish",
+        "fox": "textures/entity/eco_pets/fox",
+        "dolphin": "textures/entity/eco_pets/dolphin",
+        "allay": "textures/entity/eco_pets/allay",
+        "bat": "textures/entity/eco_pets/bat",
+        "drake": "textures/entity/eco_pets/drake"
+      },
+      "geometry": {
+        "default": "geometry.eco_pet"
+      },
+      "render_controllers": [
+        "controller.render.eco_pet"
+      ]
+    }
+  }
+}

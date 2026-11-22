@@ -3,7 +3,7 @@ import { ModalFormData } from "@minecraft/server-ui";
 import { addMoney, fmt, fmtShort, getBalance, takeMoney } from "./economy.js";
 import { container, freeSlots } from "./inventory.js";
 import { ITEMS, RARITIES, makeItem, readItem, renderItem } from "./items.js";
-import { describeItem, itemIconFor } from "./forge.js";
+import { describeItem, itemIconFor, pickItem } from "./forge.js";
 import { addPet } from "./pets.js";
 import { combatHooks, makeTough, stat, statSources } from "./stats.js";
 import { mayorIs } from "./mayor.js";
@@ -638,14 +638,25 @@ async function rewardsMenu(player, back) {
 }
 
 // ---- stars -------------------------------------------------------------------
-async function starMenu(player, back) {
-  const again = () => starMenu(player, back);
+async function starMenu(player, back, pickSlot) {
+  if (pickSlot === undefined) {
+    return pickItem(player, {
+      title: "Star Item - Pick an Item",
+      theme: "purple",
+      body: "§7Pick a §fdungeon item§7 from your inventory. Each star adds §a+10%§7 to its stats, up to 5 stars, for §dEssence§7.",
+      fits: (info) => !!info.def?.dungeon,
+      onPick: (slot) => starMenu(player, back, slot),
+      back,
+    });
+  }
+  const again = () => starMenu(player, back, pickSlot);
+  back = ((b) => () => starMenu(player, b))(back);
   const inv = container(player);
-  const slot = player.selectedSlotIndex;
+  const slot = pickSlot;
   const it = inv.getItem(slot);
   const info = readItem(it);
   if (!info?.def?.dungeon) {
-    return tileMenu(player, { title: "STAR ITEM", theme: "purple", body: "§7Hold a §fdungeon item§7 (from reward chests or the Essence Shop). Each star adds §a+10%§7 to its stats, up to 5 stars.", tiles: [backTile(back)] });
+    return tileMenu(player, { title: "STAR ITEM", theme: "purple", body: "§cThat item isn't in that slot any more - go back and pick it again.", tiles: [backTile(back)] });
   }
   if (info.stars >= 5) return tileMenu(player, { title: "STAR ITEM", theme: "purple", body: "§6This item already has 5 stars!", tiles: [backTile(back)] });
   const cost = Math.round(STAR_COST[info.stars] * (1 + info.rarity) / 2);
@@ -661,7 +672,7 @@ async function starMenu(player, back) {
         onClick: () => {
           const now = inv.getItem(slot);
           const ni = readItem(now);
-          if (!ni?.def?.dungeon || ni.id !== info.id) fail(player, "Keep holding the item.");
+          if (!ni?.def?.dungeon || ni.id !== info.id) fail(player, "That item moved - pick it again.");
           else if (getEssence(player) < cost) fail(player, `You need ${cost} Essence.`);
           else {
             addEssence(player, -cost);

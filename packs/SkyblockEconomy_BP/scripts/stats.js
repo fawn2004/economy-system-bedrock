@@ -200,7 +200,7 @@ const ABILITIES = {
         player.dimension.spawnParticle("minecraft:basic_flame_particle", { x: head.x + dir.x * i, y: head.y + dir.y * i, z: head.z + dir.z * i });
       } catch {}
     }
-    const hit = player.getEntitiesFromViewDirection({ maxDistance: 16 }).find((h) => h.entity.typeId !== "minecraft:player" && h.entity.typeId !== "minecraft:item");
+    const hit = player.getEntitiesFromViewDirection({ maxDistance: 16 }).find((h) => !["minecraft:player", "minecraft:item", "eco:pet", "eco:npc"].includes(h.entity.typeId));
     if (hit) {
       const int = stat(player, "int");
       hurtMagic(player, hit.entity, (8 + (ITEMS[def.id]?.stats?.dmg ?? 0)) * (1 + int / 100));
@@ -226,7 +226,7 @@ const ABILITIES = {
   quake: (player) => {
     const t = getStats(player).total;
     const dmg = (12 + (t.dmg ?? 0)) * (1 + (t.str ?? 0) / 100) * (1 + (t.int ?? 0) / 300);
-    for (const e of player.dimension.getEntities({ location: player.location, maxDistance: 6, excludeTypes: ["minecraft:player", "minecraft:item", "eco:npc", "eco:minion", "eco:minion_block"] })) {
+    for (const e of player.dimension.getEntities({ location: player.location, maxDistance: 6, excludeTypes: ["minecraft:player", "minecraft:item", "eco:npc", "eco:minion", "eco:minion_block", "eco:pet"] })) {
       hurtMagic(player, e, dmg);
       try {
         e.applyKnockback({ x: 0, z: 0 }, 0.8);

@@ -32,6 +32,7 @@ from collections import defaultdict
 SELL_RATIO = 0.5  # sell price = 50% of buy price (before the anti-profit check)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 OUT = os.path.join(HERE, "..", "packs", "SkyblockEconomy_BP", "scripts", "prices.js")
 
 COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
@@ -63,11 +64,13 @@ EXCLUDE_EXACT = {
     "netherreactor", "glowingobsidian", "stonecutter", "reserved6", "end_gateway", "end_portal",
     "portal", "fire", "soul_fire", "water", "lava", "flowing_water", "flowing_lava", "spawn_egg",
     "ominous_trial_key", "trial_key", "bundle_empty",
+    # removed from the shop on request
+    "netherbrick", "firework_rocket", "bundle", "shulker_box", "undyed_shulker_box",
 }
 EXCLUDE_RE = re.compile(
     r"(spawn_egg$|^element_|^light_block|^infested_|^hard_.*glass|^colored_torch|^lit_|^unlit_|"
     r"^powered_|_wall_sign$|^wall_|standing_sign$|standing_banner|^double_|_double_slab$|"
-    r"^item\.|^chemical_heat|^deprecated|^tile\.)"
+    r"^item\.|^chemical_heat|^deprecated|^tile\.|_shulker_box$|_bundle$)"
 )
 
 # ---------------------------------------------------------------------------
@@ -171,6 +174,20 @@ CONTAINER = {"milk_bucket": "bucket", "water_bucket": "bucket", "lava_bucket": "
 #  Shop categories (first matching rule wins)
 # ---------------------------------------------------------------------------
 CATEGORY_RULES = [
+    # --- specific placements (asked for by the server owner) ---
+    ("ores", r"^(brick|resin_brick)$"),
+    ("misc", r"(_bed$|^bed$|^torch$|^soul_torch$|^copper_torch$|^bowl$|^stick$|^campfire$|^soul_campfire$|^paper$|^writable_book$|^snowball$)"),
+    ("natural_flowers", r"(^(dandelion|poppy|blue_orchid|allium|azure_bluet|oxeye_daisy|cornflower|lily_of_the_valley|"
+                        r"wither_rose|sunflower|lilac|rose_bush|peony|torchflower|pitcher_plant|pink_petals|wildflowers|"
+                        r"open_eyeblossom|closed_eyeblossom|cactus_flower|red_flower|yellow_flower|leaf_litter)$|_tulip$)"),
+    ("natural", r"(^mangrove_roots$|^muddy_mangrove_roots$|^red_shrub$|_poplar_leaves$|^pointed_dripstone$|"
+                r"_mushroom_block$|^mushroom_stem$|^red_sand$)"),
+    ("farming", r"^(brown_mushroom|red_mushroom)$"),
+    ("mobs", r"^resin_clump$"),
+    ("wood_trapdoors", r"^trapdoor$"),
+    ("stone", r"(^blue_ice$|^red_sandstone)"),
+    ("nether", r"^red_nether_brick"),
+    ("glass", r"(stained_glass|^glass$|^glass_pane$|^tinted_glass$)"),
     ("treasure", r"(_smithing_template$|_pottery_sherd$|^music_disc_|^disc_fragment|_banner_pattern$|"
                  r"^enchanted_book$|^sponge$|^wet_sponge$|^conduit$|^dragon_egg$|^heart_of_the_sea$|^nether_star$|"
                  r"^totem_of_undying$|^enchanted_golden_apple$|^heavy_core$|^echo_shard$|^ominous_bottle$)"),
@@ -230,6 +247,7 @@ CATEGORY_RULES = [
 # Sub-sections inside a category: (sub id, regex). First match wins; anything
 # left over stays in the parent category.
 SUB_RULES = {
+    "colored": [(f"colored_{c}", rf"^{c}_") for c in COLORS],
     "wood": [
         ("wood_logs", r"(_log$|_wood$|_stem$|_hyphae$|^bamboo_block$|^stripped_bamboo_block$)"),
         ("wood_planks", r"(_planks$|^bamboo_mosaic$)"),
@@ -258,21 +276,23 @@ CATEGORY_INFO = {
     #   group "<category id>" = a sub-category tile shown at the top of that category
     "stone":    ("Stone",        "Stone, bricks & building blocks", "textures/blocks/stonebrick", "blue", "blocks"),
     "wood":     ("Wood",         "Logs, planks & wooden things",    "textures/blocks/log_oak", "orange", "blocks"),
-    "natural":  ("Dirt & Natural", "Dirt, grass, sand, gravel & clay", "@dirt", "green", "blocks"),
-    "colored":  ("Colours",      "Wool, glass, concrete & dyes",     "textures/blocks/wool_colored_red", "purple", "blocks"),
+    "natural":  ("Nature",       "Dirt, sand, plants & flowers",     "@dirt", "green", "blocks"),
+    "natural_flowers": ("Flowers", "Every kind of flower",           "@poppy", "green", "natural"),
+    "colored":  ("Colours",      "Wool, concrete, terracotta & dyes - one section per colour", "@red_wool", "purple", "blocks"),
+    "glass":    ("Glass",        "Glass & glass panes of every colour", "@glass", "blue", "blocks"),
     "wood_logs":      ("Logs",          "Logs, wood & stripped logs",  "@oak_log", "orange", "wood"),
     "wood_planks":    ("Planks",        "Planks of every wood type",   "@oak_planks", "orange", "wood"),
     "wood_leaves":    ("Leaves",        "Leaves of every tree",        "@oak_leaves", "green", "wood"),
-    "wood_stairs":    ("Stairs",        "Wooden stairs",               "textures/ui/eco/icon_stairs_wood", "orange", "wood"),
-    "wood_slabs":     ("Slabs",         "Wooden slabs",                "textures/ui/eco/icon_slab_wood", "orange", "wood"),
+    "wood_stairs":    ("Stairs",        "Wooden stairs",               "@oak_stairs", "orange", "wood"),
+    "wood_slabs":     ("Slabs",         "Wooden slabs",                "@oak_slab", "orange", "wood"),
     "wood_doors":     ("Doors",         "Wooden & iron doors",         "@wooden_door", "orange", "wood"),
     "wood_trapdoors": ("Trapdoors",     "Wooden & iron trapdoors",     "@trapdoor", "orange", "wood"),
     "wood_fences":    ("Fences",        "Fences & fence gates",        "textures/ui/eco/icon_fence_wood", "orange", "wood"),
     "wood_signs":     ("Signs",         "Signs & hanging signs",       "@oak_sign", "orange", "wood"),
     "wood_boats":     ("Boats",         "Boats, chest boats & rafts",  "@oak_boat", "blue", "wood"),
-    "stone_stairs":   ("Stairs",        "Stone & brick stairs",        "textures/ui/eco/icon_stairs_stone", "blue", "stone"),
-    "stone_slabs":    ("Slabs",         "Stone & brick slabs",         "textures/ui/eco/icon_slab_stone", "blue", "stone"),
-    "stone_walls":    ("Walls",         "Stone & brick walls",         "textures/ui/eco/icon_wall_stone", "blue", "stone"),
+    "stone_stairs":   ("Stairs",        "Stone & brick stairs",        "@stone_brick_stairs", "blue", "stone"),
+    "stone_slabs":    ("Slabs",         "Stone & brick slabs",         "@stone_brick_slab", "blue", "stone"),
+    "stone_walls":    ("Walls",         "Stone & brick walls",         "@stone_brick_wall", "blue", "stone"),
     "stone_bricks":   ("Bricks",        "Bricks & tiles",              "@stone_bricks", "blue", "stone"),
     "stone_polished": ("Polished",      "Polished, smooth & chiseled", "@polished_andesite", "blue", "stone"),
     "stone_copper":   ("Copper",        "Copper blocks, doors & more", "@copper_block", "orange", "stone"),
@@ -291,6 +311,16 @@ CATEGORY_INFO = {
     "mobs":     ("Mob Drops",    "Loot from mobs",                   "textures/items/rotten_flesh", "green", None),
     "brewing":  ("Brewing",      "Potions & ingredients",            "textures/items/potion_bottle_empty", "purple", None),
 }
+
+for _c in COLORS:
+    _n = " ".join(w.capitalize() for w in _c.split("_"))
+    CATEGORY_INFO[f"colored_{_c}"] = (_n, f"Everything {_n.lower()}", f"@{_c}_wool", "purple", "colored")
+
+# Items listed first (in this order) in their category; the rest follow by name.
+ORDER_FIRST = ["bucket", "water_bucket", "lava_bucket", "cod_bucket", "salmon_bucket", "tropical_fish_bucket",
+               "pufferfish_bucket", "axolotl_bucket", "tadpole_bucket"]
+# Display names that differ from the id
+NAME_OVERRIDES = {"nether_brick": "Nether Bricks"}
 
 # ===========================================================================
 
@@ -740,6 +770,80 @@ def main(src):
                     return p
         return guess(n)
 
+    # ---- 3D icons for block-shaped items (tools/iso_icons.py) ----------------
+    import iso_icons
+    shop_dir = os.path.join(HERE, "..", "packs", "SkyblockEconomy_RP", "textures", "ui", "eco", "shop")
+    os.makedirs(shop_dir, exist_ok=True)
+    made = set()
+
+    def file_of(tpath):
+        for ext in (".png", ".tga"):
+            f = os.path.join(rp, tpath + ext)
+            if os.path.exists(f):
+                return f
+        return None
+
+    def block_tex(n):
+        """-> (side, top) texture paths of block n from blocks.json, or (None, None)"""
+        b = blocks.get(n)
+        t = b.get("textures") if b else None
+        if t is None:
+            return None, None
+        def one(key):
+            p = tex_path(terrain[key]) if key in terrain else None
+            return p
+        if isinstance(t, str):
+            p = one(t)
+            return p, p
+        side = one(t.get("side") or t.get("south") or t.get("north") or next(iter(t.values())))
+        top = one(t.get("up") or t.get("top") or t.get("side") or next(iter(t.values())))
+        return side, top
+
+    def planks_for(n):
+        w = re.sub(r"_shelf$", "", n)
+        for c in (f"textures/blocks/planks_{w}", f"textures/blocks/{w}_planks", "textures/blocks/planks_big_oak" if w == "dark_oak" else ""):
+            if c and file_of(c):
+                return c
+        return "textures/blocks/planks_oak"
+
+    SHAPE_RULES = [
+        ("stairs", r"_stairs$"), ("slab", r"_slab$"), ("wall", r"_wall$"), ("carpet", r"_carpet$"),
+        ("pane", r"(_pane$)"),
+        ("cube", r"(_wool$|_concrete$|_concrete_powder$|_terracotta$|^terracotta$|^hardened_clay$|stained_glass$|"
+                 r"^glass$|^tinted_glass$|_shelf$|^nether_brick$)"),
+        ("rod", r"^end_rod$"),
+    ]
+
+    def shop_icon(n):
+        shape = next((sh for sh, r in SHAPE_RULES if re.search(r, n)), None)
+        if not shape:
+            # a flat inventory picture in textures/items wins over a block texture (lanterns, chains...)
+            ic = icon(n)
+            if ic and ic.startswith("textures/blocks/"):
+                for cand in (n, re.sub(r"^waxed_", "", n)):
+                    if file_of("textures/items/" + cand):
+                        return "textures/items/" + cand
+            return ic
+        side, top = block_tex(n)
+        front = None
+        if n.endswith("_shelf"):
+            front = icon(n)
+            side = top = planks_for(n)
+        if not side:
+            side = top = icon(n)
+        fs, ft = file_of(side or ""), file_of(top or "")
+        if not fs:
+            return icon(n)
+        try:
+            iso_icons.render(shape, iso_icons.load(fs), iso_icons.load(ft or fs),
+                             iso_icons.load(file_of(front)) if front and file_of(front) else None,
+                             os.path.join(shop_dir, n + ".png"))
+        except Exception as e:
+            print("icon failed", n, e)
+            return icon(n)
+        made.add(n + ".png")
+        return "textures/ui/eco/shop/" + n
+
     # ---- categories ------------------------------------------------------
     rules = [(c, re.compile(r)) for c, r in CATEGORY_RULES]
 
@@ -756,7 +860,7 @@ def main(src):
 
     for c, info in CATEGORY_INFO.items():  # "@item" icons = use that item's icon
         if info[2].startswith("@"):
-            CATEGORY_INFO[c] = (info[0], info[1], icon(info[2][1:]) or "textures/ui/eco/icon_blocks") + info[3:]
+            CATEGORY_INFO[c] = (info[0], info[1], shop_icon(info[2][1:]) or "textures/ui/eco/icon_blocks") + info[3:]
 
     def nice(n):
         return " ".join(w.capitalize() for w in n.split("_"))
@@ -766,10 +870,13 @@ def main(src):
     for n in ITEMS:
         if n not in buy:
             continue
-        ic = icon(n)
+        ic = shop_icon(n)
         if not ic:
             no_icon += 1
-        rows.append([n, nice(n), ic or "", buy[n], sell[n], category(n)])
+        rows.append([n, NAME_OVERRIDES.get(n, nice(n)), ic or "", buy[n], sell[n], category(n)])
+    for f in os.listdir(shop_dir):  # remove icons of items no longer in the shop
+        if f not in made:
+            os.remove(os.path.join(shop_dir, f))
 
     cats = {c: [] for c in CATEGORY_INFO}
     for r in rows:
@@ -786,7 +893,8 @@ def main(src):
         f.write("export const ITEMS = {\n")
         for c in CATEGORY_INFO:
             f.write(f"  {c}: [\n")
-            for r in sorted(cats[c], key=lambda r: r[1]):
+            first = {n: i for i, n in enumerate(ORDER_FIRST)}
+            for r in sorted(cats[c], key=lambda r: (first.get(r[0], len(first)), r[1])):
                 f.write("    " + json.dumps(["minecraft:" + r[0], r[1], r[2], r[3], r[4]]) + ",\n")
             f.write("  ],\n")
         f.write("};\n")

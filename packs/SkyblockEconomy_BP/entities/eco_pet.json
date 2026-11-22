@@ -1,0 +1,276 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "eco:pet",
+      "is_spawnable": false,
+      "is_summonable": true
+    },
+    "component_groups": {
+      "eco:pet_0": {
+        "minecraft:variant": {
+          "value": 0
+        }
+      },
+      "eco:pet_1": {
+        "minecraft:variant": {
+          "value": 1
+        }
+      },
+      "eco:pet_2": {
+        "minecraft:variant": {
+          "value": 2
+        }
+      },
+      "eco:pet_3": {
+        "minecraft:variant": {
+          "value": 3
+        }
+      },
+      "eco:pet_4": {
+        "minecraft:variant": {
+          "value": 4
+        }
+      },
+      "eco:pet_5": {
+        "minecraft:variant": {
+          "value": 5
+        }
+      },
+      "eco:pet_6": {
+        "minecraft:variant": {
+          "value": 6
+        }
+      },
+      "eco:pet_7": {
+        "minecraft:variant": {
+          "value": 7
+        }
+      },
+      "eco:pet_8": {
+        "minecraft:variant": {
+          "value": 8
+        }
+      }
+    },
+    "events": {
+      "eco:set_pet_0": {
+        "add": {
+          "component_groups": [
+            "eco:pet_0"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_1",
+            "eco:pet_2",
+            "eco:pet_3",
+            "eco:pet_4",
+            "eco:pet_5",
+            "eco:pet_6",
+            "eco:pet_7",
+            "eco:pet_8"
+          ]
+        }
+      },
+      "eco:set_pet_1": {
+        "add": {
+          "component_groups": [
+            "eco:pet_1"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_0",
+            "eco:pet_2",
+            "eco:pet_3",
+            "eco:pet_4",
+            "eco:pet_5",
+            "eco:pet_6",
+            "eco:pet_7",
+            "eco:pet_8"
+          ]
+        }
+      },
+      "eco:set_pet_2": {
+        "add": {
+          "component_groups": [
+            "eco:pet_2"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_0",
+            "eco:pet_1",
+            "eco:pet_3",
+            "eco:pet_4",
+            "eco:pet_5",
+            "eco:pet_6",
+            "eco:pet_7",
+            "eco:pet_8"
+          ]
+        }
+      },
+      "eco:set_pet_3": {
+        "add": {
+          "component_groups": [
+            "eco:pet_3"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_0",
+            "eco:pet_1",
+            "eco:pet_2",
+            "eco:pet_4",
+            "eco:pet_5",
+            "eco:pet_6",
+            "eco:pet_7",
+            "eco:pet_8"
+          ]
+        }
+      },
+      "eco:set_pet_4": {
+        "add": {
+          "component_groups": [
+            "eco:pet_4"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_0",
+            "eco:pet_1",
+            "eco:pet_2",
+            "eco:pet_3",
+            "eco:pet_5",
+            "eco:pet_6",
+            "eco:pet_7",
+            "eco:pet_8"
+          ]
+        }
+      },
+      "eco:set_pet_5": {
+        "add": {
+          "component_groups": [
+            "eco:pet_5"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_0",
+            "eco:pet_1",
+            "eco:pet_2",
+            "eco:pet_3",
+            "eco:pet_4",
+            "eco:pet_6",
+            "eco:pet_7",
+            "eco:pet_8"
+          ]
+        }
+      },
+      "eco:set_pet_6": {
+        "add": {
+          "component_groups": [
+            "eco:pet_6"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_0",
+            "eco:pet_1",
+            "eco:pet_2",
+            "eco:pet_3",
+            "eco:pet_4",
+            "eco:pet_5",
+            "eco:pet_7",
+            "eco:pet_8"
+          ]
+        }
+      },
+      "eco:set_pet_7": {
+        "add": {
+          "component_groups": [
+            "eco:pet_7"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_0",
+            "eco:pet_1",
+            "eco:pet_2",
+            "eco:pet_3",
+            "eco:pet_4",
+            "eco:pet_5",
+            "eco:pet_6",
+            "eco:pet_8"
+          ]
+        }
+      },
+      "eco:set_pet_8": {
+        "add": {
+          "component_groups": [
+            "eco:pet_8"
+          ]
+        },
+        "remove": {
+          "component_groups": [
+            "eco:pet_0",
+            "eco:pet_1",
+            "eco:pet_2",
+            "eco:pet_3",
+            "eco:pet_4",
+            "eco:pet_5",
+            "eco:pet_6",
+            "eco:pet_7"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:variant": {
+        "value": 0
+      },
+      "minecraft:type_family": {
+        "family": [
+          "eco_pet",
+          "inanimate"
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 0.2,
+        "height": 0.2
+      },
+      "minecraft:scale": {
+        "value": 0.9
+      },
+      "minecraft:health": {
+        "value": 1000,
+        "max": 1000
+      },
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "all",
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:knockback_resistance": {
+        "value": 1.0
+      },
+      "minecraft:fire_immune": {},
+      "minecraft:nameable": {
+        "always_show": false,
+        "allow_name_tag_renaming": false
+      }
+    }
+  }
+}

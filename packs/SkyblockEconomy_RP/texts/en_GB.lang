@@ -122,3 +122,4 @@ item.eco:mloot_enchanted_golden_apple=Enchanted Enchanted Golden Apple
 item.eco:chunk_hopper=Chunk Hopper
 entity.eco:npc.name=Shopkeeper
 action.interact.eco_npc=Open
+entity.eco:pet.name=Pet
