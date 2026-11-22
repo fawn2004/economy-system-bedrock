@@ -591,3 +591,93 @@ export const CHUNK_HOPPER = {
   speedIntervals: [4, 3, 2, 1.5, 1, 0.75, 0.5, 0.25],
   speedCosts: [10000, 25000, 60000, 120000, 250000, 500000, 1000000], // one per speed level
 };
+
+// ============================================================================
+//  BANK  - keeps money safe and pays interest
+//  Interest is paid every `intervalHours` (real time) on the money in the
+//  bank: `rate`% of it, but never more than the account tier's `maxInterest`.
+//  Missed payouts (while offline) are caught up, up to `maxCatchUp` of them.
+// ============================================================================
+export const BANK = {
+  intervalHours: 6,
+  rate: 2, // % per payout
+  maxCatchUp: 4,
+  // Account tiers: how much the bank holds, the biggest interest payout, and the upgrade price
+  tiers: [
+    { name: "Basic", limit: 10000000, maxInterest: 100000, cost: 0 },
+    { name: "Silver", limit: 100000000, maxInterest: 1000000, cost: 5000000 },
+    { name: "Gold", limit: 1000000000, maxInterest: 10000000, cost: 50000000 },
+    { name: "Platinum", limit: 10000000000, maxInterest: 100000000, cost: 500000000 },
+    { name: "Diamond", limit: 1000000000000, maxInterest: 1000000000, cost: 5000000000 },
+  ],
+};
+
+// ============================================================================
+//  BAZAAR  - players trade raw materials with each other through buy orders
+//  and sell offers. Instant Buy takes the cheapest sell offers, Instant Sell
+//  fills the best buy orders. Orders that cross fill straight away.
+// ============================================================================
+export const BAZAAR = {
+  tax: 1, // % taken from coins sellers receive
+  maxOrdersPerPlayer: 14,
+  maxOrdersPerProduct: 60, // per side (buy / sell), keeps the world data small
+  maxOrderAmount: 10240,
+  // Product categories: [item id, ...]. Items that don't exist in this game version are skipped.
+  // Enchanted minion loot (eco:mloot_*) is added to "enchanted" automatically.
+  categories: [
+    {
+      id: "farming", name: "Farming", icon: "textures/items/wheat",
+      items: [
+        "minecraft:wheat", "minecraft:wheat_seeds", "minecraft:carrot", "minecraft:potato", "minecraft:beetroot",
+        "minecraft:pumpkin", "minecraft:melon_slice", "minecraft:sugar_cane", "minecraft:cactus", "minecraft:cocoa_beans",
+        "minecraft:nether_wart", "minecraft:brown_mushroom", "minecraft:red_mushroom", "minecraft:egg", "minecraft:feather",
+        "minecraft:leather", "minecraft:beef", "minecraft:porkchop", "minecraft:chicken", "minecraft:mutton",
+        "minecraft:rabbit", "minecraft:rabbit_hide", "minecraft:white_wool", "minecraft:honeycomb", "minecraft:sweet_berries",
+      ],
+    },
+    {
+      id: "mining", name: "Mining", icon: "textures/items/iron_pickaxe",
+      items: [
+        "minecraft:cobblestone", "minecraft:stone", "minecraft:coal", "minecraft:raw_iron", "minecraft:iron_ingot",
+        "minecraft:raw_gold", "minecraft:gold_ingot", "minecraft:raw_copper", "minecraft:copper_ingot", "minecraft:lapis_lazuli",
+        "minecraft:redstone", "minecraft:diamond", "minecraft:emerald", "minecraft:quartz", "minecraft:obsidian",
+        "minecraft:amethyst_shard", "minecraft:glowstone_dust", "minecraft:netherrack", "minecraft:end_stone",
+        "minecraft:netherite_scrap", "minecraft:gravel", "minecraft:sand", "minecraft:flint", "minecraft:ice",
+      ],
+    },
+    {
+      id: "combat", name: "Combat", icon: "textures/items/iron_sword",
+      items: [
+        "minecraft:rotten_flesh", "minecraft:bone", "minecraft:string", "minecraft:spider_eye", "minecraft:gunpowder",
+        "minecraft:ender_pearl", "minecraft:slime_ball", "minecraft:magma_cream", "minecraft:blaze_rod", "minecraft:ghast_tear",
+        "minecraft:arrow", "minecraft:phantom_membrane", "minecraft:prismarine_shard", "minecraft:prismarine_crystals",
+        "minecraft:shulker_shell", "minecraft:wither_skeleton_skull", "minecraft:nether_star",
+      ],
+    },
+    {
+      id: "woods", name: "Woods & Fishes", icon: "textures/items/fish_raw",
+      items: [
+        "minecraft:oak_log", "minecraft:spruce_log", "minecraft:birch_log", "minecraft:jungle_log", "minecraft:acacia_log",
+        "minecraft:dark_oak_log", "minecraft:mangrove_log", "minecraft:cherry_log", "minecraft:crimson_stem", "minecraft:warped_stem",
+        "minecraft:cod", "minecraft:salmon", "minecraft:tropical_fish", "minecraft:pufferfish", "minecraft:ink_sac",
+        "minecraft:glow_ink_sac", "minecraft:kelp", "minecraft:lily_pad", "minecraft:nautilus_shell", "minecraft:sponge",
+      ],
+    },
+    { id: "enchanted", name: "Enchanted", icon: "textures/items/diamond", items: [] },
+  ],
+};
+
+// ============================================================================
+//  AUCTION HOUSE  - players list items for other players to buy
+//  BIN = Buy It Now at a fixed price. Auctions take bids; the highest bid
+//  when time runs out wins.
+// ============================================================================
+export const AUCTION = {
+  maxPerPlayer: 10, // active listings per player
+  listingFee: 1, // % of the starting price / BIN price, paid when listing
+  minFee: 10,
+  tax: 1, // % taken from the coins the seller gets
+  minBidIncrease: 10, // % a new bid must beat the current one by
+  durations: [1, 6, 12, 24, 48], // hours the seller can choose from
+  durationFees: [0, 50, 100, 250, 500], // flat extra fee for each duration above
+};

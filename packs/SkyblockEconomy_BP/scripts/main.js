@@ -14,6 +14,9 @@ import { registerChunkHoppers } from "./chunkHopper.js";
 import { registerNpcs } from "./npc.js";
 import { registerPlayerSettings } from "./playerSettings.js";
 import { registerSidebar } from "./sidebar.js";
+import { registerBank } from "./bank.js";
+import { registerAuctions } from "./auction.js";
+import { claimPayouts } from "./payouts.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -31,6 +34,7 @@ function setupPlayer(player) {
     rememberName(player);
   }
   if (CONFIG.compass.giveOnJoin) giveCompass(player, CONFIG.compass.slot);
+  claimPayouts(player); // auction sales / refunds while they were offline
 }
 
 world.afterEvents.playerSpawn.subscribe(({ player }) => {
@@ -64,3 +68,5 @@ registerLeaderboards();
 registerChunkHoppers();
 registerNpcs();
 registerPlayerSettings();
+registerBank();
+registerAuctions();

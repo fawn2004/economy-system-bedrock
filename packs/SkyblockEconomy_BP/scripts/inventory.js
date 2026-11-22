@@ -113,3 +113,23 @@ export function giveCompass(player, slot = 8) {
   if (!inv.getItem(slot)) inv.setItem(slot, stack);
   else inv.addItem(stack);
 }
+
+/** Removes up to `amount` plain items of `typeId`. Returns how many were removed. */
+export function removePlain(player, typeId, amount) {
+  const inv = container(player);
+  if (!inv || amount <= 0) return 0;
+  let left = amount;
+  for (let i = 0; i < inv.size && left > 0; i++) {
+    const it = inv.getItem(i);
+    if (!it || it.typeId !== typeId || !isPlain(it)) continue;
+    if (it.amount <= left) {
+      left -= it.amount;
+      inv.setItem(i, undefined);
+    } else {
+      it.amount -= left;
+      inv.setItem(i, it);
+      left = 0;
+    }
+  }
+  return amount - left;
+}

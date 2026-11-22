@@ -125,3 +125,24 @@ export async function askSearch(player, title) {
   const q = String(res.formValues?.[0] ?? "").trim();
   return q || undefined;
 }
+
+/** "2500", "2,500", "$2.5k", "1.2m", "3b" -> number (NaN if it isn't one). */
+export function parseAmount(text) {
+  const s = String(text ?? "").toLowerCase().replace(/[,$\s]/g, "");
+  const m = s.match(/^(\d+(?:\.\d+)?)([kmbt]?)$/);
+  if (!m) return NaN;
+  const mult = { "": 1, k: 1e3, m: 1e6, b: 1e9, t: 1e12 }[m[2]];
+  return Math.floor(Number(m[1]) * mult);
+}
+
+/** Asks for a whole number above 0 (accepts 2.5k / 1m). Resolves to it, or undefined. */
+export async function askAmount(player, title, label, placeholder = "e.g. 2500 or 2.5k") {
+  const res = await showForm(player, new ModalFormData().title(title).textField(label, placeholder));
+  if (!res || res.canceled) return undefined;
+  const n = parseAmount(res.formValues?.[0]);
+  if (!Number.isFinite(n) || n <= 0) {
+    fail(player, "Enter a whole number above 0 (you can use k / m / b).");
+    return undefined;
+  }
+  return n;
+}

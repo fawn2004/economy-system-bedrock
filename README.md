@@ -13,6 +13,9 @@ custom-styled menus: dark panels, coloured header bars, icon tiles and NEW!/HOT!
 | **Shop** | **Every vanilla item (~1,480)**, in categories with pages, plus a **Search** button |
 | **Sell** | Sell anything from your inventory, one type at a time or *Sell All* |
 | **Balance** | Your money and leaderboard rank |
+| **Bazaar** | Player-run market for materials: buy orders, sell offers, instant buy / sell |
+| **Auction House** | List the item in your hand as BIN (Buy It Now) or as a bidding auction |
+| **Bank** | Store money safely and earn interest; upgrade your account tier |
 | **Pay** | Send money to online players |
 | **Leaderboards** | Top 10 for balance, heads collected, farming, combat, skill average, every skill, spawners and minions (offline players included) |
 | **Player Settings** | Per-player toggles: **Sidebar**, **Chunk Borders** (particle outline of your chunk, only you see it), **Full Bright** (night vision, no particles), **Coordinates** (X / Y / Z + facing on the action bar), **Death Location** (chat message where you died), **XP Popups** and **Level-up Titles** |
@@ -30,6 +33,57 @@ Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration),
 - **Kits** have per-player cooldowns and enchantments. Includes an **Island Kit** for new islands.
 - **Spawners** for 24 mobs, with stacking, upgrades, mob stacking and enchanted heads (see below).
 - The compass is given on join, kept on death, and can't be dropped or stored.
+
+## Bazaar
+
+Main menu > **Bazaar** (or a Bazaar NPC). Products are grouped into **Farming**, **Mining**,
+**Combat**, **Woods & Fishes** and **Enchanted** (minion loot, enchanted crops and heads, so
+those can now be traded between players).
+
+| | |
+|---|---|
+| **Instant Buy** | Buys from the cheapest sell offers first (1, 16, 64... or a custom amount) |
+| **Instant Sell** | Sells everything you have to the highest buy orders |
+| **Buy Order** | Name an amount and price; the coins are taken now and the items wait for you |
+| **Sell Offer** | Name a price; the items are taken now and the coins wait for you |
+| **Manage Orders** | See how full each order is, **Claim** (or Claim All) and **Cancel** for a refund |
+
+- Prices can have one decimal ($0.5 cobblestone). The menu suggests a price that beats the
+  current best one.
+- An order that crosses the book fills straight away at the price that was already waiting.
+- Sellers pay a 1% tax. Max 14 orders per player. Orders keep filling while you're offline.
+- Settings: `BAZAAR` in `config.js` (tax, limits, every product list).
+
+## Auction House
+
+Main menu > **Auction House**. Hold an item and press **Create**:
+
+- **BIN**: fixed price, the first buyer gets it at once.
+- **Auction**: players bid; each bid must beat the last one by 10%. A bid in the last minute
+  adds a minute. Outbid players get their coins back straight away.
+- Durations 1h to 48h. Listing fee is 1% of the price (min $10) plus a small fee for longer
+  durations; 1% tax comes off the coins the seller gets.
+- **Browse** by Weapons, Armor, Tools, Special (add-on items like spawners and minions) or
+  Other, **Search** by name, and **Sort** by lowest/highest price, ending soon or BIN only.
+- **My Auctions**: cancel a listing or claim back an item that didn't sell.
+  **My Bids**: claim the items you won.
+- Items keep their name, lore, enchantments and damage, so skill tools, spawners and minions
+  can be sold with their levels and upgrades. The menu compass and kit items can't be listed.
+- Money for offline players (sales, refunds) is paid when they next join.
+- Max 10 listings per player. Settings: `AUCTION` in `config.js`.
+
+## Bank
+
+Main menu > **Bank** (also under Balance, or a Banker NPC). Your **purse** is your normal balance;
+the bank is a separate account.
+
+- **Deposit / Withdraw** all, half or a typed amount (`2.5k`, `10m` work). **History** shows the
+  last 10 transactions.
+- **Interest:** 2% every 6 real hours, up to the account's cap. Missed payouts while you're
+  offline are caught up (up to 4).
+- **Upgrade** the account: Basic ($10M max, $100k interest cap) > Silver > Gold > Platinum >
+  Diamond ($1T max, $1B interest cap).
+- Settings: `BANK` in `config.js`.
 
 ## Spawners
 
@@ -74,7 +128,8 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 ![NPCs](docs/npcs.png)
 
 Big shopkeepers (1.4x a player, ~2.5 blocks tall) that players tap instead of using the
-compass: **Shop** (purple), **Sell** (green) and **Menu** (blue). They turn to face the nearest
+compass: **Shop** (purple), **Sell** (green), **Menu** (blue), **Bazaar**, **Auction House** and
+**Banker**. They turn to face the nearest
 player, are invincible and can't be pushed. Admins spawn them where they stand, or remove the
 nearest one, in **Admin > NPCs**.
 

@@ -13,6 +13,9 @@ export const NPC_TYPES = {
   shop: { name: "§6§lSHOP", sub: "§7Tap to buy", skin: 0 },
   sell: { name: "§a§lSELL", sub: "§7Tap to sell", skin: 1 },
   menu: { name: "§b§lMENU", sub: "§7Tap to open", skin: 2 },
+  bazaar: { name: "§6§lBAZAAR", sub: "§7Tap to trade", skin: 0 },
+  auction: { name: "§e§lAUCTION HOUSE", sub: "§7Tap to browse", skin: 1 },
+  bank: { name: "§6§lBANKER", sub: "§7Tap to open", skin: 2 },
 };
 
 let openers = {}; // type -> (player) => opens that menu (set by menus.js)

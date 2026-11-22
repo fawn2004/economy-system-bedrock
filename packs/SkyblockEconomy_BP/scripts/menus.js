@@ -14,6 +14,9 @@ import {
   spaceFor,
 } from "./inventory.js";
 import { settingsMenu } from "./adminSettings.js";
+import { auctionMenu } from "./auction.js";
+import { bankMenu, getBank } from "./bank.js";
+import { bazaarMenu } from "./bazaar.js";
 import { leaderboardsMenu } from "./leaderboards.js";
 import { makeHopperItem } from "./chunkHopper.js";
 import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
@@ -77,6 +80,9 @@ export async function mainMenu(player) {
   const tiles = [
     { text: "§6§lSHOP", sub: "§7Buy any item", icon: ICON.shop, onClick: () => shopMenu(player) },
     { text: "§a§lSELL", sub: "§7Sell your loot", icon: ICON.sell, onClick: () => sellMenu(player) },
+    { text: "§6§lBAZAAR", sub: "§7Trade materials", icon: "textures/items/emerald", badge: "NEW", onClick: () => bazaarMenu(player, () => mainMenu(player)) },
+    { text: "§e§lAUCTION HOUSE", sub: "§7Buy & sell items", icon: "textures/items/gold_ingot", badge: "NEW", onClick: () => auctionMenu(player, () => mainMenu(player)) },
+    { text: "§6§lBANK", sub: "§7Earn interest", icon: ICON.bank, onClick: () => bankMenu(player, () => mainMenu(player)) },
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
     { text: "§6§lLEADERBOARDS", sub: "§7Who's on top", icon: ICON.top, onClick: () => leaderboardsMenu(player, () => mainMenu(player)) },
     {
@@ -102,8 +108,9 @@ export async function mainMenu(player) {
   const card = [
     `§l§f${clip(player.name, 14)}§r`,
     "",
-    "§7Balance",
+    "§7Purse",
     `§a${fmtMoney(getBalance(player))}`,
+    `§7Bank §6${fmtMoney(getBank(player))}`,
     `§7Rank §6${rank ? "#" + rank : "-"}`,
     `§7Heads §d${heads}`,
     `§7Spawners §b${ownedSpawnerCount(player.id)}`,
@@ -657,6 +664,7 @@ async function balanceMenu(player) {
     theme: "gold",
     body: `§7Your balance: §a§l${fmtMoney(getBalance(player))}§r\n§7Leaderboard rank: §6${rank ? "#" + rank : "-"}`,
     tiles: [
+      { text: "§6§lBANK", sub: "§7Earn interest", icon: ICON.bank, onClick: () => bankMenu(player, () => balanceMenu(player)) },
       { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => balanceMenu(player)) },
       { text: "§6§lBALTOP", sub: "§7Top 10", icon: ICON.top, onClick: () => topMenu(player, () => balanceMenu(player)) },
       { text: "§d§lHEADS", sub: "§7Head balances", icon: ICON.bank, onClick: () => headsMenu(player) },
@@ -888,6 +896,9 @@ async function adminNpcMenu(player, msg) {
       { text: "§6§lSHOP NPC", sub: "§7Opens the shop", icon: ICON.shop, onClick: spawn("shop", "Shop") },
       { text: "§a§lSELL NPC", sub: "§7Opens Sell", icon: ICON.sell, onClick: spawn("sell", "Sell") },
       { text: "§b§lMENU NPC", sub: "§7Opens the menu", icon: ICON.top, onClick: spawn("menu", "Menu") },
+      { text: "§6§lBAZAAR NPC", sub: "§7Opens the Bazaar", icon: "textures/items/emerald", onClick: spawn("bazaar", "Bazaar") },
+      { text: "§e§lAUCTION NPC", sub: "§7Opens the AH", icon: "textures/items/gold_ingot", onClick: spawn("auction", "Auction House") },
+      { text: "§6§lBANKER NPC", sub: "§7Opens the Bank", icon: ICON.bank, onClick: spawn("bank", "Banker") },
       {
         text: "§c§lREMOVE NPC",
         sub: "§7Nearest one",
@@ -1105,4 +1116,7 @@ setNpcOpeners({
   shop: (player) => shopMenu(player),
   sell: (player) => sellMenu(player),
   menu: (player) => mainMenu(player),
+  bazaar: (player) => bazaarMenu(player, () => mainMenu(player)),
+  auction: (player) => auctionMenu(player, () => mainMenu(player)),
+  bank: (player) => bankMenu(player, () => mainMenu(player)),
 });
