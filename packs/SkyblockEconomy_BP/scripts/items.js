@@ -274,7 +274,7 @@ export function readItem(stack) {
   const lore = stack.getLore();
   const tag = lore.find((l) => l.startsWith(IT_TAG));
   if (tag) {
-    const [id, rar, ref, stars] = tag.slice(IT_TAG.length).split(":");
+    const [id, rar, ref, stars, flags] = tag.slice(IT_TAG.length).split(":");
     const def = ITEMS[id];
     const ench = {};
     const en = lore.find((l) => l.startsWith(EN_TAG));
@@ -282,7 +282,7 @@ export function readItem(stack) {
       const m = part.match(/^([a-z]+)(\d+)$/);
       if (m && ENCHANTS[m[1]]) ench[m[1]] = Number(m[2]);
     }
-    return { id, def, kind: kindOf(stack.typeId, def), rarity: Math.max(0, Math.min(5, Number(rar) || 0)), reforge: REFORGES[ref] ? ref : "", stars: Number(stars) || 0, ench };
+    return { id, def, kind: kindOf(stack.typeId, def), rarity: Math.max(0, Math.min(5, Number(rar) || 0)), reforge: REFORGES[ref] ? ref : "", stars: Number(stars) || 0, ench, kit: (flags ?? "").includes("k") };
   }
   if (lore.some((l) => l.startsWith("§8eco:"))) return undefined; // another add-on item (skill tool, minion...)
   const kind = kindOf(stack.typeId);
@@ -367,10 +367,11 @@ export function renderItem(stack, info) {
   }
   if (def?.set) lines.push(`§8Part of the ${def.set[0].toUpperCase() + def.set.slice(1)} set`);
   if (def?.dungeon) lines.push(`§8Dungeon item${info.stars ? ` §6(${info.stars}/5 stars)` : " - star it with essence"}`);
+  if (info.kit) lines.push("§8Kit item - can't be sold or traded");
   lines.push("");
   lines.push(`${rar.color}§l${rar.name} ${KIND_LABEL[info.kind] ?? ""}`.trim());
-  const keep = lines.slice(0, 17).map((l) => (l.length > 48 ? l.slice(0, 48) : l));
-  keep.push(`${IT_TAG}${info.id}:${info.rarity}:${info.reforge || ""}:${info.stars || 0}`);
+  const keep = lines.slice(0, 18).map((l) => (l.length > 48 ? l.slice(0, 48) : l));
+  keep.push(`${IT_TAG}${info.id}:${info.rarity}:${info.reforge || ""}:${info.stars || 0}${info.kit ? ":k" : ""}`);
   const enStr = en.map(([c, l]) => c + l).join(",");
   if (enStr) keep.push(EN_TAG + enStr);
   stack.setLore(keep);

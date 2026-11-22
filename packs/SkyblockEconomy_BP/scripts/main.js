@@ -24,6 +24,7 @@ import { registerSlayer } from "./slayer.js";
 import { registerDungeons } from "./dungeons.js";
 import { registerMayor } from "./mayor.js";
 import { registerExtras } from "./extras.js";
+import { registerKitUpgrades } from "./kitUpgrades.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -84,3 +85,4 @@ registerSlayer();
 registerDungeons();
 registerMayor();
 registerExtras();
+registerKitUpgrades();

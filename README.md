@@ -78,6 +78,29 @@ reforged and enchanted too.
 - **Tough mobs**: slayer bosses, dungeon mobs and sea creatures have a big health pool shown in
   their name (e.g. *Rotting Tyrant I 400/400❤*).
 
+## Upgradable Kits
+
+Main menu > **Kits** (or Shop > Kits > Upgradable Kits). Six kit lines, each levelled from 1 to
+10 (**MAXED**):
+
+| Kit | Gear | Perk per level |
+|---|---|---|
+| Farming | Hoe (Efficiency, Harvesting, Swiftswing, Blessed); Harvester armor from Lv 4 | +4 Farming Fortune |
+| Mining | Pickaxe (Efficiency, Fortune, Swiftswing, Harvesting, Hasty/Blessed); Prospector armor from Lv 4 | +4 Mining Fortune, +3 Mining Speed |
+| Foraging | Axe (Efficiency, Harvesting, Swiftswing, Blessed) | +4 Foraging Fortune, +1 Strength |
+| Fishing | Rod (Luck of the Sea, Lure, Lure Master, Blessed); Angler's Rod from Lv 6 | +0.5% Sea Creature Chance, +3 Intelligence |
+| Combat | Sword (Sharpness, Looting, Keen Edge, Life Drain, Precision, Finisher, Storm Call...), bow from Lv 3, full armor (Protection, Vitality, Bulwark, Sturdy/Colossal) | +3 Strength, +0.5% Crit Chance, +0.5 Magic Find |
+| Dungeon | Crypt (Lv 1-3), Phantom (Lv 4-6), Sovereign (Lv 7-10) set + weapon with stars and custom enchants; Essence each claim | +3 Defense, +2 Strength, +1 Magic Find (in dungeons) |
+
+- Every level: better material (stone > iron > diamond > netherite), higher enchantment
+  levels, more custom enchantments, a reforge from level 3, higher rarity (Mythic at 10) and
+  more supplies. Maxed kits get +25% on their perk.
+- Claim each kit every 12 hours. Kit gear is marked **Kit item**: it can't be sold or traded
+  (it can still be reforged / enchanted further).
+- Upgrades cost coins (doubling each level), need a skill level (2 per level; Dungeon Kit:
+  Dungeon level) and, at the top, slayer materials (Combat Lv 6-10) or Essence (Dungeon).
+- **Preview** shows exactly what the next level gives. Admins can set kit levels in Admin > RPG.
+
 ## Pets
 
 **Profile > Pets** (or Shop > Pets). One pet can be active. It gives stats and a perk that grow

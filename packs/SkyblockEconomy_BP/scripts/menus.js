@@ -25,6 +25,7 @@ import { petsMenu } from "./pets.js";
 import { dungeonMenu, inDungeon, leaveRun } from "./dungeons.js";
 import { dailyMenu, questsMenu } from "./extras.js";
 import { mayorMenu } from "./mayor.js";
+import { kitUpgradesMenu } from "./kitUpgrades.js";
 import { leaderboardsMenu } from "./leaderboards.js";
 import { makeHopperItem } from "./chunkHopper.js";
 import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
@@ -107,6 +108,7 @@ export async function mainMenu(player) {
     { text: "§6§lBANK", sub: "§7Interest", icon: ICON.bank, onClick: () => bankMenu(player, () => mainMenu(player)) },
     { text: "§c§lPROFILE", sub: "§7Stats & pets", icon: "textures/items/diamond_chestplate", badge: "NEW", onClick: () => profileMenu(player, () => mainMenu(player)) },
     { text: "§4§lSLAYER", sub: "§7Boss fights", icon: "textures/items/eco_heads/zombie", badge: "NEW", onClick: () => slayerMenu(player, () => mainMenu(player)) },
+    { text: "§6§lKITS", sub: "§7Upgradable kits", icon: "textures/items/nether_star", badge: "NEW", onClick: () => kitUpgradesMenu(player, () => mainMenu(player)) },
     { text: "§5§lDUNGEONS", sub: "§7The Crypts", icon: "textures/items/ender_eye", badge: "NEW", onClick: () => dungeonMenu(player, () => mainMenu(player)) },
     { text: "§a§lQUESTS", sub: "§7Daily tasks", icon: "textures/items/book_writable", onClick: () => questsMenu(player, () => mainMenu(player)) },
     { text: "§e§lDAILY", sub: "§7Free coins", icon: "textures/items/clock_item", onClick: () => dailyMenu(player, () => mainMenu(player)) },
@@ -494,6 +496,7 @@ async function kitsMenu(player) {
       onClick: () => kitMenu(player, kit),
     };
   });
+  tiles.unshift({ text: "§6§lUPGRADABLE KITS", sub: "§7Level up to MAXED", icon: "textures/items/nether_star", badge: "NEW", onClick: () => kitUpgradesMenu(player, () => kitsMenu(player)) });
   tiles.push(backTile(() => shopMenu(player)));
   await tileMenu(player, { title: "KITS", theme: "purple", body: `§7Gear bundles with cooldowns    ${balLine(player)}`, tiles });
 }
