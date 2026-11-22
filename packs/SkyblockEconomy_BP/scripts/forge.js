@@ -54,6 +54,16 @@ const statsLine = (st) =>
     .map(([k, v]) => `${STATS[k]?.color ?? "§7"}+${v}${STATS[k]?.pct ? "%" : ""} ${STATS[k]?.name ?? k}`)
     .join("§7, ") || "§8none";
 
+/** The item's custom enchantments: "Life Drain III (max V)" lines. Reforging keeps them all. */
+function enchantLines(info) {
+  const list = Object.entries(info.ench ?? {}).filter(([c, l]) => ENCHANTS[c] && l > 0);
+  if (!list.length) return ["§7Custom enchants: §8none"];
+  return [
+    `§7Custom enchants §8(kept when you reforge)§7:`,
+    ...list.map(([c, l]) => `  §d${ENCHANTS[c].name} ${roman(l)}${l >= ENCHANTS[c].max ? " §6MAX" : ` §8(max ${roman(ENCHANTS[c].max)})`}`),
+  ];
+}
+
 export async function reforgeMenu(player, back, pickSlot) {
   if (pickSlot === undefined) {
     return pickItem(player, {
@@ -87,6 +97,7 @@ export async function reforgeMenu(player, back, pickSlot) {
       `§7Item: ${RARITIES[info.rarity].color}${item.nameTag?.replace(/§./g, "") || item.typeId}`,
       `§7Current reforge: ${cur ? "§f" + cur.name : "§8none"}`,
       cur ? `§7Its stats: ${statsLine(Object.fromEntries(Object.entries(cur.stats).map(([k, v]) => [k === "fortune" ? "mfo" : k, v[info.rarity]])))}` : "",
+      ...enchantLines(info),
       `§7Cost: ${getBalance(player) >= cost ? "§a" : "§c"}${fmt(cost)}`,
       "§8You get a random reforge (never the same one twice in a row).",
     ].filter(Boolean).join("\n"),
