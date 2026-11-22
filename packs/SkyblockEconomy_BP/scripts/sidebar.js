@@ -74,7 +74,7 @@ function lines(player) {
   const date = `${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")}/${String(now.getFullYear()).slice(2)}`;
   const cal = calendar();
   const out = [
-    `§7${date} §8${world.getAllPlayers().length} online`,
+    `§7${date} §7${world.getAllPlayers().length} online`,
     "",
     cal.date,
     cal.time,

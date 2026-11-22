@@ -47,13 +47,17 @@ export function niceName(text) {
 }
 const niceTitle = (t) => (/§/.test(t) ? t : niceName(t));
 
+// Dark colour codes are hard to read on the dark tooltip boxes: swap them for lighter ones.
+const READABLE = { "0": "7", "1": "9", "4": "c", "5": "d", "8": "7" };
+export const readable = (text) => String(text).replace(/§([01458])/g, (_, c) => "§" + READABLE[c]);
+
 function tooltipText(t) {
   let text = niceName(t.text);
   if (t.badge === "NEW") text += " §a§lNEW";
   if (t.sub) text += `\n§r${t.sub}`;
   if (t.lore) text += `\n${t.lore}`;
   if ((t.onClick || t.id) && !t.nav && !t.noClick) text += "\n§eClick!";
-  return text;
+  return readable(text);
 }
 
 const filler = () => ({ text: "[F]", icon: FILLER_ICON, filler: true });
@@ -118,7 +122,7 @@ export async function tileMenu(player, opts) {
     info = `\n§7Page §f${page + 1}§7/§f${pages}`;
   }
   const slots = chestSlots(shown, nav);
-  const form = new ActionFormData().title(ecoTitle(niceTitle(title), theme, layout)).body(body ? body + info : info.trim());
+  const form = new ActionFormData().title(ecoTitle(niceTitle(title), theme, layout)).body(readable(body ? body + info : info.trim()));
   for (const t of slots) {
     const text = t.filler ? "[F]" : tooltipText(t);
     if (t.icon) form.button(text, t.icon);
