@@ -100,23 +100,23 @@ export async function mainMenu(player) {
   const rank = rankOf(player);
   const heads = allHeadPoints(player).reduce((n, h) => n + h.points, 0);
   const tiles = [
-    { text: "§6§lSHOP", sub: "§7Buy any item", icon: ICON.shop, onClick: () => shopMenu(player) },
-    { text: "§a§lSELL", sub: "§7Sell your loot", icon: ICON.sell, onClick: () => sellMenu(player) },
-    { text: "§6§lBAZAAR", sub: "§7Trade materials", icon: "textures/items/emerald", badge: "NEW", onClick: () => bazaarMenu(player, () => mainMenu(player)) },
-    { text: "§e§lAUCTION HOUSE", sub: "§7Buy & sell items", icon: "textures/items/gold_ingot", badge: "NEW", onClick: () => auctionMenu(player, () => mainMenu(player)) },
-    { text: "§6§lBANK", sub: "§7Earn interest", icon: ICON.bank, onClick: () => bankMenu(player, () => mainMenu(player)) },
-    { text: "§c§lPROFILE", sub: "§7Stats, pets, gear", icon: "textures/items/diamond_chestplate", badge: "NEW", onClick: () => profileMenu(player, () => mainMenu(player)) },
-    { text: "§4§lSLAYER", sub: "§7Bosses & loot", icon: "textures/items/eco_heads/zombie", badge: "NEW", onClick: () => slayerMenu(player, () => mainMenu(player)) },
+    { text: "§6§lSHOP", sub: "§7Buy items", icon: ICON.shop, onClick: () => shopMenu(player) },
+    { text: "§a§lSELL", sub: "§7Sell loot", icon: ICON.sell, onClick: () => sellMenu(player) },
+    { text: "§6§lBAZAAR", sub: "§7Trade items", icon: "textures/items/emerald", badge: "NEW", onClick: () => bazaarMenu(player, () => mainMenu(player)) },
+    { text: "§e§lAUCTIONS", sub: "§7Buy & sell", icon: "textures/items/gold_ingot", badge: "NEW", onClick: () => auctionMenu(player, () => mainMenu(player)) },
+    { text: "§6§lBANK", sub: "§7Interest", icon: ICON.bank, onClick: () => bankMenu(player, () => mainMenu(player)) },
+    { text: "§c§lPROFILE", sub: "§7Stats & pets", icon: "textures/items/diamond_chestplate", badge: "NEW", onClick: () => profileMenu(player, () => mainMenu(player)) },
+    { text: "§4§lSLAYER", sub: "§7Boss fights", icon: "textures/items/eco_heads/zombie", badge: "NEW", onClick: () => slayerMenu(player, () => mainMenu(player)) },
     { text: "§5§lDUNGEONS", sub: "§7The Crypts", icon: "textures/items/ender_eye", badge: "NEW", onClick: () => dungeonMenu(player, () => mainMenu(player)) },
-    { text: "§a§lQUESTS", sub: "§7Commissions & goals", icon: "textures/items/book_writable", onClick: () => questsMenu(player, () => mainMenu(player)) },
-    { text: "§e§lDAILY REWARD", sub: "§7Claim every day", icon: "textures/items/clock_item", onClick: () => dailyMenu(player, () => mainMenu(player)) },
-    { text: "§6§lELECTION", sub: "§7Vote for mayor", icon: "textures/items/gold_nugget", onClick: () => mayorMenu(player, () => mainMenu(player)) },
+    { text: "§a§lQUESTS", sub: "§7Daily tasks", icon: "textures/items/book_writable", onClick: () => questsMenu(player, () => mainMenu(player)) },
+    { text: "§e§lDAILY", sub: "§7Free coins", icon: "textures/items/clock_item", onClick: () => dailyMenu(player, () => mainMenu(player)) },
+    { text: "§6§lELECTION", sub: "§7Vote mayor", icon: "textures/items/gold_nugget", onClick: () => mayorMenu(player, () => mainMenu(player)) },
     ...extraMainTiles.map((f) => f(player, () => mainMenu(player))).filter(Boolean),
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
-    { text: "§6§lLEADERBOARDS", sub: "§7Who's on top", icon: ICON.top, onClick: () => leaderboardsMenu(player, () => mainMenu(player)) },
+    { text: "§6§lRANKINGS", sub: "§7Who's on top", icon: ICON.top, onClick: () => leaderboardsMenu(player, () => mainMenu(player)) },
     {
       text: "§b§lSKILLS",
-      sub: "§7Skills & collections",
+      sub: "§7Collections",
       icon: "textures/items/iron_pickaxe",
       onClick: () =>
         skillsMenu(player, () => mainMenu(player), [
@@ -125,13 +125,13 @@ export async function mainMenu(player) {
     },
   ];
   tiles.push({
-    text: "§9§lPLAYER SETTINGS",
-    sub: "§7Sidebar, full bright...",
+    text: "§9§lSETTINGS",
+    sub: "§7Your options",
     icon: "textures/items/clock_item",
     onClick: () => playerSettingsMenu(player, () => mainMenu(player)),
   });
   if (player.hasTag(CONFIG.adminTag)) {
-    tiles.push({ text: "§c§lADMIN", sub: "§7Settings & tools", icon: ICON.admin, onClick: () => adminMenu(player) });
+    tiles.push({ text: "§c§lADMIN", sub: "§7Admin tools", icon: ICON.admin, onClick: () => adminMenu(player) });
   }
   // The player card on the left of the dashboard shows the form body
   const card = [
