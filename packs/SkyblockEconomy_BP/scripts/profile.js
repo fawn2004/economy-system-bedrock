@@ -6,6 +6,8 @@ import { itemIconFor } from "./forge.js";
 import { PET_TYPES, activePet, addPet, petLevel, petsMenu } from "./pets.js";
 import { SLAYERS, slayerLevel } from "./slayer.js";
 import { getStats, statsMenu } from "./stats.js";
+import { adminSpiritTiles, spiritsMenu, wardrobeMenu } from "./extras.js";
+import { adminElection } from "./mayor.js";
 import { backTile, pagedMenu, showForm, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -31,6 +33,10 @@ export async function profileMenu(player, back) {
     { text: "§6§lREFORGE", sub: "§7Held item", icon: "textures/blocks/anvil_top_damaged_0", onClick: () => reforgeMenu(player, again) },
     { text: "§d§lENCHANTING", sub: "§7Held item", icon: "textures/items/book_enchanted", onClick: () => enchantMenu(player, again) },
   ];
+  tiles.push(
+    { text: "§b§lWARDROBE", sub: "§7Swap armor sets", icon: "textures/items/iron_chestplate", onClick: () => wardrobeMenu(player, again) },
+    { text: "§b§lSPIRITS", sub: "§7Hidden collectibles", icon: "textures/items/nether_star", onClick: () => spiritsMenu(player, again) }
+  );
   for (const f of profileTiles) {
     try {
       const tile = f(player, again);
@@ -117,6 +123,8 @@ export async function adminRpgMenu(player, back) {
       },
     },
   ];
+  tiles.push(...adminSpiritTiles(player, again));
+  tiles.push({ text: "§6§lELECTION", sub: "§7Mayor tools", icon: "textures/items/gold_nugget", onClick: () => adminElection(player, again) });
   for (const f of adminRpgTiles) {
     try {
       const tile = f(player, again);

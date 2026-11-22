@@ -5,6 +5,7 @@ import { ITEMS, RARITIES, isItem, makeItem } from "./items.js";
 import { addPet } from "./pets.js";
 import { combatHooks, makeTough, stat, statSources, toughName } from "./stats.js";
 import { describeItem, itemIconFor } from "./forge.js";
+import { mayorIs } from "./mayor.js";
 import { ICON, backTile, fail, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -25,6 +26,8 @@ const TIERS = [
 ];
 const LEVEL_XP = [5, 15, 50, 200, 500, 1000, 5000, 10000, 25000];
 const TIME_LIMIT = 180; // seconds to beat the boss
+const questCost = (t) => Math.round(t.cost * (mayorIs("vex") ? 0.75 : 1));
+const questXp = (t) => Math.round(t.xp * (mayorIs("vex") ? 1.25 : 1));
 const roman = (n) => ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n] ?? String(n);
 
 export const SLAYERS = {
@@ -150,7 +153,7 @@ function startQuest(player, type, tier) {
   if (quest(player)) return fail(player, "You already have a slayer quest. Finish or cancel it first.");
   if (slayerLevel(player, type) < t.level) return fail(player, `You need ${s.name} Slayer level ${t.level} for tier ${roman(tier + 1)}.`);
   if (s.unlock && slayerLevel(player, s.unlock.type) < s.unlock.level) return fail(player, `Unlocks at ${SLAYERS[s.unlock.type].name} Slayer level ${s.unlock.level}.`);
-  if (!takeMoney(player, t.cost)) return fail(player, `You need ${fmt(t.cost)} to start this quest.`);
+  if (!takeMoney(player, questCost(t))) return fail(player, `You need ${fmt(questCost(t))} to start this quest.`);
   saveQuest(player, { type, tier, kills: 0, phase: "kill" });
   success(player, `Slayer quest started! Kill ${t.kills} ${s.mobName} to summon the ${s.name}.`);
   player.playSound("mob.wither.spawn", { volume: 0.3, pitch: 1.5 });
@@ -219,13 +222,13 @@ function bossDied(boss, ownerId) {
   const s = SLAYERS[q.type];
   const t = TIERS[q.tier];
   const before = slayerLevel(player, q.type);
-  player.setDynamicProperty(`eco:slxp:${q.type}`, slayerXp(player, q.type) + t.xp);
+  player.setDynamicProperty(`eco:slxp:${q.type}`, slayerXp(player, q.type) + questXp(t));
   const after = slayerLevel(player, q.type);
   saveQuest(player, undefined);
   const coins = Math.floor(t.cost * 0.5);
   addMoney(player, coins);
   const drops = rollDrops(player, q.type, q.tier);
-  player.sendMessage(`§a§lSLAYER QUEST COMPLETE! §r§7${s.name} ${roman(q.tier + 1)} defeated. §5+${t.xp} Slayer XP §a+${fmt(coins)}`);
+  player.sendMessage(`§a§lSLAYER QUEST COMPLETE! §r§7${s.name} ${roman(q.tier + 1)} defeated. §5+${questXp(t)} Slayer XP §a+${fmt(coins)}`);
   if (drops.length) player.sendMessage("§7Drops: " + drops.join("§7, "));
   if (after > before) {
     player.sendMessage(`§5§lSLAYER LEVEL UP! §r§7${s.name} Slayer §e${after}§7: ${s.rewardText}`);
@@ -362,15 +365,15 @@ async function slayerTypeMenu(player, type, back) {
     tiles: [
       ...TIERS.map((t, i) => ({
         text: `§c§lTIER ${roman(i + 1)}`,
-        sub: lvl >= t.level ? `${getBalance(player) >= t.cost ? "§a" : "§c"}${fmtShort(t.cost)} §7${fmtShort(t.hp)}❤` : `§8Needs Lv ${t.level}`,
+        sub: lvl >= t.level ? `${getBalance(player) >= questCost(t) ? "§a" : "§c"}${fmtShort(questCost(t))} §7${fmtShort(t.hp)}❤` : `§8Needs Lv ${t.level}`,
         icon: s.icon,
         onClick: async () => {
           const ok = await tileMenu(player, {
             title: `${s.name.toUpperCase()} ${roman(i + 1)}`,
             theme: "red",
-            body: `§7Kill §f${t.kills} ${s.mobName}§7, then beat the boss in §e${TIME_LIMIT / 60} minutes§7.\n§7Boss health: §c${fmtShort(t.hp)}❤    §7Boss hits: §c+${t.atk}\n§7Reward: §5${t.xp} Slayer XP§7, §a${fmt(Math.floor(t.cost / 2))}§7 and boss drops.\n§7Cost: §a${fmt(t.cost)}`,
+            body: `§7Kill §f${t.kills} ${s.mobName}§7, then beat the boss in §e${TIME_LIMIT / 60} minutes§7.\n§7Boss health: §c${fmtShort(t.hp)}❤    §7Boss hits: §c+${t.atk}\n§7Reward: §5${questXp(t)} Slayer XP§7, §a${fmt(Math.floor(t.cost / 2))}§7 and boss drops.\n§7Cost: §a${fmt(questCost(t))}`,
             tiles: [
-              { text: "§a§lSTART", sub: `§a${fmtShort(t.cost)}`, icon: ICON.confirm, id: "yes" },
+              { text: "§a§lSTART", sub: `§a${fmtShort(questCost(t))}`, icon: ICON.confirm, id: "yes" },
               { text: "§c§lCANCEL", sub: "§7Go back", icon: ICON.cancel },
             ],
           });
@@ -472,7 +475,7 @@ export function registerSlayer() {
     if (owner) bossDied(deadEntity, String(owner));
   });
   // an old copy of a boss that was respawned (it was unloaded) is removed when it loads again
-  world.afterEvents.entityLoad.subscribe(({ entity }) => {
+  world.afterEvents.entityLoad?.subscribe(({ entity }) => {
     try {
       const owner = entity.getDynamicProperty("eco:slboss");
       if (!owner) return;

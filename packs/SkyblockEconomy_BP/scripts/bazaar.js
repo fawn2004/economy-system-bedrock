@@ -7,6 +7,7 @@ import { countPlain, giveItems, removePlain, spaceFor } from "./inventory.js";
 import { lootIcon, lootIdFor, lootName } from "./minions.js";
 import { headItemId, mobIcon, mobName } from "./spawners.js";
 import { cropIcon, cropName, enchantedId } from "./tools.js";
+import { mayorIs } from "./mayor.js";
 import { ICON, backTile, fail, pagedMenu, parseAmount, showForm, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -34,7 +35,8 @@ const money = (pt) => {
 const commas = (n) => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const clip = (s, n = 18) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 const pretty = (id) => id.replace(/^[a-z_]+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-const afterTax = (t) => Math.floor((t * (100 - BAZAAR.tax)) / 100);
+const tax = () => BAZAAR.tax * (mayorIs("sable") ? 0.5 : 1);
+const afterTax = (t) => Math.floor((t * (100 - tax())) / 100);
 const newId = () => Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36);
 
 // ---- products ----------------------------------------------------------------
@@ -214,7 +216,7 @@ function instantSell(player, p, amount) {
   writeBook(p.id, book);
   const coins = Math.floor(afterTax(earned) / 10);
   addMoney(player, coins);
-  success(player, `Sold ${commas(sold)}x ${p.name} for ${fmt(coins)}${BAZAAR.tax ? ` (after ${BAZAAR.tax}% tax)` : ""}.`);
+  success(player, `Sold ${commas(sold)}x ${p.name} for ${fmt(coins)}${tax() ? ` (after ${tax()}% tax)` : ""}.`);
 }
 
 function canPlace(player, book, side) {

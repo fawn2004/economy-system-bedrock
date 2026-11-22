@@ -21,6 +21,9 @@ import { registerStats } from "./stats.js";
 import { registerPets } from "./pets.js";
 import { registerAccessories } from "./accessories.js";
 import { registerSlayer } from "./slayer.js";
+import { registerDungeons } from "./dungeons.js";
+import { registerMayor } from "./mayor.js";
+import { registerExtras } from "./extras.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -78,3 +81,6 @@ registerStats();
 registerPets();
 registerAccessories();
 registerSlayer();
+registerDungeons();
+registerMayor();
+registerExtras();

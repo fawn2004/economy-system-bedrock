@@ -16,6 +16,12 @@ custom-styled menus: dark panels, coloured header bars, icon tiles and NEW!/HOT!
 | **Bazaar** | Player-run market for materials: buy orders, sell offers, instant buy / sell |
 | **Auction House** | List the item in your hand as BIN (Buy It Now) or as a bidding auction |
 | **Bank** | Store money safely and earn interest; upgrade your account tier |
+| **Profile** | Stats, Pets, Accessory Bag, Reforge, Enchanting, Wardrobe, Spirits |
+| **Slayer** | Kill quests that summon a boss, slayer levels and a slayer shop |
+| **Dungeons** | Party dungeon runs (Floors I-V) with classes, score grades and reward chests |
+| **Quests** | 3 daily commissions plus one-time milestones |
+| **Daily Reward** | Claim once a day; the streak makes it bigger |
+| **Election** | Vote for the next mayor; the mayor's perks help everyone |
 | **Pay** | Send money to online players |
 | **Leaderboards** | Top 10 for balance, heads collected, farming, combat, skill average, every skill, spawners and minions (offline players included) |
 | **Player Settings** | Per-player toggles: **Sidebar**, **Chunk Borders** (particle outline of your chunk, only you see it), **Full Bright** (night vision, no particles), **Coordinates** (X / Y / Z + facing on the action bar), **Death Location** (chat message where you died), **XP Popups** and **Level-up Titles** |
@@ -33,6 +39,113 @@ Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration),
 - **Kits** have per-player cooldowns and enchantments. Includes an **Island Kit** for new islands.
 - **Spawners** for 24 mobs, with stacking, upgrades, mob stacking and enchanted heads (see below).
 - The compass is given on join, kept on death, and can't be dropped or stored.
+
+## Stats & items
+
+Every player has stats: **Health ❤, Defense ❈, Strength ❁, Crit Chance ☣, Crit Damage ☠,
+Speed ✦, Intelligence ✎, Magic Find ✯, Mining Speed, Mining / Farming / Foraging Fortune,
+Sea Creature Chance**. See them in **Profile > Stats** (with a breakdown of where each comes from).
+
+| Stat | What it does |
+|---|---|
+| Health | Extra hearts (Health Boost) |
+| Defense | Takes `def / (def + 100)` off damage you take (100 Defense = half damage) |
+| Damage / Strength / Crit | Every hit: `(hit + Damage) x (1 + Strength%)`, crits multiply by `1 + Crit Damage%`. Base Crit Chance 30%, Crit Damage 50% |
+| Speed / Mining Speed | Speed and Haste effects (every 20 Speed / 25 Mining Speed is one level) |
+| Intelligence | Max mana for item abilities; mana refills 2% a second |
+| Magic Find | Better odds for rare slayer, dungeon and sea creature drops |
+| Fortunes | Add to the matching skill's double-drop chance |
+
+Stats come from: base, skill levels (Farming/Fishing give Health, Mining Defense, Combat
+Crit Chance, Foraging Strength, Excavating Mining Speed), armor, the held weapon/tool, full
+armor set bonuses, pets, accessories, slayer levels, spirits, the mayor and your dungeon class.
+
+**Items** (`items.js`) are vanilla items with a name and lore, so they stack, trade and work on
+the Auction House. Each has a **rarity** (Common, Uncommon, Rare, Epic, Legendary, Mythic) and
+stats. There are about 80: shop gear (Shop > **Equipment**), accessories (Shop > **Accessories**),
+slayer gear, dungeon gear and boss materials. Plain vanilla weapons, armor and tools can be
+reforged and enchanted too.
+
+- **Abilities** (right click): Blink Blade (teleport), Ember Staff / Spirit Staff (fire bolt),
+  Mending Wand (heal the party), Quake Hammer (shockwave), Voidedge (teleport + Strength),
+  Kingsbane (+100 Strength). They cost mana; your mana shows while you hold one.
+- **Reforge** (Profile > Reforge): a random reforge for the held item. 14 reforges for weapons,
+  armor and tools. Bigger rarity = bigger stats and price.
+- **Enchanting** (Profile > Enchanting): 14 custom enchantments (Keen Edge, Life Drain,
+  Finisher, Precision, Venom, Storm Call, Scavenger, Vitality, Bulwark, Fleetfoot, Insight,
+  Harvesting, Swiftswing, Lure Master) for coins and XP levels.
+- **Tough mobs**: slayer bosses, dungeon mobs and sea creatures have a big health pool shown in
+  their name (e.g. *Rotting Tyrant I 400/400❤*).
+
+## Pets
+
+**Profile > Pets** (or Shop > Pets). One pet can be active. It gives stats and a perk that grow
+with its level (1-100) and rarity, and it levels up from the skill XP you earn (its own skill
+full XP, others a third). Pets: Wolf, Rabbit, Bee, Silverfish, Fox, Dolphin, Allay, Bat, and
+the Drakeling (rare slayer / dungeon drop). **Upgrade Rarity** for coins once it's levelled
+enough. **To Item** turns a pet into a spawn egg to trade or auction; using it adds it back.
+
+## Accessory Bag
+
+**Profile > Accessory Bag**. Accessories give stats while they're in the bag. Only the best one
+of each family counts (Swift Charm < Swift Ring < Swift Artifact). 9 slots, upgradable to 45.
+
+## Slayer
+
+Main menu > **Slayer**. Pick a boss and tier, kill that type of mob, and the boss spawns next
+to you. Beat it in 3 minutes.
+
+| Boss | Kill | Level bonus | Ability |
+|---|---|---|---|
+| Rotting Tyrant | Zombies | +2 Health | Damages players nearby and heals itself |
+| Brood Mother | Spiders | +2% Crit Damage | Summons Broodlings, slows you |
+| Bone Colossus | Skeletons | +2 Strength | Arrow volleys |
+| Void Stalker | Endermen | +5 Intelligence, +1 Defense | Teleports to you, summons Voidlings (unlocks at Rotting Tyrant 3) |
+
+5 tiers (more health, harder hits, more XP). Slayer levels 1-9. Bosses drop materials (and rare
+items); the **Slayer Shop** makes them into gear (Tyrant's Cleaver, Venom Fang, Marrow Longbow,
+Voidedge...).
+
+## Dungeons
+
+Main menu > **Dungeons > Play**. Players within 10 blocks get an invite (party of up to 5).
+The party is teleported to a dungeon built in the sky far away (x 30000+, y 200).
+
+- Rooms in a row: monster rooms, elite rooms (a Crypt Champion), puzzle rooms (flip every
+  lever) and finally the boss room. Clearing a room opens the door to the next.
+- **Secret chests** in some rooms give Essence and score.
+- Getting low on health "downs" you back to the room's entrance (-15 score). No breaking or
+  placing blocks. Leave any time from the compass menu. 20 minute limit.
+- **Floors I-V**, each needing a Dungeon level, with its own mobs, look and boss.
+- **Score** = time + skill (downs) + secrets, graded S+ to D. The grade sets Dungeon XP, Essence,
+  coins and the reward chests: Wooden (free), Gold and Diamond (grade A+, best odds).
+- **Classes**: Warrior, Mage, Ranger, Guardian, Cleric (heals the party). Each gives stats in
+  dungeons and levels up every run. Your Dungeon level adds Defense and damage in dungeons.
+- **Essence** buys dungeon gear (Essence Shop) and **stars** for dungeon items (+10% stats per
+  star, up to 5).
+- Items you drop if you die in a dungeon stay there, so be careful!
+
+## Quests, Daily Reward, Spirits, Election, Wardrobe, Sea Creatures
+
+- **Quests**: 3 random **commissions** a day (kill mobs, mine stone, chop logs, earn skill XP):
+  $10k each, $25k bonus for all 3. Plus 17 one-time **milestones** (skill levels, bank, pets,
+  slayer, dungeons...).
+- **Daily Reward**: $1,000 x your streak (up to 30). Every 7th day adds an accessory and 25
+  Essence. Miss more than 48 hours and the streak starts again.
+- **Spirits**: admins place hidden spirits (Admin > RPG > Place Spirit). Players see sparkles
+  and collect them by walking into them. Every 5 can be traded in **Profile > Spirits** for
+  +2 Health, +1 Defense, +1 Strength, +1 Speed forever.
+- **Election**: there's always a mayor with 2 perks (Bramble farming, Flint mining, Vex slayer,
+  Sable bank & bazaar, Quill dungeons, Marlow fishing, Ember combat, Dawn daily & XP). Players
+  vote for the next one from 3 candidates; terms last 3 real days.
+- **Wardrobe** (Profile): 9 slots for armor sets. Tap a slot to swap what you're wearing with it.
+- **Sea Creatures**: fishing has a chance (2% + Sea Creature Chance) to pull up a tough sea
+  monster; better ones appear at higher Fishing levels.
+
+## Admin > RPG (test tools)
+
+Give any custom item or pet, set your Slayer XP, Dungeon XP and Essence, place/remove spirits,
+and end the election or pick the mayor.
 
 ## Bazaar
 

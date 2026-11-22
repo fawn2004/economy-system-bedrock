@@ -1,6 +1,7 @@
 import { system, world } from "@minecraft/server";
 import { BANK } from "./config.js";
 import { addMoney, fmt, fmtMoney, fmtShort, getBalance, takeMoney } from "./economy.js";
+import { mayorIs } from "./mayor.js";
 import { ICON, askAmount, backTile, fail, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -38,8 +39,9 @@ const nextInterestAt = (player) => {
   return next;
 };
 
+const rate = () => BANK.rate + (mayorIs("sable") ? 1 : 0);
 function interestFor(player) {
-  return Math.min(bankTier(player).maxInterest, Math.floor((getBank(player) * BANK.rate) / 100));
+  return Math.min(bankTier(player).maxInterest, Math.floor((getBank(player) * rate()) / 100));
 }
 
 /** Pays any interest that's due (catching up missed payouts). */
@@ -107,7 +109,7 @@ export async function bankMenu(player, back) {
   const body = [
     `§7Account: §6${t.name} §8(holds up to ${fmtShort(t.limit)})`,
     `§7Bank: §6§l${fmtMoney(bank)}§r    §7Purse: §a${fmtMoney(purse)}`,
-    `§7Interest: §b${BANK.rate}% §7every §b${BANK.intervalHours}h §8(max ${fmtShort(t.maxInterest)})`,
+    `§7Interest: §b${rate()}% §7every §b${BANK.intervalHours}h §8(max ${fmtShort(t.maxInterest)})`,
     `§7Next payout: §e${fmt(interestFor(player))} §7in §e${timeLeft(nextInterestAt(player) - Date.now())}`,
   ].join("\n");
   const ask = async (title, label, fn) => {

@@ -22,6 +22,9 @@ import { adminRpgMenu, profileMenu } from "./profile.js";
 import { slayerMenu } from "./slayer.js";
 import { getStats } from "./stats.js";
 import { petsMenu } from "./pets.js";
+import { dungeonMenu, inDungeon, leaveRun } from "./dungeons.js";
+import { dailyMenu, questsMenu } from "./extras.js";
+import { mayorMenu } from "./mayor.js";
 import { leaderboardsMenu } from "./leaderboards.js";
 import { makeHopperItem } from "./chunkHopper.js";
 import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
@@ -83,6 +86,17 @@ const priceColor = (player, cost) => (getBalance(player) >= cost ? "§a" : "§c"
 export const extraMainTiles = [];
 const sellBonus = (player) => 1 + Math.max(0, getStats(player).passive.coins ?? 0) / 100;
 export async function mainMenu(player) {
+  if (inDungeon(player)) {
+    return tileMenu(player, {
+      title: "IN A DUNGEON",
+      theme: "purple",
+      body: "§7You're in a dungeon run. The rest of the menu opens again when you're back.",
+      tiles: [
+        { text: "§5§lDUNGEON", sub: "§7Run info", icon: "textures/items/ender_eye", onClick: () => dungeonMenu(player, () => mainMenu(player)) },
+        { text: "§c§lLEAVE", sub: "§7Give up the run", icon: ICON.cancel, onClick: () => leaveRun(player) },
+      ],
+    });
+  }
   const rank = rankOf(player);
   const heads = allHeadPoints(player).reduce((n, h) => n + h.points, 0);
   const tiles = [
@@ -93,6 +107,10 @@ export async function mainMenu(player) {
     { text: "§6§lBANK", sub: "§7Earn interest", icon: ICON.bank, onClick: () => bankMenu(player, () => mainMenu(player)) },
     { text: "§c§lPROFILE", sub: "§7Stats, pets, gear", icon: "textures/items/diamond_chestplate", badge: "NEW", onClick: () => profileMenu(player, () => mainMenu(player)) },
     { text: "§4§lSLAYER", sub: "§7Bosses & loot", icon: "textures/items/eco_heads/zombie", badge: "NEW", onClick: () => slayerMenu(player, () => mainMenu(player)) },
+    { text: "§5§lDUNGEONS", sub: "§7The Crypts", icon: "textures/items/ender_eye", badge: "NEW", onClick: () => dungeonMenu(player, () => mainMenu(player)) },
+    { text: "§a§lQUESTS", sub: "§7Commissions & goals", icon: "textures/items/book_writable", onClick: () => questsMenu(player, () => mainMenu(player)) },
+    { text: "§e§lDAILY REWARD", sub: "§7Claim every day", icon: "textures/items/clock_item", onClick: () => dailyMenu(player, () => mainMenu(player)) },
+    { text: "§6§lELECTION", sub: "§7Vote for mayor", icon: "textures/items/gold_nugget", onClick: () => mayorMenu(player, () => mainMenu(player)) },
     ...extraMainTiles.map((f) => f(player, () => mainMenu(player))).filter(Boolean),
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
     { text: "§6§lLEADERBOARDS", sub: "§7Who's on top", icon: ICON.top, onClick: () => leaderboardsMenu(player, () => mainMenu(player)) },

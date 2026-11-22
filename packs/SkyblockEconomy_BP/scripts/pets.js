@@ -313,7 +313,7 @@ export function registerPets() {
     ev.cancel = true;
     if (ev.isFirstEvent !== false) system.run(() => claimPetItem(ev.player));
   });
-  world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
+  world.beforeEvents.playerInteractWithEntity?.subscribe((ev) => {
     if (readPetItem(ev.itemStack)) ev.cancel = true;
   });
   // a small sparkle above you shows your active pet

@@ -57,8 +57,17 @@ function activeIndexes(list) {
   return new Set([...best.values()].map((b) => b.i));
 }
 
+const statCache = new Map(); // player id -> { raw, result }
 export function accessoryStats(player) {
-  const list = bag(player);
+  const raw = String(player.getDynamicProperty("eco:acc") ?? "[]");
+  const hit = statCache.get(player.id);
+  if (hit && hit.raw === raw) return hit.result;
+  const result = computeAccessoryStats(bag(player));
+  statCache.set(player.id, { raw, result });
+  return result;
+}
+
+function computeAccessoryStats(list) {
   const on = activeIndexes(list);
   const stats = {};
   const passive = {};
