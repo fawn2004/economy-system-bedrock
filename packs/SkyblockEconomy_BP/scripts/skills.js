@@ -2,6 +2,7 @@ import { ItemStack, system, world } from "@minecraft/server";
 import { COLLECTION_TIERS, CROPS, SKILLS, SKILL_SETTINGS as SS, SKILL_TOOLS, SPAWNERS, TOOL_LEVELS } from "./config.js";
 import { rankOn } from "./leaderboards.js";
 import { pref } from "./playerSettings.js";
+import { pauseSidebar } from "./sidebar.js";
 import { collectionTotal, getCol } from "./tools.js";
 import { addMoney, fmt } from "./economy.js";
 import { backTile, tileMenu } from "./ui.js";
@@ -72,6 +73,7 @@ export function addSkillXp(player, id, amount) {
         `${reward ? `§a+${fmt(reward)}§7, ` : ""}§a${s.perk} +${s.perkPerLevel}% §7(now ${l * s.perkPerLevel}%)`
     );
     if (pref(player, "titles", true)) try {
+      pauseSidebar(player, 60);
       player.onScreenDisplay.setTitle(`§b${s.name} ${l}`, { subtitle: "§7Skill level up!", fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 });
     } catch {}
     player.playSound("random.levelup");

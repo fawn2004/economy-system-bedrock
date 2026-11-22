@@ -28,6 +28,14 @@ export const CONFIG = {
   pageSize: 20, // items per shop page
   centerNav: true, // SEARCH / NEXT / BACK in a centred row at the top of lists
 
+  // The scoreboard-style panel on the right of the screen (players can hide it
+  // in Player Settings). Colour codes like §b§l work in the title / footer.
+  sidebar: {
+    enabled: true,
+    title: "§b§lSKYBLOCK",
+    footer: "§eSkyblock Economy",
+  },
+
   // Dropped stackable items near each other merge into one pile with a counter
   // (less lag). Items that don't stack are left alone.
   itemStacking: {

@@ -23,6 +23,7 @@ const DEFAULTS = {
     giveOnJoin: CONFIG.compass.giveOnJoin,
     centerNav: CONFIG.centerNav,
     itemStacking: clone(CONFIG.itemStacking),
+    sidebar: clone(CONFIG.sidebar),
   },
   spawner: clone(SPAWNER_SETTINGS),
   mobs: Object.fromEntries(SPAWNERS.map((s) => [s.mob, { price: s.price, disabled: false }])),
@@ -73,6 +74,7 @@ function applyConfig() {
   CONFIG.compass.giveOnJoin = c.giveOnJoin;
   CONFIG.centerNav = c.centerNav !== false;
   CONFIG.itemStacking = { ...DEFAULTS.config.itemStacking, ...(c.itemStacking ?? {}) };
+  CONFIG.sidebar = { ...DEFAULTS.config.sidebar, ...(c.sidebar ?? {}) };
 }
 
 function applySpawner() {

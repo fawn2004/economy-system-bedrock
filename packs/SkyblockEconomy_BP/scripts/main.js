@@ -13,6 +13,7 @@ import { registerLeaderboards } from "./leaderboards.js";
 import { registerChunkHoppers } from "./chunkHopper.js";
 import { registerNpcs } from "./npc.js";
 import { registerPlayerSettings } from "./playerSettings.js";
+import { registerSidebar } from "./sidebar.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -58,6 +59,7 @@ registerGroundItems();
 registerTools();
 registerSkills();
 registerMinions();
+registerSidebar();
 registerLeaderboards();
 registerChunkHoppers();
 registerNpcs();

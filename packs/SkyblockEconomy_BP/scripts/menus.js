@@ -91,7 +91,7 @@ export async function mainMenu(player) {
   ];
   tiles.push({
     text: "§9§lPLAYER SETTINGS",
-    sub: "§7Chunk borders...",
+    sub: "§7Sidebar, full bright...",
     icon: "textures/items/clock_item",
     onClick: () => playerSettingsMenu(player, () => mainMenu(player)),
   });

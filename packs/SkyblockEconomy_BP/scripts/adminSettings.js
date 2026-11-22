@@ -1,3 +1,4 @@
+import { world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { getCatalog } from "./catalog.js";
 import { CHUNK_HOPPER, COLLECTION_TIERS, CONFIG, CROPS, KITS, MINION_SETTINGS, MINION_TYPES, MINION_UPGRADES, SKILLS, SKILL_SETTINGS, SKILL_TOOLS, SPAWNERS, SPAWNER_SETTINGS as S, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
@@ -25,6 +26,7 @@ import {
   setToolLevels,
   setUpgrades,
 } from "./settings.js";
+import { clearSidebar } from "./sidebar.js";
 import { mobIcon } from "./spawners.js";
 import { ICON, backTile, fail, pagedMenu, showForm, success, tileMenu } from "./ui.js";
 
@@ -112,6 +114,12 @@ export async function settingsMenu(player, back, msg) {
         onClick: () => floorItemsForm(player, reopen),
       },
       {
+        text: "§b§lSIDEBAR",
+        sub: CONFIG.sidebar.enabled ? "§aShowing" : "§cHidden",
+        icon: "textures/items/paper",
+        onClick: () => sidebarForm(player, reopen),
+      },
+      {
         text: "§4§lRESET ALL",
         sub: "§7Back to defaults",
         icon: ICON.cancel,
@@ -145,6 +153,23 @@ async function economyForm(player, reopen) {
   setConfig({ startingBalance: start, currency, pageSize: Math.min(40, page), giveOnJoin: !!v[3], centerNav: !!v[4] });
   success(player, "Economy settings saved.");
   return reopen("§aEconomy settings saved.");
+}
+
+// ---- sidebar --------------------------------------------------------------------
+async function sidebarForm(player, reopen) {
+  const c = CONFIG.sidebar;
+  const v = await modal(player, "Sidebar", (f) =>
+    f
+      .toggle("Show the sidebar (players can still hide their own)", { defaultValue: c.enabled })
+      .textField("Title (colour codes like §b§l work)", "§b§lSKYBLOCK", { defaultValue: c.title })
+      .textField("Bottom line (e.g. your realm name, blank for none)", "", { defaultValue: c.footer })
+  );
+  if (!v) return reopen();
+  const title = String(v[1]).trim().slice(0, 40) || "§b§lSKYBLOCK";
+  setConfig({ sidebar: { enabled: !!v[0], title, footer: String(v[2]).trim().slice(0, 40) } });
+  if (!v[0]) for (const p of world.getAllPlayers()) clearSidebar(p);
+  success(player, "Sidebar saved.");
+  return reopen("§aSidebar saved.");
 }
 
 // ---- dropped items --------------------------------------------------------------

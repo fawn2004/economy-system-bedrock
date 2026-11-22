@@ -1,4 +1,5 @@
 import { system, world } from "@minecraft/server";
+import { clearSidebar } from "./sidebar.js";
 import { backTile, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -15,6 +16,7 @@ export const pref = (player, id, def) => {
 const setPref = (player, id, v) => player.setDynamicProperty(`eco:pref:${id}`, v);
 
 const SETTINGS = [
+  { id: "sidebar", name: "SIDEBAR", label: "Sidebar", desc: "Balance, heads & more on the right", def: true, icon: "textures/items/paper" },
   { id: "chunks", name: "CHUNK BORDERS", label: "Chunk Borders", desc: "Glowing lines around the chunk you're in", def: false, icon: "textures/blocks/glass" },
   { id: "fullbright", name: "FULL BRIGHT", label: "Full Bright", desc: "See clearly in the dark", def: false, icon: "textures/items/potion_bottle_nightVision" },
   { id: "coords", name: "COORDINATES", label: "Coordinates", desc: "Your X / Y / Z on the action bar", def: false, icon: "textures/items/compass_item" },
@@ -33,6 +35,7 @@ export async function playerSettingsMenu(player, back, msg) {
       icon: s.icon,
       onClick: () => {
         setPref(player, s.id, !on);
+        if (s.id === "sidebar" && on) clearSidebar(player);
         if (s.id === "fullbright" && on) {
           try {
             player.removeEffect("night_vision");

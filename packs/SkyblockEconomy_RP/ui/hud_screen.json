@@ -1,0 +1,66 @@
+{
+  "namespace": "hud",
+
+  "eco_sidebar": {
+    "type": "image",
+    "texture": "textures/ui/Black",
+    "alpha": 0.55,
+    "anchor_from": "right_middle",
+    "anchor_to": "right_middle",
+    "offset": [ -2, -12 ],
+    "size": [ "100%c + 10px", "100%c + 8px" ],
+    "layer": 2,
+    "bindings": [
+      { "binding_name": "#hud_title_text_string" },
+      {
+        "binding_type": "view",
+        "source_property_name": "(not ((#hud_title_text_string - '§e§s§b') = #hud_title_text_string))",
+        "target_property_name": "#visible"
+      }
+    ],
+    "controls": [
+      {
+        "eco_sidebar_text": {
+          "type": "label",
+          "anchor_from": "center",
+          "anchor_to": "center",
+          "size": [ "default", "default" ],
+          "text": "#text",
+          "text_alignment": "center",
+          "localize": false,
+          "shadow": true,
+          "layer": 3,
+          "bindings": [
+            { "binding_name": "#hud_title_text_string" },
+            {
+              "binding_type": "view",
+              "source_property_name": "(#hud_title_text_string - '§e§s§b§r')",
+              "target_property_name": "#text"
+            }
+          ]
+        }
+      }
+    ]
+  },
+
+  "hud_title_text": {
+    "bindings": [
+      { "binding_name": "#hud_title_text_string" },
+      {
+        "binding_type": "view",
+        "source_property_name": "((#hud_title_text_string - '§e§s§b') = #hud_title_text_string)",
+        "target_property_name": "#visible"
+      }
+    ]
+  },
+
+  "root_panel": {
+    "modifications": [
+      {
+        "array_name": "controls",
+        "operation": "insert_back",
+        "value": [ { "eco_sidebar@hud.eco_sidebar": {} } ]
+      }
+    ]
+  }
+}
