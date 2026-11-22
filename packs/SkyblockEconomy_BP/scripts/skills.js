@@ -19,6 +19,18 @@ const placed = new Set(); // blocks placed by players don't give XP
 const posKey = (dimId, l) => `${dimId}:${l.x},${l.y},${l.z}`;
 
 export const skillIds = () => Object.keys(SKILLS);
+
+// Other systems (stats, pets, mayor...) plug in here:
+//   xpBonus(player, id)   -> extra XP %          perkBonus(player, id) -> extra perk %
+//   onXp(player, id, gain)                       onCatch(player, location) -> fishing catch
+export const skillHooks = { xpBonus: [], perkBonus: [], onXp: [], onCatch: [] };
+const hookSum = (list, ...args) => list.reduce((n, f) => {
+  try {
+    return n + (Number(f(...args)) || 0);
+  } catch {
+    return n;
+  }
+}, 0);
 export const getSkillXp = (player, id) => Number(player.getDynamicProperty(`eco:skill:${id}`) ?? 0);
 
 /** XP needed to go from level L to L+1 */
@@ -47,13 +59,18 @@ export function xpToReach(level) {
 export function skillPerk(player, id) {
   const s = SKILLS[id];
   if (!s || s.disabled) return 0;
-  return skillLevel(player, id) * (s.perkPerLevel ?? 0);
+  return skillLevel(player, id) * (s.perkPerLevel ?? 0) + hookSum(skillHooks.perkBonus, player, id);
 }
 
 export function addSkillXp(player, id, amount) {
   const s = SKILLS[id];
   if (!s || s.disabled || amount <= 0) return;
-  const gain = Math.max(1, Math.round(amount * (s.xpMultiplier ?? 1)));
+  const gain = Math.max(1, Math.round(amount * (s.xpMultiplier ?? 1) * (1 + hookSum(skillHooks.xpBonus, player, id) / 100)));
+  for (const f of skillHooks.onXp) {
+    try {
+      f(player, id, gain);
+    } catch {}
+  }
   const before = levelInfo(getSkillXp(player, id)).level;
   const total = getSkillXp(player, id) + gain;
   player.setDynamicProperty(`eco:skill:${id}`, total);
@@ -174,6 +191,11 @@ export function registerSkills() {
     }
     if (!best) return;
     addSkillXp(best, "fishing", SKILLS.fishing.xpPerCatch);
+    for (const f of skillHooks.onCatch) {
+      try {
+        f(best, l);
+      } catch {}
+    }
     const extra = rollExtra(skillPerk(best, "fishing"));
     if (extra > 0) {
       try {

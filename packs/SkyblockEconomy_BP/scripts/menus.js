@@ -17,6 +17,11 @@ import { settingsMenu } from "./adminSettings.js";
 import { auctionMenu } from "./auction.js";
 import { bankMenu, getBank } from "./bank.js";
 import { bazaarMenu } from "./bazaar.js";
+import { itemShopMenu } from "./forge.js";
+import { adminRpgMenu, profileMenu } from "./profile.js";
+import { slayerMenu } from "./slayer.js";
+import { getStats } from "./stats.js";
+import { petsMenu } from "./pets.js";
 import { leaderboardsMenu } from "./leaderboards.js";
 import { makeHopperItem } from "./chunkHopper.js";
 import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
@@ -74,6 +79,9 @@ const priceColor = (player, cost) => (getBalance(player) >= cost ? "§a" : "§c"
 // ============================================================================
 //  MAIN COMPASS MENU
 // ============================================================================
+/** Tiles other systems add to the main menu: (player, back) => tile */
+export const extraMainTiles = [];
+const sellBonus = (player) => 1 + Math.max(0, getStats(player).passive.coins ?? 0) / 100;
 export async function mainMenu(player) {
   const rank = rankOf(player);
   const heads = allHeadPoints(player).reduce((n, h) => n + h.points, 0);
@@ -83,6 +91,9 @@ export async function mainMenu(player) {
     { text: "§6§lBAZAAR", sub: "§7Trade materials", icon: "textures/items/emerald", badge: "NEW", onClick: () => bazaarMenu(player, () => mainMenu(player)) },
     { text: "§e§lAUCTION HOUSE", sub: "§7Buy & sell items", icon: "textures/items/gold_ingot", badge: "NEW", onClick: () => auctionMenu(player, () => mainMenu(player)) },
     { text: "§6§lBANK", sub: "§7Earn interest", icon: ICON.bank, onClick: () => bankMenu(player, () => mainMenu(player)) },
+    { text: "§c§lPROFILE", sub: "§7Stats, pets, gear", icon: "textures/items/diamond_chestplate", badge: "NEW", onClick: () => profileMenu(player, () => mainMenu(player)) },
+    { text: "§4§lSLAYER", sub: "§7Bosses & loot", icon: "textures/items/eco_heads/zombie", badge: "NEW", onClick: () => slayerMenu(player, () => mainMenu(player)) },
+    ...extraMainTiles.map((f) => f(player, () => mainMenu(player))).filter(Boolean),
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
     { text: "§6§lLEADERBOARDS", sub: "§7Who's on top", icon: ICON.top, onClick: () => leaderboardsMenu(player, () => mainMenu(player)) },
     {
@@ -137,6 +148,12 @@ export async function shopMenu(player, msg) {
       tiles.push({ text: "§6§lCHUNK HOPPER", sub: `${priceColor(player, CHUNK_HOPPER.price)}${fmtShort(CHUNK_HOPPER.price)}`, icon: "textures/items/hopper", badge: BADGES.chunkhopper, onClick: () => chunkHopperShop(player) });
     } else if (key === "minions") {
       tiles.push({ text: "§e§lMINIONS", sub: "§7They mine for you", icon: U + "icon_minion", badge: BADGES.minions, onClick: () => minionShop(player) });
+    } else if (key === "equipment") {
+      tiles.push({ text: "§c§lEQUIPMENT", sub: "§7Weapons & armor", icon: "textures/items/iron_sword", badge: "NEW", onClick: () => itemShopMenu(player, "equipment", "EQUIPMENT", () => shopMenu(player)) });
+    } else if (key === "accessories") {
+      tiles.push({ text: "§5§lACCESSORIES", sub: "§7Charms & rings", icon: "textures/items/gold_nugget", badge: "NEW", onClick: () => itemShopMenu(player, "accessories", "ACCESSORIES", () => shopMenu(player)) });
+    } else if (key === "pets") {
+      tiles.push({ text: "§a§lPETS", sub: "§7Pet shop", icon: "textures/items/bone", badge: "NEW", onClick: () => petsMenu(player, () => shopMenu(player)) });
     } else if (key === "skilltools") {
       tiles.push({ text: "§6§lSKILL TOOLS", sub: "§7Level-up tools", icon: SKILL_TOOL_ICON, badge: BADGES.skilltools, onClick: () => skillToolsMenu(player) });
     } else if (key === "search") {
@@ -594,6 +611,7 @@ export async function sellMenu(player, msg) {
       onClick: () => {
         let earned = 0;
         for (const [id] of sellable) earned += priceOf(id) * removeAllPlain(player, id);
+        earned = Math.floor(earned * sellBonus(player));
         if (earned) addMoney(player, earned);
         const h = [...depositHeads(player).values()].reduce((n, c) => n + c, 0);
         const c = [...depositEnchanted(player).values()].reduce((n, x) => n + x, 0);
@@ -639,7 +657,7 @@ export async function sellMenu(player, msg) {
       icon: e?.icon ?? (isMinionLoot(id) ? lootIcon(id) : ICON.coin),
       onClick: () => {
         const sold = removeAllPlain(player, id);
-        const earned = sold * priceOf(id);
+        const earned = Math.floor(sold * priceOf(id) * sellBonus(player));
         addMoney(player, earned);
         success(player, `Sold ${sold}x ${name} for ${fmt(earned)}.`);
         return sellMenu(player, `§aSold §f${sold}x ${name} §afor §f${fmt(earned)}`);
@@ -784,6 +802,7 @@ async function adminMenu(player, msg) {
       { text: "§a§lCROPS", sub: "§7Enchanted crops", icon: "textures/items/wheat", onClick: () => adminCropsMenu(player) },
       { text: "§b§lSKILLS", sub: "§7Player skill levels", icon: "textures/items/iron_pickaxe", onClick: () => adminSkillsMenu(player) },
       { text: "§6§lNPCS", sub: "§7Shop keepers", icon: ICON.player, onClick: () => adminNpcMenu(player) },
+      { text: "§c§lRPG", sub: "§7Items, pets, slayer...", icon: "textures/items/diamond_sword", badge: "NEW", onClick: () => adminRpgMenu(player, back) },
       { text: "§b§lSETTINGS", sub: "§7Spawners, kits...", icon: ICON.admin, onClick: () => settingsMenu(player, back) },
       { text: "§6§lSHOP EDITOR", sub: "§7Move/hide items", icon: ICON.shop, onClick: () => editorMenu(player, back) },
       {

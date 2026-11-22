@@ -17,6 +17,10 @@ import { registerSidebar } from "./sidebar.js";
 import { registerBank } from "./bank.js";
 import { registerAuctions } from "./auction.js";
 import { claimPayouts } from "./payouts.js";
+import { registerStats } from "./stats.js";
+import { registerPets } from "./pets.js";
+import { registerAccessories } from "./accessories.js";
+import { registerSlayer } from "./slayer.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -70,3 +74,7 @@ registerNpcs();
 registerPlayerSettings();
 registerBank();
 registerAuctions();
+registerStats();
+registerPets();
+registerAccessories();
+registerSlayer();

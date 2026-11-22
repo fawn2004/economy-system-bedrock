@@ -283,7 +283,7 @@ export const SPAWNER_SETTINGS = {
 // Order of the tiles on the shop's front page. "blocks" opens the block
 // sub-categories; the rest are category ids from prices.js plus kits/spawners/search.
 export const SHOP_LAYOUT = [
-  "blocks", "food", "kits", "spawners", "minions", "chunkhopper", "skilltools", "farming", "buckets", "misc",
+  "blocks", "food", "kits", "spawners", "minions", "chunkhopper", "skilltools", "equipment", "accessories", "pets", "farming", "buckets", "misc",
   "ores", "tools", "redstone", "mobs", "brewing", "treasure", "search",
 ];
 export const BADGES = { kits: "NEW", spawners: "HOT", skilltools: "NEW", minions: "NEW", chunkhopper: "NEW" };
