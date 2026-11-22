@@ -78,7 +78,31 @@ def tooltip():
     save(img, "chest_tooltip", 3)
 
 
+def sidebar_bg():
+    # grey panel with a coloured (gold) border, for the scoreboard sidebar
+    s = 12
+    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    px = img.load()
+    border = hexc("#FFAA00")
+    inner = hexc("#7A4F00")
+    fill = (48, 48, 48, 215)
+    for i in range(s):
+        for j in range(s):
+            if i == 0 or j == 0 or i == s - 1 or j == s - 1:
+                px[i, j] = border
+            elif i == 1 or j == 1 or i == s - 2 or j == s - 2:
+                px[i, j] = inner
+            else:
+                px[i, j] = fill
+    for c in [(0, 0), (s - 1, 0), (0, s - 1), (s - 1, s - 1)]:
+        px[c] = (0, 0, 0, 0)
+    save(img, "sidebar_bg", 3)
+    head = Image.new("RGBA", (4, 4), (0, 0, 0, 90))
+    save(head, "sidebar_head")
+
+
 if __name__ == "__main__":
+    sidebar_bg()
     chest_bg()
     slot()
     tooltip()

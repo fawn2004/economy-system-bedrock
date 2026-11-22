@@ -6,15 +6,22 @@
   // marker are drawn here instead of as a big title in the middle of the screen.
   "eco_sidebar": {
     "type": "image",
-    "texture": "textures/ui/Black",
-    "alpha": 0.3,
+    "texture": "textures/ui/eco/sidebar_bg",
     "anchor_from": "right_middle",
     "anchor_to": "right_middle",
-    "offset": [ -1, -10 ],
-    "size": [ "100%c", "100%c" ],
+    "offset": [
+      -3,
+      -10
+    ],
+    "size": [
+      132,
+      "100%c + 8px"
+    ],
     "layer": 2,
     "bindings": [
-      { "binding_name": "#hud_title_text_string" },
+      {
+        "binding_name": "#hud_title_text_string"
+      },
       {
         "binding_type": "view",
         "source_property_name": "(not ((#hud_title_text_string - '§e§s§b') = #hud_title_text_string))",
@@ -26,14 +33,25 @@
         "stack": {
           "type": "stack_panel",
           "orientation": "vertical",
-          "size": [ "100%c", "100%c" ],
+          "size": [
+            132,
+            "100%c"
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            4
+          ],
           "controls": [
             {
               "heading": {
                 "type": "image",
-                "texture": "textures/ui/Black",
-                "alpha": 0.25,
-                "size": [ "100%", 11 ],
+                "texture": "textures/ui/eco/sidebar_head",
+                "size": [
+                  124,
+                  12
+                ],
                 "layer": 3,
                 "controls": [
                   {
@@ -41,14 +59,22 @@
                       "type": "label",
                       "anchor_from": "center",
                       "anchor_to": "center",
-                      "offset": [ 0, 1 ],
-                      "size": [ "default", "default" ],
+                      "offset": [
+                        0,
+                        1
+                      ],
+                      "size": [
+                        "default",
+                        "default"
+                      ],
                       "text": "#text",
                       "localize": false,
                       "shadow": true,
                       "layer": 4,
                       "bindings": [
-                        { "binding_name": "#hud_title_text_string" },
+                        {
+                          "binding_name": "#hud_title_text_string"
+                        },
                         {
                           "binding_type": "view",
                           "source_property_name": "(#hud_title_text_string - '§e§s§b§r')",
@@ -61,23 +87,44 @@
               }
             },
             {
+              "gap": {
+                "type": "panel",
+                "size": [
+                  132,
+                  3
+                ]
+              }
+            },
+            {
               "lines": {
                 "type": "panel",
-                "size": [ "100%c + 6px", "100%c + 4px" ],
+                "size": [
+                  132,
+                  "100%c"
+                ],
                 "controls": [
                   {
                     "lines_text": {
                       "type": "label",
-                      "anchor_from": "center",
-                      "anchor_to": "center",
-                      "size": [ "default", "default" ],
+                      "anchor_from": "top_left",
+                      "anchor_to": "top_left",
+                      "offset": [
+                        7,
+                        0
+                      ],
+                      "size": [
+                        120,
+                        "default"
+                      ],
                       "text": "#text",
                       "text_alignment": "left",
                       "localize": false,
                       "shadow": true,
                       "layer": 4,
                       "bindings": [
-                        { "binding_name": "#hud_subtitle_text_string" },
+                        {
+                          "binding_name": "#hud_subtitle_text_string"
+                        },
                         {
                           "binding_type": "view",
                           "source_property_name": "#hud_subtitle_text_string",

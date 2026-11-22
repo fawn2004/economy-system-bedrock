@@ -445,6 +445,6 @@ Otherwise the vanilla one is, so other add-ons' menus are unaffected.
   left of the chest.
 - Textures: `textures/ui/eco/chest_*` (regenerate with `tools/generate_chest_ui.py`).
 - The **sidebar** is sent as a title (heading, marker `§e§s§b§r`) plus a subtitle (lines);
-  `ui/hud_screen.json` draws it as a scoreboard: date, in-game season / day / time,
+  `ui/hud_screen.json` draws it on the right as a grey panel with a gold border (`textures/ui/eco/sidebar_bg`): date, in-game season / day / time,
   location, purse, bank, your current objective (slayer quest, dungeon run or a daily
   commission) and the footer.

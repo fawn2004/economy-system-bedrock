@@ -3,7 +3,8 @@
 //  * The menu is a chest: a 9-wide grid of slots. Scripts (ui.js) lay the buttons out with
 //    glass-pane fillers, Go Back / Close in the bottom row and page arrows.
 //  * Hovering (or focusing with a controller) a slot shows its name and lore in a tooltip.
-//  * The form body is shown in the tooltip-style box on the left (hidden when empty).
+//  * The chest is centred on screen; the form body is shown in the tooltip-style box to its
+//    left (hidden when empty).
 //  * Button text tokens: [F] = filler (no tooltip); [NEW] / [HOT] are removed from the text.
 //  * Textures: textures/ui/eco/chest_* (tools/generate_chest_ui.py)
 {
@@ -16,41 +17,18 @@
     ],
     "controls": [
       {
-        "layout": {
-          "type": "stack_panel",
-          "orientation": "horizontal",
-          "size": [
-            "100%c",
-            "100%c"
-          ],
+        "chest@eco_form.chest": {
           "anchor_from": "center",
-          "anchor_to": "center",
-          "controls": [
-            {
-              "info@eco_form.info_box": {}
-            },
-            {
-              "gap": {
-                "type": "panel",
-                "size": [
-                  4,
-                  4
-                ],
-                "bindings": [
-                  {
-                    "binding_name": "#form_text"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "(not (#form_text = ''))",
-                    "target_property_name": "#visible"
-                  }
-                ]
-              }
-            },
-            {
-              "chest@eco_form.chest": {}
-            }
+          "anchor_to": "center"
+        }
+      },
+      {
+        "info@eco_form.info_box": {
+          "anchor_from": "center",
+          "anchor_to": "right_middle",
+          "offset": [
+            -92,
+            0
           ]
         }
       }
@@ -96,6 +74,7 @@
           "font_scale_factor": 0.9,
           "localize": false,
           "text": "#form_text",
+          "layer": 3,
           "bindings": [
             {
               "binding_name": "#form_text"
@@ -151,6 +130,7 @@
                       "shadow": false,
                       "localize": false,
                       "text": "#text",
+                      "layer": 3,
                       "bindings": [
                         {
                           "binding_name": "#title_text"
