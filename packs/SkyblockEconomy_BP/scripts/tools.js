@@ -1,5 +1,7 @@
 import { BlockPermutation, EnchantmentTypes, ItemStack, system, world } from "@minecraft/server";
-import { COLLECTION_TIERS, CROPS, MOB_DROPS, SKILL_TOOLS, SPAWNERS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { COLLECTION_TIERS, CROPS, MOB_DROPS, SKILL_TOOLS, SPAWNERS, TOOL_KIT_BONUS, TOOL_LEVELS, TOOL_UPGRADES } from "./config.js";
+import { readItem } from "./items.js";
+import { combatHooks } from "./stats.js";
 import { addMoney, fmt, fmtMoney, getBalance, takeMoney } from "./economy.js";
 import { addHeadPoints, getHeadPoints, mobName } from "./spawners.js";
 import { addSkillXp, skillPerk } from "./skills.js";
@@ -51,7 +53,7 @@ export function collectionTotal(player, kind) {
   return SPAWNERS.reduce((n, s) => n + getCol(player, "mob", s.mob), 0);
 }
 
-const roman = (n) => ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][n] ?? String(n);
+const roman = (n) => ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV"][n] ?? String(n);
 
 // ---- enchanted crops (like enchanted heads, but from farming) ----------------
 export const enchantedId = (cropId) => `eco:enchanted_${cropId}`;
@@ -100,7 +102,7 @@ export function readTool(item) {
   if (!item) return undefined;
   const line = item.getLore().find((l) => l.startsWith(TAG));
   if (!line) return undefined;
-  const [kind, lvl, xp] = line.slice(TAG.length).split(":");
+  const [kind, lvl, xp, uses] = line.slice(TAG.length).split(":");
   if (!SKILL_TOOLS[kind]) return undefined;
   const ups = {};
   const upLine = item.getLore().find((l) => l.startsWith(UP_TAG));
@@ -110,7 +112,7 @@ export function readTool(item) {
       if (k) ups[k] = Number(v) || 0;
     }
   }
-  return { kind, level: Math.max(1, Number(lvl) || 1), xp: Math.max(0, Number(xp) || 0), ups };
+  return { kind, level: Math.max(1, Number(lvl) || 1), xp: Math.max(0, Number(xp) || 0), uses: Math.max(0, Number(uses) || 0), ups };
 }
 
 /** Highest level the player's collection allows for this tool. */
@@ -135,10 +137,65 @@ function bar(cur, next) {
   return "§a" + "|".repeat(filled) + "§8" + "|".repeat(10 - filled);
 }
 
-function writeTool(stack, kind, level, xp, player, ups = {}) {
+/** Levels of an enchant upgrade above its vanilla maximum (they give the "over" bonus). */
+export function overLevels(kind, ups, id) {
+  const u = upgradeDef(kind, id);
+  if (!u?.vanillaMax) return 0;
+  return Math.max(0, (ups?.[id] ?? 0) - u.vanillaMax);
+}
+const overBonus = (kind, ups, id) => overLevels(kind, ups, id) * (upgradeDef(kind, id)?.over ?? 0);
+
+/**
+ * Kit bonus for a skill tool: each worn upgradable-kit armor piece adds (kit level / 4).
+ * Slayer Sword: Combat Kit armor (and Dungeon Kit armor); Farming Hoe: Farming Kit armor.
+ * -> f between 0 and 10
+ */
+export function kitFactor(player, kind) {
+  let f = 0;
+  try {
+    const eq = player.getComponent("minecraft:equippable");
+    for (const slot of ["Head", "Chest", "Legs", "Feet"]) {
+      const info = readItem(eq?.getEquipment(slot));
+      if (!info?.kit) continue;
+      let line;
+      if (kind === "slayer") line = info.id === "-" ? "combat" : info.def?.dungeon ? "dungeon" : undefined;
+      else line = info.id?.startsWith("farmer_") ? "farming" : undefined;
+      if (line) f += Number(player.getDynamicProperty(`eco:kitlvl:${line}`) ?? 0) / 4;
+    }
+  } catch {}
+  return Math.min(10, f);
+}
+
+function kitLine(player, kind) {
+  const f = player ? kitFactor(player, kind) : 0;
+  const b = TOOL_KIT_BONUS[kind];
+  const kit = kind === "slayer" ? "Combat Kit" : "Farming Kit";
+  if (!f) return `§8Wear ${kit} armor for a bonus`;
+  const r = (n) => Math.round(n * 10) / 10;
+  return kind === "slayer"
+    ? `§9Kit: +${r(b.damage * f)}% dmg, +${r(b.drops * f)}% drops`
+    : `§9Kit: +${r(b.drops * f)}% crops, +${r(b.xp * f)}% XP`;
+}
+
+/** Random coin chunk from the kit bonus. */
+function kitCoins(player, kind) {
+  const f = kitFactor(player, kind);
+  const b = TOOL_KIT_BONUS[kind];
+  if (!f || Math.random() * 100 >= b.coinChance * f) return;
+  const line = kind === "slayer" ? "combat" : "farming";
+  const lvl = Math.max(1, Number(player.getDynamicProperty(`eco:kitlvl:${line}`) ?? 1));
+  const coins = Math.round((b.coins[0] + Math.random() * (b.coins[1] - b.coins[0])) * lvl);
+  addMoney(player, coins);
+  try {
+    player.onScreenDisplay.setActionBar(`§6+${fmt(coins)} §7(kit bonus)`);
+  } catch {}
+}
+
+function writeTool(stack, kind, level, xp, player, ups = {}, uses = 0) {
   const t = SKILL_TOOLS[kind];
   const next = TOOL_LEVELS.xpNeeded[level];
   const lore = [`§7Level: §e${level}§7/§e${MAX_LEVEL()}`];
+  lore.push(kind === "slayer" ? `§7Kills with this sword: §f${commas(uses)}` : `§7Crops harvested: §f${commas(uses)}`);
   if (next === undefined) lore.push(`§7XP: §b${commas(xp)} §6MAX`);
   else if (xp >= next) lore.push(`§7XP: §b${commas(xp)} §6READY TO LEVEL UP`);
   else lore.push(`§7XP: §b${commas(xp)}§7/§b${commas(next)} ${bar(xp, next)}`);
@@ -151,16 +208,30 @@ function writeTool(stack, kind, level, xp, player, ups = {}) {
     lore.push(`§7Head chance: §d+${level * t.headBonusPerLevel + upBonus("head_hunter")}%`);
   }
   const owned = (TOOL_UPGRADES[kind] ?? []).filter((u) => ups[u.id] > 0);
-  if (owned.length) lore.push("§9" + owned.map((u) => `${u.name} ${roman(ups[u.id])}`).join("§7, §9"));
-  lore.push("§8Sneak + use to upgrade");
-  if (player && next !== undefined && levelFromXp(xp) > level) {
-    const need = TOOL_LEVELS.collectionNeeded[level] ?? 0;
-    lore.push(`§cLv ${level + 1} needs ${commas(need)} ${kind === "farming" ? "crops" : "kills"}`);
+  // upgrade names, wrapped so no lore line is too long
+  let row = "";
+  for (const u of owned) {
+    const part = `${u.name} ${roman(ups[u.id])}`;
+    if (row && (row + ", " + part).length > 40) {
+      lore.push("§9" + row);
+      row = part;
+    } else row = row ? `${row}, ${part}` : part;
   }
-  lore.push(`${TAG}${kind}:${level}:${xp}`);
+  if (row) lore.push("§9" + row);
+  lore.push(kitLine(player, kind));
+  // next level: how many total kills / crops it needs (your collection), and how many you have
+  // the next level that needs a collection (e.g. Lv 4 needs 1,000 kills) and how far you are
+  const gated = TOOL_LEVELS.collectionNeeded.findIndex((n, i) => i >= level && n > 0);
+  if (gated >= 0) {
+    const need = TOOL_LEVELS.collectionNeeded[gated];
+    const have = player ? collectionTotal(player, kind) : 0;
+    lore.push(`${have >= need ? "§a" : "§c"}Lv ${gated + 1}: ${commas(need)} ${kind === "farming" ? "crops" : "kills"} §8(you: ${commas(have)})`);
+  }
+  lore.push("§8Sneak + use to upgrade");
+  lore.push(`${TAG}${kind}:${level}:${xp}:${uses}`);
   const upStr = Object.entries(ups).filter(([, v]) => v > 0).map(([k, v]) => `${k}=${v}`).join(",");
   if (upStr) lore.push(UP_TAG + upStr);
-  stack.setLore(lore);
+  stack.setLore(lore.slice(0, 20).map((l) => (l.length > 50 ? l.slice(0, 50) : l)));
   stack.nameTag = `§r§6${t.name} §e[Lv ${level}]`;
   try {
     const dur = stack.getComponent("minecraft:durability");
@@ -176,7 +247,7 @@ function writeTool(stack, kind, level, xp, player, ups = {}) {
       try {
         ench.removeEnchantment(type);
       } catch {}
-      if (ups[u.id] > 0) ench.addEnchantment({ type, level: ups[u.id] });
+      if (ups[u.id] > 0) ench.addEnchantment({ type, level: Math.min(ups[u.id], u.vanillaMax ?? ups[u.id]) });
     }
   } catch {}
 }
@@ -195,13 +266,15 @@ function heldTool(player, kind, slot = player.selectedSlotIndex) {
   return t && t.kind === kind ? { ...t, item, inv, slot } : undefined;
 }
 
-function addToolXp(player, held, mult = 1) {
+function addToolXp(player, held, mult = 1, counted = true) {
   const kind = held.kind;
-  const boost = 1 + ((held.ups.cultivating ?? 0) * (upgradeDef(kind, "cultivating")?.perLevel ?? 0)) / 100;
+  const kitXp = kind === "farming" ? kitFactor(player, kind) * (TOOL_KIT_BONUS.farming.xp ?? 0) : 0;
+  const boost = 1 + ((held.ups.cultivating ?? 0) * (upgradeDef(kind, "cultivating")?.perLevel ?? 0) + kitXp) / 100;
   const xp = held.xp + Math.max(1, Math.round(SKILL_TOOLS[kind].xpPerUse * boost * mult));
   const target = Math.min(levelFromXp(xp), levelCap(player, kind));
   const level = Math.max(held.level, target);
-  writeTool(held.item, kind, level, xp, player, held.ups);
+  held.uses = (held.uses ?? 0) + (counted ? 1 : 0);
+  writeTool(held.item, kind, level, xp, player, held.ups, held.uses);
   held.inv.setItem(held.slot, held.item);
   if (level > held.level) {
     player.sendMessage(`§6§l⬆ LEVEL UP! §r§6${SKILL_TOOLS[kind].name} §7is now §eLevel ${level}§7!`);
@@ -315,6 +388,7 @@ async function upgradeDetail(player, kind, u, back, msg, slot) {
     msg,
     `§f${u.name} §6${cur ? roman(cur) : "-"}§7/§6${roman(u.max)}`,
     `§7${u.desc ?? ""}`,
+    u.overDesc ? `§d${u.overDesc}` : "",
   ];
   if (maxed) lines.push("§aFully upgraded!");
   else {
@@ -355,7 +429,7 @@ function buyUpgrade(player, kind, u, slot) {
   }
   c.take(heads);
   held.ups[u.id] = cur + 1;
-  writeTool(held.item, kind, held.level, held.xp, player, held.ups);
+  writeTool(held.item, kind, held.level, held.xp, player, held.ups, held.uses);
   held.inv.setItem(held.slot, held.item);
   success(player, `${SKILL_TOOLS[kind].name}: ${u.name} ${roman(cur + 1)}!`);
   player.playSound("random.anvil_use");
@@ -400,6 +474,11 @@ function repairHeldTool(player) {
 }
 
 export function registerTools() {
+  combatHooks.damageBonus.push((player) => {
+    const held = heldTool(player, "slayer");
+    if (!held) return 0;
+    return overBonus("slayer", held.ups, "sharpness") + overBonus("slayer", held.ups, "fire_aspect") + kitFactor(player, "slayer") * TOOL_KIT_BONUS.slayer.damage;
+  });
   world.afterEvents.playerBreakBlock.subscribe(({ player }) => system.run(() => repairHeldTool(player)));
   world.afterEvents.entityHitEntity?.subscribe(({ damagingEntity }) => {
     if (damagingEntity?.typeId === "minecraft:player") system.run(() => repairHeldTool(damagingEntity));
@@ -432,18 +511,20 @@ export function registerTools() {
     // The Farming Hoe gets XP from breaking ANY farmable block; fully grown crops give more.
     const held = heldTool(player, "farming");
     let level = 0;
-    if (held) level = addToolXp(player, held, grown ? SKILL_TOOLS.farming.grownXpMultiplier ?? 1 : 1);
+    if (held) level = addToolXp(player, held, grown ? SKILL_TOOLS.farming.grownXpMultiplier ?? 1 : 1, grown);
     if (!grown) return; // unripe / hand-placed: hoe XP only, no rewards
     addCol(player, "crop", crop.id, crop.name);
     addSkillXp(player, "farming", SKILLS.farming.xp?.[crop.id] ?? 1);
     const harvester = held ? (held.ups.harvester ?? 0) * (upgradeDef("farming", "harvester")?.perLevel ?? 0) : 0;
+    const extraPct = held ? overBonus("farming", held.ups, "fortune") + kitFactor(player, "farming") * TOOL_KIT_BONUS.farming.drops : 0;
+    if (held) kitCoins(player, "farming");
     const pct =
-      level * SKILL_TOOLS.farming.bonusPerLevel + harvester + skillPerk(player, "farming") +
+      level * SKILL_TOOLS.farming.bonusPerLevel + harvester + extraPct + skillPerk(player, "farming") +
       tierOf(getCol(player, "crop", crop.id)) * COLLECTION_TIERS.bonusPerTier;
     const extra = rollExtra(pct);
     const at = { x: ev.block.x + 0.5, y: ev.block.y + 0.5, z: ev.block.z + 0.5 };
     const ft = SKILL_TOOLS.farming;
-    if (Math.random() * 100 < (ft.enchantedChance ?? 0) + level * (ft.enchantedPerLevel ?? 0)) {
+    if (Math.random() * 100 < (ft.enchantedChance ?? 0) + level * (ft.enchantedPerLevel ?? 0) + (held ? overBonus("farming", held.ups, "efficiency") : 0)) {
       try {
         ev.dimension.spawnItem(new ItemStack(enchantedId(crop.id), 1), at);
       } catch {}
@@ -488,8 +569,10 @@ export function registerTools() {
     if (held) level = addToolXp(killer, held);
     addSkillXp(killer, "combat", SKILLS.combat.xp?.[key] ?? SKILLS.combat.xpDefault ?? 1);
     const plunder = held ? (held.ups.plunder ?? 0) * (upgradeDef("slayer", "plunder")?.perLevel ?? 0) : 0;
+    const extraPct = held ? overBonus("slayer", held.ups, "looting") + kitFactor(killer, "slayer") * TOOL_KIT_BONUS.slayer.drops : 0;
+    if (held) kitCoins(killer, "slayer");
     const pct =
-      level * SKILL_TOOLS.slayer.bonusPerLevel + plunder + skillPerk(killer, "combat") +
+      level * SKILL_TOOLS.slayer.bonusPerLevel + plunder + extraPct + skillPerk(killer, "combat") +
       tierOf(getCol(killer, "mob", key)) * COLLECTION_TIERS.bonusPerTier;
     const sets = rollExtra(pct);
     for (let s = 0; s < sets; s++) {

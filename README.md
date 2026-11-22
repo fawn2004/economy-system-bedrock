@@ -255,7 +255,8 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 
 ## Skill tools & collections
 
-- **Farming Hoe / Slayer Sword** (Shop > Skill Tools) are wooden tools that never break. They gain XP when used (fully grown crops /
+- **Farming Hoe / Slayer Sword** (Shop > Skill Tools) are wooden tools that never break, levels 1-15.
+  Their tooltip shows kills / crops harvested with that tool and the next level's requirement. They gain XP when used (fully grown crops /
   mob kills) and level up automatically to level 10. Levels 1-3 are free; higher levels
   also need a total Farming / Combat collection. Hoe: bonus crop drops, auto-replant from
   level 3. Sword: bonus mob drops, extra enchanted-head chance, Sharpness as it levels.
@@ -272,7 +273,14 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 - **Enchanted crops:** fully grown crops have an 8% chance (+0.75% per hoe level) to drop an
   *Enchanted <Crop>*. Selling them adds them to that crop's enchanted balance
   (Collections > Enchanted). Admins can give them under Admin > Crops.
-- Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `TOOL_UPGRADES`, `COLLECTION_TIERS`, `CROPS`
+- **Upgrades go to level 15.** Vanilla enchantments stop at their normal maximum (Sharpness V,
+  Looting III, Fire Aspect II, Fortune III, Efficiency V); the levels above give bonus damage, drops
+  or Enchanted crop chance instead.
+- **Kit bonus:** wearing upgradable-kit armor while using a skill tool. Each worn piece adds
+  (kit level / 4). Slayer Sword + Combat (or Dungeon) Kit armor: +3% damage, +4% bonus drops and a
+  1% chance of a coin chunk per kill, per point. Farming Hoe + Farming Kit (Harvester) armor: +4%
+  crops, +3% hoe XP, 0.5% coin chunk chance per harvest, per point (`TOOL_KIT_BONUS`).
+- Numbers are in `SKILL_TOOLS`, `TOOL_LEVELS`, `TOOL_UPGRADES`, `TOOL_KIT_BONUS`, `COLLECTION_TIERS`, `CROPS`
   and `MOB_DROPS` in `config.js`.
 
 ## Shop NPCs

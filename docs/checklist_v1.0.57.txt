@@ -1,0 +1,31 @@
+SKYBLOCK ECONOMY v1.0.57 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+NOTE: if you ever changed skill tool settings in Admin > Settings > Skill Tools, press Reset there
+so the new level-15 upgrades are used.
+
+SKILL TOOL TOOLTIPS
+[ ] Hovering the Slayer Sword shows "Kills with this sword: X" and it goes up when you kill mobs
+[ ] Hovering the Farming Hoe shows "Crops harvested: X" and it goes up when you harvest grown crops
+[ ] The tooltip shows the next level that needs kills / crops, e.g. "Lv 4: 1,000 kills (you: 523)"
+
+LEVEL 15
+[ ] Skill tools level up to 15 (tooltip says Level x/15)
+[ ] Every upgrade (except Replenish, which is on/off) goes to level 15
+[ ] Upgrade costs rise each level
+[ ] Sharpness above V: the sword keeps Sharpness V and the extra levels give +6% damage each
+[ ] Looting above III gives +5% bonus drops per level
+[ ] Fire Aspect above II gives +3% damage per level
+[ ] Fortune above III (hoe) gives +5% bonus crops per level
+[ ] Efficiency above V (hoe) gives +1% Enchanted crop chance per level
+[ ] The upgrade screen explains what the levels above the vanilla maximum do
+
+KIT ARMOR + SKILL TOOLS
+[ ] Wearing Combat Kit armor while using the Slayer Sword gives more damage and more bonus drops
+[ ] Sometimes a kill with the sword + kit armor gives a random chunk of coins ("+$X (kit bonus)")
+[ ] The sword tooltip shows the kit bonus (e.g. "Kit: +24% dmg, +32% drops") or "Wear Combat Kit armor for a bonus"
+[ ] More kit pieces and a higher kit level = bigger bonus
+[ ] Dungeon Kit armor also counts for the Slayer Sword
+[ ] Farming Kit now gives Harvester armor from level 1
+[ ] Wearing Farming Kit (Harvester) armor with the Farming Hoe gives more crops, more hoe XP and sometimes coins
+[ ] The hoe tooltip shows its kit bonus

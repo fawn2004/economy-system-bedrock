@@ -48,7 +48,8 @@ export const LINES = {
     perk: { ffo: 4 }, perkText: "+4 Farming Fortune per level",
     gear: (t) => [
       tool(t, `minecraft:${TOOL_MAT[t - 1]}_hoe`, { efficiency: up(5, t) }, { hv: up(5, t), ef: up(5, t) }, "blessed"),
-      ...(t >= 4 ? ARMOR.map((a) => ({ custom: `farmer_${a}`, cust: t >= 6 ? { gr: up(5, t) } : {}, rarity: RARITY[t - 1] })) : []),
+      // Harvester armor at every level: worn with the Farming Hoe it gives the hoe's kit bonus
+      ...ARMOR.map((a) => ({ custom: `farmer_${a}`, cust: t >= 6 ? { gr: up(5, t) } : {}, rarity: RARITY[t - 1] })),
     ],
     supplies: (t) => [["minecraft:bone_meal", 16 + 8 * t], ["minecraft:wheat_seeds", 16], ["minecraft:carrot", 4 + 2 * t], ["minecraft:potato", 4 + 2 * t], ...(t >= 3 ? [["minecraft:sugar_cane", 4 + t]] : []), ...(t >= 5 ? [["minecraft:melon_seeds", 8], ["minecraft:pumpkin_seeds", 8]] : [])],
   },

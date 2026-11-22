@@ -318,10 +318,17 @@ export const SKILL_TOOLS = {
   },
 };
 export const TOOL_LEVELS = {
-  //          level: 1    2    3    4     5     6     7      8      9      10
-  xpNeeded: [0, 100, 300, 700, 1500, 3000, 6000, 12000, 25000, 50000],
+  //          level: 1    2    3    4     5     6     7      8      9      10     11     12      13      14      15
+  xpNeeded: [0, 100, 300, 700, 1500, 3000, 6000, 12000, 25000, 50000, 90000, 150000, 250000, 400000, 650000],
   freeLevels: 3,
-  collectionNeeded: [0, 0, 0, 1000, 2500, 5000, 10000, 25000, 50000, 100000],
+  collectionNeeded: [0, 0, 0, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 175000, 275000, 400000, 600000, 1000000],
+};
+
+// Skill tool kit bonus: wearing upgradable-kit armor while using a skill tool.
+// Each worn kit piece counts (kit level / 4); the total "f" (0-10) scales these:
+export const TOOL_KIT_BONUS = {
+  slayer: { damage: 3, drops: 4, coinChance: 1, coins: [25, 75] }, // % per f, coins x kit level
+  farming: { drops: 4, xp: 3, coinChance: 0.5, coins: [5, 20] },
 };
 
 // ============================================================================
@@ -382,62 +389,73 @@ export const MOB_DROPS = {
 //  heads = how many heads / enchanted crops each level costs.
 //  enchant = vanilla enchantment it sets;  perLevel = custom bonus per level
 // ============================================================================
+/** Upgrade costs for 15 levels: start, then x growth each level (rounded nicely). */
+const costs = (start, growth, n = 15) =>
+  Array.from({ length: n }, (_, i) => {
+    const v = start * Math.pow(growth, i);
+    const m = v >= 100000 ? 5000 : v >= 10000 ? 500 : v >= 1000 ? 100 : 1;
+    return Math.round(v / m) * m;
+  });
+
+// Upgrades go to level 15. Vanilla enchantments stop at their normal maximum (vanillaMax);
+// the levels above that give the "over" bonus instead (see overDesc).
 export const TOOL_UPGRADES = {
   farming: [
     {
-      id: "harvester", name: "Harvester", max: 5, perLevel: 10, icon: "textures/items/wheat",
+      id: "harvester", name: "Harvester", max: 15, perLevel: 10, icon: "textures/items/wheat",
       desc: "+10% bonus crop drops per level", crop: "wheat",
-      money: [2000, 5000, 12000, 25000, 50000], heads: [5, 10, 20, 40, 80],
+      money: costs(2000, 1.55), heads: costs(5, 1.4),
     },
     {
-      id: "cultivating", name: "Cultivating", max: 4, perLevel: 25, icon: "textures/items/experience_bottle",
-      desc: "+25% hoe XP per level", crop: "carrot",
-      money: [3000, 8000, 20000, 45000], heads: [5, 15, 30, 60],
+      id: "cultivating", name: "Cultivating", max: 15, perLevel: 10, icon: "textures/items/experience_bottle",
+      desc: "+10% hoe XP per level", crop: "carrot",
+      money: costs(3000, 1.55), heads: costs(5, 1.4),
     },
     {
-      id: "fortune", name: "Fortune", enchant: "fortune", max: 3, icon: "textures/items/emerald",
-      desc: "Vanilla Fortune", crop: "potato",
-      money: [5000, 15000, 40000], heads: [10, 25, 50],
+      id: "fortune", name: "Fortune", enchant: "fortune", vanillaMax: 3, over: 5, max: 15, icon: "textures/items/emerald",
+      desc: "Vanilla Fortune up to III", overDesc: "+5% bonus crop drops per level above III", crop: "potato",
+      money: costs(5000, 1.5), heads: costs(10, 1.35),
     },
     {
-      id: "efficiency", name: "Efficiency", enchant: "efficiency", max: 5, icon: "textures/items/gold_hoe",
-      desc: "Breaks melons & pumpkins faster", crop: "melon",
-      money: [1000, 3000, 7000, 15000, 30000], heads: [3, 6, 12, 25, 50],
+      id: "efficiency", name: "Efficiency", enchant: "efficiency", vanillaMax: 5, over: 1, max: 15, icon: "textures/items/gold_hoe",
+      desc: "Breaks melons & pumpkins faster (up to V)", overDesc: "+1% Enchanted crop chance per level above V", crop: "melon",
+      money: costs(1000, 1.6), heads: costs(3, 1.45),
     },
     {
       id: "replenish", name: "Replenish", max: 1, perLevel: 1, icon: "textures/items/seeds_wheat",
-      desc: "Auto-replant at any tool level", crop: "pumpkin",
+      desc: "Auto-replant at any tool level (on / off)", crop: "pumpkin",
       money: [15000], heads: [20],
     },
   ],
   slayer: [
     {
-      id: "sharpness", name: "Sharpness", enchant: "sharpness", max: 5, icon: "textures/items/diamond_sword",
-      desc: "More damage", headMob: "zombie",
-      money: [2000, 5000, 12000, 25000, 50000], heads: [5, 10, 20, 40, 80],
+      id: "sharpness", name: "Sharpness", enchant: "sharpness", vanillaMax: 5, over: 6, max: 15, icon: "textures/items/diamond_sword",
+      desc: "Vanilla Sharpness up to V", overDesc: "+6% damage per level above V", headMob: "zombie",
+      money: costs(2000, 1.55), heads: costs(5, 1.4),
     },
     {
-      id: "looting", name: "Looting", enchant: "looting", max: 3, icon: "textures/items/gold_ingot",
-      desc: "More vanilla mob drops", headMob: "skeleton",
-      money: [5000, 15000, 40000], heads: [10, 25, 50],
+      id: "looting", name: "Looting", enchant: "looting", vanillaMax: 3, over: 5, max: 15, icon: "textures/items/gold_ingot",
+      desc: "Vanilla Looting up to III", overDesc: "+5% bonus drop chance per level above III", headMob: "skeleton",
+      money: costs(5000, 1.5), heads: costs(10, 1.35),
     },
     {
-      id: "fire_aspect", name: "Fire Aspect", enchant: "fire_aspect", max: 2, icon: "textures/items/blaze_powder",
-      desc: "Sets mobs on fire", headMob: "blaze",
-      money: [8000, 20000], heads: [10, 30],
+      id: "fire_aspect", name: "Fire Aspect", enchant: "fire_aspect", vanillaMax: 2, over: 3, max: 15, icon: "textures/items/blaze_powder",
+      desc: "Sets mobs on fire (vanilla up to II)", overDesc: "+3% damage per level above II", headMob: "blaze",
+      money: costs(8000, 1.45), heads: costs(10, 1.35),
     },
     {
-      id: "head_hunter", name: "Head Hunter", max: 5, perLevel: 2, icon: "textures/items/eco_heads/wither_skeleton",
-      desc: "+2% enchanted head chance per level", headMob: "wither_skeleton",
-      money: [10000, 20000, 40000, 75000, 150000], heads: [5, 10, 20, 35, 50],
+      id: "head_hunter", name: "Head Hunter", max: 15, perLevel: 1.5, icon: "textures/items/eco_heads/wither_skeleton",
+      desc: "+1.5% enchanted head chance per level", headMob: "wither_skeleton",
+      money: costs(10000, 1.45), heads: costs(5, 1.35),
     },
     {
-      id: "plunder", name: "Plunder", max: 5, perLevel: 10, icon: "textures/items/eco_heads/spider",
+      id: "plunder", name: "Plunder", max: 15, perLevel: 10, icon: "textures/items/eco_heads/spider",
       desc: "+10% bonus drop chance per level", headMob: "spider",
-      money: [5000, 10000, 20000, 40000, 80000], heads: [10, 20, 40, 60, 100],
+      money: costs(5000, 1.5), heads: costs(10, 1.35),
     },
   ],
 };
+
 
 // ============================================================================
 //  SKILLS  (Hypixel-style). Doing things earns skill XP; skills level up
