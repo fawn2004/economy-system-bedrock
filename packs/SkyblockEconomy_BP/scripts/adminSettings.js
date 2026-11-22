@@ -141,16 +141,15 @@ async function economyForm(player, reopen) {
     f
       .textField("Starting money for new players", "500", { defaultValue: String(CONFIG.startingBalance) })
       .textField("Currency symbol", "$", { defaultValue: CONFIG.currency })
-      .textField("Items per shop page (8-40)", "20", { defaultValue: String(CONFIG.pageSize) })
+      .textField("Items per shop page (7-28)", "28", { defaultValue: String(CONFIG.pageSize) })
       .toggle("Give the menu compass when players join", { defaultValue: CONFIG.compass.giveOnJoin })
-      .toggle("Search / Next / Back in a centred row at the top of lists", { defaultValue: CONFIG.centerNav })
   );
   if (!v) return reopen();
   const start = num(v[0]);
-  const page = num(v[2], 8);
+  const page = num(v[2], 7);
   const currency = String(v[1]).trim().slice(0, 3);
   if (start === undefined || page === undefined || !currency) return reopen("§cCheck the numbers and try again.");
-  setConfig({ startingBalance: start, currency, pageSize: Math.min(40, page), giveOnJoin: !!v[3], centerNav: !!v[4] });
+  setConfig({ startingBalance: start, currency, pageSize: Math.min(28, page), giveOnJoin: !!v[3] });
   success(player, "Economy settings saved.");
   return reopen("§aEconomy settings saved.");
 }
@@ -161,11 +160,11 @@ async function sidebarForm(player, reopen) {
   const v = await modal(player, "Sidebar", (f) =>
     f
       .toggle("Show the sidebar (players can still hide their own)", { defaultValue: c.enabled })
-      .textField("Title (colour codes like §b§l work)", "§b§lSKYBLOCK", { defaultValue: c.title })
+      .textField("Title (colour codes like §e§l work)", "§e§lSKYBLOCK", { defaultValue: c.title })
       .textField("Bottom line (e.g. your realm name, blank for none)", "", { defaultValue: c.footer })
   );
   if (!v) return reopen();
-  const title = String(v[1]).trim().slice(0, 40) || "§b§lSKYBLOCK";
+  const title = String(v[1]).trim().slice(0, 40) || "§e§lSKYBLOCK";
   setConfig({ sidebar: { enabled: !!v[0], title, footer: String(v[2]).trim().slice(0, 40) } });
   if (!v[0]) for (const p of world.getAllPlayers()) clearSidebar(p);
   success(player, "Sidebar saved.");

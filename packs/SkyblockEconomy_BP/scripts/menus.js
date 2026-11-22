@@ -57,7 +57,7 @@ import {
   makeTool,
   skillToolTiles,
 } from "./tools.js";
-import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
+import { ICON, PER_PAGE, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 
 const U = "textures/ui/eco/";
 const pretty = (id) =>
@@ -230,14 +230,19 @@ async function blocksMenu(player) {
 
 /** A paged grid of catalogue items, with SEARCH / PREV / NEXT / BACK at the top and bottom. */
 async function itemListMenu(player, list, page = 0) {
-  const size = CONFIG.pageSize;
+  // a chest page holds 28; the first page also shows the sub-sections
+  const size = Math.max(7, Math.min(PER_PAGE, CONFIG.pageSize));
+  const kids = list.children ?? [];
+  const first = Math.max(7, size - kids.length);
   const items = list.items.filter((e) => e.buy > 0);
-  const pages = Math.max(1, Math.ceil(items.length / size));
+  const pages = 1 + Math.max(0, Math.ceil((items.length - first) / size));
   page = Math.min(Math.max(0, page), pages - 1);
   const reopen = () => itemListMenu(player, list, page);
-  const content = page === 0 ? [...(list.children ?? [])] : [];
+  const content = page === 0 ? [...kids] : [];
+  const from = page === 0 ? 0 : first + (page - 1) * size;
+  const to = page === 0 ? first : from + size;
   content.push(
-    ...items.slice(page * size, page * size + size).map((e) => ({
+    ...items.slice(from, to).map((e) => ({
       text: `§f${clip(e.name)}`,
       sub: `${priceColor(player, e.buy)}${fmtShort(e.buy)}`,
       icon: e.icon,

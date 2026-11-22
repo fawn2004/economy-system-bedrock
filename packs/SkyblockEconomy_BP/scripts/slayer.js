@@ -486,3 +486,13 @@ export function registerSlayer() {
   });
   world.afterEvents.worldLoad.subscribe(() => system.runInterval(bossTick, 20));
 }
+
+/** Sidebar lines for an active slayer quest (or undefined). */
+export function slayerObjective(player) {
+  const q = quest(player);
+  if (!q) return undefined;
+  const s = SLAYERS[q.type];
+  if (q.phase === "kill") return ["Slayer Quest", ` §c${s.name} ${roman(q.tier + 1)}`, ` §7(§e${q.kills}§7/§c${TIERS[q.tier].kills}§7) Kills`];
+  const left = Math.max(0, Math.ceil((q.until - Date.now()) / 1000));
+  return ["Slayer Quest", ` §c${s.name} ${roman(q.tier + 1)}`, ` §cSlay the boss! §e${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`];
+}

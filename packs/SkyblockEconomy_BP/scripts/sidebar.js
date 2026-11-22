@@ -1,19 +1,26 @@
 import { system, world } from "@minecraft/server";
+import { getBank } from "./bank.js";
 import { CONFIG } from "./config.js";
-import { fmtMoney, getBalance, rankOf } from "./economy.js";
+import { dungeonObjective, inDungeon } from "./dungeons.js";
+import { getBalance } from "./economy.js";
+import { commissionObjective } from "./extras.js";
 import { pref } from "./playerSettings.js";
-import { allHeadPoints, ownedSpawnerCount } from "./spawners.js";
+import { slayerObjective } from "./slayer.js";
 
 // ============================================================================
-//  SIDEBAR  (the scoreboard-style panel on the right of the screen)
-//  Each player gets their own: it's sent as a title starting with MARK, and
-//  the resource pack (ui/hud_screen.json) draws titles with that marker as the
-//  sidebar instead of a big title. Players can hide it in Player Settings,
-//  admins can change the title / footer or turn it off (Admin > Settings).
+//  SIDEBAR  (scoreboard-style panel on the right of the screen)
+//  Each player gets their own. It's sent as a title + subtitle: the title
+//  starts with MARK and holds the sidebar's heading, the subtitle holds the
+//  lines. The resource pack (ui/hud_screen.json) draws titles with that marker
+//  as the sidebar instead of a big title. Players can hide it in Settings,
+//  admins can change the heading / footer or turn it off (Admin > Settings).
+//
+//  Lines: date, in-game season / day / time, location, purse, bank, your
+//  current objective (slayer quest, dungeon run or a daily commission), footer.
 // ============================================================================
 
 export const SIDEBAR_MARK = "§e§s§b§r";
-const REFRESH = 40; // ticks (2 seconds)
+const REFRESH = 20; // ticks (1 second)
 const paused = new Map(); // player id -> tick until which real titles are showing
 
 /** Call before showing a normal title so the sidebar doesn't cover it. */
@@ -27,35 +34,73 @@ export function clearSidebar(player) {
   } catch {}
 }
 
-function lines(player, online) {
-  const rank = rankOf(player);
-  const heads = allHeadPoints(player).reduce((n, h) => n + h.points, 0);
-  const bar = "§8- - - - - - - - - - - -";
+const SEASONS = ["Early Spring", "Spring", "Late Spring", "Early Summer", "Summer", "Late Summer", "Early Autumn", "Autumn", "Late Autumn", "Early Winter", "Winter", "Late Winter"];
+const DAYS_PER_SEASON = 31;
+const ordinal = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th");
+const commas = (n) => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+function coins(n) {
+  if (n >= 1e12) return (Math.floor(n / 1e10) / 100) + "T";
+  return commas(n);
+}
+
+function calendar() {
+  let day = 0, ticks = 6000;
+  try {
+    day = world.getDay();
+    ticks = world.getTimeOfDay();
+  } catch {}
+  const d = day % (SEASONS.length * DAYS_PER_SEASON);
+  const season = SEASONS[Math.floor(d / DAYS_PER_SEASON)];
+  const hours24 = (Math.floor(ticks / 1000) + 6) % 24;
+  const minutes = Math.floor(((ticks % 1000) / 1000) * 6) * 10; // steps of 10 minutes
+  const h12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+  const night = hours24 >= 19 || hours24 < 6;
+  return {
+    date: ` ${season} ${ordinal((d % DAYS_PER_SEASON) + 1)}`,
+    time: ` §7${h12}:${String(minutes).padStart(2, "0")}${hours24 < 12 ? "am" : "pm"} ${night ? "§b☽" : "§e☀"}`,
+  };
+}
+
+function location(player) {
+  if (inDungeon(player)) return "§cThe Crypts";
+  const id = player.dimension.id;
+  if (id.includes("nether")) return "§cThe Nether";
+  if (id.includes("end")) return "§dThe End";
+  return "§bYour Island";
+}
+
+function lines(player) {
+  const now = new Date();
+  const date = `${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")}/${String(now.getFullYear()).slice(2)}`;
+  const cal = calendar();
   const out = [
-    CONFIG.sidebar.title,
-    bar,
-    `§f${player.name}`,
+    `§7${date} §8${world.getAllPlayers().length} online`,
     "",
-    `§7Balance: §a${fmtMoney(getBalance(player))}`,
-    `§7Rank: §6${rank ? "#" + rank : "-"}`,
-    `§7Heads: §d${String(heads).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
-    `§7Spawners: §b${ownedSpawnerCount(player.id)}`,
+    cal.date,
+    cal.time,
+    ` §7⏣ ${location(player)}`,
     "",
-    `§7Online: §f${online}`,
-    bar,
+    `Purse: §6${coins(getBalance(player))}`,
+    `Bank: §6${coins(getBank(player))}`,
+    "",
   ];
+  let obj;
+  try {
+    obj = dungeonObjective(player) ?? slayerObjective(player) ?? commissionObjective(player);
+  } catch {}
+  if (obj) out.push(...obj, "");
   if (CONFIG.sidebar.footer) out.push(CONFIG.sidebar.footer);
   return out.join("\n");
 }
 
 function refresh() {
-  const players = world.getAllPlayers();
   const now = system.currentTick;
-  for (const p of players) {
+  for (const p of world.getAllPlayers()) {
     try {
       if (!CONFIG.sidebar.enabled || !pref(p, "sidebar", true)) continue;
       if ((paused.get(p.id) ?? 0) > now) continue;
-      p.onScreenDisplay.setTitle(SIDEBAR_MARK + lines(p, players.length), {
+      p.onScreenDisplay.setTitle(SIDEBAR_MARK + CONFIG.sidebar.title, {
+        subtitle: lines(p),
         fadeInDuration: 0,
         stayDuration: REFRESH * 3,
         fadeOutDuration: 0,

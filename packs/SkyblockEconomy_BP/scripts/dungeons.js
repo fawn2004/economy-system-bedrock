@@ -1,5 +1,5 @@
 import { system, world } from "@minecraft/server";
-import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { ModalFormData } from "@minecraft/server-ui";
 import { addMoney, fmt, fmtShort, getBalance, takeMoney } from "./economy.js";
 import { container, freeSlots } from "./inventory.js";
 import { ITEMS, RARITIES, makeItem, readItem, renderItem } from "./items.js";
@@ -8,7 +8,7 @@ import { addPet } from "./pets.js";
 import { combatHooks, makeTough, stat, statSources } from "./stats.js";
 import { mayorIs } from "./mayor.js";
 import { adminRpgTiles } from "./profile.js";
-import { ICON, backTile, ecoTitle, fail, showForm, success, tileMenu } from "./ui.js";
+import { ICON, backTile, fail, showForm, success, tileMenu } from "./ui.js";
 
 // ============================================================================
 //  DUNGEONS - "The Crypts", Floors I to V
@@ -647,13 +647,16 @@ async function essenceShop(player, back) {
 
 // ---- party & menus -----------------------------------------------------------
 async function askJoin(p, leader, F) {
-  const form = new ActionFormData()
-    .title(ecoTitle("DUNGEON INVITE", "purple"))
-    .body(`§f${leader.name} §7invites you to §f${F.name}§7.${F.fee ? ` §7Entry fee: §a${fmt(F.fee)}` : ""}`)
-    .button("§a§lJOIN\n§r§7Let's go", ICON.confirm)
-    .button("§c§lNO THANKS\n§r§7Stay here", ICON.cancel);
-  const res = await showForm(p, form);
-  return res && !res.canceled && res.selection === 0;
+  const pick = await tileMenu(p, {
+    title: "Dungeon Invite",
+    theme: "purple",
+    body: `§f${leader.name} §7invites you to §f${F.name}§7.${F.fee ? ` §7Entry fee: §a${fmt(F.fee)}` : ""}`,
+    tiles: [
+      { text: "§aJoin", sub: "§7Let's go!", icon: ICON.confirm, id: "yes" },
+      { text: "§cNo Thanks", sub: "§7Stay here", icon: ICON.cancel, id: "no" },
+    ],
+  });
+  return pick?.id === "yes";
 }
 
 async function playMenu(player, back) {
@@ -864,3 +867,17 @@ export function registerDungeons() {
   });
 }
 
+
+/** Sidebar lines while in a dungeon (or undefined). */
+export function dungeonObjective(player) {
+  const run = runOf(player);
+  if (!run) return undefined;
+  const t = run.start ? Math.floor((Date.now() - run.start) / 1000) : 0;
+  return [
+    `§c${run.floor.name}`,
+    ` §7Room: §a${Math.max(0, run.cur)}§7/§a${run.rooms.length - 1}`,
+    ` §7Time: §e${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`,
+    ` §7Secrets: §d${run.secrets}  §7Downs: §c${run.deaths}`,
+    ` §7Class: §f${CLASSES[getClass(player)].name}`,
+  ];
+}

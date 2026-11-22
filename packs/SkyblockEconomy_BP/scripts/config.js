@@ -25,14 +25,14 @@ export const CONFIG = {
     slot: 8, // hotbar slot (0-8) it goes into if that slot is free
   },
 
-  pageSize: 20, // items per shop page
-  centerNav: true, // SEARCH / NEXT / BACK in a centred row at the top of lists
+  pageSize: 28, // items per shop page (a chest page holds up to 28)
+  centerNav: true, // (no longer used: menus are chests with the buttons in the bottom row)
 
   // The scoreboard-style panel on the right of the screen (players can hide it
   // in Player Settings). Colour codes like §b§l work in the title / footer.
   sidebar: {
     enabled: true,
-    title: "§b§lSKYBLOCK",
+    title: "§e§lSKYBLOCK",
     footer: "§eSkyblock Economy",
   },
 

@@ -468,3 +468,15 @@ export function adminSpiritTiles(player, back) {
   ];
 }
 
+
+/** Sidebar lines: the first unfinished daily commission (or undefined). */
+export function commissionObjective(player) {
+  try {
+    const d = commissions(player);
+    for (const t of d.tasks) {
+      const c = COMMISSIONS.find((x) => x.k === t.k);
+      if (c && t.have < c.need) return ["Objective", ` §e${c.name}`, ` §7(§e${t.have}§7/§a${c.need}§7)`];
+    }
+  } catch {}
+  return undefined;
+}

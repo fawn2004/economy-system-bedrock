@@ -21,32 +21,115 @@ export const ICON = {
   search: "textures/ui/eco/icon_search",
 };
 
-// Extra marker after the theme = the dashboard layout (player card + tiles)
+// Extra marker after the theme = the old dashboard layout (kept so older calls still work)
 const DASHBOARD = "§d§b§r";
 
 export function ecoTitle(text, theme = "red", layout) {
   return `${MARKER}§${THEME[theme] ?? 1}§r${layout === "dashboard" ? DASHBOARD : ""}${text}`;
 }
 
+// ---- chest layout ---------------------------------------------------------------
+// Menus are drawn as a chest (ui/eco_form.json): a 9-wide grid of slots. Content goes
+// in the middle 7 columns of up to 4 rows (28 per page), framed by glass panes, with
+// page arrows, Go Back and Close in the bottom row - like a server-side chest GUI.
+export const PER_PAGE = 28;
+const COLS = 9;
+const INNER = 7;
+const FILLER_ICON = "textures/blocks/glass_black";
+const ROMAN = /^(I|II|III|IV|V|VI|VII|VIII|IX|X)$/;
+const KEEP_CAPS = new Set(["XP", "HP", "NPC", "NPCS", "RPG", "AH", "ID", "BIN", "UI"]);
+
+/** "§6§lAUCTION HOUSE" -> "§6Auction House" (keeps colours, roman numerals and acronyms like XP). */
+export function niceName(text) {
+  return String(text)
+    .replace(/§l/g, "")
+    .replace(/(?<=^|[^A-Za-z]|§[0-9a-z])([A-Z][A-Z']+)(?![A-Za-z])/g, (w) => (ROMAN.test(w) || KEEP_CAPS.has(w) ? w : w[0] + w.slice(1).toLowerCase()));
+}
+const niceTitle = (t) => (/§/.test(t) ? t : niceName(t));
+
+function tooltipText(t) {
+  let text = niceName(t.text);
+  if (t.badge === "NEW") text += " §a§lNEW";
+  if (t.sub) text += `\n§r${t.sub}`;
+  if (t.lore) text += `\n${t.lore}`;
+  if ((t.onClick || t.id) && !t.nav) text += "\n§eClick!";
+  return text;
+}
+
+const filler = () => ({ text: "[F]", icon: FILLER_ICON, filler: true });
+
+/** Positions (0-6) for k items in a row: spread out when there are only a few. */
+function rowCols(k, onlyRow) {
+  if (onlyRow && k === 1) return [3];
+  if (onlyRow && k === 2) return [1, 5];
+  if (onlyRow && k === 3) return [1, 3, 5];
+  const start = Math.floor((INNER - k) / 2);
+  return Array.from({ length: k }, (_, i) => start + i);
+}
+
+/** Lays content + nav tiles out as chest slots. */
+function chestSlots(content, nav) {
+  const rows = Math.max(1, Math.ceil(content.length / INNER));
+  const slots = [];
+  for (let i = 0; i < COLS; i++) slots.push(filler());
+  for (let r = 0; r < rows; r++) {
+    const row = content.slice(r * INNER, r * INNER + INNER);
+    const line = [filler()];
+    const cells = Array.from({ length: INNER }, () => filler());
+    rowCols(row.length, rows === 1).forEach((c, i) => (cells[c] = row[i]));
+    line.push(...cells, filler());
+    slots.push(...line);
+  }
+  const bottom = Array.from({ length: COLS }, () => filler());
+  if (nav.prev) bottom[0] = nav.prev;
+  if (nav.back) bottom[3] = nav.back;
+  bottom[4] = { text: "§cClose", icon: "textures/blocks/barrier", nav: "close" };
+  if (nav.search) bottom[5] = nav.search;
+  if (nav.next) bottom[8] = nav.next;
+  slots.push(...bottom);
+  return slots;
+}
+
 /**
- * Shows a styled tile menu.
- *   tiles: [{ text, sub?, icon?, badge?, onClick? }]
- * Each tile is "TEXT" on the first line, "sub" (smaller info) on the second.
+ * Shows a chest menu.
+ *   tiles: [{ text, sub?, lore?, icon?, badge?, onClick?, nav? }]
+ * Tiles with nav "back" / "prev" / "next" / "search" go in the bottom row. More than 28
+ * content tiles are split into pages automatically.
  * Resolves to the clicked tile, or undefined if the menu was closed.
  */
-export async function tileMenu(player, { title, theme = "red", body = "", tiles, layout }) {
-  const form = new ActionFormData().title(ecoTitle(title, theme, layout)).body(body);
+export async function tileMenu(player, opts) {
+  const { title, theme = "red", body = "", tiles, layout } = opts;
+  const nav = {};
+  const content = [];
   for (const t of tiles) {
-    let text = t.text;
-    if (t.sub) text += `\n§r${t.sub}`;
-    if (t.badge) text += `[${t.badge}]`;
+    if (!t || t.badge === "NAVX") continue;
+    if (t.nav && t.nav !== "close") nav[t.nav] = t;
+    else content.push(t);
+  }
+  let page = opts._page ?? 0;
+  const pages = Math.max(1, Math.ceil(content.length / PER_PAGE));
+  page = Math.min(Math.max(0, page), pages - 1);
+  let shown = content;
+  let info = "";
+  if (pages > 1) {
+    shown = content.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
+    if (page > 0) nav.prev = { text: "§aPrevious Page", sub: `§ePage ${page}`, icon: "textures/items/arrow", nav: "prev", onClick: () => tileMenu(player, { ...opts, _page: page - 1 }) };
+    if (page < pages - 1) nav.next = { text: "§aNext Page", sub: `§ePage ${page + 2}`, icon: "textures/items/arrow", nav: "next", onClick: () => tileMenu(player, { ...opts, _page: page + 1 }) };
+    info = `\n§7Page §f${page + 1}§7/§f${pages}`;
+  }
+  const slots = chestSlots(shown, nav);
+  const form = new ActionFormData().title(ecoTitle(niceTitle(title), theme, layout)).body(body ? body + info : info.trim());
+  for (const t of slots) {
+    const text = t.filler ? "[F]" : tooltipText(t);
     if (t.icon) form.button(text, t.icon);
     else form.button(text);
   }
   const res = await showForm(player, form);
   if (!res || res.canceled || res.selection === undefined) return undefined;
-  const tile = tiles[res.selection];
-  if (tile?.onClick) await tile.onClick();
+  const tile = slots[res.selection];
+  if (!tile || tile.nav === "close") return undefined;
+  if (tile.filler) return tileMenu(player, opts); // glass pane: nothing happens
+  if (tile.onClick) await tile.onClick();
   return tile;
 }
 
@@ -61,7 +144,7 @@ export async function showForm(player, form) {
   return undefined;
 }
 
-export const backTile = (onClick) => ({ text: "§cBACK", sub: "§7Go back", icon: ICON.back, onClick });
+export const backTile = (onClick) => ({ text: "§aGo Back", sub: "§7To the previous menu", icon: "textures/items/arrow", nav: "back", onClick });
 
 export function success(player, msg) {
   player.sendMessage(`§a§l✔ §r§a${msg}`);
@@ -73,49 +156,27 @@ export function fail(player, msg) {
   player.playSound("note.bass", { pitch: 0.7 });
 }
 
-export const searchTile = (onClick, sub = "§7In this list") => ({ text: "§b§lSEARCH", sub, icon: ICON.search, onClick });
+export const searchTile = (onClick, sub = "§7In this list") => ({ text: "§aSearch", sub, icon: "textures/items/sign", nav: "search", onClick });
 
-/**
- * Adds navigation tiles around a page of content tiles.
- * Long or multi-page lists get SEARCH / PREV / NEXT / BACK in the top row and
- * PREV / NEXT / BACK again at the bottom; short ones just at the bottom.
- */
+/** Adds page arrows, Go Back and Search to a page of content tiles. */
 export function withNav(content, { page = 0, pages = 1, goto, back, onSearch }) {
-  const moves = [];
-  if (page > 0) moves.push({ text: "§e§l< PREV", sub: `§7Page ${page}`, icon: ICON.back, onClick: () => goto(page - 1) });
-  if (page < pages - 1) moves.push({ text: "§e§lNEXT >", sub: `§7Page ${page + 2}`, icon: ICON.confirm, onClick: () => goto(page + 1) });
-  if (back) moves.push(backTile(back));
-  const top = onSearch ? [searchTile(onSearch)] : [];
-  const long = content.length > 8 || pages > 1;
-  if (CONFIG.centerNav) {
-    // Centred row at the top (drawn by the resource pack over the grid's first
-    // row): tag the nav buttons and pad with hidden fillers to a full row of 4.
-    const nav = [...top, ...moves];
-    const row = nav.map((t) => ({ ...t, badge: `NAV${nav.length}` }));
-    while (row.length < 4) row.push({ text: "", badge: "NAVX" });
-    return [...row, ...content, ...(long ? moves : [])];
-  }
-  if (long) return [...top, ...moves, ...content, ...moves];
-  return [...top, ...content, ...moves];
+  const out = [...content];
+  if (page > 0) out.push({ text: "§aPrevious Page", sub: `§ePage ${page}`, icon: "textures/items/arrow", nav: "prev", onClick: () => goto(page - 1) });
+  if (page < pages - 1) out.push({ text: "§aNext Page", sub: `§ePage ${page + 2}`, icon: "textures/items/arrow", nav: "next", onClick: () => goto(page + 1) });
+  if (back) out.push(backTile(back));
+  if (onSearch) out.push(searchTile(onSearch));
+  return out;
 }
 
 /**
  * tileMenu with automatic pages.
- *   opts: { title, theme, body, tiles, back, perPage?, onSearch? }
+ *   opts: { title, theme, body, tiles, back, onSearch? }
  */
 export async function pagedMenu(player, opts, page = 0) {
-  const per = opts.perPage ?? 20;
-  const pages = Math.max(1, Math.ceil(opts.tiles.length / per));
-  page = Math.min(Math.max(0, page), pages - 1);
-  const tiles = withNav(opts.tiles.slice(page * per, page * per + per), {
-    page,
-    pages,
-    goto: (p) => pagedMenu(player, opts, p),
-    back: opts.back,
-    onSearch: opts.onSearch,
-  });
-  const info = pages > 1 ? `\n§7Page §f${page + 1}§7/§f${pages}` : "";
-  return tileMenu(player, { title: opts.title, theme: opts.theme, body: (opts.body ?? "") + info, tiles });
+  const tiles = [...opts.tiles];
+  if (opts.back) tiles.push(backTile(opts.back));
+  if (opts.onSearch) tiles.push(searchTile(opts.onSearch));
+  return tileMenu(player, { title: opts.title, theme: opts.theme, body: opts.body ?? "", tiles, _page: page });
 }
 
 /** Asks for a search word. Resolves to the text, or undefined if cancelled/empty. */

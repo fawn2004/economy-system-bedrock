@@ -1,20 +1,20 @@
 {
   "format_version": 2,
   "header": {
-    "name": "§bSkyblock Economy §7(Resources) §ev1.0.42",
+    "name": "§bSkyblock Economy §7(Resources) §ev1.0.43",
     "description": "Custom menu UI & textures for Skyblock Economy",
     "uuid": "7afcfb53-cef0-4163-bd4f-57d31350ad3b",
-    "version": [1, 0, 42],
+    "version": [1, 0, 43],
     "min_engine_version": [1, 21, 90]
   },
   "modules": [
     {
       "type": "resources",
       "uuid": "538fe7a4-23df-467b-a6bc-356fb151ae72",
-      "version": [1, 0, 42]
+      "version": [1, 0, 43]
     }
   ],
   "dependencies": [
-    { "uuid": "5c2691b0-97fb-40e5-9b9b-7d8f44955d23", "version": [1, 0, 42] }
+    { "uuid": "5c2691b0-97fb-40e5-9b9b-7d8f44955d23", "version": [1, 0, 43] }
   ]
 }
