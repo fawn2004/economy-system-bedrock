@@ -17,7 +17,7 @@ item tooltips on hover, and Go Back / Close / page arrows in the bottom row.
 | **Bazaar** | Player-run market for materials: buy orders, sell offers, instant buy / sell |
 | **Auction House** | List the item in your hand as BIN (Buy It Now) or as a bidding auction |
 | **Bank** | Store money safely and earn interest; upgrade your account tier |
-| **Profile** | Stats, Pets, Accessory Bag, Reforge, Enchanting, Wardrobe, Spirits |
+| **Profile** | Stats, Pets, Reforge, Enchanting, Wardrobe, Spirits |
 | **Slayer** | Kill quests that summon a boss, slayer levels and a slayer shop |
 | **Dungeons** | Party dungeon runs (Floors I-V) with classes, score grades and reward chests |
 | **Quests** | 3 daily commissions plus one-time milestones |
