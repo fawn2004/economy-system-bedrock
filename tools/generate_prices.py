@@ -725,6 +725,7 @@ def main(src):
         "axolotl_bucket": "bucket_axolotl", "tadpole_bucket": "bucket_tadpole",
         "oak_sign": "sign", "dark_oak_boat": "boat_darkoak", "dark_oak_sign": "sign_darkoak", "grass_block": "../blocks/grass_side_carried", "sea_lantern": "../blocks/sea_lantern",
         "bamboo_raft": "bamboo_raft", "bamboo_chest_raft": "bamboo_chest_raft",
+        "sulfur_cube_bucket": "bucket_sulfur_cube",
     }
 
     def guess(n):
@@ -810,7 +811,8 @@ def main(src):
         ("stairs", r"_stairs$"), ("slab", r"_slab$"), ("wall", r"_wall$"), ("carpet", r"_carpet$"),
         ("pane", r"(_pane$)"),
         ("cube", r"(_wool$|_concrete$|_concrete_powder$|_terracotta$|^terracotta$|^hardened_clay$|stained_glass$|"
-                 r"^glass$|^tinted_glass$|_shelf$|^nether_brick$)"),
+                 r"^glass$|^tinted_glass$|^nether_brick$)"),
+        ("shelf", r"_shelf$"),
         ("rod", r"^end_rod$"),
     ]
 
@@ -827,7 +829,15 @@ def main(src):
         side, top = block_tex(n)
         front = None
         if n.endswith("_shelf"):
-            front = icon(n)
+            # the shelf texture is a 32x32 sheet: front (top-left), side (top-right), boards (bottom)
+            f = file_of(icon(n) or "")
+            if f:
+                sheet = iso_icons.load_full(f)
+                w = sheet.size[0] // 2
+                iso_icons.render("shelf", sheet.crop((w, 0, 2 * w, w)), sheet.crop((0, w, w, 2 * w)), sheet.crop((0, 0, w, w)),
+                                 os.path.join(shop_dir, n + ".png"))
+                made.add(n + ".png")
+                return "textures/ui/eco/shop/" + n
             side = top = planks_for(n)
         if not side:
             side = top = icon(n)

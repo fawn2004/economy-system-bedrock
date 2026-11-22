@@ -19,7 +19,10 @@ SHAPES = {
     "wall": [(0, 0, 5, 4, 13, 11), (4, 0, 4, 12, 16, 12), (12, 0, 5, 16, 13, 11)],
     "carpet": [(0, 0, 0, 16, 1, 16)],
     "pane": [(0, 0, 7, 16, 16, 9)],
-    "rod": [(6, 0, 6, 10, 1, 10), (7, 1, 7, 9, 16, 9)],
+    # end rod: base plate + thin rod; the extra tuple = texture region (u0, v0, width, height) to sample
+    "rod": [(6, 0, 6, 10, 1, 10, (2, 2, 4, 4)), (7, 1, 7, 9, 16, 9, (0, 0, 2, 15))],
+    # shelf: half-depth, open side towards you
+    "shelf": [(0, 0, 8, 16, 16, 16)],
 }
 SHADE = {"top": 1.0, "south": 0.82, "east": 0.64}
 
@@ -34,6 +37,11 @@ def load(path):
     if h > w:  # animated strip: first frame
         img = img.crop((0, 0, w, w))
     return img
+
+
+def load_full(path):
+    """Like load(), but keeps the whole image (for texture sheets)."""
+    return Image.open(path).convert("RGBA")
 
 
 def sample(tex, u, v):
@@ -53,20 +61,29 @@ def render(shape, side, top=None, front=None, out_path=None):
         c = (int(col[0] * shade), int(col[1] * shade), int(col[2] * shade), col[3])
         d.polygon([(px * 2, py * 2) for px, py in pts], fill=c)
 
-    for (x0, y0, z0, x1, y1, z1) in SHAPES[shape]:
+    for box in SHAPES[shape]:
+        x0, y0, z0, x1, y1, z1 = box[:6]
+        region = box[6] if len(box) > 6 else None
+
+        def tx(u, v, region=region):
+            if not region:
+                return u, v
+            u0, v0, w, h = region
+            return u0 + (int(u) % w), v0 + (int(v) % h)
+
         # top face (y = y1): u = x, v = z
         for x in range(x0, x1):
             for z in range(z0, z1):
-                quad([proj(x, y1, z), proj(x + 1, y1, z), proj(x + 1, y1, z + 1), proj(x, y1, z + 1)], sample(top, x, z), SHADE["top"])
+                quad([proj(x, y1, z), proj(x + 1, y1, z), proj(x + 1, y1, z + 1), proj(x, y1, z + 1)], sample(top, *tx(x, z)), SHADE["top"])
         # south face (z = z1): u = x, v = 16 - y
         tex = front or side
         for x in range(x0, x1):
             for y in range(y0, y1):
-                quad([proj(x, y + 1, z1), proj(x + 1, y + 1, z1), proj(x + 1, y, z1), proj(x, y, z1)], sample(tex, x, 15 - y), SHADE["south"])
+                quad([proj(x, y + 1, z1), proj(x + 1, y + 1, z1), proj(x + 1, y, z1), proj(x, y, z1)], sample(tex, *tx(x, 15 - y)), SHADE["south"])
         # east face (x = x1): u = 16 - z, v = 16 - y
         for z in range(z0, z1):
             for y in range(y0, y1):
-                quad([proj(x1, y + 1, z), proj(x1, y + 1, z + 1), proj(x1, y, z + 1), proj(x1, y, z)], sample(side, 15 - z, 15 - y), SHADE["east"])
+                quad([proj(x1, y + 1, z), proj(x1, y + 1, z + 1), proj(x1, y, z + 1), proj(x1, y, z)], sample(side, *tx(15 - z, 15 - y)), SHADE["east"])
     img = img.resize((SIZE, SIZE), Image.LANCZOS)
     if out_path:
         img.save(out_path)

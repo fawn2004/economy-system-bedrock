@@ -115,7 +115,8 @@ Main menu > **Kits** (or Shop > Kits > Upgradable Kits). Six kit lines, each lev
 with its level (1-100) and rarity, and it levels up from the skill XP you earn (its own skill
 full XP, others a third). Pets: Wolf, Rabbit, Bee, Silverfish, Fox, Dolphin, Allay, Bat, and
 the Drakeling (rare slayer / dungeon drop). **Upgrade Rarity** for coins once it's levelled
-enough. Your active pet floats next to you as a little head (the `eco:pet` entity, made by
+enough. Only one pet is out at a time: summoning another puts the current one away (chat says
+which). Your active pet floats next to you as a little head (the `eco:pet` entity, made by
 `tools/generate_pets.py`). **To Item** turns a pet into a spawn egg to trade or auction; using it adds it back.
 
 ## Accessory Bag
@@ -173,9 +174,9 @@ The party is teleported to a dungeon built in the sky far away (x 30000+, y 200)
   slayer, dungeons...).
 - **Daily Reward**: $1,000 x your streak (up to 30). Every 7th day adds an accessory and 25
   Essence. Miss more than 48 hours and the streak starts again.
-- **Spirits**: admins place hidden spirits (Admin > RPG > Place Spirit). Players see sparkles
-  and collect them by walking into them. Every 5 can be traded in **Profile > Spirits** for
-  +2 Health, +1 Defense, +1 Strength, +1 Speed forever.
+- **Spirits**: every mob you kill in a dungeon has a 3% chance to drop a spirit (bosses 25%;
+  Magic Find raises both). Every 5 can be traded in **Profile > Spirits** for +2 Health,
+  +1 Defense, +1 Strength, +1 Speed forever. Admins can give spirits in Admin > RPG.
 - **Election**: there's always a mayor with 2 perks (Bramble farming, Flint mining, Vex slayer,
   Sable bank & bazaar, Quill dungeons, Marlow fishing, Ember combat, Dawn daily & XP). Players
   vote for the next one from 3 candidates; terms last 3 real days.
@@ -185,7 +186,7 @@ The party is teleported to a dungeon built in the sky far away (x 30000+, y 200)
 
 ## Admin > RPG (test tools)
 
-Give any custom item or pet, set your Slayer XP, Dungeon XP and Essence, place/remove spirits,
+Give any custom item or pet, set your Slayer XP, Dungeon XP and Essence, give spirits,
 and end the election or pick the mayor.
 
 ## Bazaar

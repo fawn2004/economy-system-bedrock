@@ -1,0 +1,25 @@
+SKYBLOCK ECONOMY v1.0.53 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+PETS
+[ ] Only one pet can be out at a time
+[ ] Summoning a different pet puts the one that's out away
+[ ] Chat says which pet was put away and which pet was brought out (with their level)
+[ ] Only one pet head follows you (no extra copies left behind)
+[ ] The Summon button says "Swaps out your <pet>" when another pet is out
+[ ] Despawning your pet says which pet was put away
+
+SPIRITS
+[ ] Killing mobs in a dungeon sometimes drops a spirit (about 3% per mob)
+[ ] Killing a dungeon boss has a bigger chance (about 25%)
+[ ] Chat says "SPIRIT FOUND!" with how many you have
+[ ] Normal mobs outside dungeons don't drop spirits
+[ ] Profile > Spirits shows how many you've collected and how many more until the next trade
+[ ] Trading 5 spirits still gives +2 Health, +1 Defense, +1 Strength, +1 Speed
+[ ] Spirits you found before this update still count
+[ ] Admin > RPG > Give Spirit adds one (for testing)
+
+SHOP ICONS
+[ ] Sulfur Cube Bucket shows the sulfur cube bucket icon (not a water bucket)
+[ ] Shelves look like shelves (half-depth with the shelf front), not a full block
+[ ] End Rod shows a rod icon (not blank)

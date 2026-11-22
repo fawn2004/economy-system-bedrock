@@ -1680,7 +1680,7 @@ export const ITEMS = {
     ["minecraft:tadpole_bucket", "Tadpole Bucket", "textures/items/bucket_tadpole", 81, 40],
     ["minecraft:milk_bucket", "Milk Bucket", "textures/items/bucket_milk", 81, 40],
     ["minecraft:powder_snow_bucket", "Powder Snow Bucket", "textures/items/bucket_powder_snow", 81, 40],
-    ["minecraft:sulfur_cube_bucket", "Sulfur Cube Bucket", "", 81, 40],
+    ["minecraft:sulfur_cube_bucket", "Sulfur Cube Bucket", "textures/items/bucket_sulfur_cube", 81, 40],
   ],
   mobs: [
     ["minecraft:armadillo_scute", "Armadillo Scute", "textures/items/armadillo_scute", 40, 20],

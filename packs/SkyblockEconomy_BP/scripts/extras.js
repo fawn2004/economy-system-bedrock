@@ -93,35 +93,39 @@ export async function dailyMenu(player, back) {
 // ============================================================================
 //  SPIRITS
 // ============================================================================
-const SP_KEY = "eco:spirits";
-const spirits = () => readJson(world, SP_KEY, []);
-const found = (p) => new Set(readJson(p, "eco:spf", []));
+// Spirits drop from mobs killed in dungeons (SPIRIT_CHANCE %, bosses SPIRIT_BOSS_CHANCE %,
+// both raised by Magic Find). Spirits found under the old "hidden in the world" system still count.
+export const SPIRIT_CHANCE = 3;
+export const SPIRIT_BOSS_CHANCE = 25;
+const found = (p) => new Set(readJson(p, "eco:spf", [])); // old system: ids of spirits found in the world
+export const spiritCount = (p) => found(p).size + Number(p.getDynamicProperty("eco:spcount") ?? 0);
+export function addSpirit(p, n = 1) {
+  p.setDynamicProperty("eco:spcount", Number(p.getDynamicProperty("eco:spcount") ?? 0) + n);
+}
 const SP_REWARD = { hp: 2, def: 1, str: 1, spd: 1 };
 
 export async function spiritsMenu(player, back) {
   const again = () => spiritsMenu(player, back);
-  const all = spirits();
-  const f = found(player);
-  const have = all.filter((s) => f.has(s.id)).length;
+  const total = spiritCount(player);
   const traded = Number(player.getDynamicProperty("eco:sptraded") ?? 0);
-  const canTrade = Math.floor(f.size / 5) - traded;
+  const canTrade = Math.floor(total / 5) - traded;
   await tileMenu(player, {
     title: "SPIRITS",
     theme: "blue",
     body: [
-      `§7Wandering Spirits are hidden around the world. Walk into the sparkles to collect them.`,
-      `§7Found: §b${have}§7/§b${all.length}`,
+      `§7Spirits drop from mobs you kill in §5dungeons§7 (§b${SPIRIT_CHANCE}%§7 per mob, §b${SPIRIT_BOSS_CHANCE}%§7 per boss - more with Magic Find).`,
+      `§7Spirits collected: §b${total}`,
       `§7Every 5 spirits can be traded for: §c+2 Health§7, §a+1 Defense§7, §c+1 Strength§7, §f+1 Speed§7 (forever).`,
       `§7Trades done: §f${traded}    §7Ready: §a${Math.max(0, canTrade)}`,
     ].join("\n"),
     tiles: [
       {
         text: "§b§lTRADE 5",
-        sub: canTrade > 0 ? "§aReady!" : "§7Find more",
+        sub: canTrade > 0 ? "§aReady!" : `§7${5 - (total % 5)} more to go`,
         icon: "textures/items/nether_star",
         badge: canTrade > 0 ? "NEW" : undefined,
         onClick: () => {
-          if (canTrade <= 0) fail(player, "Find 5 more spirits first.");
+          if (canTrade <= 0) fail(player, "Collect 5 more spirits first (from dungeon mobs).");
           else {
             player.setDynamicProperty("eco:sptraded", traded + 1);
             invalidate(player);
@@ -136,30 +140,6 @@ export async function spiritsMenu(player, back) {
   });
 }
 
-function spiritTick() {
-  const all = spirits();
-  if (!all.length) return;
-  for (const p of world.getAllPlayers()) {
-    const f = found(p);
-    const l = p.location;
-    for (const s of all) {
-      if (f.has(s.id) || s.dim !== p.dimension.id) continue;
-      const d2 = (s.x - l.x) ** 2 + (s.y - l.y) ** 2 + (s.z - l.z) ** 2;
-      if (d2 > 30 * 30) continue;
-      try {
-        p.spawnParticle("minecraft:villager_happy", { x: s.x + (Math.random() - 0.5) * 0.6, y: s.y + 0.5 + Math.random(), z: s.z + (Math.random() - 0.5) * 0.6 });
-        p.spawnParticle("minecraft:endrod", { x: s.x, y: s.y + 1, z: s.z });
-      } catch {}
-      if (d2 < 2.5) {
-        f.add(s.id);
-        p.setDynamicProperty("eco:spf", JSON.stringify([...f]));
-        const n = all.filter((x) => f.has(x.id)).length;
-        p.sendMessage(`§b§lSPIRIT FOUND! §r§7(${n}/${all.length})${f.size % 5 === 0 ? " §aTrade 5 in Profile > Spirits!" : ""}`);
-        p.playSound("random.orb", { pitch: 0.6 });
-      }
-    }
-  }
-}
 
 // ============================================================================
 //  QUESTS (milestones)
@@ -185,7 +165,7 @@ const QUESTS = [
   { id: "slayer5", name: "Slayer", desc: "Reach Slayer level 5 (any)", goal: 5, cur: (p) => Math.max(...Object.keys(SLAYERS).map((t) => slayerLevel(p, t))), coins: 1000000 },
   { id: "dungeon1", name: "Into the Crypts", desc: "Reach Dungeon level 1", goal: 1, cur: (p) => dungeonLevel(p), coins: 25000, essence: 25 },
   { id: "dungeon10", name: "Crypt Crawler", desc: "Reach Dungeon level 10", goal: 10, cur: (p) => dungeonLevel(p), coins: 1000000, essence: 250 },
-  { id: "spirit10", name: "Spirit Seeker", desc: "Find 10 Spirits", goal: 10, cur: (p) => found(p).size, coins: 100000 },
+  { id: "spirit10", name: "Spirit Seeker", desc: "Collect 10 Spirits", goal: 10, cur: (p) => spiritCount(p), coins: 100000 },
 ];
 
 // ---- commissions (daily) ----
@@ -400,6 +380,23 @@ export function registerExtras() {
     }
     bump(player, "kill:any");
     bump(player, "kill:" + id);
+    let dg, boss;
+    try {
+      dg = dead.getDynamicProperty("eco:dg");
+      boss = dead.getDynamicProperty("eco:dgboss");
+    } catch {}
+    if (dg) {
+      const chance = (boss ? SPIRIT_BOSS_CHANCE : SPIRIT_CHANCE) * (1 + Math.max(0, stat(player, "mf")) / 100);
+      if (Math.random() * 100 < chance) {
+        addSpirit(player);
+        const n = spiritCount(player);
+        player.sendMessage(`§b§lSPIRIT FOUND! §r§7A spirit drifted out of the ${boss ? "boss" : "mob"}. §8(${n} collected)${n % 5 === 0 ? " §aTrade 5 in Profile > Spirits!" : ""}`);
+        player.playSound("random.orb", { pitch: 0.6 });
+        try {
+          player.dimension.spawnParticle("minecraft:totem_particle", dead.location);
+        } catch {}
+      }
+    }
     let sea;
     try {
       sea = dead.getDynamicProperty("eco:sea");
@@ -422,61 +419,18 @@ export function registerExtras() {
     if (id === "minecraft:stone" || id === "minecraft:cobblestone" || id === "minecraft:deepslate" || id === "minecraft:cobbled_deepslate") bump(player, "break:stone");
     else if (/_(log|stem)$/.test(id)) bump(player, "break:log");
   });
-  world.afterEvents.worldLoad.subscribe(() => system.runInterval(spiritTick, 10));
 }
 
 // ---- admin tiles ----
 export function adminSpiritTiles(player, back) {
   return [
     {
-      text: "§b§lPLACE SPIRIT",
-      sub: "§7On the block you stand on",
+      text: "§b§lGIVE SPIRIT",
+      sub: "§7+1 for testing",
       icon: "textures/items/nether_star",
       onClick: () => {
-        const all = spirits();
-        const l = player.location;
-        // spirits sit on a block: find the solid block under you (up to 6 blocks down)
-        let ground;
-        for (let y = Math.floor(l.y); y >= Math.floor(l.y) - 6; y--) {
-          try {
-            const b = player.dimension.getBlock({ x: Math.floor(l.x), y, z: Math.floor(l.z) });
-            if (b && !b.isAir && !b.isLiquid) {
-              ground = y;
-              break;
-            }
-          } catch {}
-        }
-        if (ground === undefined) {
-          fail(player, "Stand on a block to place a Spirit (there's no block under you).");
-          return back();
-        }
-        all.push({ id: Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36), x: Math.floor(l.x) + 0.5, y: ground + 1.5, z: Math.floor(l.z) + 0.5, dim: player.dimension.id });
-        world.setDynamicProperty(SP_KEY, JSON.stringify(all.slice(-300)));
-        success(player, `Placed a Spirit (${all.length} in the world).`);
-        return back();
-      },
-    },
-    {
-      text: "§c§lREMOVE SPIRIT",
-      sub: "§7Nearest (10 blocks)",
-      icon: ICON.cancel,
-      onClick: () => {
-        const all = spirits();
-        const l = player.location;
-        let best = -1, bd = 100;
-        all.forEach((s, i) => {
-          const d = (s.x - l.x) ** 2 + (s.y - l.y) ** 2 + (s.z - l.z) ** 2;
-          if (s.dim === player.dimension.id && d < bd) {
-            bd = d;
-            best = i;
-          }
-        });
-        if (best < 0) fail(player, "No spirit within 10 blocks.");
-        else {
-          all.splice(best, 1);
-          world.setDynamicProperty(SP_KEY, JSON.stringify(all));
-          success(player, "Removed the nearest Spirit.");
-        }
+        addSpirit(player);
+        success(player, `You now have ${spiritCount(player)} spirits.`);
         return back();
       },
     },

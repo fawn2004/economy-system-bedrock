@@ -171,12 +171,19 @@ async function petMenu(player, u, back) {
   const tiles = [
     {
       text: active ? "§c§lDESPAWN" : "§a§lSUMMON",
-      sub: active ? "§7Put it away" : "§7Make it active",
+      sub: active ? "§7Put it away" : activePet(player) ? `§7Swaps out your ${PET_TYPES[activePet(player).t].name}` : "§7Make it active",
       icon: active ? ICON.cancel : ICON.confirm,
       onClick: () => {
+        const prev = activePet(player); // only one pet can be out at a time
         player.setDynamicProperty("eco:petOn", active ? undefined : u);
         invalidate(player);
-        success(player, active ? `Despawned your ${t.name}.` : `Summoned your ${t.name}!`);
+        despawnFollower(player.id);
+        const name = (p) => `${RARITIES[p.r].color}${PET_TYPES[p.t].name} §7(Lv ${petLevel(p.xp, p.r).level})`;
+        if (active) success(player, `Put away your ${PET_TYPES[pet.t].name}.`);
+        else if (prev && prev.u !== u) {
+          player.sendMessage(`§e§lPETS §r§7Put away your ${name(prev)}§7 and brought out your ${name(pet)}§7!`);
+          player.playSound("random.pop");
+        } else success(player, `Summoned your ${PET_TYPES[pet.t].name}!`);
         return back();
       },
     },
@@ -280,6 +287,15 @@ function despawnFollower(playerId) {
 
 function followTick() {
   const t = system.currentTick;
+  if (t % 40 === 0) {
+    // remove any stray pet entity that isn't the one following its owner (e.g. left over after lag)
+    const keep = new Set([...followers.values()].filter((e) => e?.isValid).map((e) => e.id));
+    for (const id of ["minecraft:overworld", "minecraft:nether", "minecraft:the_end"]) {
+      try {
+        for (const e of world.getDimension(id).getEntities({ type: PET_ENTITY })) if (!keep.has(e.id)) e.remove();
+      } catch {}
+    }
+  }
   for (const pl of world.getAllPlayers()) {
     const pet = activePet(pl);
     let e = followers.get(pl.id);
