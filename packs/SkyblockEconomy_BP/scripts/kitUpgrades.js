@@ -9,6 +9,7 @@ import { skillLevel } from "./skills.js";
 import { countCustom, takeCustom } from "./slayer.js";
 import { invalidate, statSources } from "./stats.js";
 import { ICON, backTile, fail, showForm, success, tileMenu } from "./ui.js";
+import { itemIcon } from "./itemData.js";
 
 // ============================================================================
 //  UPGRADABLE KITS
@@ -225,6 +226,42 @@ function upgrade(player, line) {
   player.playSound("random.anvil_use");
 }
 
+// ---- kit preview: every item as a slot, hover to see it ------------------------
+const VANILLA_NAMES = { luck_of_the_sea: "Luck of the Sea", fire_aspect: "Fire Aspect" };
+const vanillaName = (e) => VANILLA_NAMES[e] ?? pretty(e);
+
+/** Shows what a kit level gives: one slot per item (hover = its name, stats, enchants...). */
+function kitPreviewMenu(player, line, t, back) {
+  const L = LINES[line];
+  const tiles = [];
+  for (const spec of L.gear(t)) {
+    const st = buildStack(spec);
+    if (!st) continue;
+    const lore = st.getLore().filter((l) => !l.startsWith("§8eco:"));
+    const vanilla = Object.entries(spec.ench ?? {}).map(([e, l]) => `§7${vanillaName(e)} ${roman(l)}`);
+    tiles.push({
+      text: st.nameTag ?? pretty(st.typeId),
+      sub: [...(vanilla.length ? [...vanilla, ""] : []), ...lore].join("\n"),
+      icon: itemIcon(st.typeId),
+      noClick: true,
+      onClick: () => kitPreviewMenu(player, line, t, back),
+    });
+  }
+  L.supplies(t).forEach(([id, n], i) =>
+    tiles.push({ text: `§f${n}x ${pretty(id)}`, sub: "§7Supplies (kit item)", icon: itemIcon(id), newRow: i === 0, noClick: true, onClick: () => kitPreviewMenu(player, line, t, back) })
+  );
+  if (L.essence) tiles.push({ text: `§d${L.essence(t)} Essence`, sub: "§7Added to your Essence", icon: "textures/items/amethyst_shard", noClick: true, onClick: () => kitPreviewMenu(player, line, t, back) });
+  const perk = Object.entries(perkStats(line, t)).map(([k, v]) => `§a+${v} ${k}`).join("\n");
+  tiles.push({ text: "§6Kit Perk", sub: `${perk}\n§7${L.perkText}${t >= MAX_LEVEL ? "\n§6+25% (maxed)" : ""}`, icon: "textures/items/nether_star", newRow: true, noClick: true, onClick: () => kitPreviewMenu(player, line, t, back) });
+  tiles.push(backTile(back));
+  return tileMenu(player, {
+    title: `${L.name} Level ${t}`,
+    theme: "gold",
+    body: `§6§l${L.name} - level ${t}${t >= MAX_LEVEL ? " (MAXED)" : ""}§r\n§7Hover over an item to see its stats and enchantments.`,
+    tiles,
+  });
+}
+
 // ---- menus -------------------------------------------------------------------
 export async function kitUpgradesMenu(player, back) {
   const again = () => kitUpgradesMenu(player, back);
@@ -265,6 +302,7 @@ async function kitLineMenu(player, line, back) {
   } else lines.push(`§7Perk: §a${L.perkText}`);
   const tiles = [];
   if (t) tiles.push({ text: "§aClaim Kit", sub: `§7Every ${CLAIM_HOURS}h`, icon: ICON.confirm, onClick: () => (claim(player, line), again()) });
+  if (t) tiles.push({ text: `§eView Your Kit (Level ${t})`, sub: "§7See every item", icon: L.icon, onClick: () => kitPreviewMenu(player, line, t, again) });
   if (next <= MAX_LEVEL) {
     const coins = upgradeCost(line, next);
     const need = reqFor(line, next);
@@ -286,13 +324,7 @@ async function kitLineMenu(player, line, back) {
       text: `§bPreview Level ${next}`,
       sub: "§7See what you'd get",
       icon: "textures/items/book_writable",
-      onClick: () =>
-        tileMenu(player, {
-          title: `${L.name} Level ${next}`,
-          theme: "gold",
-          body: [`§6§l${L.name} - level ${next}${next === MAX_LEVEL ? " (MAXED)" : ""}`, ...contentsText(line, next), `§7Perk: §a${Object.entries(perkStats(line, next)).map(([k, v]) => `+${v} ${k}`).join(", ")}`].join("\n"),
-          tiles: [backTile(again)],
-        }),
+      onClick: () => kitPreviewMenu(player, line, next, again),
     });
   }
   tiles.push(backTile(back));

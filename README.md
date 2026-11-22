@@ -106,7 +106,8 @@ Main menu > **Kits** (or Shop > Kits > Upgradable Kits). Six kit lines, each lev
   (it can still be reforged / enchanted further).
 - Upgrades cost coins (doubling each level), need a skill level (2 per level; Dungeon Kit:
   Dungeon level) and, at the top, slayer materials (Combat Lv 6-10) or Essence (Dungeon).
-- **Preview** shows exactly what the next level gives. Admins can set kit levels in Admin > RPG.
+- **Preview** (next level) and **View Your Kit** (current level) show every item as a slot: hover to
+  see its stats, enchantments and stars. Admins can set kit levels in Admin > RPG.
 
 ## Pets
 
