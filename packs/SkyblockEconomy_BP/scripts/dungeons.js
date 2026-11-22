@@ -36,35 +36,35 @@ const FLOORS = [
     boss: { type: "minecraft:zombie", name: "§4§lThe Gravekeeper", hp: 2000, atk: 4 },
     pal: { wall: "stone_bricks", floor: "mossy_stone_bricks", accent: "cracked_stone_bricks", light: "sea_lantern" },
     xp: 40, essence: [5, 15], coins: 5000, chests: [25000, 75000],
-    loot: [["crypt_blade", 5], ["crypt_helmet", 4], ["crypt_chestplate", 3], ["crypt_leggings", 3], ["crypt_boots", 4], ["crypt_ring", 2], ["gravebloom_hoe", 3], ["crypt_pick", 3], ["rotwood_axe", 3], ["drowned_rod", 2], ["crypt_lantern", 1], ["ancient_coin", 18], ["crypt_relic", 6], ["@essence", 20, 10, 30], ["@coins", 20, 5000, 15000]],
+    loot: [["crypt_blade", 5], ["crypt_helmet", 4], ["crypt_chestplate", 3], ["crypt_leggings", 3], ["crypt_boots", 4], ["gravebloom_hoe", 3], ["crypt_pick", 3], ["rotwood_axe", 3], ["drowned_rod", 2], ["ancient_coin", 18], ["crypt_relic", 6], ["@essence", 20, 10, 30], ["@coins", 20, 5000, 15000]],
   },
   {
     name: "Floor II", level: 2, fee: 5000, rooms: 6, mobHp: 150, atk: 4, mobs: ["minecraft:zombie", "minecraft:skeleton", "minecraft:spider"], count: [4, 6],
     boss: { type: "minecraft:skeleton", name: "§4§lThe Bone Regent", hp: 6000, atk: 7 },
     pal: { wall: "deepslate_bricks", floor: "deepslate_tiles", accent: "cracked_deepslate_bricks", light: "sea_lantern" },
     xp: 90, essence: [10, 25], coins: 15000, chests: [75000, 200000],
-    loot: [["crypt_chestplate", 3], ["crypt_leggings", 3], ["crypt_ring", 3], ["bonebreaker", 2], ["spirit_staff", 1], ["phantom_helmet", 1], ["phantom_boots", 1], ["gravebloom_hoe", 3], ["crypt_pick", 3], ["rotwood_axe", 3], ["drowned_rod", 3], ["crypt_lantern", 1.5], ["ancient_coin", 12], ["crypt_relic", 10], ["bone_idol", 4], ["@essence", 20, 20, 50], ["@coins", 18, 10000, 30000]],
+    loot: [["crypt_chestplate", 3], ["crypt_leggings", 3], ["bonebreaker", 2], ["spirit_staff", 1], ["phantom_helmet", 1], ["phantom_boots", 1], ["gravebloom_hoe", 3], ["crypt_pick", 3], ["rotwood_axe", 3], ["drowned_rod", 3], ["ancient_coin", 12], ["crypt_relic", 10], ["bone_idol", 4], ["@essence", 20, 20, 50], ["@coins", 18, 10000, 30000]],
   },
   {
     name: "Floor III", level: 5, fee: 25000, rooms: 7, mobHp: 400, atk: 7, mobs: ["minecraft:zombie", "minecraft:stray", "minecraft:wither_skeleton"], count: [4, 7],
     boss: { type: "minecraft:wither_skeleton", name: "§4§lThe Hollow King", hp: 18000, atk: 11 },
     pal: { wall: "polished_blackstone_bricks", floor: "blackstone", accent: "gilded_blackstone", light: "shroomlight" },
     xp: 180, essence: [20, 45], coins: 40000, chests: [200000, 600000],
-    loot: [["bonebreaker", 3], ["spirit_staff", 2], ["phantom_helmet", 3], ["phantom_chestplate", 2], ["phantom_leggings", 2], ["phantom_boots", 3], ["phantom_scythe", 2], ["phantom_drill", 2], ["spectral_hatchet", 2], ["phantom_rod", 1.5], ["crypt_lantern", 2], ["ash_crown", 0.5], ["crypt_relic", 10], ["bone_idol", 8], ["hollow_crown_shard", 3], ["@essence", 20, 40, 90], ["@coins", 15, 30000, 80000]],
+    loot: [["bonebreaker", 3], ["spirit_staff", 2], ["phantom_helmet", 3], ["phantom_chestplate", 2], ["phantom_leggings", 2], ["phantom_boots", 3], ["phantom_scythe", 2], ["phantom_drill", 2], ["spectral_hatchet", 2], ["phantom_rod", 1.5], ["crypt_relic", 10], ["bone_idol", 8], ["hollow_crown_shard", 3], ["@essence", 20, 40, 90], ["@coins", 15, 30000, 80000]],
   },
   {
     name: "Floor IV", level: 9, fee: 100000, rooms: 8, mobHp: 1000, atk: 11, mobs: ["minecraft:husk", "minecraft:wither_skeleton", "minecraft:vindicator"], count: [5, 7],
     boss: { type: "minecraft:ravager", name: "§4§lThe Ash Warden", hp: 50000, atk: 16 },
     pal: { wall: "nether_bricks", floor: "red_nether_bricks", accent: "chiseled_nether_bricks", light: "shroomlight" },
     xp: 350, essence: [40, 90], coins: 100000, chests: [600000, 2000000],
-    loot: [["phantom_chestplate", 3], ["phantom_leggings", 3], ["phantom_scythe", 3], ["phantom_drill", 3], ["spectral_hatchet", 3], ["phantom_rod", 2.5], ["sovereign_helmet", 1], ["sovereign_boots", 1], ["ash_crown", 1], ["kingsbane", 0.3], ["spirit_staff", 2], ["sovereign_lantern", 0.5], ["bone_idol", 8], ["hollow_crown_shard", 6], ["ashen_ember", 3], ["@essence", 20, 80, 160], ["@coins", 15, 80000, 200000]],
+    loot: [["phantom_chestplate", 3], ["phantom_leggings", 3], ["phantom_scythe", 3], ["phantom_drill", 3], ["spectral_hatchet", 3], ["phantom_rod", 2.5], ["sovereign_helmet", 1], ["sovereign_boots", 1], ["kingsbane", 0.3], ["spirit_staff", 2], ["bone_idol", 8], ["hollow_crown_shard", 6], ["ashen_ember", 3], ["@essence", 20, 80, 160], ["@coins", 15, 80000, 200000]],
   },
   {
     name: "Floor V", level: 14, fee: 500000, rooms: 9, mobHp: 2500, atk: 16, mobs: ["minecraft:wither_skeleton", "minecraft:vindicator", "minecraft:blaze", "minecraft:enderman"], count: [5, 8],
     boss: { type: "minecraft:wither_skeleton", name: "§4§lThe Undying Sovereign", hp: 150000, atk: 24 },
     pal: { wall: "end_stone_bricks", floor: "purpur_block", accent: "purpur_pillar", light: "sea_lantern" },
     xp: 700, essence: [80, 180], coins: 250000, chests: [2000000, 6000000],
-    loot: [["sovereign_helmet", 2], ["sovereign_chestplate", 1.5], ["sovereign_leggings", 1.5], ["sovereign_boots", 2], ["kingsbane", 1], ["ash_crown", 2], ["sovereign_sickle", 1.5], ["sovereign_excavator", 1.5], ["sovereign_timberaxe", 1.5], ["sovereign_rod", 1.2], ["sovereign_lantern", 1], ["@pet", 0.2, "drake"], ["hollow_crown_shard", 8], ["ashen_ember", 6], ["sovereign_jewel", 2], ["@essence", 20, 150, 300], ["@coins", 15, 200000, 500000]],
+    loot: [["sovereign_helmet", 2], ["sovereign_chestplate", 1.5], ["sovereign_leggings", 1.5], ["sovereign_boots", 2], ["kingsbane", 1], ["sovereign_sickle", 1.5], ["sovereign_excavator", 1.5], ["sovereign_timberaxe", 1.5], ["sovereign_rod", 1.2], ["@pet", 0.2, "drake"], ["hollow_crown_shard", 8], ["ashen_ember", 6], ["sovereign_jewel", 2], ["@essence", 20, 150, 300], ["@coins", 15, 200000, 500000]],
   },
 ];
 
@@ -78,7 +78,7 @@ export const CLASSES = {
 
 // Essence shop: [item id, essence]
 const ESSENCE_SHOP = [
-  ["crypt_helmet", 80], ["crypt_chestplate", 120], ["crypt_leggings", 100], ["crypt_boots", 80], ["crypt_blade", 150], ["crypt_ring", 200],
+  ["crypt_helmet", 80], ["crypt_chestplate", 120], ["crypt_leggings", 100], ["crypt_boots", 80], ["crypt_blade", 150],
   ["spirit_staff", 1200], ["bonebreaker", 1500],
 ];
 const STAR_COST = [25, 50, 100, 200, 400];

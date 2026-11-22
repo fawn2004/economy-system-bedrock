@@ -59,11 +59,11 @@ Sea Creature Chance**. See them in **Profile > Stats** (with a breakdown of wher
 
 Stats come from: base, skill levels (Farming/Fishing give Health, Mining Defense, Combat
 Crit Chance, Foraging Strength, Excavating Mining Speed), armor, the held weapon/tool, full
-armor set bonuses, pets, accessories, slayer levels, spirits, the mayor and your dungeon class.
+armor set bonuses, pets, slayer levels, spirits, the mayor and your dungeon class.
 
 **Items** (`items.js`) are vanilla items with a name and lore, so they stack, trade and work on
 the Auction House. Each has a **rarity** (Common, Uncommon, Rare, Epic, Legendary, Mythic) and
-stats. There are about 80: shop gear (Shop > **Equipment**), accessories (Shop > **Accessories**),
+stats. There are about 80: shop gear (Shop > **Equipment**: custom weapons, armor and tools with stats),
 slayer gear, dungeon gear and boss materials. Plain vanilla weapons, armor and tools can be
 reforged and enchanted too.
 
@@ -119,11 +119,6 @@ enough. Only one pet is out at a time: summoning another puts the current one aw
 which). Your active pet floats next to you as a little head (the `eco:pet` entity, made by
 `tools/generate_pets.py`). **To Item** turns a pet into a spawn egg to trade or auction; using it adds it back.
 
-## Accessory Bag
-
-**Profile > Accessory Bag**. Accessories give stats while they're in the bag. Only the best one
-of each family counts (Swift Charm < Swift Ring < Swift Artifact). 9 slots, upgradable to 45.
-
 ## Slayer
 
 Main menu > **Slayer**. Pick a boss and tier, kill that type of mob, and the boss spawns next
@@ -172,8 +167,8 @@ The party is teleported to a dungeon built in the sky far away (x 30000+, y 200)
 - **Quests**: 3 random **commissions** a day (kill mobs, mine stone, chop logs, earn skill XP):
   $10k each, $25k bonus for all 3. Plus 17 one-time **milestones** (skill levels, bank, pets,
   slayer, dungeons...).
-- **Daily Reward**: $1,000 x your streak (up to 30). Every 7th day adds an accessory and 25
-  Essence. Miss more than 48 hours and the streak starts again.
+- **Daily Reward**: $1,000 x your streak (up to 30). Every 7th day adds a triple-coin bonus and
+  25 Essence. Miss more than 48 hours and the streak starts again.
 - **Spirits**: every mob you kill in a dungeon has a 3% chance to drop a spirit (bosses 25%;
   Magic Find raises both). Every 5 can be traded in **Profile > Spirits** for +2 Health,
   +1 Defense, +1 Strength, +1 Speed forever. Admins can give spirits in Admin > RPG.
@@ -258,11 +253,11 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 
 ## Skill tools & collections
 
-- **Farming Hoe / Slayer Sword** (Shop > Skill Tools) gain XP when used (fully grown crops /
+- **Farming Hoe / Slayer Sword** (Shop > Skill Tools) are wooden tools that never break. They gain XP when used (fully grown crops /
   mob kills) and level up automatically to level 10. Levels 1-3 are free; higher levels
   also need a total Farming / Combat collection. Hoe: bonus crop drops, auto-replant from
   level 3. Sword: bonus mob drops, extra enchanted-head chance, Sharpness as it levels.
-  They never break and are kept on death.
+  They are kept on death.
 - **Collections** (main menu): every crop and spawner mob has a counter with 5 tiers;
   each tier pays money once and adds a permanent bonus drop chance for that crop/mob.
   Hand-placed melons, pumpkins, sugar cane and cactus don't count.
@@ -494,3 +489,11 @@ Otherwise the vanilla one is, so other add-ons' menus are unaffected.
   `ui/hud_screen.json` draws it on the right as a grey panel with a gold border (`textures/ui/eco/sidebar_bg`): date, in-game season / day / time,
   location, purse, bank, your current objective (slayer quest, dungeon run or a daily
   commission) and the footer.
+
+## Removed from the shop
+
+Shulker boxes, bundles, firework rockets, poisonous potatoes, honey bottles, pufferfish, bone
+blocks, beehives, chipped / damaged anvils, jukeboxes, music discs, straw beds, harnesses,
+brushes, horse and nautilus armor, maps, name tags, leads, (calibrated) sculk sensors, minecarts,
+weighted pressure plates and shulker shells are not sold (`HIDE_EXACT` / `HIDE_RE` in
+`tools/generate_prices.py`). Accessories were removed from the add-on.

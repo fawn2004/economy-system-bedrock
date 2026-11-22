@@ -360,7 +360,26 @@ function isGrown(perm, crop) {
 }
 
 // ---- events ------------------------------------------------------------------
+/** Skill tools never break: put their durability back after they're used. */
+function repairHeldTool(player) {
+  try {
+    const inv = player.getComponent("minecraft:inventory")?.container;
+    const slot = player.selectedSlotIndex;
+    const item = inv?.getItem(slot);
+    if (!readTool(item)) return;
+    const dur = item.getComponent("minecraft:durability");
+    if (!dur || dur.damage === 0) return;
+    dur.damage = 0;
+    inv.setItem(slot, item);
+  } catch {}
+}
+
 export function registerTools() {
+  world.afterEvents.playerBreakBlock.subscribe(({ player }) => system.run(() => repairHeldTool(player)));
+  world.afterEvents.entityHitEntity?.subscribe(({ damagingEntity }) => {
+    if (damagingEntity?.typeId === "minecraft:player") system.run(() => repairHeldTool(damagingEntity));
+  });
+  world.afterEvents.playerInteractWithBlock?.subscribe(({ player }) => system.run(() => repairHeldTool(player))); // tilling with the hoe
   // sneak + use (tap the air or a block) with a skill tool -> upgrade menu
   const open = (player) => upgradeMenu(player).catch((e) => console.warn("[eco] " + e));
   world.afterEvents.itemUse.subscribe(({ source, itemStack }) => {

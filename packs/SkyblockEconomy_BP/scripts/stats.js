@@ -9,7 +9,7 @@ import { backTile, fail, tileMenu } from "./ui.js";
 //  Every player has stats (Health, Defense, Strength, Crit Chance/Damage,
 //  Speed, Intelligence, Magic Find, fortunes...). They add up from:
 //    base + skill levels + armor + held weapon/tool + full-set bonuses
-//    + anything other systems register in `statSources` (pets, accessories,
+//    + anything other systems register in `statSources` (pets,
 //      spirits, mayor, dungeon class...)
 //  How they work in game:
 //    Health   extra hearts (Health Boost)        Speed  Speed effect

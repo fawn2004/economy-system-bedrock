@@ -1,0 +1,64 @@
+SKYBLOCK ECONOMY v1.0.54 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+REMOVED FROM THE SHOP
+[ ] Poisonous Potato
+[ ] Honey Bottle
+[ ] Pufferfish
+[ ] Bone Block
+[ ] Beehive (farming)
+[ ] Chipped Anvil and Damaged Anvil (misc)
+[ ] Jukebox
+[ ] Music discs (and disc fragments)
+[ ] Straw Bed
+[ ] Harnesses (tools & armour)
+[ ] Brush (tools & armour)
+[ ] Copper (and all) Nautilus Armour (tools & armour)
+[ ] Horse Armour (tools & armour)
+[ ] Empty Map (tools & armour)
+[ ] Name Tag
+[ ] Lead (tools & armour)
+[ ] Calibrated Sculk Sensor
+[ ] Sculk Sensor
+[ ] All minecarts
+[ ] Heavy Weighted Pressure Plate
+[ ] Light Weighted Pressure Plate
+[ ] Shulker Shell
+
+MOVED
+[ ] Rotten Flesh is out of Food (now in Mob Drops)
+[ ] Sugar is in Brewing (potions)
+[ ] Spider Eye is in Brewing (potions)
+[ ] Enchanted Golden Apple is in Food (not Treasure)
+
+ICONS
+[ ] Misc: Anvil
+[ ] Misc: Blast Furnace
+[ ] Misc: Cartography Table
+[ ] Misc: Chest
+[ ] Misc: Enchanting Table
+[ ] Misc: Furnace
+[ ] Misc: Grindstone
+[ ] Misc: Lectern
+[ ] Misc: Loom
+[ ] Misc: Smoker
+[ ] Misc: Stonecutter
+[ ] Tools & Armour: Shield
+[ ] Redstone: all buttons look like buttons
+[ ] Redstone: all pressure plates look like pressure plates
+[ ] Redstone: Lightning Rod, Exposed, Weathered, Oxidized (and waxed) lightning rods
+[ ] Mob Drops: Skeleton Skull, Wither Skeleton Skull, Zombie Head, Creeper Head, Piglin Head, Dragon Head
+[ ] Treasure: Dragon Egg
+[ ] Treasure: Heavy Core
+
+KITS & SKILL TOOLS
+[ ] Shop > Kits no longer has the Upgradable Kits tile (it's in the main menu)
+[ ] Farming Hoe (skill tool) is a wooden hoe and never breaks
+[ ] Slayer Sword (skill tool) is a wooden sword and never breaks
+[ ] Farming Hoe gains XP when farming (already a feature - check it still works)
+
+ACCESSORIES REMOVED
+[ ] No Accessories category in the shop
+[ ] No Accessory Bag in Profile
+[ ] Dungeon chests, slayer drops and the slayer shop no longer give accessories
+[ ] 7th-day Daily Reward gives a coin bonus + 25 Essence instead of an accessory

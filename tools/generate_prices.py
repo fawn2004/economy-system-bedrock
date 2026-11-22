@@ -175,6 +175,9 @@ CONTAINER = {"milk_bucket": "bucket", "water_bucket": "bucket", "lava_bucket": "
 # ---------------------------------------------------------------------------
 CATEGORY_RULES = [
     # --- specific placements (asked for by the server owner) ---
+    ("brewing", r"^(sugar|spider_eye)$"),
+    ("food", r"^enchanted_golden_apple$"),
+    ("mobs", r"^rotten_flesh$"),
     ("ores", r"^(brick|resin_brick)$"),
     ("misc", r"(_bed$|^bed$|^torch$|^soul_torch$|^copper_torch$|^bowl$|^stick$|^campfire$|^soul_campfire$|^paper$|^writable_book$|^snowball$)"),
     ("natural_flowers", r"(^(dandelion|poppy|blue_orchid|allium|azure_bluet|oxeye_daisy|cornflower|lily_of_the_valley|"
@@ -315,6 +318,45 @@ CATEGORY_INFO = {
 for _c in COLORS:
     _n = " ".join(w.capitalize() for w in _c.split("_"))
     CATEGORY_INFO[f"colored_{_c}"] = (_n, f"Everything {_n.lower()}", f"@{_c}_wool", "purple", "colored")
+
+# Items hidden from the shop (still used to work out other prices, so nothing else changes)
+HIDE_EXACT = {
+    "poisonous_potato", "honey_bottle", "pufferfish", "bone_block", "beehive", "chipped_anvil", "damaged_anvil",
+    "jukebox", "straw_bed", "brush", "empty_map", "map", "name_tag", "lead", "calibrated_sculk_sensor",
+    "sculk_sensor", "heavy_weighted_pressure_plate", "light_weighted_pressure_plate", "shulker_shell",
+}
+HIDE_RE = re.compile(r"(^music_disc_|^disc_fragment|_harness$|_horse_armor$|_nautilus_armor$|minecart$)")
+
+# Icons drawn from specific textures: item -> (shape, side, top, front); each texture is
+# "textures/..." or ("textures/...", (x0, y0, x1, y1)) to use part of the image.
+B = "textures/blocks/"
+SKULL = lambda f: ((f, (0, 8, 8, 16)), (f, (8, 0, 16, 8)), (f, (8, 8, 16, 16)))
+MANUAL_ICONS = {
+    "blast_furnace": ("cube", B + "blast_furnace_side", B + "blast_furnace_top", B + "blast_furnace_front_off"),
+    "furnace": ("cube", B + "furnace_side", B + "furnace_top", B + "furnace_front_off"),
+    "smoker": ("cube", B + "smoker_side", B + "smoker_top", B + "smoker_front_off"),
+    "loom": ("cube", B + "loom_side", B + "loom_top", B + "loom_front"),
+    "cartography_table": ("cube", B + "cartography_table_side3", B + "cartography_table_top", B + "cartography_table_side1"),
+    "chest": ("chest", B + "chest_side", B + "chest_top", B + "chest_front"),
+    "enchanting_table": ("table12", B + "enchanting_table_side", B + "enchanting_table_top", None),
+    "stonecutter_block": ("table9", B + "stonecutter2_side", B + "stonecutter2_top", None),
+    "lectern": ("lectern", B + "lectern_sides", B + "lectern_top", B + "lectern_front"),
+    "grindstone": ("grindstone", B + "grindstone_side", B + "grindstone_round", B + "grindstone_side"),
+    "anvil": ("anvil", B + "anvil_base", B + "anvil_top_damaged_0", None),
+    "dragon_egg": ("egg", B + "dragon_egg", None, None),
+    "heavy_core": ("heavy", B + "heavy_core", None, None),
+    "skeleton_skull": ("cube",) + SKULL("textures/entity/skulls/skeleton"),
+    "wither_skeleton_skull": ("cube",) + SKULL("textures/entity/skulls/wither_skeleton"),
+    "zombie_head": ("cube",) + SKULL("textures/entity/skulls/zombie"),
+    "creeper_head": ("cube",) + SKULL("textures/entity/skulls/creeper"),
+    "piglin_head": ("cube", ("textures/entity/piglin/piglin", (0, 8, 8, 16)), ("textures/entity/piglin/piglin", (8, 0, 18, 8)), ("textures/entity/piglin/piglin", (8, 8, 18, 16))),
+    "dragon_head": ("cube", ("textures/entity/dragon/dragon", (112, 46, 128, 62)), ("textures/entity/dragon/dragon", (128, 30, 144, 46)), ("textures/entity/dragon/dragon", (128, 46, 144, 62))),
+    # flat picture cut out of a texture
+    "shield": ("flat", ("textures/entity/shield", (1, 1, 13, 23)), None, None),
+}
+for _r in ("lightning_rod", "exposed_lightning_rod", "weathered_lightning_rod", "oxidized_lightning_rod"):
+    MANUAL_ICONS[_r] = ("lrod", B + _r, None, None)
+    MANUAL_ICONS["waxed_" + _r] = ("lrod", B + _r, None, None)
 
 # Items listed first (in this order) in their category; the rest follow by name.
 ORDER_FIRST = ["bucket", "water_bucket", "lava_bucket", "cod_bucket", "salmon_bucket", "tropical_fish_bucket",
@@ -725,7 +767,7 @@ def main(src):
         "axolotl_bucket": "bucket_axolotl", "tadpole_bucket": "bucket_tadpole",
         "oak_sign": "sign", "dark_oak_boat": "boat_darkoak", "dark_oak_sign": "sign_darkoak", "grass_block": "../blocks/grass_side_carried", "sea_lantern": "../blocks/sea_lantern",
         "bamboo_raft": "bamboo_raft", "bamboo_chest_raft": "bamboo_chest_raft",
-        "sulfur_cube_bucket": "bucket_sulfur_cube",
+        "sulfur_cube_bucket": "bucket_sulfur_cube", "shield": "shield",
     }
 
     def guess(n):
@@ -813,15 +855,47 @@ def main(src):
         ("cube", r"(_wool$|_concrete$|_concrete_powder$|_terracotta$|^terracotta$|^hardened_clay$|stained_glass$|"
                  r"^glass$|^tinted_glass$|^nether_brick$)"),
         ("shelf", r"_shelf$"),
+        ("button", r"_button$"),
+        ("plate", r"_pressure_plate$"),
         ("rod", r"^end_rod$"),
     ]
 
+    def face(spec):
+        if not spec:
+            return None
+        path, crop = (spec, None) if isinstance(spec, str) else spec
+        f = file_of(path)
+        if not f:
+            return None
+        img = iso_icons.load_full(f)
+        if crop:
+            img = img.crop(crop)
+        elif img.size[1] > img.size[0]:
+            img = img.crop((0, 0, img.size[0], img.size[0]))
+        return img
+
     def shop_icon(n):
+        if n in MANUAL_ICONS:
+            shape, side, top, front = MANUAL_ICONS[n]
+            si = face(side)
+            if si and shape == "flat":
+                from PIL import Image
+                k = min(56 / si.size[0], 56 / si.size[1])
+                pic = si.resize((max(1, int(si.size[0] * k)), max(1, int(si.size[1] * k))), Image.NEAREST)
+                canvas = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+                canvas.alpha_composite(pic, ((64 - pic.size[0]) // 2, (64 - pic.size[1]) // 2))
+                canvas.save(os.path.join(shop_dir, n + ".png"))
+                made.add(n + ".png")
+                return "textures/ui/eco/shop/" + n
+            if si:
+                iso_icons.render(shape, si, face(top) or si, face(front), os.path.join(shop_dir, n + ".png"))
+                made.add(n + ".png")
+                return "textures/ui/eco/shop/" + n
         shape = next((sh for sh, r in SHAPE_RULES if re.search(r, n)), None)
         if not shape:
             # a flat inventory picture in textures/items wins over a block texture (lanterns, chains...)
             ic = icon(n)
-            if ic and ic.startswith("textures/blocks/"):
+            if ic and (ic.startswith("textures/blocks/") or ic.startswith("textures/entity/")):
                 for cand in (n, re.sub(r"^waxed_", "", n)):
                     if file_of("textures/items/" + cand):
                         return "textures/items/" + cand
@@ -878,7 +952,7 @@ def main(src):
     rows = []
     no_icon = 0
     for n in ITEMS:
-        if n not in buy:
+        if n not in buy or n in HIDE_EXACT or HIDE_RE.search(n):
             continue
         ic = shop_icon(n)
         if not ic:

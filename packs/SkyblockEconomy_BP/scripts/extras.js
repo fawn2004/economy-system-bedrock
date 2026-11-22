@@ -6,7 +6,6 @@ import { deserializeItem, serializeItem } from "./itemData.js";
 import { ITEMS, RARITIES, makeItem } from "./items.js";
 import { mayorIs } from "./mayor.js";
 import { getPets, petLevel } from "./pets.js";
-import { accessoryStats } from "./accessories.js";
 import { SLAYERS, slayerLevel } from "./slayer.js";
 import { addEssence, dungeonLevel } from "./dungeons.js";
 import { addSkillXp, skillHooks, skillIds, skillLevel } from "./skills.js";
@@ -44,7 +43,6 @@ function give(player, stack) {
 // ============================================================================
 //  DAILY REWARD
 // ============================================================================
-const ACC_REWARDS = ["speed_charm_1", "vital_1", "iron_1", "power_1", "keen_1", "wise_1"];
 
 export async function dailyMenu(player, back) {
   const again = () => dailyMenu(player, back);
@@ -62,7 +60,7 @@ export async function dailyMenu(player, back) {
     theme: "gold",
     body: [
       `§7Streak: §6§l${d.streak} day${d.streak === 1 ? "" : "s"}${ready && !keeps && d.streak ? " §r§c(missed - starts again)" : ""}`,
-      ready ? `§7Today's reward (day ${streak}): §a${fmt(coins)}${special ? " §d+ an accessory and 25 Essence!" : ""}` : `§7Next reward in §e${Math.floor(wait / HOUR)}h ${Math.floor((wait % HOUR) / 60000)}m`,
+      ready ? `§7Today's reward (day ${streak}): §a${fmt(coins)}${special ? ` §d+ ${fmt(coins * 2)} bonus and 25 Essence!` : ""}` : `§7Next reward in §e${Math.floor(wait / HOUR)}h ${Math.floor((wait % HOUR) / 60000)}m`,
       "§8Claim within 48 hours to keep your streak. Every 7th day is a special reward.",
       mayorIs("dawn") ? "§eMayor Dawn doubles daily rewards!" : "",
     ].filter(Boolean).join("\n"),
@@ -77,10 +75,10 @@ export async function dailyMenu(player, back) {
           player.setDynamicProperty("eco:daily", JSON.stringify({ last: now, streak }));
           addMoney(player, coins);
           if (special) {
-            give(player, makeItem(ACC_REWARDS[Math.floor(Math.random() * ACC_REWARDS.length)]));
+            addMoney(player, coins * 2);
             addEssence(player, 25);
           }
-          success(player, `Daily reward claimed: ${fmt(coins)}${special ? " + accessory + 25 Essence" : ""}! Streak: ${streak}`);
+          success(player, `Daily reward claimed: ${fmt(coins)}${special ? ` + ${fmt(coins * 2)} bonus + 25 Essence` : ""}! Streak: ${streak}`);
           player.playSound("random.levelup");
           return again();
         },
@@ -160,7 +158,6 @@ const QUESTS = [
   { id: "purse10m", name: "Tycoon", desc: "Have $10M in your purse", goal: 10000000, cur: (p) => getBalance(p), coins: 500000 },
   { id: "pet1", name: "Best Friend", desc: "Own a pet", goal: 1, cur: (p) => getPets(p).length, coins: 10000 },
   { id: "pet50", name: "Pet Trainer", desc: "Get a pet to level 50", goal: 50, cur: (p) => Math.max(0, ...getPets(p).map((x) => petLevel(x.xp, x.r).level)), coins: 500000 },
-  { id: "acc5", name: "Collector", desc: "Have 5 active accessories", goal: 5, cur: (p) => accessoryStats(p).count, coins: 100000 },
   { id: "slayer1", name: "Monster Hunter", desc: "Reach Slayer level 1 (any)", goal: 1, cur: (p) => Math.max(...Object.keys(SLAYERS).map((t) => slayerLevel(p, t))), coins: 25000 },
   { id: "slayer5", name: "Slayer", desc: "Reach Slayer level 5 (any)", goal: 5, cur: (p) => Math.max(...Object.keys(SLAYERS).map((t) => slayerLevel(p, t))), coins: 1000000 },
   { id: "dungeon1", name: "Into the Crypts", desc: "Reach Dungeon level 1", goal: 1, cur: (p) => dungeonLevel(p), coins: 25000, essence: 25 },
@@ -405,9 +402,9 @@ export function registerExtras() {
       const c = CREATURES[sea];
       addMoney(player, c.coins);
       addSkillXp(player, "fishing", c.xp);
-      if (Math.random() < 0.05 + sea * 0.05 && ITEMS.tide_charm) {
-        give(player, makeItem("tide_charm"));
-        player.sendMessage(`§d§lRARE DROP! §r${RARITIES[ITEMS.tide_charm.rarity].color}Tide Charm`);
+      if (Math.random() < 0.05 + sea * 0.05 && ITEMS.ancient_coin) {
+        give(player, makeItem("ancient_coin"));
+        player.sendMessage(`§d§lRARE DROP! §r${RARITIES[ITEMS.ancient_coin.rarity].color}Ancient Coin`);
       }
       player.sendMessage(`§3Sea creature slain! §a+${fmt(c.coins)} §3+${c.xp} Fishing XP`);
     }

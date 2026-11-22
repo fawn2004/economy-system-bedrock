@@ -38,7 +38,6 @@ export const SLAYERS = {
     drops: [
       { id: "rotten_core", chance: 100, min: 2, max: 4, perTier: 2 },
       { id: "tyrant_fang", chance: 4, perTierChance: 3, minTier: 2 },
-      { id: "tyrant_charm", chance: 1, perTierChance: 0.5, minTier: 3 },
     ],
   },
   spider: {
@@ -48,7 +47,6 @@ export const SLAYERS = {
     drops: [
       { id: "venom_sac", chance: 100, min: 2, max: 4, perTier: 2 },
       { id: "silk_crown", chance: 4, perTierChance: 3, minTier: 2 },
-      { id: "spider_charm", chance: 1, perTierChance: 0.5, minTier: 3 },
     ],
   },
   skeleton: {
@@ -58,7 +56,6 @@ export const SLAYERS = {
     drops: [
       { id: "marrow_shard", chance: 100, min: 2, max: 4, perTier: 2 },
       { id: "colossus_skull", chance: 4, perTierChance: 3, minTier: 2 },
-      { id: "bone_charm", chance: 1, perTierChance: 0.5, minTier: 3 },
     ],
   },
   enderman: {
@@ -68,7 +65,6 @@ export const SLAYERS = {
     drops: [
       { id: "void_dust", chance: 100, min: 1, max: 3, perTier: 2 },
       { id: "void_heart", chance: 2, perTierChance: 2, minTier: 2 },
-      { id: "void_charm", chance: 1, perTierChance: 0.5, minTier: 3 },
       { pet: "drake", chance: 0.2, perTierChance: 0.2, minTier: 3 },
     ],
   },
@@ -76,16 +72,12 @@ export const SLAYERS = {
 
 // Slayer shop recipes: item, slayer + level needed, materials [[id, n]], coins
 export const SLAYER_SHOP = [
-  { id: "tyrant_charm", type: "zombie", level: 2, mats: [["rotten_core", 32]], coins: 100000 },
   { id: "tyrant_blade", type: "zombie", level: 3, mats: [["rotten_core", 64], ["tyrant_fang", 2]], coins: 250000 },
   { id: "tyrant_chestplate", type: "zombie", level: 4, mats: [["rotten_core", 128], ["tyrant_fang", 4]], coins: 500000 },
-  { id: "spider_charm", type: "spider", level: 2, mats: [["venom_sac", 32]], coins: 100000 },
   { id: "venom_fang", type: "spider", level: 3, mats: [["venom_sac", 64], ["silk_crown", 2]], coins: 300000 },
   { id: "web_boots", type: "spider", level: 4, mats: [["venom_sac", 96], ["silk_crown", 3]], coins: 400000 },
-  { id: "bone_charm", type: "skeleton", level: 2, mats: [["marrow_shard", 32]], coins: 100000 },
   { id: "bone_bow", type: "skeleton", level: 3, mats: [["marrow_shard", 64], ["colossus_skull", 2]], coins: 300000 },
   { id: "bone_helmet", type: "skeleton", level: 4, mats: [["marrow_shard", 96], ["colossus_skull", 3]], coins: 400000 },
-  { id: "void_charm", type: "enderman", level: 3, mats: [["void_dust", 48]], coins: 1000000 },
   { id: "void_leggings", type: "enderman", level: 4, mats: [["void_dust", 96], ["void_heart", 2]], coins: 2000000 },
   { id: "void_edge", type: "enderman", level: 5, mats: [["void_dust", 128], ["void_heart", 3]], coins: 5000000 },
 ];

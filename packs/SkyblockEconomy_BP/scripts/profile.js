@@ -1,5 +1,4 @@
 import { ModalFormData } from "@minecraft/server-ui";
-import { accessoryMenu, accessoryStats } from "./accessories.js";
 import { enchantMenu, giveCustom, reforgeMenu } from "./forge.js";
 import { RARITIES, availableItems } from "./items.js";
 import { itemIconFor } from "./forge.js";
@@ -11,7 +10,7 @@ import { adminElection } from "./mayor.js";
 import { backTile, pagedMenu, showForm, success, tileMenu } from "./ui.js";
 
 // ============================================================================
-//  PROFILE  (main menu > Profile): stats, pets, accessories, reforge,
+//  PROFILE  (main menu > Profile): stats, pets, reforge,
 //  enchanting, plus tiles other systems add (wardrobe, spirits...).
 //  ADMIN > RPG: give any custom item / pet, set slayer levels.
 // ============================================================================
@@ -25,11 +24,9 @@ export async function profileMenu(player, back) {
   const again = () => profileMenu(player, back);
   const t = getStats(player).total;
   const pet = activePet(player);
-  const acc = accessoryStats(player).count;
   const tiles = [
     { text: "§c§lSTATS", sub: `§c❤${Math.round(t.hp ?? 0)} §a❈${Math.round(t.def ?? 0)} §c❁${Math.round(t.str ?? 0)}`, icon: "textures/items/diamond_sword", onClick: () => statsMenu(player, again) },
     { text: "§a§lPETS", sub: pet ? `${RARITIES[pet.r].color}${PET_TYPES[pet.t].name} §7Lv${petLevel(pet.xp, pet.r).level}` : "§7No active pet", icon: "textures/items/bone", onClick: () => petsMenu(player, again) },
-    { text: "§5§lACCESSORY BAG", sub: `§7${acc} active`, icon: "textures/items/gold_nugget", onClick: () => accessoryMenu(player, again) },
     { text: "§6§lREFORGE", sub: "§7Held item", icon: "textures/blocks/anvil_top_damaged_0", onClick: () => reforgeMenu(player, again) },
     { text: "§d§lENCHANTING", sub: "§7Held item", icon: "textures/items/book_enchanted", onClick: () => enchantMenu(player, again) },
   ];

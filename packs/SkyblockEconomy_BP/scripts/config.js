@@ -283,7 +283,7 @@ export const SPAWNER_SETTINGS = {
 // Order of the tiles on the shop's front page. "blocks" opens the block
 // sub-categories; the rest are category ids from prices.js plus kits/spawners/search.
 export const SHOP_LAYOUT = [
-  "blocks", "food", "kits", "spawners", "minions", "chunkhopper", "skilltools", "equipment", "accessories", "pets", "farming", "buckets", "misc",
+  "blocks", "food", "kits", "spawners", "minions", "chunkhopper", "skilltools", "equipment", "pets", "farming", "buckets", "misc",
   "ores", "tools", "redstone", "mobs", "brewing", "treasure", "search",
 ];
 export const BADGES = { kits: "NEW", spawners: "HOT", skilltools: "NEW", minions: "NEW", chunkhopper: "NEW" };
@@ -297,7 +297,7 @@ export const BADGES = { kits: "NEW", spawners: "HOT", skilltools: "NEW", minions
 export const SKILL_TOOLS = {
   farming: {
     name: "Farming Hoe",
-    item: "minecraft:diamond_hoe",
+    item: "minecraft:wooden_hoe", // never breaks (durability is restored after every use)
     price: 5000,
     icon: "textures/items/diamond_hoe",
     xpPerUse: 1, // per fully grown crop harvested
@@ -309,7 +309,7 @@ export const SKILL_TOOLS = {
   },
   slayer: {
     name: "Slayer Sword",
-    item: "minecraft:diamond_sword",
+    item: "minecraft:wooden_sword", // never breaks (durability is restored after every use)
     price: 10000,
     icon: "textures/items/diamond_sword",
     xpPerUse: 2, // per mob killed

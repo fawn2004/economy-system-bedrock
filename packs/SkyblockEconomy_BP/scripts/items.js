@@ -231,7 +231,8 @@ export const ITEMS = {
 };
 for (const [id, d] of Object.entries(ITEMS)) d.id = id;
 export const itemDef = (id) => ITEMS[id];
-export const availableItems = () => Object.values(ITEMS).filter((d) => exists(d.item));
+// Accessories were removed from the add-on: they're never sold, dropped or given any more.
+export const availableItems = () => Object.values(ITEMS).filter((d) => exists(d.item) && d.kind !== "accessory");
 
 // ---- reforges ----------------------------------------------------------------------
 // Six numbers per stat = value at Common, Uncommon, Rare, Epic, Legendary, Mythic.

@@ -173,8 +173,6 @@ export async function shopMenu(player, msg) {
       tiles.push({ text: "§e§lMINIONS", sub: "§7They mine for you", icon: U + "icon_minion", badge: BADGES.minions, onClick: () => minionShop(player) });
     } else if (key === "equipment") {
       tiles.push({ text: "§c§lEQUIPMENT", sub: "§7Weapons & armor", icon: "textures/items/iron_sword", badge: "NEW", onClick: () => itemShopMenu(player, "equipment", "EQUIPMENT", () => shopMenu(player)) });
-    } else if (key === "accessories") {
-      tiles.push({ text: "§5§lACCESSORIES", sub: "§7Charms & rings", icon: "textures/items/gold_nugget", badge: "NEW", onClick: () => itemShopMenu(player, "accessories", "ACCESSORIES", () => shopMenu(player)) });
     } else if (key === "pets") {
       tiles.push({ text: "§a§lPETS", sub: "§7Pet shop", icon: "textures/items/bone", badge: "NEW", onClick: () => petsMenu(player, () => shopMenu(player)) });
     } else if (key === "skilltools") {
@@ -499,7 +497,6 @@ async function kitsMenu(player) {
       onClick: () => kitMenu(player, kit),
     };
   });
-  tiles.unshift({ text: "§6§lUPGRADABLE KITS", sub: "§7Level up to MAXED", icon: "textures/items/nether_star", badge: "NEW", onClick: () => kitUpgradesMenu(player, () => kitsMenu(player)) });
   tiles.push(backTile(() => shopMenu(player)));
   await tileMenu(player, { title: "KITS", theme: "purple", body: `§7Gear bundles with cooldowns    ${balLine(player)}`, tiles });
 }
