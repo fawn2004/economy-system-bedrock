@@ -158,10 +158,10 @@ export async function auctionMenu(player, back) {
   await tileMenu(player, {
     title: "AUCTION HOUSE",
     theme: "gold",
-    body: `§7Buy and sell items with other players. Hold an item and press §aCREATE§7 to sell it.\n§7Live auctions: §f${live.length}    §7Purse: §a${fmtMoney(getBalance(player))}`,
+    body: `§7Buy and sell items with other players. Press §aCREATE§7 and pick an item from your inventory to sell it.\n§7Live auctions: §f${live.length}    §7Purse: §a${fmtMoney(getBalance(player))}`,
     tiles: [
       { text: "§6§lBROWSE", sub: `§7${live.length} listings`, icon: ICON.search, onClick: () => browseCats(player, home) },
-      { text: "§a§lCREATE", sub: "§7Sell the item in your hand", icon: ICON.sell, onClick: () => createMenu(player, home) },
+      { text: "§a§lCREATE", sub: "§7Sell an item from your inventory", icon: ICON.sell, onClick: () => createMenu(player, home) },
       {
         text: "§e§lMY AUCTIONS",
         sub: `§7${mine.length}/${AUCTION.maxPerPlayer}`,
@@ -344,12 +344,37 @@ async function viewAuction(player, id, back) {
   await tileMenu(player, { title: a.bin ? "BIN AUCTION" : "AUCTION", theme: "gold", body: lines.join("\n"), tiles });
 }
 
-async function createMenu(player, back) {
+/** Lists the items in the player's inventory that can be auctioned. */
+async function pickAuctionItem(player, back) {
   const inv = container(player);
-  const slot = player.selectedSlotIndex;
+  const again = () => pickAuctionItem(player, back);
+  const tiles = [];
+  for (let i = 0; i < (inv?.size ?? 0); i++) {
+    const it = inv.getItem(i);
+    if (!it || !canTrade(it)) continue;
+    const d = serializeItem(it);
+    tiles.push({
+      text: `${d.ench?.length ? "§b" : "§f"}${itemDataName(d)}`,
+      sub: [`§7x${d.n}`, ...itemDataLines(d).slice(0, 6), i < 9 ? `§8Hotbar slot ${i + 1}` : "§8Inventory"].join("\n"),
+      icon: itemIcon(d.id),
+      onClick: () => createMenu(player, again, i),
+    });
+  }
+  tiles.push(backTile(back));
+  return tileMenu(player, {
+    title: "Create Auction - Pick an Item",
+    theme: "gold",
+    body: tiles.length > 1 ? "§7Pick the item you want to sell. The whole stack is listed." : "§cYou have nothing that can be auctioned. §8(Kit items and the menu compass can't be sold.)",
+    tiles,
+  });
+}
+
+async function createMenu(player, back, slot) {
+  if (slot === undefined) return pickAuctionItem(player, back);
+  const inv = container(player);
   const held = inv?.getItem(slot);
   if (!held) {
-    fail(player, "Hold the item you want to sell in your hand first.");
+    fail(player, "That item isn't there any more - pick it again.");
     return back();
   }
   if (!canTrade(held)) {
@@ -400,10 +425,10 @@ async function createMenu(player, back) {
     ],
   });
   if (ok?.id !== "yes") return back();
-  // make sure the item is still the one in hand
+  // make sure the item is still in that slot
   const now = inv.getItem(slot);
   if (!now || now.typeId !== data.id || now.amount !== data.n || JSON.stringify(serializeItem(now)) !== JSON.stringify(data)) {
-    fail(player, "The item in your hand changed. Try again.");
+    fail(player, "That item moved or changed - pick it again.");
     return back();
   }
   if (!takeMoney(player, cost)) {

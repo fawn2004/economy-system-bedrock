@@ -43,31 +43,40 @@ function give(player, stack) {
 // ============================================================================
 //  DAILY REWARD
 // ============================================================================
+export const DAILY_HOURS = 12; // time between claims
+/** -> { ready, left: "3h 20m" } for the main menu tile */
+export function dailyStatus(player) {
+  const d = readJson(player, "eco:daily", { last: 0, streak: 0 });
+  const wait = Math.max(0, d.last + DAILY_HOURS * HOUR - Date.now());
+  return { ready: wait === 0, left: `${Math.floor(wait / HOUR)}h ${Math.floor((wait % HOUR) / 60000)}m` };
+}
+const DAILY_STREAK_HOURS = 36; // claim within this long to keep your streak
 
 export async function dailyMenu(player, back) {
   const again = () => dailyMenu(player, back);
   const d = readJson(player, "eco:daily", { last: 0, streak: 0 });
   const now = Date.now();
-  const ready = now - d.last >= 20 * HOUR;
-  const keeps = now - d.last <= 48 * HOUR;
+  const ready = now - d.last >= DAILY_HOURS * HOUR;
+  const keeps = now - d.last <= DAILY_STREAK_HOURS * HOUR;
   const streak = ready ? (keeps ? d.streak + 1 : 1) : d.streak;
   const day = Math.min(30, streak);
   const coins = 1000 * day * (mayorIs("dawn") ? 2 : 1);
   const special = streak % 7 === 0;
-  const wait = Math.max(0, d.last + 20 * HOUR - now);
+  const wait = Math.max(0, d.last + DAILY_HOURS * HOUR - now);
+  const left = `${Math.floor(wait / HOUR)}h ${Math.floor((wait % HOUR) / 60000)}m`;
   await tileMenu(player, {
     title: "DAILY REWARD",
     theme: "gold",
     body: [
       `§7Streak: §6§l${d.streak} day${d.streak === 1 ? "" : "s"}${ready && !keeps && d.streak ? " §r§c(missed - starts again)" : ""}`,
-      ready ? `§7Today's reward (day ${streak}): §a${fmt(coins)}${special ? ` §d+ ${fmt(coins * 2)} bonus and 25 Essence!` : ""}` : `§7Next reward in §e${Math.floor(wait / HOUR)}h ${Math.floor((wait % HOUR) / 60000)}m`,
-      "§8Claim within 48 hours to keep your streak. Every 7th day is a special reward.",
+      ready ? `§7Today's reward (day ${streak}): §a${fmt(coins)}${special ? ` §d+ ${fmt(coins * 2)} bonus and 25 Essence!` : ""}` : `§7Claimed! Next reward in §e${left}`,
+      `§8Claim every ${DAILY_HOURS} hours. Claim within ${DAILY_STREAK_HOURS} hours to keep your streak. Every 7th claim is a special reward.`,
       mayorIs("dawn") ? "§eMayor Dawn doubles daily rewards!" : "",
     ].filter(Boolean).join("\n"),
     tiles: [
       {
         text: ready ? "§a§lCLAIM" : "§8§lCLAIMED",
-        sub: ready ? `§a${fmt(coins)}` : "§7Come back later",
+        sub: ready ? `§a${fmt(coins)}` : `§7Next claim in §e${left}`,
         icon: ready ? ICON.confirm : ICON.cancel,
         badge: ready ? "NEW" : undefined,
         onClick: () => {

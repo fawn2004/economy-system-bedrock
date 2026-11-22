@@ -188,9 +188,8 @@ export function makeTool(kind, player) {
   return stack;
 }
 
-function heldTool(player, kind) {
+function heldTool(player, kind, slot = player.selectedSlotIndex) {
   const inv = player.getComponent("minecraft:inventory")?.container;
-  const slot = player.selectedSlotIndex;
   const item = inv?.getItem(slot);
   const t = readTool(item);
   return t && t.kind === kind ? { ...t, item, inv, slot } : undefined;
@@ -240,27 +239,53 @@ function currency(player, u) {
   return { have: getHeadPoints(player, u.headMob), take: (n) => addHeadPoints(player, u.headMob, -n), label: `${mobName(u.headMob)} heads`, short: "h" };
 }
 
-/** Opens the upgrade menu for the skill tool in the player's hand. */
-export async function upgradeMenu(player, back, msg) {
-  const held = ["slayer", "farming"].map((k) => heldTool(player, k)).find(Boolean);
+/** Lists the skill tools in the player's inventory to pick one to upgrade. */
+export async function pickToolMenu(player, back) {
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  const tiles = [];
+  for (let i = 0; i < (inv?.size ?? 0); i++) {
+    const it = inv.getItem(i);
+    const t = readTool(it);
+    if (!t) continue;
+    tiles.push({
+      text: it.nameTag ?? SKILL_TOOLS[t.kind].name,
+      sub: `§7Level ${t.level}${i < 9 ? `\n§8Hotbar slot ${i + 1}` : "\n§8Inventory"}`,
+      icon: SKILL_TOOLS[t.kind].icon,
+      onClick: () => upgradeMenu(player, () => pickToolMenu(player, back), undefined, i),
+    });
+  }
+  tiles.push(backTile(back));
+  return tileMenu(player, {
+    title: "Upgrade a Skill Tool",
+    theme: "green",
+    body: tiles.length > 1 ? "§7Pick the skill tool you want to upgrade." : "§cYou don't have a skill tool. Buy one in Shop > Skill Tools.",
+    tiles,
+  });
+}
+
+/** Opens the upgrade menu for a skill tool (in `slot`, or the one in the player's hand). */
+export async function upgradeMenu(player, back, msg, slot) {
+  const held = ["slayer", "farming"].map((k) => heldTool(player, k, slot)).find(Boolean);
   if (!held) {
-    fail(player, "Hold your skill tool in your hand to upgrade it.");
+    if (slot === undefined) return pickToolMenu(player, back);
+    fail(player, "That tool isn't in that slot any more - pick it again.");
     return back?.();
   }
+  slot = held.slot;
   const kind = held.kind;
   const t = SKILL_TOOLS[kind];
   const defs = (TOOL_UPGRADES[kind] ?? []).filter((u) => !u.disabled);
-  const reopen = (m) => upgradeMenu(player, back, m);
+  const reopen = (m) => upgradeMenu(player, back, m, slot);
   const tiles = defs.map((u) => {
     const cur = held.ups[u.id] ?? 0;
-    if (cur >= u.max) return { text: `§a§l${u.name.toUpperCase()}`, sub: `§a${roman(cur)} §7MAX`, icon: u.icon, onClick: () => upgradeDetail(player, kind, u, () => reopen()) };
+    if (cur >= u.max) return { text: `§a§l${u.name.toUpperCase()}`, sub: `§a${roman(cur)} §7MAX`, icon: u.icon, onClick: () => upgradeDetail(player, kind, u, () => reopen(), undefined, slot) };
     const c = currency(player, u);
     const ok = getBalance(player) >= u.money[cur] && c.have >= u.heads[cur];
     return {
       text: `§e§l${u.name.toUpperCase()}`,
       sub: `§7${cur ? roman(cur) : "-"} > ${ok ? "§a" : "§c"}${roman(cur + 1)}`,
       icon: u.icon,
-      onClick: () => upgradeDetail(player, kind, u, () => reopen()),
+      onClick: () => upgradeDetail(player, kind, u, () => reopen(), undefined, slot),
     };
   });
   if (back) tiles.push(backTile(back));
@@ -276,16 +301,16 @@ export async function upgradeMenu(player, back, msg) {
 }
 
 /** One upgrade: what it does, its cost, and a BUY button. */
-async function upgradeDetail(player, kind, u, back, msg) {
-  const held = heldTool(player, kind);
+async function upgradeDetail(player, kind, u, back, msg, slot) {
+  const held = heldTool(player, kind, slot);
   if (!held) {
-    fail(player, "Hold your skill tool in your hand to upgrade it.");
+    fail(player, "That tool isn't in that slot any more - pick it again.");
     return back();
   }
   const cur = held.ups[u.id] ?? 0;
   const maxed = cur >= u.max;
   const c = currency(player, u);
-  const reopen = (m) => upgradeDetail(player, kind, u, back, m);
+  const reopen = (m) => upgradeDetail(player, kind, u, back, m, slot);
   const lines = [
     msg,
     `§f${u.name} §6${cur ? roman(cur) : "-"}§7/§6${roman(u.max)}`,
@@ -306,16 +331,16 @@ async function upgradeDetail(player, kind, u, back, msg) {
       text: `§a§lBUY ${roman(cur + 1)}`,
       sub: `§a${fmt(u.money[cur])}`,
       icon: u.icon,
-      onClick: () => reopen(buyUpgrade(player, kind, u)),
+      onClick: () => reopen(buyUpgrade(player, kind, u, slot)),
     });
   }
   tiles.push(backTile(back));
   await tileMenu(player, { title: u.name.toUpperCase(), theme: kind === "slayer" ? "red" : "green", body: lines.filter(Boolean).join("\n"), tiles });
 }
 
-function buyUpgrade(player, kind, u) {
-  const held = heldTool(player, kind);
-  if (!held) return "§cHold the tool in your hand.";
+function buyUpgrade(player, kind, u, slot) {
+  const held = heldTool(player, kind, slot);
+  if (!held) return "§cThat tool isn't in that slot any more.";
   const cur = held.ups[u.id] ?? 0;
   if (cur >= u.max) return `§a${u.name} is already maxed.`;
   const money = u.money[cur], heads = u.heads[cur];
@@ -578,9 +603,9 @@ function toolsInfo(player, back) {
       `§7Levels 1-${TOOL_LEVELS.freeLevels} are free; higher levels also need a total collection:\n` +
       `§e${SKILL_TOOLS.farming.name} §7(crops ${commas(collectionTotal(player, "farming"))}): ${fmtLevels("farming")}\n` +
       `§c${SKILL_TOOLS.slayer.name} §7(kills ${commas(collectionTotal(player, "slayer"))}): ${fmtLevels("slayer")}\n` +
-      `§fTo upgrade a tool: hold it, sneak and use it (tap / right-click).\n` +
+      `§fTo upgrade a tool: Profile > Skill Tool Upgrades (or hold it, sneak and use it).\n` +
       `§8Buy them in Shop > Skill Tools.`,
-    tiles: [backTile(back)],
+    tiles: [{ text: "§a§lUPGRADE A TOOL", sub: "§7Pick from your inventory", icon: "textures/blocks/anvil_top_damaged_0", onClick: () => pickToolMenu(player, () => toolsInfo(player, back)) }, backTile(back)],
   });
 }
 

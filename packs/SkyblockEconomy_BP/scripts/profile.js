@@ -5,6 +5,7 @@ import { itemIconFor } from "./forge.js";
 import { PET_TYPES, activePet, addPet, petLevel, petsMenu } from "./pets.js";
 import { SLAYERS, slayerLevel } from "./slayer.js";
 import { getStats, statsMenu } from "./stats.js";
+import { pickToolMenu } from "./tools.js";
 import { adminSpiritTiles, spiritsMenu, wardrobeMenu } from "./extras.js";
 import { adminElection } from "./mayor.js";
 import { backTile, pagedMenu, showForm, success, tileMenu } from "./ui.js";
@@ -27,8 +28,9 @@ export async function profileMenu(player, back) {
   const tiles = [
     { text: "§c§lSTATS", sub: `§c❤${Math.round(t.hp ?? 0)} §a❈${Math.round(t.def ?? 0)} §c❁${Math.round(t.str ?? 0)}`, icon: "textures/items/diamond_sword", onClick: () => statsMenu(player, again) },
     { text: "§a§lPETS", sub: pet ? `${RARITIES[pet.r].color}${PET_TYPES[pet.t].name} §7Lv${petLevel(pet.xp, pet.r).level}` : "§7No active pet", icon: "textures/items/bone", onClick: () => petsMenu(player, again) },
-    { text: "§6§lREFORGE", sub: "§7Held item", icon: "textures/blocks/anvil_top_damaged_0", onClick: () => reforgeMenu(player, again) },
-    { text: "§d§lENCHANTING", sub: "§7Held item", icon: "textures/items/book_enchanted", onClick: () => enchantMenu(player, again) },
+    { text: "§6§lREFORGE", sub: "§7Pick an item", icon: "textures/blocks/anvil_top_damaged_0", onClick: () => reforgeMenu(player, again) },
+    { text: "§d§lENCHANTING", sub: "§7Pick an item", icon: "textures/items/book_enchanted", onClick: () => enchantMenu(player, again) },
+    { text: "§a§lSKILL TOOL UPGRADES", sub: "§7Farming Hoe & Slayer Sword", icon: "textures/items/wooden_hoe", onClick: () => pickToolMenu(player, again) },
   ];
   tiles.push(
     { text: "§b§lWARDROBE", sub: "§7Swap armor sets", icon: "textures/items/iron_chestplate", onClick: () => wardrobeMenu(player, again) },
@@ -45,7 +47,7 @@ export async function profileMenu(player, back) {
   await tileMenu(player, {
     title: "PROFILE",
     theme: "red",
-    body: `§f§l${player.name}§r\n§7Slayer levels: §5${slayer}\n§7Tip: hold an item and open Reforge or Enchanting to upgrade it.`,
+    body: `§f§l${player.name}§r\n§7Slayer levels: §5${slayer}\n§7Reforge, Enchanting and Skill Tool Upgrades let you pick the item from your inventory.`,
     tiles,
   });
 }

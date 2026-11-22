@@ -25,7 +25,7 @@ import { ITEMS as CUSTOM_ITEMS, readItem } from "./items.js";
 import { getStats } from "./stats.js";
 import { petsMenu } from "./pets.js";
 import { dungeonMenu, inDungeon, leaveRun } from "./dungeons.js";
-import { dailyMenu, questsMenu } from "./extras.js";
+import { dailyMenu, dailyStatus, questsMenu } from "./extras.js";
 import { mayorMenu } from "./mayor.js";
 import { kitUpgradesMenu } from "./kitUpgrades.js";
 import { leaderboardsMenu } from "./leaderboards.js";
@@ -113,7 +113,7 @@ export async function mainMenu(player) {
     { text: "§6§lKITS", sub: "§7Upgradable kits", icon: "textures/items/nether_star", badge: "NEW", onClick: () => kitUpgradesMenu(player, () => mainMenu(player)) },
     { text: "§5§lDUNGEONS", sub: "§7The Crypts", icon: "textures/items/ender_eye", badge: "NEW", onClick: () => dungeonMenu(player, () => mainMenu(player)) },
     { text: "§a§lQUESTS", sub: "§7Daily tasks", icon: "textures/items/book_writable", onClick: () => questsMenu(player, () => mainMenu(player)) },
-    { text: "§e§lDAILY", sub: "§7Free coins", icon: "textures/items/clock_item", onClick: () => dailyMenu(player, () => mainMenu(player)) },
+    { text: "§e§lDAILY", sub: dailyStatus(player).ready ? "§aReady to claim!" : `§7Next in §e${dailyStatus(player).left}`, icon: "textures/items/clock_item", badge: dailyStatus(player).ready ? "NEW" : undefined, onClick: () => dailyMenu(player, () => mainMenu(player)) },
     { text: "§6§lELECTION", sub: "§7Vote mayor", icon: "textures/items/gold_nugget", onClick: () => mayorMenu(player, () => mainMenu(player)) },
     ...extraMainTiles.map((f) => f(player, () => mainMenu(player))).filter(Boolean),
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },

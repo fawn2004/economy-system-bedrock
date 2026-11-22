@@ -1,0 +1,99 @@
+SKYBLOCK ECONOMY v1.0.54 + v1.0.55 - CHECKLIST
+(v1.0.54 = shop clean-up / icons / accessories, v1.0.55 = inventory pickers, stats, daily, progress, sidebar)
+(put an x in the box when you've checked it works: [x])
+
+REMOVED FROM THE SHOP
+[ ] Poisonous Potato
+[ ] Honey Bottle
+[ ] Pufferfish
+[ ] Bone Block
+[ ] Beehive (farming)
+[ ] Chipped Anvil and Damaged Anvil (misc)
+[ ] Jukebox
+[ ] Music discs (and disc fragments)
+[ ] Straw Bed
+[ ] Harnesses (tools & armour)
+[ ] Brush (tools & armour)
+[ ] Copper (and all) Nautilus Armour (tools & armour)
+[ ] Horse Armour (tools & armour)
+[ ] Empty Map (tools & armour)
+[ ] Name Tag
+[ ] Lead (tools & armour)
+[ ] Calibrated Sculk Sensor
+[ ] Sculk Sensor
+[ ] All minecarts
+[ ] Heavy Weighted Pressure Plate
+[ ] Light Weighted Pressure Plate
+[ ] Shulker Shell
+
+MOVED
+[ ] Rotten Flesh is out of Food (now in Mob Drops)
+[ ] Sugar is in Brewing (potions)
+[ ] Spider Eye is in Brewing (potions)
+[ ] Enchanted Golden Apple is in Food (not Treasure)
+
+ICONS
+[ ] Misc: Anvil
+[ ] Misc: Blast Furnace
+[ ] Misc: Cartography Table
+[ ] Misc: Chest
+[ ] Misc: Enchanting Table
+[ ] Misc: Furnace
+[ ] Misc: Grindstone
+[ ] Misc: Lectern
+[ ] Misc: Loom
+[ ] Misc: Smoker
+[ ] Misc: Stonecutter
+[ ] Tools & Armour: Shield
+[ ] Redstone: all buttons look like buttons
+[ ] Redstone: all pressure plates look like pressure plates
+[ ] Redstone: Lightning Rod, Exposed, Weathered, Oxidized (and waxed) lightning rods
+[ ] Mob Drops: Skeleton Skull, Wither Skeleton Skull, Zombie Head, Creeper Head, Piglin Head, Dragon Head
+[ ] Treasure: Dragon Egg
+[ ] Treasure: Heavy Core
+
+KITS & SKILL TOOLS
+[ ] Shop > Kits no longer has the Upgradable Kits tile (it's in the main menu)
+[ ] Farming Hoe (skill tool) is a wooden hoe and never breaks
+[ ] Slayer Sword (skill tool) is a wooden sword and never breaks
+[ ] Farming Hoe gains XP when farming (already a feature - check it still works)
+
+ACCESSORIES REMOVED
+[ ] No Accessories category in the shop
+[ ] No Accessory Bag in Profile
+[ ] Dungeon chests, slayer drops and the slayer shop no longer give accessories
+[ ] 7th-day Daily Reward gives a coin bonus + 25 Essence instead of an accessory
+
+======== v1.0.55 ========
+
+NO MORE "HOLD THE ITEM"
+[ ] Auction House > Create lists the items in your inventory - pick one to sell it (no need to hold it)
+[ ] The compass and kit items aren't offered on the Auction House
+[ ] Profile > Skill Tool Upgrades lists your Farming Hoe / Slayer Sword - pick one to upgrade it
+[ ] Collections > Skill Tools info has an "Upgrade a Tool" button that does the same
+[ ] Sneak + use on a skill tool still opens its upgrades too
+[ ] Profile > Pets > Add Pet Item lists pet items in your inventory - pick one to add it to the Pet Menu
+[ ] Reforge, Enchanting and Star Item still let you pick from your inventory (from the last updates)
+
+STATS
+[ ] Profile > Stats shows each stat in its own slot with an icon
+[ ] Hovering a stat explains what it does in plain words (e.g. "You take 30% less damage")
+[ ] Hovering a stat shows where it comes from (base, armor, skills, pet...)
+[ ] The left box shows hearts, damage reduction and mana
+[ ] Long tooltip lines wrap so the boxes don't get too wide
+
+DAILY REWARD
+[ ] You can claim it every 12 hours
+[ ] After claiming, the Daily menu says "Claimed! Next reward in Xh Ym"
+[ ] The Claimed button shows the time left
+[ ] The main menu Daily tile shows "Next in Xh Ym", or "Ready to claim!" with a NEW badge
+
+SKILLS - MY PROGRESS
+[ ] The left box is short and fits (average, rank, maxed skills)
+[ ] Each skill has its own slot - hover for XP, XP to next level, how to train, perk
+[ ] Bottom row: Improve Next, Collection Rewards, Skill Tool Unlocks (hover for details)
+
+SIDEBAR
+[ ] Turning the Sidebar off in Settings hides it straight away
+[ ] Turning it back on shows it again
+[ ] Admin > Settings > Sidebar off hides it for everyone

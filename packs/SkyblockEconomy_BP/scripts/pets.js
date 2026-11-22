@@ -109,9 +109,8 @@ export function readPetItem(stack) {
   return { t, r: Math.max(0, Math.min(4, Number(r) || 0)), xp: Number(xp) || 0 };
 }
 
-function claimPetItem(player) {
+function claimPetItem(player, slot = player.selectedSlotIndex) {
   const inv = container(player);
-  const slot = player.selectedSlotIndex;
   const it = inv?.getItem(slot);
   const pet = readPetItem(it);
   if (!pet) return;
@@ -142,6 +141,40 @@ export async function petsMenu(player, back) {
       };
     });
   tiles.unshift({ text: "§e§lPET SHOP", sub: "§7Buy a pet", icon: ICON.shop, onClick: () => petShopMenu(player, again) });
+  // pet items (spawn eggs from "To Item", trades or the Auction House) in the inventory
+  const inv = container(player);
+  const petSlots = [];
+  for (let i = 0; i < (inv?.size ?? 0); i++) if (readPetItem(inv.getItem(i))) petSlots.push(i);
+  if (petSlots.length) {
+    tiles.unshift({
+      text: "§a§lADD PET ITEM",
+      sub: `§7${petSlots.length} pet item${petSlots.length > 1 ? "s" : ""} in your inventory`,
+      icon: "textures/items/egg",
+      badge: "NEW",
+      onClick: () =>
+        tileMenu(player, {
+          title: "Add a Pet",
+          theme: "green",
+          body: "§7Pick a pet item from your inventory to add it to your Pet Menu.",
+          tiles: [
+            ...petSlots.map((i) => {
+              const it = inv.getItem(i);
+              const pd = readPetItem(it);
+              return {
+                text: it?.nameTag ?? PET_TYPES[pd.t].name,
+                sub: it ? it.getLore().filter((l) => !l.startsWith("§8eco:") && !l.includes("Use to add")).join("\n") : "",
+                icon: PET_TYPES[pd.t].icon,
+                onClick: () => {
+                  claimPetItem(player, i);
+                  return again();
+                },
+              };
+            }),
+            backTile(again),
+          ],
+        }),
+    });
+  }
   await pagedMenu(player, {
     title: "PETS",
     theme: "green",

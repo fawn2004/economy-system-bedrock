@@ -297,40 +297,44 @@ export async function skillsMenu(player, back, extraTiles = []) {
 
 // ---- "my progress": what the player should work on next ------------------------
 function progressMenu(player, back) {
+  const again = () => progressMenu(player, back);
   const ids = skillIds().filter((id) => !SKILLS[id].disabled);
   const infos = ids.map((id) => ({ id, s: SKILLS[id], ...levelInfo(getSkillXp(player, id)) }));
   const avg = infos.length ? infos.reduce((n, x) => n + x.level, 0) / infos.length : 0;
   const maxed = infos.filter((x) => x.level >= SS.maxLevel).length;
-  let rankLine = "";
+  let rank = "";
   try {
     const r = rankOn(player, "skillAvg");
-    if (r.rank) rankLine = `   §7Server rank: §6#${r.rank}§7/${r.total}`;
+    if (r.rank) rank = `§6#${r.rank}§7 of ${r.total}`;
   } catch {}
   const short = (into, need) => {
     const f = need ? Math.max(0, Math.min(10, Math.floor((into / need) * 10))) : 10;
     return "§a" + "|".repeat(f) + "§8" + "|".repeat(10 - f);
   };
 
-  const lines = [`§fSkill average §b${avg.toFixed(1)}${rankLine}   §7Maxed: §6${maxed}/${infos.length}`, "", "§e§lYOUR SKILLS"];
-  for (const x of infos) {
-    lines.push(
-      x.need
-        ? `§f${x.s.name} §bLv ${x.level} ${short(x.into, x.need)} §7${commas(x.need - x.into)} XP to Lv ${x.level + 1}`
-        : `§f${x.s.name} §bLv ${x.level} §6MAX`
-    );
-  }
+  // one slot per skill
+  const tiles = infos.map((x) => ({
+    text: `§b${x.s.name} §fLv ${x.level}`,
+    sub: [
+      x.need ? `${short(x.into, x.need)} §7${commas(x.into)}/${commas(x.need)} XP` : "§6MAX LEVEL",
+      x.need ? `§7${commas(x.need - x.into)} XP to level ${x.level + 1}` : "",
+      `§7How: §f${x.s.how}`,
+      `§7Perk: §a${x.s.perk} ${x.level * x.s.perkPerLevel}%`,
+    ].filter(Boolean).join("\n"),
+    icon: x.s.icon,
+    onClick: () => skillDetail(player, x.id, again),
+  }));
 
   // the three lowest skills
-  const weakest = infos
-    .filter((x) => x.need)
-    .sort((a, b) => a.level - b.level || a.into / a.need - b.into / b.need)
-    .slice(0, 3);
-  if (weakest.length) {
-    lines.push("", "§e§lIMPROVE NEXT");
-    for (const x of weakest) {
-      lines.push(`§c> §f${x.s.name} §7(Lv ${x.level}): §f${x.s.how}§7 - §a${x.s.perk} +${x.s.perkPerLevel}%§7 per level`);
-    }
-  }
+  const weakest = infos.filter((x) => x.need).sort((a, b) => a.level - b.level || a.into / a.need - b.into / b.need).slice(0, 3);
+  tiles.push({
+    text: "§c§lImprove Next",
+    sub: weakest.length ? weakest.map((x) => `§c> §f${x.s.name} §7(Lv ${x.level}): ${x.s.how}`).join("\n") : "§6All skills maxed!",
+    icon: "textures/ui/eco/icon_top",
+    newRow: true,
+    noClick: true,
+    onClick: again,
+  });
 
   // collections closest to their next tier
   const cols = [
@@ -341,31 +345,45 @@ function progressMenu(player, back) {
       const n = getCol(player, c.kind, c.id);
       const t = COLLECTION_TIERS.amounts.filter((a) => n >= a).length;
       const next = COLLECTION_TIERS.amounts[t];
-      return next ? { ...c, n, t, next, left: next - n, frac: n / next, reward: COLLECTION_TIERS.rewards[t] ?? 0 } : undefined;
+      return next ? { ...c, n, t, next, frac: n / next, reward: COLLECTION_TIERS.rewards[t] ?? 0 } : undefined;
     })
     .filter((c) => c && c.n > 0)
     .sort((a, b) => b.frac - a.frac)
     .slice(0, 3);
-  if (cols.length) {
-    lines.push("", "§e§lCLOSEST COLLECTION REWARDS");
-    for (const c of cols) {
-      lines.push(`§6> §f${c.name} §7${commas(c.n)}/${commas(c.next)} - §f${commas(c.left)} more §7for tier ${c.t + 1} (§a${fmt(c.reward)}§7)`);
-    }
-  } else lines.push("", "§7Harvest crops and kill mobs to start your collections.");
+  tiles.push({
+    text: "§6§lCollection Rewards",
+    sub: cols.length
+      ? cols.map((c) => `§6> §f${c.name} §7${commas(c.n)}/${commas(c.next)} - tier ${c.t + 1} pays §a${fmt(c.reward)}`).join("\n")
+      : "§7Harvest crops and kill mobs to start your collections.",
+    icon: "textures/ui/eco/icon_farming",
+    noClick: true,
+    onClick: again,
+  });
 
   // skill tool unlocks
-  lines.push("", "§e§lSKILL TOOL UNLOCKS");
-  for (const [kind, label] of [["farming", "crops harvested"], ["slayer", "mob kills"]]) {
+  const unlocks = [["farming", "crops harvested"], ["slayer", "mob kills"]].map(([kind, label]) => {
     const total = collectionTotal(player, kind);
     const idx = TOOL_LEVELS.collectionNeeded.findIndex((need, i) => i + 1 > TOOL_LEVELS.freeLevels && total < need);
-    lines.push(
-      idx >= 0
-        ? `§f${SKILL_TOOLS[kind].name} §7Lv ${idx + 1} unlocks at §f${commas(TOOL_LEVELS.collectionNeeded[idx])} ${label} §8(${commas(TOOL_LEVELS.collectionNeeded[idx] - total)} to go)`
-        : `§f${SKILL_TOOLS[kind].name} §aall levels unlocked`
-    );
-  }
+    return idx >= 0
+      ? `§f${SKILL_TOOLS[kind].name} §7Lv ${idx + 1} at §f${commas(TOOL_LEVELS.collectionNeeded[idx])} ${label} §8(${commas(TOOL_LEVELS.collectionNeeded[idx] - total)} to go)`
+      : `§f${SKILL_TOOLS[kind].name} §aall levels unlocked`;
+  });
+  tiles.push({ text: "§e§lSkill Tool Unlocks", sub: unlocks.join("\n"), icon: "textures/items/wooden_hoe", noClick: true, onClick: again });
+  tiles.push(backTile(back));
 
-  return tileMenu(player, { title: "MY PROGRESS", theme: "blue", body: lines.join("\n"), tiles: [backTile(back)] });
+  return tileMenu(player, {
+    title: "My Progress",
+    theme: "blue",
+    body: [
+      `§fSkill average: §b${avg.toFixed(1)}`,
+      rank ? `§fServer rank: ${rank}` : "",
+      `§fMaxed skills: §6${maxed}§7/§6${infos.length}`,
+      "",
+      "§7Hover over a skill to see your XP and how to level it.",
+      "§7The bottom row shows what to work on next.",
+    ].filter((l) => l !== null).join("\n"),
+    tiles,
+  });
 }
 
 function skillDetail(player, id, back) {

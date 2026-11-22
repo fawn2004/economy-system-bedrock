@@ -477,46 +477,61 @@ export function statText(id, v) {
   return `${s.color}${s.sym} ${s.name} §f${Math.round(v * 10) / 10}${s.pct ? "%" : ""}`;
 }
 
+// What each stat does, in plain words (v = your total)
+const STAT_HELP = {
+  hp: { icon: "textures/ui/heart", say: (v) => `§fYou have §c${Math.round((20 + v) / 2 * 10) / 10} hearts§f (normal is 10).\n§7Every 2 Health = 1 extra heart.` },
+  def: { icon: "textures/items/iron_chestplate", say: (v) => `§fYou take §a${Math.round((v / (v + 100)) * 100)}% less damage§f from every hit.\n§7100 Defense = half damage.` },
+  str: { icon: "textures/items/blaze_powder", say: (v) => `§fEvery hit you land does §c+${Math.round(v)}% damage§f.` },
+  cc: { icon: "textures/items/flint", say: (v) => `§f§9${Math.round(v)}%§f of your hits are §9critical hits§f.` },
+  cd: { icon: "textures/items/diamond_sword", say: (v) => `§fCritical hits do §9+${Math.round(v)}% damage§f on top.` },
+  dmg: { icon: "textures/items/iron_sword", say: (v) => `§fYour weapon adds §c+${Math.round(v)} damage§f to every hit.` },
+  spd: { icon: "textures/items/sugar", say: (v) => `§fYou move faster: §f${v >= 20 ? `Speed ${Math.min(7, Math.floor(v / 20))} effect` : "no Speed effect yet"}§f.\n§7Every 20 Speed = 1 level of Speed.` },
+  int: { icon: "textures/items/book_enchanted", say: (v) => `§fYour max §bmana§f is §b${Math.round(v)}§f.\n§7Mana is used by right-click item abilities and refills 2% a second.` },
+  mf: { icon: "textures/items/gold_nugget", say: (v) => `§fRare drops from bosses, dungeon chests and sea creatures are §b${Math.round(v)}% more likely§f.` },
+  ms: { icon: "textures/items/iron_pickaxe", say: (v) => `§fYou mine faster: §f${v >= 25 ? `Haste ${Math.min(5, Math.floor(v / 25))} effect` : "no Haste effect yet"}§f.\n§7Every 25 Mining Speed = 1 level of Haste.` },
+  mfo: { icon: "textures/items/diamond", say: (v) => `§f§6+${Math.round(v)}%§f chance of extra drops when §6mining§f.` },
+  ffo: { icon: "textures/items/wheat", say: (v) => `§f§6+${Math.round(v)}%§f chance of extra crops when §6farming§f.` },
+  wfo: { icon: "textures/blocks/log_oak", say: (v) => `§f§6+${Math.round(v)}%§f chance of extra logs when §6chopping trees§f.` },
+  scc: { icon: "textures/items/fishing_rod_uncast", say: (v) => `§fEach catch has a §3${Math.round((2 + v) * 10) / 10}%§f chance to pull up a §3sea creature§f.` },
+};
+const ALWAYS_SHOW = ["hp", "def", "str", "cc", "cd", "spd", "int", "mf"];
+
 export async function statsMenu(player, back) {
   invalidate(player);
+  const again = () => statsMenu(player, back);
   const st = getStats(player);
   const t = st.total;
-  const lines = [];
-  for (const k of STAT_ORDER) {
-    if (k === "dmg") continue;
+  const show = STAT_ORDER.filter((k) => STAT_HELP[k] && (ALWAYS_SHOW.includes(k) || Math.round(t[k] ?? 0) !== 0));
+  const tiles = show.map((k, i) => {
+    const s = STATS[k];
     const v = t[k] ?? 0;
-    if (!v && !(k in BASE_STATS)) continue;
-    lines.push(statText(k, v));
-  }
+    const from = st.parts
+      .filter((p) => p.stats[k])
+      .map((p) => `§7- ${p.label}: ${p.stats[k] > 0 ? "§a+" : "§c"}${Math.round(p.stats[k] * 10) / 10}`);
+    return {
+      text: `${s.color}${s.sym} ${s.name}: §f${Math.round(v * 10) / 10}${s.pct ? "%" : ""}`,
+      sub: `${STAT_HELP[k].say(v)}${from.length ? `\n\n§7Comes from:\n${from.join("\n")}` : ""}`,
+      icon: STAT_HELP[k].icon,
+      newRow: i === ALWAYS_SHOW.length && i > 0, // fortunes etc. on their own row
+      noClick: true,
+      onClick: again,
+    };
+  });
+  tiles.push(backTile(back));
   const h = player.getComponent("minecraft:health");
-  lines.push("");
-  lines.push(`§7Hearts: §c${Math.ceil(h?.currentValue ?? 20)}§7/§c${Math.ceil(h?.effectiveMax ?? 20)} §8(half-hearts)`);
-  lines.push(`§7Damage taken: §a-${Math.round((t.def / (t.def + 100)) * 1000) / 10}% §8(from Defense)`);
-  lines.push(`§7Mana: §b${Math.floor(getMana(player))}§7/§b${maxMana(player)}`);
-  const held = st.heldInfo;
-  if (held?.def || held?.id === "-") lines.push(`§7Holding: ${RARITIES[held.rarity].color}${heldItem(player)?.nameTag?.replace(/§./g, "") ?? "item"}`);
-  const sources = st.parts.filter((p) => Object.values(p.stats).some((v) => v));
   await tileMenu(player, {
-    title: "YOUR STATS",
+    title: "Your Stats",
     theme: "red",
-    body: lines.join("\n"),
-    tiles: [
-      {
-        text: "§e§lBREAKDOWN",
-        sub: `§7${sources.length} sources`,
-        icon: "textures/items/book_writable",
-        onClick: () =>
-          tileMenu(player, {
-            title: "STAT SOURCES",
-            theme: "red",
-            body: sources
-              .map((p) => `§f${p.label}: ` + Object.entries(p.stats).filter(([, v]) => v).map(([k, v]) => `${STATS[k]?.color ?? "§7"}${v > 0 ? "+" : ""}${Math.round(v * 10) / 10}${STATS[k]?.sym ?? k}`).join(" "))
-              .join("\n"),
-            tiles: [backTile(() => statsMenu(player, back))],
-          }),
-      },
-      backTile(back),
-    ],
+    body: [
+      `§f§l${player.name}§r`,
+      `§c❤ ${Math.ceil((h?.currentValue ?? 20) / 2)}§7/§c${Math.ceil((h?.effectiveMax ?? 20) / 2)} hearts`,
+      `§a❈ -${Math.round(((t.def ?? 0) / ((t.def ?? 0) + 100)) * 100)}% damage taken`,
+      `§b✎ ${Math.floor(getMana(player))}§7/§b${maxMana(player)} mana`,
+      "",
+      "§7Hover over a stat to see what it does and where it comes from.",
+      "§8Stats come from armor, your held weapon or tool, skills, pets, slayer levels, kits, spirits and the mayor.",
+    ].join("\n"),
+    tiles,
   });
 }
 

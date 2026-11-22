@@ -28,7 +28,17 @@ export function pauseSidebar(player, ticks = 60) {
   paused.set(player.id, system.currentTick + ticks);
 }
 
+const shown = new Set(); // players whose sidebar is currently on screen
+
+/**
+ * Hides the sidebar. "title clear" alone isn't enough: the screen keeps the last
+ * title text (which is what draws the sidebar), so it's replaced by an empty title.
+ */
 export function clearSidebar(player) {
+  shown.delete(player.id);
+  try {
+    player.onScreenDisplay.setTitle("§r", { subtitle: "§r", fadeInDuration: 0, stayDuration: 1, fadeOutDuration: 0 });
+  } catch {}
   try {
     player.runCommand("title @s clear");
   } catch {}
@@ -97,8 +107,12 @@ function refresh() {
   const now = system.currentTick;
   for (const p of world.getAllPlayers()) {
     try {
-      if (!CONFIG.sidebar.enabled || !pref(p, "sidebar", true)) continue;
+      if (!CONFIG.sidebar.enabled || !pref(p, "sidebar", true)) {
+        if (shown.has(p.id)) clearSidebar(p);
+        continue;
+      }
       if ((paused.get(p.id) ?? 0) > now) continue;
+      shown.add(p.id);
       p.onScreenDisplay.setTitle(SIDEBAR_MARK + CONFIG.sidebar.title, {
         subtitle: lines(p),
         fadeInDuration: 0,
@@ -111,5 +125,8 @@ function refresh() {
 
 export function registerSidebar() {
   world.afterEvents.worldLoad.subscribe(() => system.runInterval(refresh, REFRESH));
-  world.beforeEvents.playerLeave.subscribe(({ player }) => paused.delete(player.id));
+  world.beforeEvents.playerLeave.subscribe(({ player }) => {
+    paused.delete(player.id);
+    shown.delete(player.id);
+  });
 }

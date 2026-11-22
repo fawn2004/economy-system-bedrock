@@ -45,7 +45,8 @@ Shop categories: **Blocks** (Stone, Wood, Colours, Nether, The End, Decoration),
 
 Every player has stats: **Health ❤, Defense ❈, Strength ❁, Crit Chance ☣, Crit Damage ☠,
 Speed ✦, Intelligence ✎, Magic Find ✯, Mining Speed, Mining / Farming / Foraging Fortune,
-Sea Creature Chance**. See them in **Profile > Stats** (with a breakdown of where each comes from).
+Sea Creature Chance**. See them in **Profile > Stats**: hover a stat to see what it does in plain
+words and where it comes from.
 
 | Stat | What it does |
 |---|---|
@@ -167,7 +168,8 @@ The party is teleported to a dungeon built in the sky far away (x 30000+, y 200)
 - **Quests**: 3 random **commissions** a day (kill mobs, mine stone, chop logs, earn skill XP):
   $10k each, $25k bonus for all 3. Plus 17 one-time **milestones** (skill levels, bank, pets,
   slayer, dungeons...).
-- **Daily Reward**: $1,000 x your streak (up to 30). Every 7th day adds a triple-coin bonus and
+- **Daily Reward**: claim every 12 hours (the main menu tile shows the time left); $1,000 x your
+  streak (up to 30), claim within 36 hours to keep the streak. Every 7th day adds a triple-coin bonus and
   25 Essence. Miss more than 48 hours and the streak starts again.
 - **Spirits**: every mob you kill in a dungeon has a 3% chance to drop a spirit (bosses 25%;
   Magic Find raises both). Every 5 can be traded in **Profile > Spirits** for +2 Health,
@@ -206,7 +208,7 @@ those can now be traded between players).
 
 ## Auction House
 
-Main menu > **Auction House**. Hold an item and press **Create**:
+Main menu > **Auction House**. Press **Create** and pick an item from your inventory:
 
 - **BIN**: fixed price, the first buyer gets it at once.
 - **Auction**: players bid; each bid must beat the last one by 10%. A bid in the last minute
@@ -261,8 +263,8 @@ stack limits and mob prices are in `SPAWNERS` / `SPAWNER_SETTINGS` in `config.js
 - **Collections** (main menu): every crop and spawner mob has a counter with 5 tiers;
   each tier pays money once and adds a permanent bonus drop chance for that crop/mob.
   Hand-placed melons, pumpkins, sugar cane and cactus don't count.
-- **Upgrades:** hold a skill tool, sneak and use it to open its upgrade
-  menu. Slayer Sword: Sharpness, Looting, Fire Aspect, Head Hunter (+head chance), Plunder
+- **Upgrades:** Profile > Skill Tool Upgrades (pick the tool from your inventory), or hold the
+  tool, sneak and use it. Slayer Sword: Sharpness, Looting, Fire Aspect, Head Hunter (+head chance), Plunder
   (+bonus drops), paid with money **and** heads of a set mob. Farming Hoe: Harvester
   (+bonus crops), Cultivating (+XP), Fortune, Efficiency, Replenish (auto-replant at any
   level), paid with money **and** enchanted crops of a set crop.

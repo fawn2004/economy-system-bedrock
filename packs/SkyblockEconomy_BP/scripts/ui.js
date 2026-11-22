@@ -51,13 +51,37 @@ const niceTitle = (t) => (/§/.test(t) ? t : niceName(t));
 const READABLE = { "0": "7", "1": "9", "4": "c", "5": "d", "8": "7" };
 export const readable = (text) => String(text).replace(/§([01458])/g, (_, c) => "§" + READABLE[c]);
 
+/** Wraps long tooltip lines (~40 letters) so the tooltip box doesn't get too wide. Keeps the line's colour. */
+function wrapLines(text, width = 40) {
+  return String(text)
+    .split("\n")
+    .map((line) => {
+      if (line.replace(/§./g, "").length <= width) return line;
+      const colour = (line.match(/^((?:§.)*)/) ?? ["", ""])[1];
+      let last = colour;
+      const out = [];
+      let cur = "";
+      for (const w of line.split(" ")) {
+        if ((cur + " " + w).replace(/§./g, "").trim().length > width && cur) {
+          out.push(cur);
+          const codes = cur.match(/§[0-9a-f]/g);
+          last = codes ? codes[codes.length - 1] : last;
+          cur = last + w;
+        } else cur = cur ? cur + " " + w : w;
+      }
+      if (cur) out.push(cur);
+      return out.join("\n");
+    })
+    .join("\n");
+}
+
 function tooltipText(t) {
   let text = niceName(t.text);
   if (t.badge === "NEW") text += " §a§lNEW";
   if (t.sub) text += `\n§r${t.sub}`;
   if (t.lore) text += `\n${t.lore}`;
   if ((t.onClick || t.id) && !t.nav && !t.noClick) text += "\n§eClick!";
-  return readable(text);
+  return readable(wrapLines(text));
 }
 
 const filler = () => ({ text: "[F]", icon: FILLER_ICON, filler: true });
