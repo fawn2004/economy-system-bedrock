@@ -24,7 +24,7 @@ item tooltips on hover, and Go Back / Close / page arrows in the bottom row.
 | **Daily Reward** | Claim once a day; the streak makes it bigger |
 | **Election** | Vote for the next mayor; the mayor's perks help everyone |
 | **Pay** | Send money to online players |
-| **Leaderboards** | Top 10 for balance, heads collected, farming, combat, skill average, every skill, spawners and minions (offline players included) |
+| **Leaderboards** | Top 10 for skill average and every skill (top row), plus balance, heads collected and farming (offline players included) |
 | **Player Settings** | Per-player toggles: **Sidebar**, **Chunk Borders** (particle outline of your chunk, only you see it), **Full Bright** (night vision, no particles), **Coordinates** (X / Y / Z + facing on the action bar), **Death Location** (chat message where you died), **XP Popups** and **Level-up Titles** |
 | **Balance display** | Balances under $1M show exactly ($523,410); bigger ones are shortened ($2.4M, $2.4B, $7.2T) |
 | **Sidebar** | Scoreboard-style panel on the right of the screen, different for every player: date, in-game season and time, location, purse, bank and your current objective. Players can hide theirs in Player Settings; admins change the title / bottom line or turn it off in Admin > Settings > Sidebar. Uses a title with a hidden marker, drawn by `ui/hud_screen.json`, so it pauses for a moment while a level-up title shows |
@@ -188,7 +188,7 @@ and end the election or pick the mayor.
 ## Bazaar
 
 Main menu > **Bazaar** (or a Bazaar NPC). Products are grouped into **Farming**, **Mining**,
-**Combat**, **Woods & Fishes** and **Enchanted** (minion loot, enchanted crops and heads, so
+**Combat** (mob and animal drops, fish), **Blocks** (stone, sand, logs...) and **Enchanted** (minion loot, enchanted crops and heads, so
 those can now be traded between players).
 
 | | |
@@ -469,6 +469,7 @@ Settings are saved in the world, so they work on Realms and survive add-on updat
 - **Server name above the menu:** `$eco_server_name` / `$eco_server_tag` in
   `packs/SkyblockEconomy_RP/ui/eco_form.json`
 - **Colours / textures / icons:** edit `tools/generate_assets.py`, then run it (needs Pillow).
+  After adding or changing item icons, run `tools/generate_icon_map.py` so menus use the same icons.
 
 ## How the custom UI works
 

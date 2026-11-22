@@ -72,12 +72,24 @@ function rowCols(k, onlyRow) {
 }
 
 /** Lays content + nav tiles out as chest slots. */
+/** Splits content into rows of up to 7; a tile with newRow: true always starts a new row. */
+function splitRows(content) {
+  const rows = [[]];
+  for (const t of content) {
+    const cur = rows[rows.length - 1];
+    if (cur.length === INNER || (t.newRow && cur.length)) rows.push([t]);
+    else cur.push(t);
+  }
+  return rows;
+}
+
 function chestSlots(content, nav) {
-  const rows = Math.max(1, Math.ceil(content.length / INNER));
+  const grouped = splitRows(content);
+  const rows = grouped.length;
   const slots = [];
   for (let i = 0; i < COLS; i++) slots.push(filler());
   for (let r = 0; r < rows; r++) {
-    const row = content.slice(r * INNER, r * INNER + INNER);
+    const row = grouped[r];
     const line = [filler()];
     const cells = Array.from({ length: INNER }, () => filler());
     rowCols(row.length, rows === 1).forEach((c, i) => (cells[c] = row[i]));
@@ -111,12 +123,15 @@ export async function tileMenu(player, opts) {
     else content.push(t);
   }
   let page = opts._page ?? 0;
-  const pages = Math.max(1, Math.ceil(content.length / PER_PAGE));
+  const allRows = splitRows(content);
+  const pageRows = [];
+  for (let i = 0; i < allRows.length; i += PER_PAGE / INNER) pageRows.push(allRows.slice(i, i + PER_PAGE / INNER).flat());
+  const pages = Math.max(1, pageRows.length);
   page = Math.min(Math.max(0, page), pages - 1);
   let shown = content;
   let info = "";
   if (pages > 1) {
-    shown = content.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
+    shown = pageRows[page];
     if (page > 0) nav.prev = { text: "§aPrevious Page", sub: `§ePage ${page}`, icon: "textures/items/arrow", nav: "prev", onClick: () => tileMenu(player, { ...opts, _page: page - 1 }) };
     if (page < pages - 1) nav.next = { text: "§aNext Page", sub: `§ePage ${page + 2}`, icon: "textures/items/arrow", nav: "next", onClick: () => tileMenu(player, { ...opts, _page: page + 1 }) };
     info = `\n§7Page §f${page + 1}§7/§f${pages}`;

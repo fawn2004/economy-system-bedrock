@@ -1,6 +1,7 @@
 import { EnchantmentTypes, ItemLockMode, ItemStack } from "@minecraft/server";
 import { getCatalog } from "./catalog.js";
 import { isMinionLoot, lootIcon } from "./minions.js";
+import { ECO_ICONS } from "./ecoIcons.js";
 
 // ============================================================================
 //  ITEM DATA
@@ -75,7 +76,7 @@ export function itemDataName(d) {
 
 /** Vanilla-style icon path for an item id (best guess - fine for most items). */
 export function itemIcon(id) {
-  const known = getCatalog().all.get(id)?.icon;
+  const known = getCatalog().all.get(id)?.icon ?? ECO_ICONS[id];
   if (known) return known;
   if (isMinionLoot(id)) return lootIcon(id);
   if (id === "minecraft:mob_spawner") return "textures/ui/eco/icon_spawners";

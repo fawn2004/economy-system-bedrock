@@ -2,6 +2,7 @@ import { ItemStack, system, world } from "@minecraft/server";
 import { sellPrice } from "./catalog.js";
 import { CONFIG, MINION_SETTINGS as MS, MINION_TYPES, MINION_UPGRADES } from "./config.js";
 import { addMoney, fmt, fmtMoney, getBalance, takeMoney } from "./economy.js";
+import { ECO_ICONS } from "./ecoIcons.js";
 import { ICON, backTile, fail, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -40,10 +41,7 @@ export const lootName = (id) => {
   for (const t of MINION_TYPES) for (const tier of t.tiers) if (tier.drop[0] === base) return "Enchanted " + tier.name;
   return "Enchanted " + pretty(base ?? id);
 };
-export const lootIcon = (id) => {
-  const b = baseFromLoot(id)?.replace("minecraft:", "");
-  return b ? ({ cobblestone: "textures/blocks/cobblestone", lapis_lazuli: "textures/items/dye_powder_blue", redstone: "textures/items/redstone_dust" }[b] ?? `textures/items/${b}`) : ICON.coin;
-};
+export const lootIcon = (id) => ECO_ICONS[id] ?? ICON.coin;
 /** Sell value of one enchanted item made from `base` (tier value, or shop price x lootMultiplier). */
 function baseValue(base) {
   for (const t of MINION_TYPES) for (const tier of t.tiers) if (tier.drop[0] === base && tier.value) return tier.value;

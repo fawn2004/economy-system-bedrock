@@ -8,6 +8,7 @@ import { lootIcon, lootIdFor, lootName } from "./minions.js";
 import { headItemId, mobIcon, mobName } from "./spawners.js";
 import { cropIcon, cropName, enchantedId } from "./tools.js";
 import { mayorIs } from "./mayor.js";
+import { ECO_ICONS } from "./ecoIcons.js";
 import { ICON, backTile, fail, pagedMenu, parseAmount, showForm, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -74,8 +75,8 @@ function getProducts() {
           const id = lootIdFor(tier.drop[0]);
           add({ id, name: lootName(id), icon: lootIcon(id), npc: 0 });
         }
-      for (const crop of CROPS) add({ id: enchantedId(crop.id), name: "Enchanted " + crop.name, icon: cropIcon(crop.id), npc: 0 });
-      for (const sp of SPAWNERS) add({ id: headItemId(sp.mob), name: mobName(sp.mob) + " Head", icon: mobIcon(sp.mob), npc: 0 });
+      for (const crop of CROPS) add({ id: enchantedId(crop.id), name: "Enchanted " + crop.name, icon: ECO_ICONS[enchantedId(crop.id)] ?? cropIcon(crop.id), npc: 0 });
+      for (const sp of SPAWNERS) add({ id: headItemId(sp.mob), name: mobName(sp.mob) + " Head", icon: ECO_ICONS[headItemId(sp.mob)] ?? mobIcon(sp.mob), npc: 0 });
     }
     cats.push({ id: c.id, name: c.name, icon: c.icon, items });
   }

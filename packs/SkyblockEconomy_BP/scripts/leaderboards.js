@@ -117,12 +117,14 @@ function show(board, v) {
 
 export async function leaderboardsMenu(player, back) {
   const reopen = () => leaderboardsMenu(player, back);
-  const tiles = boards().map((b) => ({
-    text: `§e§l${b.name.toUpperCase()}`,
-    sub: "§7Top 10",
-    icon: b.icon,
-    onClick: () => boardMenu(player, b, reopen),
-  }));
+  // Shown in the menu: skills on the top row, the rest centred underneath.
+  // (Combat kills, Spawners and Minions boards are still used for ranks, just not listed.)
+  const HIDDEN = new Set(["combat", "spawners", "minions"]);
+  const all = boards().filter((b) => !HIDDEN.has(b.id));
+  const skills = all.filter((b) => b.skill || b.id === "skillAvg");
+  const rest = all.filter((b) => !b.skill && b.id !== "skillAvg");
+  const tile = (b) => ({ text: `§e§l${b.name.toUpperCase()}`, sub: "§7Top 10", icon: b.icon, onClick: () => boardMenu(player, b, reopen) });
+  const tiles = [...skills.map(tile), ...rest.map((b, i) => ({ ...tile(b), newRow: i === 0 }))];
   tiles.push(backTile(back));
   await tileMenu(player, {
     title: "LEADERBOARDS",

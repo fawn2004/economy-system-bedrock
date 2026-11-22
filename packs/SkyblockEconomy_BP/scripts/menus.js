@@ -132,7 +132,7 @@ export async function mainMenu(player) {
   tiles.push({
     text: "§9§lSETTINGS",
     sub: "§7Your options",
-    icon: "textures/items/clock_item",
+    icon: "textures/ui/settings_glyph_color_2x",
     onClick: () => playerSettingsMenu(player, () => mainMenu(player)),
   });
   if (player.hasTag(CONFIG.adminTag)) {

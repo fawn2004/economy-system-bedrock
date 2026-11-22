@@ -629,38 +629,43 @@ export const BAZAAR = {
       id: "farming", name: "Farming", icon: "textures/items/wheat",
       items: [
         "minecraft:wheat", "minecraft:wheat_seeds", "minecraft:carrot", "minecraft:potato", "minecraft:beetroot",
-        "minecraft:pumpkin", "minecraft:melon_slice", "minecraft:sugar_cane", "minecraft:cactus", "minecraft:cocoa_beans",
-        "minecraft:nether_wart", "minecraft:brown_mushroom", "minecraft:red_mushroom", "minecraft:egg", "minecraft:feather",
-        "minecraft:leather", "minecraft:beef", "minecraft:porkchop", "minecraft:chicken", "minecraft:mutton",
-        "minecraft:rabbit", "minecraft:rabbit_hide", "minecraft:white_wool", "minecraft:honeycomb", "minecraft:sweet_berries",
+        "minecraft:beetroot_seeds", "minecraft:pumpkin", "minecraft:pumpkin_seeds", "minecraft:melon_slice", "minecraft:melon_seeds",
+        "minecraft:sugar_cane", "minecraft:cactus", "minecraft:cocoa_beans", "minecraft:nether_wart", "minecraft:brown_mushroom",
+        "minecraft:red_mushroom", "minecraft:sweet_berries", "minecraft:glow_berries", "minecraft:bamboo", "minecraft:kelp",
+        "minecraft:lily_pad", "minecraft:honeycomb",
       ],
     },
     {
       id: "mining", name: "Mining", icon: "textures/items/iron_pickaxe",
       items: [
-        "minecraft:cobblestone", "minecraft:stone", "minecraft:coal", "minecraft:raw_iron", "minecraft:iron_ingot",
-        "minecraft:raw_gold", "minecraft:gold_ingot", "minecraft:raw_copper", "minecraft:copper_ingot", "minecraft:lapis_lazuli",
-        "minecraft:redstone", "minecraft:diamond", "minecraft:emerald", "minecraft:quartz", "minecraft:obsidian",
-        "minecraft:amethyst_shard", "minecraft:glowstone_dust", "minecraft:netherrack", "minecraft:end_stone",
-        "minecraft:netherite_scrap", "minecraft:gravel", "minecraft:sand", "minecraft:flint", "minecraft:ice",
+        "minecraft:coal", "minecraft:raw_iron", "minecraft:iron_ingot", "minecraft:raw_gold", "minecraft:gold_ingot",
+        "minecraft:raw_copper", "minecraft:copper_ingot", "minecraft:lapis_lazuli", "minecraft:redstone", "minecraft:diamond",
+        "minecraft:emerald", "minecraft:quartz", "minecraft:amethyst_shard", "minecraft:glowstone_dust", "minecraft:netherite_scrap",
+        "minecraft:flint",
       ],
     },
     {
       id: "combat", name: "Combat", icon: "textures/items/iron_sword",
       items: [
+        // mob drops
         "minecraft:rotten_flesh", "minecraft:bone", "minecraft:string", "minecraft:spider_eye", "minecraft:gunpowder",
         "minecraft:ender_pearl", "minecraft:slime_ball", "minecraft:magma_cream", "minecraft:blaze_rod", "minecraft:ghast_tear",
-        "minecraft:arrow", "minecraft:phantom_membrane", "minecraft:prismarine_shard", "minecraft:prismarine_crystals",
-        "minecraft:shulker_shell", "minecraft:wither_skeleton_skull", "minecraft:nether_star",
+        "minecraft:arrow", "minecraft:phantom_membrane", "minecraft:shulker_shell", "minecraft:wither_skeleton_skull", "minecraft:nether_star",
+        // animal drops
+        "minecraft:leather", "minecraft:feather", "minecraft:egg", "minecraft:beef", "minecraft:porkchop", "minecraft:chicken",
+        "minecraft:mutton", "minecraft:rabbit", "minecraft:rabbit_hide", "minecraft:white_wool",
+        // fish & sea drops
+        "minecraft:cod", "minecraft:salmon", "minecraft:tropical_fish", "minecraft:pufferfish", "minecraft:ink_sac",
+        "minecraft:glow_ink_sac", "minecraft:prismarine_shard", "minecraft:prismarine_crystals", "minecraft:nautilus_shell",
       ],
     },
     {
-      id: "woods", name: "Woods & Fishes", icon: "textures/items/fish_raw",
+      id: "blocks", name: "Blocks", icon: "textures/blocks/log_oak",
       items: [
+        "minecraft:cobblestone", "minecraft:stone", "minecraft:gravel", "minecraft:sand", "minecraft:obsidian", "minecraft:ice",
+        "minecraft:netherrack", "minecraft:end_stone", "minecraft:sponge",
         "minecraft:oak_log", "minecraft:spruce_log", "minecraft:birch_log", "minecraft:jungle_log", "minecraft:acacia_log",
         "minecraft:dark_oak_log", "minecraft:mangrove_log", "minecraft:cherry_log", "minecraft:crimson_stem", "minecraft:warped_stem",
-        "minecraft:cod", "minecraft:salmon", "minecraft:tropical_fish", "minecraft:pufferfish", "minecraft:ink_sac",
-        "minecraft:glow_ink_sac", "minecraft:kelp", "minecraft:lily_pad", "minecraft:nautilus_shell", "minecraft:sponge",
       ],
     },
     { id: "enchanted", name: "Enchanted", icon: "textures/items/diamond", items: [] },
