@@ -1,0 +1,31 @@
+SKYBLOCK ECONOMY v1.0.60 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+COMBAT LINE
+[ ] Every hit shows a line on the action bar with the damage and the enchants that worked,
+    e.g. "19 dmg | Keen +40% | Storm +75% | Venom | Drain +1.4❤"
+[ ] The "+XP" popup doesn't cover the combat line straight away
+
+WEAPON ENCHANTS
+[ ] Keen Edge: hits do noticeably more damage (+8% per level, shown as "Keen +X%")
+[ ] Life Drain: you heal when you hit a mob while hurt (hearts appear, "Drain +X❤")
+[ ] Finisher: extra damage on mobs under half health (crit sparks, "Finisher +X%")
+[ ] Precision: more Crit Damage (check Profile > Stats while holding the weapon)
+[ ] Venom: mobs get poisoned (green poison effect), stronger at higher levels
+[ ] Storm Call: every 4th hit has a thunder sound, a blast and "Storm +X%"
+[ ] Scavenger: each kill gives coins ("+$X (Scavenger)")
+
+ARMOR ENCHANTS
+[ ] Vitality: more hearts (Profile > Stats Health goes up)
+[ ] Bulwark: more Defense (you take less damage)
+[ ] Fleetfoot: Fleetfoot V on one piece gives a Speed effect (every 15 Speed = 1 level of Speed)
+[ ] Insight: more mana (Profile > Stats Intelligence)
+[ ] Regrowth: hearts appear and you heal a little every 5 seconds when hurt
+[ ] Retaliate: mobs that hit you take damage back (sparks on them)
+[ ] Last Stand: under 30% health you see "LAST STAND +X% Defense"
+[ ] Nightsight: night vision while wearing the helmet
+
+TOOL ENCHANTS
+[ ] Harvesting: more extra drops (Fortune shows in Profile > Stats while holding the tool)
+[ ] Swiftswing: Swiftswing III+ on a tool gives Haste while holding it
+[ ] Lure Master: higher Sea Creature Chance (Profile > Stats)

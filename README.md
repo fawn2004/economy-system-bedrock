@@ -74,11 +74,23 @@ reforged and enchanted too.
 - **Reforge** (Profile > Reforge): pick a weapon, armor piece or tool from your inventory (the
   menu lists everything that can be reforged) and get a random reforge. 14 reforges for weapons,
   armor and tools. Bigger rarity = bigger stats and price.
-- **Enchanting** (Profile > Enchanting): pick an item from your inventory; 18 custom enchantments. Weapons: Keen Edge, Life
-  Drain, Finisher, Precision, Venom, Storm Call, Scavenger. Armor: Vitality, Bulwark, Fleetfoot,
-  Insight, **Regrowth** (heals over time), **Retaliate** (hits attackers back), **Last Stand**
-  (more Defense under 30% health), **Nightsight** (helmet: night vision). Tools: Harvesting,
-  Swiftswing, Lure Master.
+- **Enchanting** (Profile > Enchanting): pick an item from your inventory. What each enchant does
+  (per level; levels above V count half):
+  | Enchant | Effect |
+  |---|---|
+  | Keen Edge | +8% damage |
+  | Life Drain | heal 3% of the damage you deal (hearts appear) |
+  | Finisher | +8% damage to mobs under half health |
+  | Precision | +10% Crit Damage |
+  | Venom | poison, stronger and longer with level |
+  | Storm Call | every 4th hit: +25% damage, thunder and a blast |
+  | Scavenger | +8 coins per kill |
+  | Vitality / Bulwark / Fleetfoot / Insight | +2 Health / +5 Defense / +3 Speed / +10 Intelligence |
+  | Regrowth / Retaliate / Last Stand / Nightsight | heal over time / hit attackers back / more Defense when low / night vision |
+  | Harvesting / Swiftswing / Lure Master | +6 Fortune / +10 Mining Speed / +1% Sea Creature Chance |
+
+  Every hit shows a combat line on the action bar naming the enchants that worked
+  (e.g. `19 dmg | Keen +40% | Storm +75% | Drain +1.4❤`). Speed: every 15 Speed = 1 level of Speed.
   - Custom enchantments go up to **XV** (Nightsight is on/off). Levels above V give half as much as
     levels I-V (XV = twice as strong as V). Last Stand, Retaliate and Regrowth totals are capped.
   - Every attempt has a **chance to work**: I 90%, II 75%, III 60%, IV 45%, V 30%, then 28% at VI down

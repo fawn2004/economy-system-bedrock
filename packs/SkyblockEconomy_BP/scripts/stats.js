@@ -1,7 +1,7 @@
 import { EquipmentSlot, system, world } from "@minecraft/server";
 import { addMoney } from "./economy.js";
 import { ITEMS, RARITIES, STATS, STAT_ORDER, enchEff, isArmorKind, isToolKind, isWeaponKind, itemStats, readItem } from "./items.js";
-import { skillHooks, skillLevel } from "./skills.js";
+import { combatShownAt, skillHooks, skillLevel } from "./skills.js";
 import { backTile, fail, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -141,7 +141,7 @@ function applyEffects(player) {
   const t = getStats(player).total;
   const hp = Math.floor(t.hp ?? 0);
   const hb = hp >= 4 ? Math.min(60, Math.floor(hp / 4) - 1) : -1;
-  const sp = (t.spd ?? 0) >= 20 ? Math.min(6, Math.floor(t.spd / 20) - 1) : -1;
+  const sp = (t.spd ?? 0) >= 15 ? Math.min(3, Math.floor(t.spd / 15) - 1) : -1;
   const hs = (t.ms ?? 0) >= 25 ? Math.min(4, Math.floor(t.ms / 25) - 1) : -1;
   const nv = getStats(player).passive.arm_nv ? 1 : 0;
   const key = `${hb}:${sp}:${hs}:${nv}`;
@@ -359,11 +359,19 @@ function healthRatio(e) {
   return h ? h.currentValue / h.effectiveMax : 1;
 }
 
-function showDamage(player, n, crit) {
+// combatShownAt (skills.js): when each player last saw a combat line, so "+XP" popups don't hide it straight away
+function showDamage(player, n, crit, notes = []) {
+  combatShownAt.set(player.id, system.currentTick);
+  const head = crit ? `§f✧ §e${shortNum(n)} §6CRIT` : `§f${shortNum(n)} §7dmg`;
   try {
-    player.onScreenDisplay.setActionBar(crit ? `§f✧ §e${shortNum(n)} §f✧ §6CRIT` : `§7${shortNum(n)} damage`);
+    player.onScreenDisplay.setActionBar([head, ...notes].join(" §8| "));
   } catch {}
 }
+const particle = (e, name, dy = 1) => {
+  try {
+    e.dimension.spawnParticle(name, { x: e.location.x, y: e.location.y + dy, z: e.location.z });
+  } catch {}
+};
 
 function onHurt({ hurtEntity: target, damage, damageSource }) {
   if (damage >= 90000) return; // our own finishing blow
@@ -382,7 +390,13 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
     if (!h || h.currentValue <= 0) return;
     const pas = getStats(target).passive;
     let def = Math.max(0, stat(target, "def"));
-    if (pas.arm_lt && h.currentValue < h.effectiveMax * 0.3) def *= 1 + 0.15 * Math.min(10, pas.arm_lt); // Last Stand (max +150%)
+    if (pas.arm_lt && h.currentValue < h.effectiveMax * 0.3) {
+      def *= 1 + 0.15 * Math.min(10, pas.arm_lt); // Last Stand (max +150%)
+      try {
+        target.onScreenDisplay.setActionBar(`§6§lLAST STAND §r§7+${Math.round(15 * Math.min(10, pas.arm_lt))}% Defense`);
+      } catch {}
+      particle(target, "minecraft:totem_particle");
+    }
     const red = def / (def + 100);
     let extra = 0;
     const src = damageSource?.damagingEntity;
@@ -397,6 +411,7 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
     if (pas.arm_rf && src && src.typeId !== "minecraft:player" && cause !== "thorns") {
       try {
         src.applyDamage(Math.max(1, damage * 0.04 * Math.min(15, pas.arm_rf)), { cause: "thorns", damagingEntity: target });
+        particle(src, "minecraft:critical_hit_emitter");
       } catch {}
     }
     for (const f of combatHooks.playerHurt) {
@@ -419,8 +434,14 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
   const t = st.total;
   const p = st.passive;
   let mult = 1 + Math.max(0, t.str ?? 0) / 100;
-  let pct = (p.en_sh ?? 0) * 5;
-  if (p.en_ex && healthRatio(target) < 0.5) pct += p.en_ex * 4;
+  const notes = [];
+  let pct = (p.en_sh ?? 0) * 8; // Keen Edge
+  if (p.en_sh) notes.push(`§dKeen +${Math.round(p.en_sh * 8)}%`);
+  if (p.en_ex && healthRatio(target) < 0.5) {
+    pct += p.en_ex * 8; // Finisher
+    notes.push(`§cFinisher +${Math.round(p.en_ex * 8)}%`);
+    particle(target, "minecraft:critical_hit_emitter");
+  }
   for (const f of combatHooks.damageBonus) {
     try {
       pct += Number(f(attacker, target)) || 0;
@@ -430,30 +451,39 @@ function onHurt({ hurtEntity: target, damage, damageSource }) {
   hitCount.set(attacker.id, n);
   let storm = false;
   if (p.en_st && n % 4 === 0) {
-    pct += 20 * p.en_st;
+    pct += 25 * p.en_st; // Storm Call
     storm = true;
+    notes.push(`§eStorm +${Math.round(p.en_st * 25)}%`);
   }
   let total = (raw + (t.dmg ?? 0)) * mult * (1 + pct / 100);
   const crit = Math.random() * 100 < (t.cc ?? 0);
   if (crit) total *= 1 + Math.max(0, t.cd ?? 0) / 100;
-  showDamage(attacker, total, crit);
 
   if (storm) {
+    particle(target, "minecraft:knockback_roar_particle");
+    particle(target, "minecraft:huge_explosion_emitter", 0.5);
     try {
-      target.dimension.spawnParticle("minecraft:knockback_roar_particle", target.location);
-      attacker.playSound("ambient.weather.thunder", { volume: 0.4, pitch: 1.6 });
+      attacker.playSound("ambient.weather.thunder", { volume: 0.5, pitch: 1.4 });
     } catch {}
   }
   if (p.en_vn || p.venom) {
+    const v = p.en_vn ?? 1;
     try {
-      target.addEffect("poison", 40 + Math.round((p.en_vn ?? 1) * 10), { amplifier: Math.max(0, Math.min(4, Math.floor((p.en_vn ?? 1) - 1))) });
+      target.addEffect("poison", 60 + Math.round(v * 20), { amplifier: Math.max(0, Math.min(4, Math.floor(v / 2))) });
     } catch {}
+    if (p.en_vn) notes.push("§2Venom");
   }
-  const steal = (p.en_ls ?? 0) + (p.lifesteal ?? 0);
+  const steal = (p.en_ls ?? 0) * 3 + (p.lifesteal ?? 0); // Life Drain: 3% per level
   if (steal > 0) {
     const h = attacker.getComponent("minecraft:health");
-    if (h) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + (total * steal) / 100));
+    if (h && h.currentValue < h.effectiveMax) {
+      const heal = Math.max(0.5, (total * steal) / 100);
+      h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + heal));
+      notes.push(`§aDrain +${Math.round((heal / 2) * 10) / 10}❤`);
+      particle(attacker, "minecraft:heart_particle", 2);
+    }
   }
+  showDamage(attacker, total, crit, notes);
 
   if (tough) {
     damageTough(target, total, attacker);
@@ -485,7 +515,7 @@ const STAT_HELP = {
   cc: { icon: "textures/items/flint", say: (v) => `§f§9${Math.round(v)}%§f of your hits are §9critical hits§f.` },
   cd: { icon: "textures/items/diamond_sword", say: (v) => `§fCritical hits do §9+${Math.round(v)}% damage§f on top.` },
   dmg: { icon: "textures/items/iron_sword", say: (v) => `§fYour weapon adds §c+${Math.round(v)} damage§f to every hit.` },
-  spd: { icon: "textures/items/sugar", say: (v) => `§fYou move faster: §f${v >= 20 ? `Speed ${Math.min(7, Math.floor(v / 20))} effect` : "no Speed effect yet"}§f.\n§7Every 20 Speed = 1 level of Speed.` },
+  spd: { icon: "textures/items/sugar", say: (v) => `§fYou move faster: §f${v >= 15 ? `Speed ${Math.min(4, Math.floor(v / 15))} effect` : "no Speed effect yet"}§f.\n§7Every 15 Speed = 1 level of Speed (max IV).` },
   int: { icon: "textures/items/book_enchanted", say: (v) => `§fYour max §bmana§f is §b${Math.round(v)}§f.\n§7Mana is used by right-click item abilities and refills 2% a second.` },
   mf: { icon: "textures/items/gold_nugget", say: (v) => `§fRare drops from bosses, dungeon chests and sea creatures are §b${Math.round(v)}% more likely§f.` },
   ms: { icon: "textures/items/iron_pickaxe", say: (v) => `§fYou mine faster: §f${v >= 25 ? `Haste ${Math.min(5, Math.floor(v / 25))} effect` : "no Haste effect yet"}§f.\n§7Every 25 Mining Speed = 1 level of Haste.` },
@@ -555,7 +585,14 @@ export function registerStats() {
     const killer = damageSource?.damagingEntity;
     if (killer?.typeId !== "minecraft:player") return;
     const p = getStats(killer).passive;
-    if (p.en_sv) addMoney(killer, p.en_sv * 3);
+    if (p.en_sv) {
+      const coins = Math.round(p.en_sv * 8); // Scavenger
+      addMoney(killer, coins);
+      combatShownAt.set(killer.id, system.currentTick);
+      try {
+        killer.onScreenDisplay.setActionBar(`§6+$${coins} §7(Scavenger)`);
+      } catch {}
+    }
     for (const f of combatHooks.kill) {
       try {
         f(killer, deadEntity);
@@ -582,10 +619,13 @@ export function registerStats() {
           const rg = getStats(p).passive.arm_rg;
           if (rg && system.currentTick % 100 < 20) {
             const h = p.getComponent("minecraft:health");
-            if (h && h.currentValue > 0 && h.currentValue < h.effectiveMax) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + Math.min(5, 0.25 * rg)));
+            if (h && h.currentValue > 0 && h.currentValue < h.effectiveMax) {
+              h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + Math.min(5, 0.25 * rg)));
+              particle(p, "minecraft:heart_particle", 2);
+            }
           }
           const info = readItem(heldItem(p));
-          if (info?.def?.ability) p.onScreenDisplay.setActionBar(`§b✎ ${Math.floor(getMana(p))}/${maxMana(p)} Mana`);
+          if (info?.def?.ability && system.currentTick - (combatShownAt.get(p.id) ?? -99) > 30) p.onScreenDisplay.setActionBar(`§b✎ ${Math.floor(getMana(p))}/${maxMana(p)} Mana`);
         } catch {}
       }
     }, 20);

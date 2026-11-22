@@ -257,23 +257,23 @@ export const REFORGE_COST = [250, 1000, 5000, 25000, 100000, 500000];
 // ---- custom enchantments -------------------------------------------------------------
 // code: short id stored in lore. for: which items. Each level costs `cost * level^2` coins and `xp * level` XP levels.
 export const ENCHANTS = {
-  sh: { name: "Keen Edge", for: "weapon", max: 15, cost: 2000, xp: 3, desc: "+5% damage per level" },
-  ls: { name: "Life Drain", for: "weapon", max: 15, cost: 4000, xp: 4, desc: "Heal 1% of damage dealt per level" },
-  ex: { name: "Finisher", for: "weapon", max: 15, cost: 3000, xp: 3, desc: "+4% damage per level on mobs under half health" },
-  cr: { name: "Precision", for: "weapon", max: 15, cost: 5000, xp: 4, desc: "+8% Crit Damage per level" },
-  vn: { name: "Venom", for: "weapon", max: 15, cost: 6000, xp: 5, desc: "Poisons mobs you hit" },
-  st: { name: "Storm Call", for: "weapon", max: 15, cost: 15000, xp: 6, desc: "Every 4th hit calls lightning (+20% damage per level)" },
-  sv: { name: "Scavenger", for: "weapon", max: 15, cost: 2500, xp: 2, desc: "+3 coins per level per kill" },
+  sh: { name: "Keen Edge", for: "weapon", max: 15, cost: 2000, xp: 3, desc: "+8% damage per level" },
+  ls: { name: "Life Drain", for: "weapon", max: 15, cost: 4000, xp: 4, desc: "Heal 3% of the damage you deal per level" },
+  ex: { name: "Finisher", for: "weapon", max: 15, cost: 3000, xp: 3, desc: "+8% damage per level to mobs under half health" },
+  cr: { name: "Precision", for: "weapon", max: 15, cost: 5000, xp: 4, desc: "+10% Crit Damage per level" },
+  vn: { name: "Venom", for: "weapon", max: 15, cost: 6000, xp: 5, desc: "Poisons mobs you hit (stronger and longer per level)" },
+  st: { name: "Storm Call", for: "weapon", max: 15, cost: 15000, xp: 6, desc: "Every 4th hit is a lightning strike: +25% damage per level" },
+  sv: { name: "Scavenger", for: "weapon", max: 15, cost: 2500, xp: 2, desc: "+8 coins per level for every kill" },
   gr: { name: "Vitality", for: "armor", max: 15, cost: 4000, xp: 4, desc: "+2 Health per level" },
-  bw: { name: "Bulwark", for: "armor", max: 15, cost: 3000, xp: 3, desc: "+4 Defense per level" },
-  sw: { name: "Fleetfoot", for: "armor", max: 15, cost: 3000, xp: 3, desc: "+2 Speed per level" },
-  in: { name: "Insight", for: "armor", max: 15, cost: 3000, xp: 3, desc: "+5 Intelligence per level" },
+  bw: { name: "Bulwark", for: "armor", max: 15, cost: 3000, xp: 3, desc: "+5 Defense per level" },
+  sw: { name: "Fleetfoot", for: "armor", max: 15, cost: 3000, xp: 3, desc: "+3 Speed per level (every 15 Speed = 1 level of Speed)" },
+  in: { name: "Insight", for: "armor", max: 15, cost: 3000, xp: 3, desc: "+10 Intelligence (mana) per level" },
   rg: { name: "Regrowth", for: "armor", max: 15, cost: 8000, xp: 5, desc: "Heals 0.25 health per level every 5 seconds (adds up across pieces, max 5)" },
   rf: { name: "Retaliate", for: "armor", max: 15, cost: 6000, xp: 4, desc: "Hits back 4% of the damage you take per level (all pieces, max 60%)" },
   lt: { name: "Last Stand", for: "armor", max: 15, cost: 10000, xp: 6, desc: "+15% Defense per level while under 30% health (all pieces, max +150%)" },
   nv: { name: "Nightsight", for: "armor", kinds: ["helmet"], max: 1, cost: 15000, xp: 5, desc: "Night vision while worn (helmet only)" },
-  hv: { name: "Harvesting", for: "tool", max: 15, cost: 2500, xp: 2, desc: "+5 Fortune per level" },
-  ef: { name: "Swiftswing", for: "tool", max: 15, cost: 2500, xp: 2, desc: "+10 Mining Speed per level" },
+  hv: { name: "Harvesting", for: "tool", max: 15, cost: 2500, xp: 2, desc: "+6 Fortune per level (more extra drops)" },
+  ef: { name: "Swiftswing", for: "tool", max: 15, cost: 2500, xp: 2, desc: "+10 Mining Speed per level (every 25 = 1 level of Haste)" },
   an: { name: "Lure Master", for: "rod", max: 15, cost: 5000, xp: 4, desc: "+1% Sea Creature Chance per level" },
 };
 
@@ -338,11 +338,11 @@ export function itemStats(info) {
   if (r) for (const [k, vals] of Object.entries(r.stats)) add(k === "fortune" ? fortuneStat(info.kind) : k, vals[info.rarity] ?? vals[vals.length - 1]);
   const e = Object.fromEntries(Object.entries(info.ench ?? {}).map(([c, l]) => [c, enchEff(l)]));
   if (e.gr) add("hp", 2 * e.gr);
-  if (e.bw) add("def", 4 * e.bw);
-  if (e.sw) add("spd", 2 * e.sw);
-  if (e.in) add("int", 5 * e.in);
-  if (e.cr) add("cd", 8 * e.cr);
-  if (e.hv) add(fortuneStat(info.kind), 5 * e.hv);
+  if (e.bw) add("def", 5 * e.bw);
+  if (e.sw) add("spd", 3 * e.sw);
+  if (e.in) add("int", 10 * e.in);
+  if (e.cr) add("cd", 10 * e.cr);
+  if (e.hv) add(fortuneStat(info.kind), 6 * e.hv);
   if (e.ef) add("ms", 10 * e.ef);
   if (e.an) add("scc", e.an);
   return out;

@@ -24,6 +24,8 @@ export const skillIds = () => Object.keys(SKILLS);
 //   xpBonus(player, id)   -> extra XP %          perkBonus(player, id) -> extra perk %
 //   onXp(player, id, gain)                       onCatch(player, location) -> fishing catch
 export const skillHooks = { xpBonus: [], perkBonus: [], onXp: [], onCatch: [] };
+/** When each player last saw a combat line (set by stats.js) - the "+XP" popup waits a moment after it. */
+export const combatShownAt = new Map();
 const hookSum = (list, ...args) => list.reduce((n, f) => {
   try {
     return n + (Number(f(...args)) || 0);
@@ -110,7 +112,7 @@ export function addSkillXp(player, id, amount) {
   const total = getSkillXp(player, id) + gain;
   player.setDynamicProperty(`eco:skill:${id}`, total);
   const info = levelInfo(total);
-  if (SS.showActionBar && pref(player, "xpbar", true)) {
+  if (SS.showActionBar && pref(player, "xpbar", true) && system.currentTick - (combatShownAt.get(player.id) ?? -99) > 30) {
     try {
       player.onScreenDisplay.setActionBar(
         info.need ? `§3+${gain} ${s.name} XP §7(${commas(info.into)}/${commas(info.need)})` : `§3+${gain} ${s.name} XP §6MAX`
