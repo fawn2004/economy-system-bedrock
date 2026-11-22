@@ -368,7 +368,7 @@ function progressMenu(player, back) {
       ? `§f${SKILL_TOOLS[kind].name} §7Lv ${idx + 1} at §f${commas(TOOL_LEVELS.collectionNeeded[idx])} ${label} §8(${commas(TOOL_LEVELS.collectionNeeded[idx] - total)} to go)`
       : `§f${SKILL_TOOLS[kind].name} §aall levels unlocked`;
   });
-  tiles.push({ text: "§e§lSkill Tool Unlocks", sub: unlocks.join("\n"), icon: "textures/items/wooden_hoe", noClick: true, onClick: again });
+  tiles.push({ text: "§e§lSkill Tool Unlocks", sub: unlocks.join("\n"), icon: "textures/items/wood_hoe", noClick: true, onClick: again });
   tiles.push(backTile(back));
 
   return tileMenu(player, {

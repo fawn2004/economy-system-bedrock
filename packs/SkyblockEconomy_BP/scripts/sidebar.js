@@ -12,7 +12,7 @@ import { slayerObjective } from "./slayer.js";
 //  Each player gets their own. It's sent as a title + subtitle: the title
 //  starts with MARK and holds the sidebar's heading, the subtitle holds the
 //  lines. The resource pack (ui/hud_screen.json) draws titles with that marker
-//  as the sidebar instead of a big title. Players can hide it in Settings,
+//  as the sidebar instead of a big title. Players can switch to a compact one in Settings,
 //  admins can change the heading / footer or turn it off (Admin > Settings).
 //
 //  Lines: date, in-game season / day / time, location, purse, bank, your
@@ -79,9 +79,15 @@ function location(player) {
   return "§bYour Island";
 }
 
-function lines(player) {
+function lines(player, compact) {
   const now = new Date();
   const date = `${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")}/${String(now.getFullYear()).slice(2)}`;
+  if (compact) {
+    // compact sidebar (Player Settings > Sidebar): just the essentials
+    const small = [`§7${date} §7${world.getAllPlayers().length} online`, "", `Purse: §6${coins(getBalance(player))}`, `Bank: §6${coins(getBank(player))}`];
+    if (CONFIG.sidebar.footer) small.push("", CONFIG.sidebar.footer);
+    return small.join("\n");
+  }
   const cal = calendar();
   const out = [
     `§7${date} §7${world.getAllPlayers().length} online`,
@@ -107,14 +113,14 @@ function refresh() {
   const now = system.currentTick;
   for (const p of world.getAllPlayers()) {
     try {
-      if (!CONFIG.sidebar.enabled || !pref(p, "sidebar", true)) {
+      if (!CONFIG.sidebar.enabled) {
         if (shown.has(p.id)) clearSidebar(p);
         continue;
       }
       if ((paused.get(p.id) ?? 0) > now) continue;
       shown.add(p.id);
       p.onScreenDisplay.setTitle(SIDEBAR_MARK + CONFIG.sidebar.title, {
-        subtitle: lines(p),
+        subtitle: lines(p, !pref(p, "sidebar", true)),
         fadeInDuration: 0,
         stayDuration: REFRESH * 3,
         fadeOutDuration: 0,

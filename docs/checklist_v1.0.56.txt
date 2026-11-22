@@ -1,0 +1,21 @@
+SKYBLOCK ECONOMY v1.0.56 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+MENU TEXT
+[ ] The text box on the left of the menus is smaller and stays inside the box (try a shop item, the Stats menu, Dungeons)
+
+ICONS
+[ ] Profile > Skill Tool Upgrades has a wooden hoe icon (not a missing texture)
+[ ] Skills > My Progress > Skill Tool Unlocks has a wooden hoe icon
+[ ] Shop > Skill Tools shows a wooden hoe and a wooden sword
+
+STATS
+[ ] Hovering a stat says "Starting stats (everyone has these)" instead of "Base"
+[ ] The text under the stats explains the starting stats (30% Crit Chance, 50% Crit Damage, 100 Intelligence)
+
+SIDEBAR
+[ ] Settings > Sidebar now switches between FULL and COMPACT (it doesn't turn it off any more)
+[ ] Compact sidebar shows only: the date, players online, purse and bank (+ the footer line)
+[ ] Full sidebar shows everything (season, time, location, purse, bank, objective)
+[ ] The setting is remembered after rejoining
+[ ] Admin > Settings > Sidebar can still turn the sidebar off for everyone

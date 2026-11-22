@@ -30,7 +30,7 @@ export async function profileMenu(player, back) {
     { text: "§a§lPETS", sub: pet ? `${RARITIES[pet.r].color}${PET_TYPES[pet.t].name} §7Lv${petLevel(pet.xp, pet.r).level}` : "§7No active pet", icon: "textures/items/bone", onClick: () => petsMenu(player, again) },
     { text: "§6§lREFORGE", sub: "§7Pick an item", icon: "textures/blocks/anvil_top_damaged_0", onClick: () => reforgeMenu(player, again) },
     { text: "§d§lENCHANTING", sub: "§7Pick an item", icon: "textures/items/book_enchanted", onClick: () => enchantMenu(player, again) },
-    { text: "§a§lSKILL TOOL UPGRADES", sub: "§7Farming Hoe & Slayer Sword", icon: "textures/items/wooden_hoe", onClick: () => pickToolMenu(player, again) },
+    { text: "§a§lSKILL TOOL UPGRADES", sub: "§7Farming Hoe & Slayer Sword", icon: "textures/items/wood_hoe", onClick: () => pickToolMenu(player, again) },
   ];
   tiles.push(
     { text: "§b§lWARDROBE", sub: "§7Swap armor sets", icon: "textures/items/iron_chestplate", onClick: () => wardrobeMenu(player, again) },

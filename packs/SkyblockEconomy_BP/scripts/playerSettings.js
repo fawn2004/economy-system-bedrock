@@ -1,5 +1,4 @@
 import { system, world } from "@minecraft/server";
-import { clearSidebar } from "./sidebar.js";
 import { backTile, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -16,7 +15,7 @@ export const pref = (player, id, def) => {
 const setPref = (player, id, v) => player.setDynamicProperty(`eco:pref:${id}`, v);
 
 const SETTINGS = [
-  { id: "sidebar", name: "SIDEBAR", label: "Sidebar", desc: "Balance, heads & more on the right", def: true, icon: "textures/items/paper" },
+  { id: "sidebar", name: "SIDEBAR", label: "Sidebar", desc: "Full, or compact (just date, players, purse & bank)", def: true, icon: "textures/items/paper", onText: "FULL", offText: "COMPACT" },
   { id: "chunks", name: "CHUNK BORDERS", label: "Chunk Borders", desc: "Glowing lines around the chunk you're in", def: false, icon: "textures/blocks/glass" },
   { id: "fullbright", name: "FULL BRIGHT", label: "Full Bright", desc: "See clearly in the dark", def: false, icon: "textures/items/potion_bottle_nightVision" },
   { id: "coords", name: "COORDINATES", label: "Coordinates", desc: "Your X / Y / Z on the action bar", def: false, icon: "textures/items/compass_item" },
@@ -30,19 +29,21 @@ export async function playerSettingsMenu(player, back, msg) {
   const tiles = SETTINGS.map((s) => {
     const on = pref(player, s.id, s.def);
     return {
-      text: `${on ? "§a" : "§c"}§l${s.name}`,
-      sub: on ? "§aON §7- tap to turn off" : "§cOFF §7- tap to turn on",
+      text: `${on ? "§a" : s.offText ? "§e" : "§c"}§l${s.name}`,
+      sub: s.onText
+        ? on ? `§a${s.onText} §7- tap for ${s.offText.toLowerCase()}` : `§e${s.offText} §7- tap for ${s.onText.toLowerCase()}`
+        : on ? "§aON §7- tap to turn off" : "§cOFF §7- tap to turn on",
       icon: s.icon,
       onClick: () => {
         setPref(player, s.id, !on);
-        if (s.id === "sidebar" && on) clearSidebar(player);
         if (s.id === "fullbright" && on) {
           try {
             player.removeEffect("night_vision");
           } catch {}
         }
-        success(player, `${s.label} turned ${!on ? "on" : "off"}.`);
-        return reopen(`§f${s.name} §7is now ${!on ? "§aON" : "§cOFF"}`);
+        const state = s.onText ? (!on ? s.onText : s.offText).toLowerCase() : !on ? "on" : "off";
+        success(player, s.onText ? `${s.label} is now ${state}.` : `${s.label} turned ${state}.`);
+        return reopen(`§f${s.name} §7is now §a${state.toUpperCase()}`);
       },
     };
   });
@@ -52,7 +53,11 @@ export async function playerSettingsMenu(player, back, msg) {
     theme: "blue",
     body:
       (msg ? msg + "\n" : "") +
-      SETTINGS.map((s) => `§f${s.label}: ${pref(player, s.id, s.def) ? "§aON" : "§cOFF"} §8- ${s.desc}`).join("\n"),
+      SETTINGS.map((s) => {
+        const on = pref(player, s.id, s.def);
+        const v = s.onText ? (on ? `§a${s.onText}` : `§e${s.offText}`) : on ? "§aON" : "§cOFF";
+        return `§f${s.label}: ${v} §8- ${s.desc}`;
+      }).join("\n"),
     tiles,
   });
 }

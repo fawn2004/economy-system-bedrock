@@ -80,7 +80,7 @@ export function addBuff(player, stats, seconds) {
 
 /** -> { total: {stat: n}, parts: [{ label, stats }], passive: {}, held } */
 export function computeStats(player) {
-  const parts = [{ label: "Base", stats: { ...BASE_STATS } }];
+  const parts = [{ label: "Starting stats (everyone has these)", stats: { ...BASE_STATS } }];
   const sk = {};
   for (const [id, st, per] of SKILL_STATS) {
     try {
@@ -529,7 +529,7 @@ export async function statsMenu(player, back) {
       `§b✎ ${Math.floor(getMana(player))}§7/§b${maxMana(player)} mana`,
       "",
       "§7Hover over a stat to see what it does and where it comes from.",
-      "§8Stats come from armor, your held weapon or tool, skills, pets, slayer levels, kits, spirits and the mayor.",
+      "§8Everyone starts with 30% Crit Chance, 50% Crit Damage and 100 Intelligence. Armor, weapons, skills, pets, slayer levels, kits, spirits and the mayor add more.",
     ].join("\n"),
     tiles,
   });

@@ -299,7 +299,7 @@ export const SKILL_TOOLS = {
     name: "Farming Hoe",
     item: "minecraft:wooden_hoe", // never breaks (durability is restored after every use)
     price: 5000,
-    icon: "textures/items/diamond_hoe",
+    icon: "textures/items/wood_hoe",
     xpPerUse: 1, // per fully grown crop harvested
     bonusPerLevel: 10, // % chance of an extra drop, per level
     replantLevel: 3, // crops replant themselves from this level
@@ -311,7 +311,7 @@ export const SKILL_TOOLS = {
     name: "Slayer Sword",
     item: "minecraft:wooden_sword", // never breaks (durability is restored after every use)
     price: 10000,
-    icon: "textures/items/diamond_sword",
+    icon: "textures/items/wood_sword",
     xpPerUse: 2, // per mob killed
     bonusPerLevel: 10, // % chance of extra mob drops, per level
     headBonusPerLevel: 1, // extra % enchanted head chance, per level
