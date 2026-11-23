@@ -6,6 +6,8 @@ import { getBalance } from "./economy.js";
 import { commissionObjective } from "./extras.js";
 import { pref } from "./playerSettings.js";
 import { slayerObjective } from "./slayer.js";
+import { activeRank } from "./ranks.js";
+import { islandLabel } from "./islands.js";
 
 // ============================================================================
 //  SIDEBAR  (scoreboard-style panel on the right of the screen)
@@ -76,15 +78,20 @@ function location(player) {
   const id = player.dimension.id;
   if (id.includes("nether")) return "§cThe Nether";
   if (id.includes("end")) return "§dThe End";
-  return "§bYour Island";
+  return islandLabel(player) ?? "§eHub";
 }
+
+const rankLine = (p) => {
+  const r = activeRank(p);
+  return r ? [`Rank: ${r.prefix}`] : [];
+};
 
 function lines(player, compact) {
   const now = new Date();
   const date = `${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")}/${String(now.getFullYear()).slice(2)}`;
   if (compact) {
     // compact sidebar (Player Settings > Sidebar): just the essentials
-    const small = [`§7${date} §7${world.getAllPlayers().length} online`, "", `Purse: §6${coins(getBalance(player))}`, `Bank: §6${coins(getBank(player))}`];
+    const small = [`§7${date} §7${world.getAllPlayers().length} online`, "", ...rankLine(player), `Purse: §6${coins(getBalance(player))}`, `Bank: §6${coins(getBank(player))}`];
     if (CONFIG.sidebar.footer) small.push("", CONFIG.sidebar.footer);
     return small.join("\n");
   }
@@ -96,6 +103,7 @@ function lines(player, compact) {
     cal.time,
     ` §7⏣ ${location(player)}`,
     "",
+    ...rankLine(player),
     `Purse: §6${coins(getBalance(player))}`,
     `Bank: §6${coins(getBank(player))}`,
     "",

@@ -1,0 +1,27 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.eco_crate": {
+      "arrays": {
+        "textures": {
+          "Array.tiers": [
+            "Texture.t0",
+            "Texture.t1",
+            "Texture.t2",
+            "Texture.t3",
+            "Texture.t4"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Array.tiers[query.variant]"
+      ]
+    }
+  }
+}

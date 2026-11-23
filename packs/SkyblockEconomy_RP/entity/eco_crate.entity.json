@@ -1,0 +1,36 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "eco:crate",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "t0": "textures/entity/eco_crate_common",
+        "t1": "textures/entity/eco_crate_rare",
+        "t2": "textures/entity/eco_crate_epic",
+        "t3": "textures/entity/eco_crate_legendary",
+        "t4": "textures/entity/eco_crate_mythic"
+      },
+      "geometry": {
+        "default": "geometry.eco_crate"
+      },
+      "animations": {
+        "idle": "animation.eco_crate.idle",
+        "open": "animation.eco_crate.open",
+        "close": "animation.eco_crate.close",
+        "lid": "controller.animation.eco_crate.lid"
+      },
+      "scripts": {
+        "animate": [
+          "idle",
+          "lid"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.eco_crate"
+      ]
+    }
+  }
+}

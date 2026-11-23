@@ -352,6 +352,24 @@
     },
     "eco_chunk_hopper": {
       "textures": "textures/items/hopper"
+    },
+    "eco_crate_key_common": {
+      "textures": "textures/items/eco_crates/key_common"
+    },
+    "eco_crate_key_rare": {
+      "textures": "textures/items/eco_crates/key_rare"
+    },
+    "eco_crate_key_epic": {
+      "textures": "textures/items/eco_crates/key_epic"
+    },
+    "eco_crate_key_legendary": {
+      "textures": "textures/items/eco_crates/key_legendary"
+    },
+    "eco_crate_key_mythic": {
+      "textures": "textures/items/eco_crates/key_mythic"
+    },
+    "eco_money_pouch": {
+      "textures": "textures/items/eco_crates/money_pouch"
     }
   }
 }

@@ -1,3 +1,4 @@
+import { giveKey } from "./crates.js";
 import { system, world } from "@minecraft/server";
 import { addMoney, fmt, fmtShort, getBalance, takeMoney } from "./economy.js";
 import { container, freeSlots } from "./inventory.js";
@@ -220,6 +221,7 @@ function bossDied(boss, ownerId) {
   const coins = Math.floor(t.cost * 0.5);
   addMoney(player, coins);
   const drops = rollDrops(player, q.type, q.tier);
+  if (Math.random() < 0.2 + 0.1 * q.tier) giveKey(player, Math.min(3, q.tier)); // crate key
   player.sendMessage(`§a§lSLAYER QUEST COMPLETE! §r§7${s.name} ${roman(q.tier + 1)} defeated. §5+${questXp(t)} Slayer XP §a+${fmt(coins)}`);
   if (drops.length) player.sendMessage("§7Drops: " + drops.join("§7, "));
   if (after > before) {

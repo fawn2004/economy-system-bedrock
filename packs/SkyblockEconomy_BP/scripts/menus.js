@@ -31,6 +31,9 @@ import { kitUpgradesMenu } from "./kitUpgrades.js";
 import { leaderboardsMenu } from "./leaderboards.js";
 import { makeHopperItem } from "./chunkHopper.js";
 import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
+import { adminIslands, goHome, islandMenu, islandOf } from "./islands.js";
+import { adminCrates, cratesMenu } from "./crates.js";
+import { activeRank, adminRanks, ranksMenu } from "./ranks.js";
 import { playerSettingsMenu } from "./playerSettings.js";
 import { isMinionLoot, lootIcon, lootIdFor, lootName, lootSellPrice, makeMinionItem } from "./minions.js";
 import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, totalUnclaimed, xpToReach } from "./skills.js";
@@ -107,6 +110,7 @@ export async function mainMenu(player) {
     { text: "§a§lSELL", sub: "§7Sell loot", icon: ICON.sell, onClick: () => sellMenu(player) },
     { text: "§6§lBAZAAR", sub: "§7Trade items", icon: "textures/items/emerald", badge: "NEW", onClick: () => bazaarMenu(player, () => mainMenu(player)) },
     { text: "§e§lAUCTIONS", sub: "§7Buy & sell", icon: "textures/items/gold_ingot", badge: "NEW", onClick: () => auctionMenu(player, () => mainMenu(player)) },
+    { text: "§b§lISLAND", sub: islandOf(player) ? "§7Home & upgrades" : "§aGet your island!", icon: "textures/blocks/grass_side_carried", badge: "NEW", onClick: () => islandMenu(player, () => mainMenu(player)) },
     { text: "§6§lBANK", sub: "§7Interest", icon: ICON.bank, onClick: () => bankMenu(player, () => mainMenu(player)) },
     { text: "§c§lPROFILE", sub: "§7Stats & pets", icon: "textures/items/diamond_chestplate", badge: "NEW", onClick: () => profileMenu(player, () => mainMenu(player)) },
     { text: "§4§lSLAYER", sub: "§7Boss fights", icon: "textures/items/eco_heads/zombie", badge: "NEW", onClick: () => slayerMenu(player, () => mainMenu(player)) },
@@ -115,6 +119,8 @@ export async function mainMenu(player) {
     { text: "§a§lQUESTS", sub: "§7Daily tasks", icon: "textures/items/book_writable", onClick: () => questsMenu(player, () => mainMenu(player)) },
     { text: "§e§lDAILY", sub: dailyStatus(player).ready ? "§aReady to claim!" : `§7Next in §e${dailyStatus(player).left}`, icon: "textures/items/clock_item", badge: dailyStatus(player).ready ? "NEW" : undefined, onClick: () => dailyMenu(player, () => mainMenu(player)) },
     { text: "§6§lELECTION", sub: "§7Vote mayor", icon: "textures/items/gold_nugget", onClick: () => mayorMenu(player, () => mainMenu(player)) },
+    { text: "§d§lCRATES", sub: "§7Keys & rewards", icon: "textures/items/eco_crates/key_mythic", badge: "NEW", onClick: () => cratesMenu(player, () => mainMenu(player)) },
+    { text: "§5§lRANKS", sub: activeRank(player) ? `§7${activeRank(player).name}` : "§7Chat ranks", icon: "textures/items/name_tag", badge: "NEW", onClick: () => ranksMenu(player, () => mainMenu(player)) },
     ...extraMainTiles.map((f) => f(player, () => mainMenu(player))).filter(Boolean),
     { text: "§b§lPAY", sub: "§7Send money", icon: ICON.pay, onClick: () => payMenu(player, () => mainMenu(player)) },
     { text: "§6§lRANKINGS", sub: "§7Who's on top", icon: ICON.top, onClick: () => leaderboardsMenu(player, () => mainMenu(player)) },
@@ -854,7 +860,10 @@ async function adminMenu(player, msg) {
       { text: "§a§lCROPS", sub: "§7Enchanted crops", icon: "textures/items/wheat", onClick: () => adminCropsMenu(player) },
       { text: "§b§lSKILLS", sub: "§7Player skill levels", icon: "textures/items/iron_pickaxe", onClick: () => adminSkillsMenu(player) },
       { text: "§6§lNPCS", sub: "§7Shop keepers", icon: ICON.player, onClick: () => adminNpcMenu(player) },
-      { text: "§c§lRPG", sub: "§7Items, pets, slayer...", icon: "textures/items/diamond_sword", badge: "NEW", onClick: () => adminRpgMenu(player, back) },
+      { text: "§c§lRPG", sub: "§7Items, pets, slayer...", icon: "textures/items/diamond_sword", onClick: () => adminRpgMenu(player, back) },
+      { text: "§b§lISLANDS", sub: "§7Hub, delete...", icon: "textures/blocks/grass_side_carried", badge: "NEW", onClick: () => adminIslands(player, back) },
+      { text: "§d§lCRATES", sub: "§7Place, give keys", icon: "textures/items/eco_crates/key_mythic", badge: "NEW", onClick: () => adminCrates(player, back) },
+      { text: "§5§lRANKS", sub: "§7Give a rank", icon: "textures/items/name_tag", badge: "NEW", onClick: () => adminRanks(player, back) },
       { text: "§b§lSETTINGS", sub: "§7Spawners, kits...", icon: ICON.admin, onClick: () => settingsMenu(player, back) },
       { text: "§6§lSHOP EDITOR", sub: "§7Move/hide items", icon: ICON.shop, onClick: () => editorMenu(player, back) },
       {
@@ -970,6 +979,10 @@ async function adminNpcMenu(player, msg) {
       { text: "§6§lBAZAAR NPC", sub: "§7Opens the Bazaar", icon: "textures/items/emerald", onClick: spawn("bazaar", "Bazaar") },
       { text: "§e§lAUCTION NPC", sub: "§7Opens the AH", icon: "textures/items/gold_ingot", onClick: spawn("auction", "Auction House") },
       { text: "§6§lBANKER NPC", sub: "§7Opens the Bank", icon: ICON.bank, onClick: spawn("bank", "Banker") },
+      { text: "§b§lISLAND NPC", sub: "§7Makes islands", icon: "textures/blocks/grass_side_carried", badge: "NEW", onClick: spawn("island", "Island") },
+      { text: "§a§lHOME NPC", sub: "§7Teleports home", icon: "textures/items/bed_red", badge: "NEW", onClick: spawn("home", "Home") },
+      { text: "§d§lCRATES NPC", sub: "§7Crate info & keys", icon: "textures/items/eco_crates/key_mythic", badge: "NEW", onClick: spawn("crates", "Crates") },
+      { text: "§5§lRANKS NPC", sub: "§7Rank shop", icon: "textures/items/name_tag", badge: "NEW", onClick: spawn("ranks", "Ranks") },
       {
         text: "§c§lREMOVE NPC",
         sub: "§7Nearest one",
@@ -1190,4 +1203,8 @@ setNpcOpeners({
   bazaar: (player) => bazaarMenu(player, () => mainMenu(player)),
   auction: (player) => auctionMenu(player, () => mainMenu(player)),
   bank: (player) => bankMenu(player, () => mainMenu(player)),
+  island: (player) => islandMenu(player, () => mainMenu(player)),
+  home: (player) => (islandOf(player) ? goHome(player) : islandMenu(player, () => mainMenu(player))),
+  crates: (player) => cratesMenu(player, () => mainMenu(player)),
+  ranks: (player) => ranksMenu(player, () => mainMenu(player)),
 });

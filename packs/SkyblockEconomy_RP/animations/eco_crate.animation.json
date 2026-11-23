@@ -1,0 +1,121 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.eco_crate.idle": {
+      "loop": true,
+      "bones": {
+        "gem": {
+          "position": [
+            0,
+            "math.sin(query.life_time * 120) * 1.2",
+            0
+          ],
+          "rotation": [
+            45,
+            "query.life_time * 90",
+            45
+          ]
+        }
+      }
+    },
+    "animation.eco_crate.open": {
+      "animation_length": 0.6,
+      "loop": "hold_on_last_frame",
+      "bones": {
+        "lid": {
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.15": [
+              6,
+              0,
+              0
+            ],
+            "0.6": [
+              -105,
+              0,
+              0
+            ]
+          }
+        },
+        "root": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.08": [
+              0.6,
+              0,
+              0
+            ],
+            "0.16": [
+              -0.6,
+              0,
+              0
+            ],
+            "0.24": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "gem": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.6": [
+              0,
+              6,
+              0
+            ]
+          },
+          "rotation": [
+            0,
+            "query.life_time * 720",
+            0
+          ],
+          "scale": {
+            "0.0": [
+              1,
+              1,
+              1
+            ],
+            "0.6": [
+              1.6,
+              1.6,
+              1.6
+            ]
+          }
+        }
+      }
+    },
+    "animation.eco_crate.close": {
+      "animation_length": 0.4,
+      "bones": {
+        "lid": {
+          "rotation": {
+            "0.0": [
+              -105,
+              0,
+              0
+            ],
+            "0.4": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

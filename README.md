@@ -421,13 +421,37 @@ recipes):
 Players still earn money the skyblock way: cobblestone generators, farms, mob farms,
 trees and so on.
 
+## Sky Islands
+Tap the **Island NPC** (or Menu > Island) to get your own floating island in the void: a small grass
+island with a tree and a starter chest. One island per player; islands are 1000 blocks apart on a grid
+starting at x/z 10000 (`ISLAND` in `scripts/islands.js`). Build area: 100x100, upgradable to 200x200
+($500k) and 300x300 ($2.5M). The edge pushes you back, falling into the void sends you home, and only
+the owner + members can build or open chests. The **Home NPC** (or Menu > Island > Home) teleports you
+back. Admin > Islands: set the Hub, delete a player's island. Needs a void world (skyblock).
+
+## Crates
+5 crates (Common, Rare, Epic, Legendary, Mythic) with their own model, colours and lid-opening
+animation. Admins place them in Admin > Crates. Tap a crate holding its key to open it (spinning
+rewards on screen), or without a key to see every reward and its chance. Rewards: money pouches,
+tools, custom items, spawners, pets, rank vouchers and keys. Keys: Menu > Crates (buy Common/Rare/Epic),
+Daily Reward, dungeons, slayer bosses, other crates. Assets are made by `tools/generate_crates.py`.
+
+## Chat Ranks
+112 ranks (+ 8 staff ranks) in 5 rarities with colour styles (rainbow, fire, ice, galaxy...). Menu > Ranks
+to buy / switch; Mythic ranks only come from crates as Rank Vouchers; Admin > Ranks gives any rank.
+Ranks show above heads and on the sidebar. In **chat** they need the separate
+`SkyblockEconomy_Chat_BP` pack (Beta APIs experiment, `@minecraft/server` 2.12.0-beta): it reads the
+`eco_chat:<prefix>` tag the main pack sets. Beta APIs change with every Minecraft update, so that pack
+may need a new version after an update - the main pack is unaffected.
+
 ## Install
 
 1. Run `./tools/build.sh`. It creates `dist/SkyblockEconomy_v<version>.mcaddon`
    (the version also shows in the pack names in-game).
 2. Open the `.mcaddon` file to import it into Minecraft.
 3. Add **both** the behaviour pack and the resource pack to your world.
-4. No experimental toggles are needed (stable Script API, game 1.21.90+).
+4. The main packs need no experimental toggles (stable Script API, game 1.21.90+). The optional
+   **Chat Ranks** pack (also in `dist/` on its own) needs **Beta APIs** turned on.
 5. Realms: apply the packs to a local copy of the world, then *Replace World* on the realm.
 
 ## Commands

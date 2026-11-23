@@ -1,0 +1,58 @@
+SKYBLOCK ECONOMY v1.0.61 - CHECKLIST
+(put an x in the box when you've checked it works: [x])
+
+INSTALL
+[ ] Import SkyblockEconomy_v1.0.61.mcaddon - it now has 3 packs: Behaviour, Resource and Chat Ranks
+[ ] The Chat Ranks pack is on the world (behaviour packs) with Beta APIs turned on
+[ ] No "pack failed to load" message (if Chat Ranks fails after a Minecraft update, everything
+    else still works - only the chat prefix stops)
+
+SKY ISLANDS
+[ ] Admin > NPCs: spawn an ISLAND NPC and a HOME NPC at spawn
+[ ] Tap the Island NPC -> "Create Island" -> "Generating your island..." -> you land on a small
+    grass island with a tree and a starter chest, void all around
+[ ] Starter chest has: 2 water buckets, lava, ice, saplings, bone meal, sugar cane, cactus,
+    seeds, mushrooms, bread, torches, dirt, sand
+[ ] Try making a second island -> "You already have an island!"
+[ ] A second player makes an island -> it's 1000 blocks away from yours
+[ ] Walk to the edge (50 blocks from the middle) -> green border particles, then you get pushed back
+[ ] Menu > Island > Show Border shows the border for 10 seconds
+[ ] Jump into the void -> teleported back to the island home
+[ ] Menu > Island > Upgrade Size: 100x100 -> 200x200 ($500k) -> 300x300 ($2.5M)
+[ ] Set Home: stand somewhere on your island and set it - Home takes you there
+[ ] Home NPC (or Menu > Island > Home) takes you back to your island from anywhere
+[ ] Another player can't break/place blocks or open chests on your island
+[ ] Members: add a player -> they can build on your island; tap them to remove
+[ ] Visitors On/Off: when Off, your island doesn't show in other players' Visit list
+[ ] Visit: teleport to another online player's island
+[ ] Sidebar location shows "Your Island" / "<Name>'s Island" / "Hub"
+[ ] Admin > Islands > Set Hub Here, then Menu > Island > Hub takes you there
+[ ] Admin > Islands > Delete Island lets a player make a new one
+
+CRATES
+[ ] Admin > Crates: place each of the 5 crates (Common, Rare, Epic, Legendary, Mythic)
+[ ] Each crate has its own colour, a floating spinning gem and sparkles around it
+[ ] Admin > Crates > Give Keys: give yourself keys (each key has its own coloured icon)
+[ ] Hold the right key and tap the crate: the lid swings open, the gem rises and spins,
+    the rewards spin on screen (slowing down) with rising "ding" sounds, then you win one
+[ ] The lid closes again after a few seconds
+[ ] Wrong key -> tells you which crate the key is for
+[ ] No key -> shows every reward with its % chance, an Open button (if you have keys) and Buy Key
+[ ] Legendary/Mythic wins (and $1M+ pouches) get announced in chat
+[ ] Money Pouch: use it -> money added. Higher crates = bigger pouches
+[ ] Rewards include tools, custom items, spawners, pets, rank vouchers, other keys, money pouches
+[ ] Menu > Crates: see your keys for every crate, preview rewards, buy Common/Rare/Epic keys
+[ ] Key sources: Daily Reward (Common key, Epic every 7th day), dungeons (chance), slayer bosses (chance)
+[ ] Crates NPC (Admin > NPCs) opens Menu > Crates
+
+CHAT RANKS
+[ ] Menu > Ranks shows your rank, a chat preview, My Ranks, Rank Shop
+[ ] Rank Shop: top row picks the rarity (Common $25k, Rare $150k, Epic $750k, Legendary $3M,
+    Mythic = crates only). Buying a rank uses it straight away
+[ ] Chat: "[RANK] Name: message" with colours (rainbow / fire / ice / galaxy etc. on rarer ranks)
+[ ] Your rank shows above your head and on the sidebar ("Rank: ...")
+[ ] My Ranks: tap a rank to switch to it. Remove Rank hides it
+[ ] Rank Voucher from a crate: use it (or Ranks > Redeem Vouchers) to unlock the rank;
+    a voucher for a rank you already have gives money instead
+[ ] Admin > Ranks: give any rank (staff ranks too: Owner, Admin, Mod, Helper, YouTube...)
+[ ] Ranks NPC (Admin > NPCs) opens Menu > Ranks

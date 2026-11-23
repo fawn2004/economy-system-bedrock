@@ -1,0 +1,40 @@
+{
+  "format_version": "1.10.0",
+  "animation_controllers": {
+    "controller.animation.eco_crate.lid": {
+      "initial_state": "shut",
+      "states": {
+        "shut": {
+          "transitions": [
+            {
+              "opened": "query.mark_variant == 1"
+            }
+          ]
+        },
+        "opened": {
+          "animations": [
+            "open"
+          ],
+          "transitions": [
+            {
+              "closing": "query.mark_variant == 0"
+            }
+          ]
+        },
+        "closing": {
+          "animations": [
+            "close"
+          ],
+          "transitions": [
+            {
+              "shut": "query.all_animations_finished"
+            },
+            {
+              "opened": "query.mark_variant == 1"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

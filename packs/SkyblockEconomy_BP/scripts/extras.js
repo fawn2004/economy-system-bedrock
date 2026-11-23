@@ -8,6 +8,7 @@ import { mayorIs } from "./mayor.js";
 import { getPets, petLevel } from "./pets.js";
 import { SLAYERS, slayerLevel } from "./slayer.js";
 import { addEssence, dungeonLevel } from "./dungeons.js";
+import { giveKey } from "./crates.js";
 import { addSkillXp, skillHooks, skillIds, skillLevel } from "./skills.js";
 import { combatHooks, invalidate, makeTough, stat, statSources } from "./stats.js";
 import { ICON, backTile, fail, success, tileMenu } from "./ui.js";
@@ -69,7 +70,7 @@ export async function dailyMenu(player, back) {
     theme: "gold",
     body: [
       `§7Streak: §6§l${d.streak} day${d.streak === 1 ? "" : "s"}${ready && !keeps && d.streak ? " §r§c(missed - starts again)" : ""}`,
-      ready ? `§7Today's reward (day ${streak}): §a${fmt(coins)}${special ? ` §d+ ${fmt(coins * 2)} bonus and 25 Essence!` : ""}` : `§7Claimed! Next reward in §e${left}`,
+      ready ? `§7Today's reward (day ${streak}): §a${fmt(coins)} §7+ ${special ? "§5Epic" : "§fCommon"} Crate Key${special ? ` §d+ ${fmt(coins * 2)} bonus and 25 Essence!` : ""}` : `§7Claimed! Next reward in §e${left}`,
       `§8Claim every ${DAILY_HOURS} hours. Claim within ${DAILY_STREAK_HOURS} hours to keep your streak. Every 7th claim is a special reward.`,
       mayorIs("dawn") ? "§eMayor Dawn doubles daily rewards!" : "",
     ].filter(Boolean).join("\n"),
@@ -87,6 +88,7 @@ export async function dailyMenu(player, back) {
             addMoney(player, coins * 2);
             addEssence(player, 25);
           }
+          giveKey(player, special ? 2 : 0); // crate key: Common, Epic every 7th claim
           success(player, `Daily reward claimed: ${fmt(coins)}${special ? ` + ${fmt(coins * 2)} bonus + 25 Essence` : ""}! Streak: ${streak}`);
           player.playSound("random.levelup");
           return again();

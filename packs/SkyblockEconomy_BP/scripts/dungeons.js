@@ -8,6 +8,7 @@ import { addPet } from "./pets.js";
 import { combatHooks, makeTough, stat, statSources } from "./stats.js";
 import { mayorIs } from "./mayor.js";
 import { adminRpgTiles } from "./profile.js";
+import { giveKey } from "./crates.js";
 import { ICON, backTile, fail, showForm, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -289,6 +290,8 @@ function endRun(run, won) {
       const coins = Math.round(F.coins * mult);
       addMoney(p, coins);
       p.setDynamicProperty("eco:dgReward", JSON.stringify({ floor: run.floorIndex, grade, opened: [] }));
+      // crate key: better floors / grades give better keys more often
+      if (Math.random() < 0.25 + 0.1 * run.floorIndex) giveKey(p, Math.min(3, Math.floor(run.floorIndex / 2) + (mult >= 1.5 ? 1 : 0)));
       p.sendMessage(
         `§6§l${F.name} CLEARED! §r§7Score §e${score} §7(time ${Math.round(time)}, skill ${skill}, secrets ${Math.round(explore)}) Grade §6§l${grade}\n` +
           `§3+${xp} Dungeon XP §d+${ess} Essence §a+${fmt(coins)} §7- open your reward chests in §fDungeons > Rewards`

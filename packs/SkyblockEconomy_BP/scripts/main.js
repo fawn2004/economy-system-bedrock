@@ -24,6 +24,9 @@ import { registerDungeons } from "./dungeons.js";
 import { registerMayor } from "./mayor.js";
 import { registerExtras } from "./extras.js";
 import { registerKitUpgrades } from "./kitUpgrades.js";
+import { registerRanks } from "./ranks.js";
+import { registerIslands } from "./islands.js";
+import { registerCrates } from "./crates.js";
 
 world.afterEvents.worldLoad.subscribe(() => {
   applySavedSettings(); // in-game Admin > Settings changes
@@ -84,3 +87,6 @@ registerDungeons();
 registerMayor();
 registerExtras();
 registerKitUpgrades();
+registerRanks();
+registerIslands();
+registerCrates();

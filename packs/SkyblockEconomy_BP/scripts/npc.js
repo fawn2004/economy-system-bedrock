@@ -16,6 +16,10 @@ export const NPC_TYPES = {
   bazaar: { name: "§6§lBAZAAR", sub: "§7Tap to trade", skin: 0 },
   auction: { name: "§e§lAUCTION HOUSE", sub: "§7Tap to browse", skin: 1 },
   bank: { name: "§6§lBANKER", sub: "§7Tap to open", skin: 2 },
+  island: { name: "§b§lISLAND", sub: "§7Tap to get your island", skin: 0 },
+  home: { name: "§a§lHOME", sub: "§7Tap to go to your island", skin: 2 },
+  crates: { name: "§d§lCRATES", sub: "§7Keys & rewards", skin: 1 },
+  ranks: { name: "§5§lRANKS", sub: "§7Chat ranks", skin: 1 },
 };
 
 let openers = {}; // type -> (player) => opens that menu (set by menus.js)

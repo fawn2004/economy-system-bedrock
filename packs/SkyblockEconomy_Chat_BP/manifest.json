@@ -1,0 +1,37 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "\u00a7bSkyblock Economy \u00a77(Chat Ranks) \u00a7ev1.0.61",
+    "description": "Shows Skyblock Economy ranks in chat. Needs the Beta APIs experiment.",
+    "uuid": "f030f68a-c4dd-4081-b10b-0b735873800a",
+    "version": [
+      1,
+      0,
+      61
+    ],
+    "min_engine_version": [
+      1,
+      21,
+      90
+    ]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "11fc647a-45b6-42dc-af0b-8e9bbd37dbc4",
+      "entry": "scripts/chat.js",
+      "version": [
+        1,
+        0,
+        61
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "2.12.0-beta"
+    }
+  ]
+}
