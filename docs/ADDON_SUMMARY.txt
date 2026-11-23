@@ -1,0 +1,153 @@
+SKYBLOCK ECONOMY v1.0.61 - EVERYTHING IN THE ADD-ON
+=====================================================
+
+PACKS
+- Behaviour pack + Resource pack (no experiments needed, Minecraft 1.21.90+)
+- Chat Ranks pack (optional, needs Beta APIs) - puts ranks in front of chat messages
+- Admins: /tag <name> add admin   (gives the red ADMIN tile in the menu)
+
+HOW PLAYERS USE IT
+- Menu Compass: given on join, kept on death, can't be dropped. Use it to open the menu.
+- NPCs: big shopkeepers you tap instead of using the compass (Shop, Sell, Menu, Bazaar,
+  Auction House, Banker, Island, Home, Crates, Ranks). Admins place them in Admin > NPCs.
+- All menus look like Hypixel-style chests: item slots, glass panes, hover tooltips,
+  Go Back / Close / page arrows / Search on the bottom row.
+- Sidebar on the right (grey with a gold border): date, players online, season & time,
+  location, rank, purse, bank and your current objective. Full or Compact in Settings.
+
+-----------------------------------------------------------------------------
+MONEY & TRADING
+-----------------------------------------------------------------------------
+SHOP        Every vanilla item (~1,480) in categories + Search. Kits, Spawners,
+            Minions, Chunk Hopper, Skill Tools, Equipment, Pets.
+            Prices are worked out so buying -> crafting -> selling never makes a profit.
+SELL        Sell one item type or Sell All.
+BAZAAR      Player market for materials (Farming, Mining, Combat, Blocks, Enchanted):
+            instant buy/sell, buy orders, sell offers, claim/cancel. 1% tax.
+AUCTIONS    Sell items from your inventory as BIN or bidding auctions (1h-48h).
+            Browse by type, search, sort. Pays offline players when they join.
+BANK        Safe account with 2% interest every 6 hours. 5 account tiers
+            (Basic -> Diamond). Deposit / withdraw / history.
+PAY         Send money to online players.
+RANKINGS    Top 10 leaderboards: skill average, each skill, balance, heads, farming.
+MONEY       Balances up to 1 quadrillion; shown as $2.4M / $2.4B etc.
+
+-----------------------------------------------------------------------------
+YOUR ISLAND (NEW)
+-----------------------------------------------------------------------------
+- Tap the Island NPC -> a small grass island in the void with a tree + starter chest.
+- One island per player, islands are 1000 blocks apart.
+- Size: 100x100 -> 200x200 ($500k) -> 300x300 ($2.5M).
+- Border pushes you back (green particles near the edge). Void = teleport home.
+- Only you + your members can build / open chests. Visitors on/off.
+- Menu > Island: Home, Set Home, Upgrade, Members, Visitors, Visit, Show Border, Hub.
+- Home NPC teleports you back to your island.
+- Admin > Islands: set Hub, delete a player's island, teleport to islands.
+
+-----------------------------------------------------------------------------
+CRATES (NEW)
+-----------------------------------------------------------------------------
+- 5 crates: Common, Rare, Epic, Legendary, Mythic - each with its own model,
+  colours, floating gem and sparkles.
+- Hold the right key and tap: lid opens, rewards spin on screen, you win one.
+  Big wins are announced in chat.
+- Tap without a key: see every reward and its % chance, buy keys.
+- Rewards: money pouches (bigger each tier), tools, custom items, spawners, pets,
+  rank vouchers, higher crate keys.
+- Keys: Menu > Crates (buy Common/Rare/Epic), Daily Reward (Common, Epic every 7th
+  day), dungeons, slayer bosses, other crates.
+- Admin > Crates: place / remove crates, give keys, make money pouches.
+
+-----------------------------------------------------------------------------
+CHAT RANKS (NEW)
+-----------------------------------------------------------------------------
+- 112 ranks + 8 staff ranks (Owner, Co-Owner, Admin, Mod, Helper, Build Team,
+  YouTube, Streamer).
+- Colour styles: solid colours, rainbow, fire, ice, galaxy, toxic, royal, ocean,
+  sunset, candy, lava and more.
+- Rarities: Common $25k, Rare $150k, Epic $750k, Legendary $3M, Mythic (crates only).
+- Shows in chat, above your head and on the sidebar. Menu > Ranks to buy / switch.
+- Rank Vouchers from crates; Admin > Ranks gives anyone any rank.
+
+-----------------------------------------------------------------------------
+STATS, ITEMS & GEAR
+-----------------------------------------------------------------------------
+STATS       Health, Defense, Strength, Crit Chance, Crit Damage, Speed, Intelligence,
+            Magic Find, Mining Speed, Mining/Farming/Foraging Fortune, Sea Creature
+            Chance. Profile > Stats explains each one and where it comes from.
+ITEMS       ~80 custom items with rarities (Common -> Mythic): shop equipment, slayer
+            gear, dungeon gear, boss materials. Some have right-click abilities that
+            use mana (teleport, fire bolt, heal party, shockwave...).
+REFORGE     Profile > Reforge: random reforge on weapons, armor and tools.
+ENCHANTING  Profile > Enchanting: custom enchants up to XV that really work -
+            Keen Edge, Life Drain, Finisher, Precision, Venom, Storm Call, Scavenger,
+            Vitality, Bulwark, Fleetfoot, Insight, Regrowth, Retaliate, Last Stand,
+            Nightsight, Harvesting, Swiftswing, Lure Master.
+            Each attempt has a % chance; a fail still costs.
+            Every hit shows a combat line, e.g. "19 dmg | Keen +40% | Storm +75%".
+WARDROBE    9 saved armor sets, swap in one tap.
+
+-----------------------------------------------------------------------------
+SKILLS & PROGRESS
+-----------------------------------------------------------------------------
+SKILLS      Farming, Mining, Foraging, Excavating, Fishing, Combat (max 25).
+            Each level: perk +2% and a coin reward you claim in the Skills menu.
+MY PROGRESS Skill average, rank, weakest skills, closest collections, next unlocks.
+COLLECTIONS Every crop and spawner mob: 5 tiers, pays money + bonus drop chance.
+SKILL TOOLS Farming Hoe & Slayer Sword: wooden, unbreakable, levels 1-15, show their
+            kills / crops. Upgrades (Sharpness, Looting, Fortune, Replenish...) paid
+            with money + heads / enchanted crops. Work together with kit armor.
+KITS        6 upgradable kit lines (Farming, Mining, Foraging, Fishing, Combat,
+            Dungeon), levels 1-10, claim every 12h. Better materials, enchants,
+            reforges and rarity each level. Preview shows every item.
+PETS        Wolf, Rabbit, Bee, Silverfish, Fox, Dolphin, Allay, Bat, Drakeling.
+            Level 1-100, upgrade rarity, one follows you at a time, trade as eggs.
+
+-----------------------------------------------------------------------------
+COMBAT CONTENT
+-----------------------------------------------------------------------------
+SLAYER      4 bosses (Rotting Tyrant, Brood Mother, Bone Colossus, Void Stalker),
+            5 tiers, slayer levels 1-9, boss drops + Slayer Shop gear.
+DUNGEONS    Party runs (up to 5), Floors I-V: monster, elite, puzzle and boss rooms,
+            secret chests, score grades S+ to D, classes (Warrior, Mage, Ranger,
+            Guardian, Cleric), Essence shop, item stars, reward chests with
+            dungeon-only tools and treasures to sell, spirits.
+SEA         Fishing can pull up tough sea creatures.
+
+-----------------------------------------------------------------------------
+DAILY STUFF
+-----------------------------------------------------------------------------
+DAILY       Claim every 12h, grows with your streak (+ crate key). Every 7th day bonus.
+QUESTS      3 daily commissions + 17 one-time milestones.
+ELECTION    Vote for a mayor every 3 days; the mayor's perks help everyone.
+SPIRITS     Rare dungeon drops; every 5 = permanent stats.
+
+-----------------------------------------------------------------------------
+ISLAND BUILDINGS
+-----------------------------------------------------------------------------
+SPAWNERS    24 mobs. Stack up to 16, upgrade levels 1-10 with enchanted heads,
+            stacked mobs that stand still, can't be mined/blown up, owner-only.
+MINIONS     5 mining + 5 farming minions ($25k -> $50M) with Speed, Luck, Fortune,
+            Storage and Better Blocks upgrades. Work while you're away.
+CHUNK HOPPER Collects every dropped item in its chunk; Sell All / Collect;
+            storage + speed upgrades.
+
+-----------------------------------------------------------------------------
+PLAYER SETTINGS
+-----------------------------------------------------------------------------
+Sidebar Full/Compact, Chunk Borders, Full Bright, Coordinates, Death Location,
+XP Popups, Level-up Titles.
+
+-----------------------------------------------------------------------------
+ADMIN PANEL (players with the admin tag)
+-----------------------------------------------------------------------------
+Money, Heads, Crops, Skills (per player), NPCs, RPG (give items/pets, slayer &
+dungeon XP, essence, spirits, mayor, kit levels), Islands, Crates, Ranks,
+Settings (spawners, minions, kits, skills, chunk hopper, sidebar...), Shop Editor
+(move/hide/reprice shop items live), Clear Items, Give Compass.
+
+Commands:
+  /tag <player> add admin
+  /scoreboard players add <player> money 1000
+  /scriptevent eco:compass
+  /execute as @p run scriptevent eco:menu
