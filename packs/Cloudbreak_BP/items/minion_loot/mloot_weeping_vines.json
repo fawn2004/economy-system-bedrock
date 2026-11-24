@@ -1,0 +1,19 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "eco:mloot_weeping_vines",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "eco_mloot_weeping_vines",
+      "minecraft:display_name": {
+        "value": "§r§bEnchanted Weeping Vines"
+      },
+      "minecraft:max_stack_size": 64,
+      "minecraft:glint": true
+    }
+  }
+}

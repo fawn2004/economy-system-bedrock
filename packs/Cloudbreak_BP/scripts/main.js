@@ -17,6 +17,8 @@ import {
 } from "./clans.js";
 import { clearIslandSpawn, createIsland, registerProtection, sendHome } from "./islands.js";
 import { mainMenu } from "./menus.js";
+import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
+import { setHomeMenu } from "./eco/menus.js";
 
 const MENU_ITEM = CONFIG.menuItem.id;
 
@@ -36,6 +38,7 @@ function giveMenuItem(player) {
 }
 
 function setupPlayer(player) {
+  setupEconomyPlayer(player);
   refreshName(player);
   // kicked or disbanded while offline: drop the old island spawn point
   if (!clanOf(player) && player.getDynamicProperty("cb:homeSet")) {
@@ -74,6 +77,8 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, sourceEntity }) => {
 });
 
 registerProtection();
+registerEconomy();
+setHomeMenu((player) => mainMenu(player));
 
 // ---------------------------------------------------------------------------
 // Commands: /menu, /is, /sc <action> [name]

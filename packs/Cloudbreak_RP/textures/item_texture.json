@@ -2,6 +2,356 @@
   "resource_pack_name": "cloudbreak",
   "texture_name": "atlas.items",
   "texture_data": {
-    "cb_menu": { "textures": "textures/items/cb/menu" }
+    "cb_menu": {
+      "textures": "textures/items/cb/menu"
+    },
+    "eco_head_pig": {
+      "textures": "textures/items/eco_heads/pig"
+    },
+    "eco_head_cow": {
+      "textures": "textures/items/eco_heads/cow"
+    },
+    "eco_head_chicken": {
+      "textures": "textures/items/eco_heads/chicken"
+    },
+    "eco_head_sheep": {
+      "textures": "textures/items/eco_heads/sheep"
+    },
+    "eco_head_rabbit": {
+      "textures": "textures/items/eco_heads/rabbit"
+    },
+    "eco_head_mooshroom": {
+      "textures": "textures/items/eco_heads/mooshroom"
+    },
+    "eco_head_zombie": {
+      "textures": "textures/items/eco_heads/zombie"
+    },
+    "eco_head_husk": {
+      "textures": "textures/items/eco_heads/husk"
+    },
+    "eco_head_drowned": {
+      "textures": "textures/items/eco_heads/drowned"
+    },
+    "eco_head_skeleton": {
+      "textures": "textures/items/eco_heads/skeleton"
+    },
+    "eco_head_stray": {
+      "textures": "textures/items/eco_heads/stray"
+    },
+    "eco_head_wither_skeleton": {
+      "textures": "textures/items/eco_heads/wither_skeleton"
+    },
+    "eco_head_spider": {
+      "textures": "textures/items/eco_heads/spider"
+    },
+    "eco_head_cave_spider": {
+      "textures": "textures/items/eco_heads/cave_spider"
+    },
+    "eco_head_creeper": {
+      "textures": "textures/items/eco_heads/creeper"
+    },
+    "eco_head_slime": {
+      "textures": "textures/items/eco_heads/slime"
+    },
+    "eco_head_magma_cube": {
+      "textures": "textures/items/eco_heads/magma_cube"
+    },
+    "eco_head_witch": {
+      "textures": "textures/items/eco_heads/witch"
+    },
+    "eco_head_enderman": {
+      "textures": "textures/items/eco_heads/enderman"
+    },
+    "eco_head_blaze": {
+      "textures": "textures/items/eco_heads/blaze"
+    },
+    "eco_head_ghast": {
+      "textures": "textures/items/eco_heads/ghast"
+    },
+    "eco_head_guardian": {
+      "textures": "textures/items/eco_heads/guardian"
+    },
+    "eco_head_zombie_pigman": {
+      "textures": "textures/items/eco_heads/zombie_pigman"
+    },
+    "eco_head_iron_golem": {
+      "textures": "textures/items/eco_heads/iron_golem"
+    },
+    "eco_enchanted_wheat": {
+      "textures": "textures/items/wheat"
+    },
+    "eco_enchanted_carrot": {
+      "textures": "textures/items/carrot"
+    },
+    "eco_enchanted_potato": {
+      "textures": "textures/items/potato"
+    },
+    "eco_enchanted_beetroot": {
+      "textures": "textures/items/beetroot"
+    },
+    "eco_enchanted_nether_wart": {
+      "textures": "textures/items/nether_wart"
+    },
+    "eco_enchanted_cocoa": {
+      "textures": "textures/items/dye_powder_brown"
+    },
+    "eco_enchanted_melon": {
+      "textures": "textures/items/melon"
+    },
+    "eco_enchanted_pumpkin": {
+      "textures": "textures/blocks/pumpkin_face_off"
+    },
+    "eco_enchanted_sugar_cane": {
+      "textures": "textures/items/reeds"
+    },
+    "eco_enchanted_cactus": {
+      "textures": "textures/blocks/cactus_side"
+    },
+    "eco_mining_minion": {
+      "textures": "textures/items/eco_mining_minion"
+    },
+    "eco_mloot_cobblestone": {
+      "textures": "textures/blocks/cobblestone"
+    },
+    "eco_mloot_coal": {
+      "textures": "textures/items/coal"
+    },
+    "eco_mloot_raw_iron": {
+      "textures": "textures/items/raw_iron"
+    },
+    "eco_mloot_raw_gold": {
+      "textures": "textures/items/raw_gold"
+    },
+    "eco_mloot_lapis_lazuli": {
+      "textures": "textures/items/dye_powder_blue"
+    },
+    "eco_mloot_redstone": {
+      "textures": "textures/items/redstone_dust"
+    },
+    "eco_mloot_diamond": {
+      "textures": "textures/items/diamond"
+    },
+    "eco_mloot_emerald": {
+      "textures": "textures/items/emerald"
+    },
+    "eco_mloot_netherrack": {
+      "textures": "textures/blocks/netherrack"
+    },
+    "eco_mloot_soul_sand": {
+      "textures": "textures/blocks/soul_sand"
+    },
+    "eco_mloot_quartz": {
+      "textures": "textures/items/quartz"
+    },
+    "eco_mloot_glowstone_dust": {
+      "textures": "textures/items/glowstone_dust"
+    },
+    "eco_mloot_magma_cream": {
+      "textures": "textures/items/magma_cream"
+    },
+    "eco_mloot_blaze_rod": {
+      "textures": "textures/items/blaze_rod"
+    },
+    "eco_mloot_ancient_debris": {
+      "textures": "textures/blocks/ancient_debris_side"
+    },
+    "eco_mloot_netherite_scrap": {
+      "textures": "textures/items/netherite_scrap"
+    },
+    "eco_mloot_obsidian": {
+      "textures": "textures/blocks/obsidian"
+    },
+    "eco_mloot_crying_obsidian": {
+      "textures": "textures/blocks/crying_obsidian"
+    },
+    "eco_mloot_amethyst_shard": {
+      "textures": "textures/items/amethyst_shard"
+    },
+    "eco_mloot_sea_lantern": {
+      "textures": "textures/blocks/sea_lantern"
+    },
+    "eco_mloot_shroomlight": {
+      "textures": "textures/blocks/shroomlight"
+    },
+    "eco_mloot_sculk_catalyst": {
+      "textures": "textures/blocks/sculk_catalyst_side"
+    },
+    "eco_mloot_echo_shard": {
+      "textures": "textures/items/echo_shard"
+    },
+    "eco_mloot_heavy_core": {
+      "textures": "textures/blocks/heavy_core"
+    },
+    "eco_mloot_end_stone": {
+      "textures": "textures/blocks/end_stone"
+    },
+    "eco_mloot_purpur_block": {
+      "textures": "textures/blocks/purpur_block"
+    },
+    "eco_mloot_chorus_fruit": {
+      "textures": "textures/items/chorus_fruit"
+    },
+    "eco_mloot_ender_pearl": {
+      "textures": "textures/items/ender_pearl"
+    },
+    "eco_mloot_shulker_shell": {
+      "textures": "textures/items/shulker_shell"
+    },
+    "eco_mloot_end_crystal": {
+      "textures": "textures/items/end_crystal"
+    },
+    "eco_mloot_dragon_breath": {
+      "textures": "textures/items/dragons_breath"
+    },
+    "eco_mloot_dragon_egg": {
+      "textures": "textures/blocks/dragon_egg"
+    },
+    "eco_mloot_bedrock": {
+      "textures": "textures/blocks/bedrock"
+    },
+    "eco_mloot_reinforced_deepslate": {
+      "textures": "textures/blocks/reinforced_deepslate_top"
+    },
+    "eco_mloot_budding_amethyst": {
+      "textures": "textures/blocks/budding_amethyst"
+    },
+    "eco_mloot_end_portal_frame": {
+      "textures": "textures/blocks/endframe_top"
+    },
+    "eco_mloot_mob_spawner": {
+      "textures": "textures/blocks/mob_spawner"
+    },
+    "eco_mloot_beacon": {
+      "textures": "textures/blocks/beacon"
+    },
+    "eco_mloot_netherite_block": {
+      "textures": "textures/blocks/netherite_block"
+    },
+    "eco_mloot_nether_star": {
+      "textures": "textures/items/nether_star"
+    },
+    "eco_mloot_wheat": {
+      "textures": "textures/items/wheat"
+    },
+    "eco_mloot_carrot": {
+      "textures": "textures/items/carrot"
+    },
+    "eco_mloot_potato": {
+      "textures": "textures/items/potato"
+    },
+    "eco_mloot_beetroot": {
+      "textures": "textures/items/beetroot"
+    },
+    "eco_mloot_sugar_cane": {
+      "textures": "textures/items/reeds"
+    },
+    "eco_mloot_cactus": {
+      "textures": "textures/blocks/cactus_side"
+    },
+    "eco_mloot_melon_slice": {
+      "textures": "textures/items/melon"
+    },
+    "eco_mloot_pumpkin": {
+      "textures": "textures/blocks/pumpkin_side"
+    },
+    "eco_mloot_nether_wart": {
+      "textures": "textures/items/nether_wart"
+    },
+    "eco_mloot_crimson_fungus": {
+      "textures": "textures/blocks/crimson_fungus"
+    },
+    "eco_mloot_warped_fungus": {
+      "textures": "textures/blocks/warped_fungus"
+    },
+    "eco_mloot_crimson_roots": {
+      "textures": "textures/blocks/crimson_roots"
+    },
+    "eco_mloot_warped_roots": {
+      "textures": "textures/blocks/warped_roots"
+    },
+    "eco_mloot_weeping_vines": {
+      "textures": "textures/blocks/weeping_vines_base"
+    },
+    "eco_mloot_twisting_vines": {
+      "textures": "textures/blocks/twisting_vines_base"
+    },
+    "eco_mloot_warped_wart_block": {
+      "textures": "textures/blocks/warped_wart_block"
+    },
+    "eco_mloot_sweet_berries": {
+      "textures": "textures/items/sweet_berries"
+    },
+    "eco_mloot_glow_berries": {
+      "textures": "textures/items/glow_berries"
+    },
+    "eco_mloot_cocoa_beans": {
+      "textures": "textures/items/dye_powder_brown"
+    },
+    "eco_mloot_bamboo": {
+      "textures": "textures/blocks/bamboo_block"
+    },
+    "eco_mloot_kelp": {
+      "textures": "textures/blocks/kelp_a"
+    },
+    "eco_mloot_sea_pickle": {
+      "textures": "textures/items/sea_pickle"
+    },
+    "eco_mloot_waterlily": {
+      "textures": "textures/blocks/carried_waterlily"
+    },
+    "eco_mloot_big_dripleaf": {
+      "textures": "textures/blocks/big_dripleaf_top"
+    },
+    "eco_mloot_golden_carrot": {
+      "textures": "textures/items/carrot_golden"
+    },
+    "eco_mloot_glistering_melon_slice": {
+      "textures": "textures/items/melon_speckled"
+    },
+    "eco_mloot_honeycomb": {
+      "textures": "textures/items/honeycomb"
+    },
+    "eco_mloot_honey_bottle": {
+      "textures": "textures/items/honey_bottle"
+    },
+    "eco_mloot_pumpkin_pie": {
+      "textures": "textures/items/pumpkin_pie"
+    },
+    "eco_mloot_cookie": {
+      "textures": "textures/items/cookie"
+    },
+    "eco_mloot_cake": {
+      "textures": "textures/items/cake"
+    },
+    "eco_mloot_golden_apple": {
+      "textures": "textures/items/apple_golden"
+    },
+    "eco_mloot_torchflower": {
+      "textures": "textures/blocks/torchflower"
+    },
+    "eco_mloot_pitcher_plant": {
+      "textures": "textures/blocks/pitcher_crop_side"
+    },
+    "eco_mloot_spore_blossom": {
+      "textures": "textures/blocks/spore_blossom"
+    },
+    "eco_mloot_chorus_flower": {
+      "textures": "textures/blocks/chorus_flower"
+    },
+    "eco_mloot_wither_rose": {
+      "textures": "textures/blocks/flower_wither_rose"
+    },
+    "eco_mloot_turtle_egg": {
+      "textures": "textures/items/turtle_egg"
+    },
+    "eco_mloot_sniffer_egg": {
+      "textures": "textures/blocks/sniffer_egg_not_cracked_top"
+    },
+    "eco_mloot_enchanted_golden_apple": {
+      "textures": "textures/items/apple_golden"
+    },
+    "eco_chunk_hopper": {
+      "textures": "textures/items/hopper"
+    }
   }
 }

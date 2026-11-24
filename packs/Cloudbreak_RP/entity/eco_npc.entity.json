@@ -1,0 +1,30 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "eco:npc",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "s0": "textures/entity/eco_npc_shop",
+        "s1": "textures/entity/eco_npc_sell",
+        "s2": "textures/entity/eco_npc_menu"
+      },
+      "geometry": {
+        "default": "geometry.eco_npc"
+      },
+      "animations": {
+        "idle": "animation.eco_npc.idle"
+      },
+      "scripts": {
+        "animate": [
+          "idle"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.eco_npc"
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "eco:head_stray",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "eco_head_stray",
+      "minecraft:display_name": {
+        "value": "§r§dEnchanted Stray Head"
+      },
+      "minecraft:max_stack_size": 64,
+      "minecraft:glint": true
+    }
+  }
+}

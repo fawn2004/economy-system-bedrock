@@ -1,0 +1,53 @@
+{
+  "namespace": "server_form",
+
+  // Action forms whose title starts with the marker "§e§c§o" use the custom
+  // Skyblock Economy layout (eco_form.json). Every other form keeps the
+  // vanilla look, so other add-ons on your realm are not affected.
+  "long_form": {
+    "type": "panel",
+    // sized from its children: the form factory has no size of its own, so % sizes collapse to 0
+    "size": [ "100%c", "100%c" ],
+    "controls": [
+      {
+        "vanilla_long_form": {
+          "type": "panel",
+          "size": [ 225, 200 ],
+          "bindings": [
+            { "binding_name": "#title_text" },
+            {
+              "binding_type": "view",
+              "source_property_name": "((#title_text - '§e§c§o') = #title_text)",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "long_form@common_dialogs.main_panel_no_buttons": {
+                "$title_panel": "common_dialogs.standard_title_label",
+                "$title_size": [ "100% - 14px", 10 ],
+                "size": [ 225, 200 ],
+                "$text_name": "#title_text",
+                "$title_text_binding_type": "none",
+                "$child_control": "server_form.long_form_panel",
+                "layer": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "eco_form@eco_form.eco_screen": {
+          "bindings": [
+            { "binding_name": "#title_text" },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§e§c§o') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
