@@ -10,7 +10,7 @@
     "components": {
       "minecraft:icon": "eco_mloot_glistering_melon_slice",
       "minecraft:display_name": {
-        "value": "§r§bEnchanted Glistering Melon Slice"
+        "value": "§r§bEnchanted Glistering Melon"
       },
       "minecraft:max_stack_size": 64,
       "minecraft:glint": true

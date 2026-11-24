@@ -144,31 +144,31 @@
             "Geometry.cross",
             "Geometry.cross",
             "Geometry.cross",
-            "Geometry.cube",
-            "Geometry.cross",
-            "Geometry.cross",
-            "Geometry.cross",
-            "Geometry.cube",
             "Geometry.cross",
             "Geometry.cross",
             "Geometry.cross",
             "Geometry.cross",
             "Geometry.cube",
-            "Geometry.cube",
-            "Geometry.cube",
-            "Geometry.cube",
-            "Geometry.cube",
             "Geometry.cross",
-            "Geometry.cube",
-            "Geometry.cube",
+            "Geometry.cross",
             "Geometry.cross",
             "Geometry.cross",
             "Geometry.cross",
             "Geometry.cube",
+            "Geometry.cube",
             "Geometry.cross",
             "Geometry.cube",
-            "Geometry.cube",
-            "Geometry.cube"
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross",
+            "Geometry.cross"
           ]
         }
       },
@@ -197,9 +197,23 @@
             "Texture.s8",
             "Texture.s9"
           ]
+        },
+        "geometries": {
+          "Array.geos": [
+            "Geometry.g0",
+            "Geometry.g1",
+            "Geometry.g2",
+            "Geometry.g3",
+            "Geometry.g4",
+            "Geometry.g5",
+            "Geometry.g6",
+            "Geometry.g7",
+            "Geometry.g8",
+            "Geometry.g9"
+          ]
         }
       },
-      "geometry": "Geometry.default",
+      "geometry": "Array.geos[query.variant]",
       "materials": [
         {
           "*": "Material.default"

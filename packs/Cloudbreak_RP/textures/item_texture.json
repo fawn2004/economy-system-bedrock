@@ -110,77 +110,80 @@
     "eco_mining_minion": {
       "textures": "textures/items/eco_mining_minion"
     },
-    "eco_mloot_cobblestone": {
-      "textures": "textures/blocks/cobblestone"
+    "eco_chunk_hopper": {
+      "textures": "textures/items/hopper"
     },
-    "eco_mloot_coal": {
-      "textures": "textures/items/coal"
+    "eco_mloot_snow": {
+      "textures": "textures/blocks/snow"
     },
-    "eco_mloot_raw_iron": {
-      "textures": "textures/items/raw_iron"
+    "eco_mloot_clay": {
+      "textures": "textures/blocks/clay"
     },
-    "eco_mloot_raw_gold": {
-      "textures": "textures/items/raw_gold"
+    "eco_mloot_calcite": {
+      "textures": "textures/blocks/calcite"
     },
-    "eco_mloot_lapis_lazuli": {
-      "textures": "textures/items/dye_powder_blue"
+    "eco_mloot_diorite": {
+      "textures": "textures/blocks/stone_diorite"
     },
-    "eco_mloot_redstone": {
-      "textures": "textures/items/redstone_dust"
+    "eco_mloot_packed_ice": {
+      "textures": "textures/blocks/ice_packed"
     },
-    "eco_mloot_diamond": {
-      "textures": "textures/items/diamond"
+    "eco_mloot_blue_ice": {
+      "textures": "textures/blocks/blue_ice"
     },
-    "eco_mloot_emerald": {
-      "textures": "textures/items/emerald"
+    "eco_mloot_quartz_block": {
+      "textures": "textures/blocks/quartz_block_side"
     },
-    "eco_mloot_netherrack": {
-      "textures": "textures/blocks/netherrack"
+    "eco_mloot_pearlescent_froglight": {
+      "textures": "textures/blocks/pearlescent_froglight_side"
     },
-    "eco_mloot_soul_sand": {
-      "textures": "textures/blocks/soul_sand"
+    "eco_mloot_tuff": {
+      "textures": "textures/blocks/tuff"
     },
-    "eco_mloot_quartz": {
-      "textures": "textures/items/quartz"
+    "eco_mloot_andesite": {
+      "textures": "textures/blocks/stone_andesite"
     },
-    "eco_mloot_glowstone_dust": {
-      "textures": "textures/items/glowstone_dust"
+    "eco_mloot_cobbled_deepslate": {
+      "textures": "textures/blocks/deepslate/cobbled_deepslate"
     },
-    "eco_mloot_magma_cream": {
-      "textures": "textures/items/magma_cream"
+    "eco_mloot_raw_copper_block": {
+      "textures": "textures/blocks/raw_copper_block"
     },
-    "eco_mloot_blaze_rod": {
-      "textures": "textures/items/blaze_rod"
+    "eco_mloot_copper_block": {
+      "textures": "textures/blocks/copper_block"
     },
-    "eco_mloot_ancient_debris": {
-      "textures": "textures/blocks/ancient_debris_side"
+    "eco_mloot_weathered_copper": {
+      "textures": "textures/blocks/weathered_copper"
     },
-    "eco_mloot_netherite_scrap": {
-      "textures": "textures/items/netherite_scrap"
+    "eco_mloot_oxidized_copper": {
+      "textures": "textures/blocks/oxidized_copper"
     },
-    "eco_mloot_obsidian": {
-      "textures": "textures/blocks/obsidian"
+    "eco_mloot_lodestone": {
+      "textures": "textures/blocks/lodestone_side"
     },
-    "eco_mloot_crying_obsidian": {
-      "textures": "textures/blocks/crying_obsidian"
+    "eco_mloot_hardened_clay": {
+      "textures": "textures/blocks/hardened_clay"
     },
-    "eco_mloot_amethyst_shard": {
-      "textures": "textures/items/amethyst_shard"
+    "eco_mloot_red_sandstone": {
+      "textures": "textures/blocks/red_sandstone_normal"
     },
-    "eco_mloot_sea_lantern": {
-      "textures": "textures/blocks/sea_lantern"
+    "eco_mloot_magma": {
+      "textures": "textures/blocks/magma"
+    },
+    "eco_mloot_glowstone": {
+      "textures": "textures/blocks/glowstone"
     },
     "eco_mloot_shroomlight": {
       "textures": "textures/blocks/shroomlight"
     },
-    "eco_mloot_sculk_catalyst": {
-      "textures": "textures/blocks/sculk_catalyst_side"
+    "eco_mloot_ochre_froglight": {
+      "textures": "textures/blocks/ochre_froglight_side"
     },
-    "eco_mloot_echo_shard": {
-      "textures": "textures/items/echo_shard"
+    "eco_mloot_raw_gold_block": {
+      "textures": "textures/blocks/raw_gold_block"
     },
-    "eco_mloot_heavy_core": {
-      "textures": "textures/blocks/heavy_core"
+    "eco_mloot_gilded_blackstone": {
+      "textures": "textures/blocks/gilded_blackstone"
     },
     "eco_mloot_end_stone": {
       "textures": "textures/blocks/end_stone"
@@ -188,47 +191,47 @@
     "eco_mloot_purpur_block": {
       "textures": "textures/blocks/purpur_block"
     },
-    "eco_mloot_chorus_fruit": {
-      "textures": "textures/items/chorus_fruit"
+    "eco_mloot_obsidian": {
+      "textures": "textures/blocks/obsidian"
     },
-    "eco_mloot_ender_pearl": {
-      "textures": "textures/items/ender_pearl"
+    "eco_mloot_crying_obsidian": {
+      "textures": "textures/blocks/crying_obsidian"
     },
-    "eco_mloot_shulker_shell": {
-      "textures": "textures/items/shulker_shell"
+    "eco_mloot_amethyst_block": {
+      "textures": "textures/blocks/amethyst_block"
     },
-    "eco_mloot_end_crystal": {
-      "textures": "textures/items/end_crystal"
+    "eco_mloot_sculk": {
+      "textures": "textures/blocks/sculk"
     },
-    "eco_mloot_dragon_breath": {
-      "textures": "textures/items/dragons_breath"
-    },
-    "eco_mloot_dragon_egg": {
-      "textures": "textures/blocks/dragon_egg"
-    },
-    "eco_mloot_bedrock": {
-      "textures": "textures/blocks/bedrock"
+    "eco_mloot_verdant_froglight": {
+      "textures": "textures/blocks/verdant_froglight_side"
     },
     "eco_mloot_reinforced_deepslate": {
       "textures": "textures/blocks/reinforced_deepslate_top"
     },
-    "eco_mloot_budding_amethyst": {
-      "textures": "textures/blocks/budding_amethyst"
+    "eco_mloot_prismarine": {
+      "textures": "textures/blocks/prismarine_rough"
     },
-    "eco_mloot_end_portal_frame": {
-      "textures": "textures/blocks/endframe_top"
+    "eco_mloot_dark_prismarine": {
+      "textures": "textures/blocks/prismarine_dark"
     },
-    "eco_mloot_mob_spawner": {
-      "textures": "textures/blocks/mob_spawner"
+    "eco_mloot_sea_lantern": {
+      "textures": "textures/blocks/sea_lantern"
     },
-    "eco_mloot_beacon": {
-      "textures": "textures/blocks/beacon"
+    "eco_mloot_lapis_block": {
+      "textures": "textures/blocks/lapis_block"
+    },
+    "eco_mloot_emerald_block": {
+      "textures": "textures/blocks/emerald_block"
+    },
+    "eco_mloot_diamond_block": {
+      "textures": "textures/blocks/diamond_block"
+    },
+    "eco_mloot_ancient_debris": {
+      "textures": "textures/blocks/ancient_debris_side"
     },
     "eco_mloot_netherite_block": {
       "textures": "textures/blocks/netherite_block"
-    },
-    "eco_mloot_nether_star": {
-      "textures": "textures/items/nether_star"
     },
     "eco_mloot_wheat": {
       "textures": "textures/items/wheat"
@@ -269,14 +272,14 @@
     "eco_mloot_warped_roots": {
       "textures": "textures/blocks/warped_roots"
     },
+    "eco_mloot_nether_sprouts": {
+      "textures": "textures/blocks/nether_sprouts"
+    },
     "eco_mloot_weeping_vines": {
       "textures": "textures/blocks/weeping_vines_base"
     },
     "eco_mloot_twisting_vines": {
       "textures": "textures/blocks/twisting_vines_base"
-    },
-    "eco_mloot_warped_wart_block": {
-      "textures": "textures/blocks/warped_wart_block"
     },
     "eco_mloot_sweet_berries": {
       "textures": "textures/items/sweet_berries"
@@ -302,6 +305,33 @@
     "eco_mloot_big_dripleaf": {
       "textures": "textures/blocks/big_dripleaf_top"
     },
+    "eco_mloot_pink_petals": {
+      "textures": "textures/blocks/pink_petals"
+    },
+    "eco_mloot_azalea": {
+      "textures": "textures/blocks/azalea_side"
+    },
+    "eco_mloot_flowering_azalea": {
+      "textures": "textures/blocks/flowering_azalea_side"
+    },
+    "eco_mloot_spore_blossom": {
+      "textures": "textures/blocks/spore_blossom"
+    },
+    "eco_mloot_chorus_flower": {
+      "textures": "textures/blocks/chorus_flower"
+    },
+    "eco_mloot_torchflower": {
+      "textures": "textures/blocks/torchflower"
+    },
+    "eco_mloot_pitcher_plant": {
+      "textures": "textures/blocks/pitcher_crop_side"
+    },
+    "eco_mloot_wither_rose": {
+      "textures": "textures/blocks/flower_wither_rose"
+    },
+    "eco_mloot_apple": {
+      "textures": "textures/items/apple"
+    },
     "eco_mloot_golden_carrot": {
       "textures": "textures/items/carrot_golden"
     },
@@ -311,47 +341,17 @@
     "eco_mloot_honeycomb": {
       "textures": "textures/items/honeycomb"
     },
-    "eco_mloot_honey_bottle": {
-      "textures": "textures/items/honey_bottle"
-    },
-    "eco_mloot_pumpkin_pie": {
-      "textures": "textures/items/pumpkin_pie"
-    },
-    "eco_mloot_cookie": {
-      "textures": "textures/items/cookie"
-    },
-    "eco_mloot_cake": {
-      "textures": "textures/items/cake"
+    "eco_mloot_chorus_fruit": {
+      "textures": "textures/items/chorus_fruit"
     },
     "eco_mloot_golden_apple": {
       "textures": "textures/items/apple_golden"
     },
-    "eco_mloot_torchflower": {
-      "textures": "textures/blocks/torchflower"
-    },
-    "eco_mloot_pitcher_plant": {
-      "textures": "textures/blocks/pitcher_crop_side"
-    },
-    "eco_mloot_spore_blossom": {
-      "textures": "textures/blocks/spore_blossom"
-    },
-    "eco_mloot_chorus_flower": {
-      "textures": "textures/blocks/chorus_flower"
-    },
-    "eco_mloot_wither_rose": {
-      "textures": "textures/blocks/flower_wither_rose"
-    },
-    "eco_mloot_turtle_egg": {
-      "textures": "textures/items/turtle_egg"
-    },
-    "eco_mloot_sniffer_egg": {
-      "textures": "textures/blocks/sniffer_egg_not_cracked_top"
+    "eco_mloot_echo_shard": {
+      "textures": "textures/items/echo_shard"
     },
     "eco_mloot_enchanted_golden_apple": {
       "textures": "textures/items/apple_golden"
-    },
-    "eco_chunk_hopper": {
-      "textures": "textures/items/hopper"
     }
   }
 }

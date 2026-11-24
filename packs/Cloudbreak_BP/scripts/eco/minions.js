@@ -74,7 +74,7 @@ export const capacityOf = (d) => MS.baseStorage + lvl(d, "storage") * (upDef("st
 const luckOf = (d) => lvl(d, "luck") * (upDef("luck")?.perLevel ?? 0);
 const fortuneOf = (d) => lvl(d, "fortune") * (upDef("fortune")?.perLevel ?? 0);
 const stored = (d) => Object.values(d.store ?? {}).reduce((a, b) => a + b, 0);
-export const typeOf = (d) => MINION_TYPES.find((t) => t.id === (d?.type ?? "mining")) ?? MINION_TYPES[0];
+export const typeOf = (d) => MINION_TYPES.find((t) => t.id === (d?.type ?? "cloud")) ?? MINION_TYPES[0];
 const tiersOf = (d) => typeOf(d).tiers;
 const tierOf = (d) => tiersOf(d)[Math.min(d.tier ?? 0, tiersOf(d).length - 1)];
 const nextTierOf = (d) => tiersOf(d)[(d.tier ?? 0) + 1];
@@ -102,7 +102,7 @@ function write(e, d) {
 }
 
 // ---- items -------------------------------------------------------------------
-export function makeMinionItem(tier = 0, ups = {}, type = "mining") {
+export function makeMinionItem(tier = 0, ups = {}, type = "cloud") {
   const s = new ItemStack(ITEM, 1);
   const mt = MINION_TYPES.find((t) => t.id === type) ?? MINION_TYPES[0];
   const t = mt.tiers[tier] ?? mt.tiers[0];
@@ -118,7 +118,7 @@ export function makeMinionItem(tier = 0, ups = {}, type = "mining") {
 function readItem(item) {
   if (item?.typeId !== ITEM) return undefined;
   const line = item.getLore().find((l) => l.startsWith(TAG));
-  if (!line) return { tier: 0, ups: {}, type: "mining" };
+  if (!line) return { tier: 0, ups: {}, type: "cloud" };
   const [tier, levels, type] = line.slice(TAG.length).split(":");
   const mt = MINION_TYPES.find((t) => t.id === type) ?? MINION_TYPES[0];
   const ups = {};

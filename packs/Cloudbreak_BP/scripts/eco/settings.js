@@ -147,7 +147,7 @@ function applyMinions() {
     t.price = sv.price ?? def.price;
     t.upgradeMultiplier = sv.upgradeMultiplier ?? def.upgradeMultiplier;
     // older versions saved the Mining Minion's tiers as "minionTiers"
-    const tiers = sv.tiers ?? (t.id === "mining" ? saved.minionTiers : undefined) ?? def.tiers;
+    const tiers = sv.tiers ?? (t.id === "cloud" ? saved.minionTiers : undefined) ?? def.tiers;
     t.tiers.length = 0;
     t.tiers.push(...clone(tiers).map((x, i) => ({ ...x, display: def.tiers[i]?.display ?? x.display })));
   }
@@ -173,7 +173,7 @@ export function setMinionUpgrades(list) {
 }
 
 export function setMinionTiers(list) {
-  setMinionType("mining", { tiers: list });
+  setMinionType("cloud", { tiers: list });
 }
 
 function applySkills() {
