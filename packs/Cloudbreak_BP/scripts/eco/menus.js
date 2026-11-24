@@ -2,7 +2,7 @@ import { ItemStack, world } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { filterItems, getCatalog, itemsDeep, search, sellPrice } from "./catalog.js";
 import { BADGES, CHUNK_HOPPER, CONFIG, CROPS, KITS, MINION_SETTINGS, MINION_TYPES, SHOP_LAYOUT, SKILLS, SKILL_TOOLS, SPAWNERS } from "./config.js";
-import { addMoney, fmt, fmtMoney, fmtShort, getBalance, rankOf, setBalance, takeMoney, topBalances } from "./economy.js";
+import { addMoney, fmt, fmtMoney, fmtShort, getBalance, rankOf, sellMultiplier, setBalance, takeMoney, topBalances } from "./economy.js";
 import {
   applyEnchants,
   countPlain,
@@ -593,6 +593,7 @@ export async function sellMenu(player, msg) {
       onClick: () => {
         let earned = 0;
         for (const [id] of sellable) earned += priceOf(id) * removeAllPlain(player, id);
+        earned = Math.floor(earned * sellMultiplier(player));
         if (earned) addMoney(player, earned);
         const h = [...depositHeads(player).values()].reduce((n, c) => n + c, 0);
         const c = [...depositEnchanted(player).values()].reduce((n, x) => n + x, 0);
@@ -638,7 +639,7 @@ export async function sellMenu(player, msg) {
       icon: e?.icon ?? (isMinionLoot(id) ? lootIcon(id) : ICON.coin),
       onClick: () => {
         const sold = removeAllPlain(player, id);
-        const earned = sold * priceOf(id);
+        const earned = Math.floor(sold * priceOf(id) * sellMultiplier(player));
         addMoney(player, earned);
         success(player, `Sold ${sold}x ${name} for ${fmt(earned)}.`);
         return sellMenu(player, `§aSold §f${sold}x ${name} §afor §f${fmt(earned)}`);

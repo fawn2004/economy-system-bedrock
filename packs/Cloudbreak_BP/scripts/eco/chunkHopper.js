@@ -1,7 +1,7 @@
 import { BlockPermutation, ItemStack, system, world } from "@minecraft/server";
 import { sellPrice } from "./catalog.js";
 import { CHUNK_HOPPER as CH, CONFIG } from "./config.js";
-import { addMoney, fmt, getBalance, takeMoney } from "./economy.js";
+import { addMoney, fmt, getBalance, sellMultiplier, takeMoney } from "./economy.js";
 import { isMinionLoot, lootName, lootSellPrice } from "./minions.js";
 import { addHeadPoints, headMob, mobName } from "./spawners.js";
 import { addCropPoints, cropName, enchantedCrop } from "./tools.js";
@@ -271,6 +271,7 @@ function sellAll(player, key) {
   }
   save(key, d);
   if (!sold && !heads && !crops) return "§7Nothing here can be sold.";
+  earned = Math.floor(earned * sellMultiplier(player));
   if (earned) addMoney(player, earned);
   const parts = [];
   if (sold) parts.push(`§f${commas(sold)} §aitems for §f${fmt(earned)}`);

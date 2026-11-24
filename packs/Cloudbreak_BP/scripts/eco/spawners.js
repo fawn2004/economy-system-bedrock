@@ -87,6 +87,25 @@ function loadAll() {
   }
 }
 
+// Cloudbreak: the Island Core's Spawner Cap limits spawners per island.
+// The hook returns how many more spawners fit at a location (Infinity = no limit).
+let roomHook = () => Infinity;
+export const setSpawnerRoom = (fn) => (roomHook = fn);
+function capRoom(player, dimId, loc) {
+  try {
+    return roomHook(player, dimId, loc);
+  } catch {
+    return Infinity;
+  }
+}
+
+/** Spawners (counting stacks) whose location passes the test. */
+export function countSpawnersWhere(test) {
+  let n = 0;
+  for (const d of spawners.values()) if (test(d)) n += d.stack;
+  return n;
+}
+
 /** How many spawners (counting stacks) a player owns. */
 export function ownedSpawnerCount(playerId) {
   let n = 0;
@@ -182,6 +201,7 @@ function placeSpawner(player, block, face, info) {
   if (target.x === px && target.z === pz && (target.y === py || target.y === py + 1)) return;
 
   const loc = target.location;
+  if (capRoom(player, player.dimension.id, loc) < 1) return fail(player, "Your island's spawner cap is full. Upgrade Spawner Cap in the Core Terminal.");
   try {
     world.structureManager.place(`eco:spawner_${info.mob}`, player.dimension, loc);
   } catch {
@@ -206,7 +226,9 @@ function addToStack(player, key, info, all) {
   const room = S.maxStack - d.stack;
   if (room <= 0) return fail(player, `This spawner is full (${S.maxStack} max).`);
   const held = container(player)?.getItem(player.selectedSlotIndex);
-  const n = Math.min(room, all ? held?.amount ?? 1 : 1);
+  const cap = capRoom(player, d.dim ?? player.dimension.id, d);
+  if (cap < 1) return fail(player, "Your island's spawner cap is full. Upgrade Spawner Cap in the Core Terminal.");
+  const n = Math.min(room, cap, all ? held?.amount ?? 1 : 1);
   d.stack += n;
   save(key, d);
   takeFromHand(player, n);
@@ -219,11 +241,13 @@ function addFromInventory(player, key) {
   const inv = container(player);
   if (!d || !inv) return 0;
   let added = 0;
-  for (let i = 0; i < inv.size && d.stack < S.maxStack; i++) {
+  let cap = capRoom(player, d.dim ?? player.dimension.id, d);
+  for (let i = 0; i < inv.size && d.stack < S.maxStack && cap > 0; i++) {
     const it = inv.getItem(i);
     const info = spawnerFromItem(it);
     if (!info || info.mob !== d.mob || info.level !== d.level) continue;
-    const n = Math.min(S.maxStack - d.stack, it.amount);
+    const n = Math.min(S.maxStack - d.stack, it.amount, cap);
+    cap -= n;
     d.stack += n;
     added += n;
     if (it.amount > n) {

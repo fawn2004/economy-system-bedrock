@@ -15,8 +15,9 @@ import {
   refreshName,
   transferLeadership,
 } from "./clans.js";
-import { clearIslandSpawn, createIsland, registerProtection, sendHome } from "./islands.js";
-import { mainMenu } from "./menus.js";
+import { clearIslandSpawn, createIsland, registerProtection, sendHome, setOnHome } from "./islands.js";
+import { coreTerminal, mainMenu, setFloor } from "./menus.js";
+import { ensureCore, registerCore, setCoreTerminal, settleTax } from "./core.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
 
@@ -79,6 +80,10 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, sourceEntity }) => {
 registerProtection();
 registerEconomy();
 setHomeMenu((player) => mainMenu(player));
+registerCore();
+setCoreTerminal(coreTerminal);
+setOnHome((clan) => ensureCore(clan));
+setFloor("afterDeposit", (clan) => settleTax(clan));
 
 // ---------------------------------------------------------------------------
 // Commands: /menu, /is, /sc <action> [name]

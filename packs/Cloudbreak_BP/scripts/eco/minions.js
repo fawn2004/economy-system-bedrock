@@ -1,7 +1,7 @@
 import { ItemStack, system, world } from "@minecraft/server";
 import { sellPrice } from "./catalog.js";
 import { CONFIG, MINION_SETTINGS as MS, MINION_TYPES, MINION_UPGRADES } from "./config.js";
-import { addMoney, fmt, fmtMoney, getBalance, takeMoney } from "./economy.js";
+import { addMoney, fmt, fmtMoney, getBalance, sellMultiplier, takeMoney } from "./economy.js";
 import { ICON, backTile, fail, success, tileMenu } from "./ui.js";
 
 // ============================================================================
@@ -353,6 +353,7 @@ function sellAll(player, e) {
   }
   write(e, d);
   if (!sold) return "§7Nothing to sell.";
+  earned = Math.floor(earned * sellMultiplier(player));
   addMoney(player, earned);
   success(player, `Sold ${commas(sold)} items for ${fmt(earned)}.`);
   return `§aSold §f${commas(sold)} §aitems for §f${fmt(earned)}§a!`;

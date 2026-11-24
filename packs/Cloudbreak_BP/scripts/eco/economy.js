@@ -79,6 +79,17 @@ export function setBalance(player, amount) {
   return value;
 }
 
+// Cloudbreak's Island Core can raise sell prices (Sell Multiplier upgrade).
+let sellMult = () => 1;
+export const setSellMultiplier = (fn) => (sellMult = fn);
+export function sellMultiplier(player) {
+  try {
+    return Math.max(1, Number(sellMult(player)) || 1);
+  } catch {
+    return 1;
+  }
+}
+
 export function addMoney(player, amount) {
   return setBalance(player, getBalance(player) + amount);
 }

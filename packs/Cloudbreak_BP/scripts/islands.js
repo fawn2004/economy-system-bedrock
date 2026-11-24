@@ -53,6 +53,11 @@ export function inIslandArea(dimensionId, loc) {
   return loc.x >= I.originX - half && loc.z >= I.originZ - half && loc.x < I.originX + I.columns * I.spacing - half;
 }
 
+// Called whenever a player arrives home (the island chunk is loaded then),
+// e.g. to place the Island Core. Set by main.js.
+let onHome = () => {};
+export const setOnHome = (fn) => (onHome = fn);
+
 export const spawnLocation = (clan) => ({ x: clan.island.x + 0.5, y: clan.island.y + 1, z: clan.island.z + 0.5 });
 
 // ---------------------------------------------------------------------------
@@ -165,6 +170,13 @@ export async function sendHome(player, clan = clanOf(player)) {
   player.teleport(spawnLocation(clan), { dimension: dim });
   player.setSpawnPoint({ dimension: dim, ...spawnLocation(clan) });
   player.setDynamicProperty("cb:homeSet", true);
+  system.runTimeout(() => {
+    try {
+      onHome(clan, player);
+    } catch (e) {
+      console.warn(`[cloudbreak] home hook: ${e}`);
+    }
+  }, 10);
   player.sendMessage(`${CONFIG.prefix}Welcome home to §b${clan.name}§7's island.`);
 }
 
