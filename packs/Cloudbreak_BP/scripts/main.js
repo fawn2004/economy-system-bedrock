@@ -19,6 +19,7 @@ import { clearIslandSpawn, createIsland, registerProtection, sendHome, setOnHome
 import { coreTerminal, mainMenu, raidMenu, setFloor } from "./menus.js";
 import { ensureCore, registerCore, setCoreTerminal, settleTax } from "./core.js";
 import { backOut, registerRaids } from "./raids.js";
+import { registerAfterRaid } from "./after.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
 
@@ -86,6 +87,7 @@ setCoreTerminal(coreTerminal);
 setOnHome((clan) => ensureCore(clan));
 setFloor("afterDeposit", (clan) => settleTax(clan));
 registerRaids();
+registerAfterRaid();
 
 // ---------------------------------------------------------------------------
 // Commands: /menu, /is, /sc <action> [name]

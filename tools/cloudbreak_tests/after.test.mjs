@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {mkPlayer,handlers,players} from '@minecraft/server';
+import * as C from './clans.js';
+import * as K from './core.js';
+import * as R from './raids.js';
+import * as A from './after.js';
+import * as I from './islands.js';
+let n=0; const t=async(name,f)=>{await f();n++;console.log('ok -',name);};
+const old=Date.now()-10*86400000;
+const mk=(name,pid,slot,bank)=>{const p=mkPlayer(pid,pid);const c=C.createClan(p,name).clan;c.created=old;c.island={slot,x:20000+slot*1000,y:100,z:20000,size:100};c.bank=bank;C.saveClan(c);return [p,c];};
+const [a,ca]=mk('Hitters','HA',0,200000); const [d,cd]=mk('Victims','HD',1,1000000);
+I.registerProtection(); K.registerCore(); R.registerRaids(); A.registerAfterRaid();
+const g=(c)=>C.getClan(c.id);
+await t('insurance tiers in order, paid from bank',()=>{const dd=g(cd);assert.ok(A.buyInsurance(d).ok);assert.ok(A.buyInsurance(d).ok);assert.equal(g(cd).insurance,2);assert.equal(g(cd).bank,1000000-300000);});
+await t('raid win: immunity, insurance payout, revenge, stats, log',async()=>{const prep=R.prepareRaid(a,'normal');const r=await R.launchRaid(a,prep);a.location={x:g(cd).island.x+10,y:101,z:20000};R._tickForTests();const bankAfterTheft=g(cd).bank;r.raid.lootEnd=Date.now()-1;R._tickForTests();const dd=g(cd);assert.equal(dd.bank,bankAfterTheft+Math.floor(175000*0.25),'Silver pays 25% of 175k');assert.ok(dd.immuneUntil>Date.now()+11*3600000);assert.equal(dd.revenge.clanId,ca.id);assert.equal(dd.stats.losses,1);assert.equal(g(ca).stats.wins,1);assert.equal(g(ca).log[0].kind,'won');assert.equal(dd.log[0].kind,'raided');});
+await t('revenge raid ignores immunity and clears after use',async()=>{assert.equal(R.targetsFor(g(ca),'normal').length,0,'victim immune');assert.equal(R.targetsFor(g(cd),'revenge').length,1);const prep=R.prepareRaid(d,'revenge');assert.ok(prep.ok,prep.msg);const r=await R.launchRaid(d,prep);assert.equal(g(cd).revenge,undefined);r.raid.bridgeEnd=Date.now()-1;d.location={x:0,y:0,z:0};R._tickForTests();assert.equal(g(ca).stats.defences,1);assert.equal(g(ca).stats.streak,1);assert.equal(g(cd).stats.losses,2);});
+await t('leaderboards sort',()=>{const w=A.board('wins');assert.equal(w[0].clan.id,ca.id);const s=A.board('streak');assert.equal(s[0].clan.id,ca.id);});
+console.log(`\n${n} tests passed`);

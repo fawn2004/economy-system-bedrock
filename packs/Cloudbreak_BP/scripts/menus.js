@@ -34,6 +34,7 @@ import { fmt, fmtMoney, getBalance } from "./eco/economy.js";
 import { adminMenu, sellMenu, shopMenu } from "./eco/menus.js";
 import { playerSettingsMenu } from "./eco/playerSettings.js";
 import * as R from "./raids.js";
+import * as A from "./after.js";
 
 // Floors that later milestones fill in (raids, insurance, raid log, leaderboards).
 const floorHooks = {};
@@ -113,10 +114,10 @@ async function clanMenu(player, clan) {
   const online = Object.keys(clan.members).filter((id) => world.getEntity(id)).length;
   const floors = [
     { n: 9, text: "Settings", sub: "Chunk borders, full bright, raid sound, coords", run: () => playerSettingsMenu(player, () => mainMenu(player)) },
-    { n: 8, text: "Leaderboards", sub: "Raid wins, streaks, richest, core level", run: () => floorHooks.leaderboards?.(player) },
-    { n: 7, text: "Raid Log", sub: "Raids you did and raids on you", run: () => floorHooks.raidlog?.(player) },
+    { n: 8, text: "Leaderboards", sub: "Raid wins, streaks, richest, core level", run: () => leaderboardsMenu(player) },
+    { n: 7, text: "Raid Log", sub: "Raids you did and raids on you", run: () => raidLogMenu(player) },
     { n: 6, text: "Members", sub: `${online} / ${memberCount(clan)} online`, run: () => membersMenu(player) },
-    { n: 5, text: "Insurance", sub: "Get stolen money back", run: () => floorHooks.insurance?.(player) },
+    { n: 5, text: "Insurance", sub: "Get stolen money back", run: () => insuranceMenu(player) },
     { n: 4, text: "Sky Shop", sub: "Buy and sell", run: () => floorHooks.shop ? floorHooks.shop(player) : shopMenu(player) },
     { n: 3, text: "Clan Bank", sub: `${fmtMoney(bankOf(clan))} · ${hoursCovered(clan)}h of tax`, run: () => bankMenu(player) },
     { n: 2, text: "Raids", sub: "Buy a raid", run: () => raidMenu(player) },
@@ -390,4 +391,85 @@ async function startRaid(player, type) {
   }
   const r = await R.launchRaid(player, prep);
   if (!r.ok) return raidMenu(player, "§c" + r.msg);
+}
+
+// ---------------------------------------------------------------------------
+// Insurance Vault, Raid Log, Leaderboards
+// ---------------------------------------------------------------------------
+
+export async function insuranceMenu(player, msg) {
+  const clan = clanOf(player);
+  if (!clan) return mainMenu(player);
+  const owned = clan.insurance ?? 0;
+  const tiers = CONFIG.insurance;
+  const lines = tiers.map((t, i) => `${i < owned ? "§a✔" : i === owned ? "§e›" : "§8✖"} §f${t.name} §7${Math.round(t.pct * 100)}% back · ${fmt(t.price)}`);
+  const form = new ActionFormData()
+    .title("Insurance Vault")
+    .body(
+      (msg ? msg + "\n\n" : "") +
+        "§7Get part of the money back when your clan is raided. Covers money only. Buy the tiers in order; the best one you own counts.\n\n" +
+        lines.join("\n") +
+        `\n\n§7Clan bank §a${fmt(bankOf(clan))}`
+    );
+  const opts = [];
+  if (owned < tiers.length) opts.push({ text: `Buy ${tiers[owned].name} · ${fmtMoney(tiers[owned].price)}`, run: async () => {
+    if (!(await confirm(player, "Insurance", `Buy ${tiers[owned].name} insurance for ${fmt(tiers[owned].price)} from the clan bank?`, "Buy"))) return insuranceMenu(player);
+    const r = A.buyInsurance(player);
+    return insuranceMenu(player, (r.ok ? "§a" : "§c") + r.msg);
+  } });
+  opts.push({ text: "Back", run: () => mainMenu(player) });
+  for (const o of opts) form.button(o.text);
+  const res = await show(player, form);
+  if (!res || res.canceled) return;
+  await opts[res.selection]?.run();
+}
+
+const LOG_LABEL = {
+  won: "§aRAID WON",
+  failed: "§7RAID FAILED",
+  defended: "§bDEFENDED",
+  raided: "§cRAIDED",
+  backout: "§8CALLED OFF",
+};
+
+export async function raidLogMenu(player, filter = "all") {
+  const clan = clanOf(player);
+  if (!clan) return mainMenu(player);
+  const mine = ["won", "failed", "backout"];
+  const list = (clan.log ?? []).filter((e) => filter === "all" || (filter === "ours" ? mine.includes(e.kind) : !mine.includes(e.kind)));
+  const st = clan.stats ?? {};
+  const ago = (t) => {
+    const m = Math.floor((Date.now() - t) / 60000);
+    return m < 60 ? `${m}m ago` : m < 1440 ? `${Math.floor(m / 60)}h ago` : `${Math.floor(m / 1440)}d ago`;
+  };
+  const body =
+    `§7Wins §a${st.wins ?? 0}§7 · losses §c${st.losses ?? 0}§7 · defences §b${st.defences ?? 0}§7 · streak §f${st.streak ?? 0}\n\n` +
+    (list.length
+      ? list.slice(0, 15).map((e) => `${LOG_LABEL[e.kind] ?? e.kind} §f${e.other} §7${e.money >= 0 ? "§a+" : "§c-"}${fmt(Math.abs(e.money))} §8${ago(e.t)}\n §8${e.detail ?? ""}`).join("\n")
+      : "§8Nothing here yet.");
+  const form = new ActionFormData().title("Raid Log").body(body);
+  const tabs = [["all", "All"], ["ours", "Our raids"], ["theirs", "Raids on us"]];
+  for (const [id, label] of tabs) form.button(`${id === filter ? "§l" : ""}${label}`);
+  form.button("Back");
+  const res = await show(player, form);
+  if (!res || res.canceled) return;
+  if (res.selection < tabs.length) return raidLogMenu(player, tabs[res.selection][0]);
+  return mainMenu(player);
+}
+
+export async function leaderboardsMenu(player, id = "wins") {
+  const own = clanOf(player);
+  const rows = A.board(id);
+  const b = A.BOARDS.find((x) => x.id === id) ?? A.BOARDS[0];
+  const rank = own ? rows.findIndex((r) => r.clan.id === own.id) + 1 : 0;
+  const top = rows.slice(0, 10).map((r, i) => `${i < 3 ? ["§6", "§f", "§c"][i] : "§7"}#${i + 1} §f${r.clan.name} §7${r.text}${own && r.clan.id === own.id ? " §b(you)" : ""}`);
+  const form = new ActionFormData()
+    .title(`Leaderboards · ${b.name}`)
+    .body((top.length ? top.join("\n") : "§8No clans yet.") + (own && rank > 10 ? `\n\n§b#${rank} ${own.name} §7${rows[rank - 1].text}` : ""));
+  for (const x of A.BOARDS) form.button(`${x.id === id ? "§l" : ""}${x.name}`);
+  form.button("Back");
+  const res = await show(player, form);
+  if (!res || res.canceled) return;
+  if (res.selection < A.BOARDS.length) return leaderboardsMenu(player, A.BOARDS[res.selection].id);
+  return mainMenu(player);
 }

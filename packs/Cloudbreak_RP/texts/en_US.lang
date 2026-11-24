@@ -113,3 +113,6 @@ item.eco:mloot_golden_apple=Enchanted Golden Apple
 item.eco:mloot_echo_shard=Enchanted Echo Shard
 item.eco:mloot_enchanted_golden_apple=Enchanted Enchanted Golden Apple
 tile.cb:island_core.name=Island Core
+item.cb:key_raider=Raider Crate Key
+item.cb:key_defender=Defender Crate Key
+item.cb:key_legendary=Legendary Crate Key

@@ -44,6 +44,21 @@ export const CONFIG = {
     revengeHours: 24,
   },
 
+  insurance: [
+    { name: "Basic", pct: 0.1, price: 50000 },
+    { name: "Silver", pct: 0.25, price: 250000 },
+    { name: "Gold", pct: 0.5, price: 1000000 },
+    { name: "Diamond", pct: 0.75, price: 5000000 },
+  ],
+
+  crates: {
+    raider: { name: "Raider Crate", key: "cb:key_raider", color: "§c" },
+    defender: { name: "Defender Crate", key: "cb:key_defender", color: "§b" },
+    legendary: { name: "Legendary Crate", key: "cb:key_legendary", color: "§6" },
+  },
+
+  raidLogSize: 30,
+
   menuItem: {
     id: "cb:menu",
     giveOnJoin: true,
