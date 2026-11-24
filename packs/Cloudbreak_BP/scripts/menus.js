@@ -31,7 +31,7 @@ import {
 } from "./core.js";
 import { UPGRADES } from "./config.js";
 import { fmt, fmtMoney, getBalance } from "./eco/economy.js";
-import { adminMenu, sellMenu, shopMenu } from "./eco/menus.js";
+import { adminMenu, sellMenu, shopMenu, skyShopMenu } from "./eco/menus.js";
 import { playerSettingsMenu } from "./eco/playerSettings.js";
 import * as R from "./raids.js";
 import * as A from "./after.js";
@@ -118,7 +118,7 @@ async function clanMenu(player, clan) {
     { n: 7, text: "Raid Log", sub: "Raids you did and raids on you", run: () => raidLogMenu(player) },
     { n: 6, text: "Members", sub: `${online} / ${memberCount(clan)} online`, run: () => membersMenu(player) },
     { n: 5, text: "Insurance", sub: "Get stolen money back", run: () => insuranceMenu(player) },
-    { n: 4, text: "Sky Shop", sub: "Buy and sell", run: () => floorHooks.shop ? floorHooks.shop(player) : shopMenu(player) },
+    { n: 4, text: "Sky Shop", sub: "Buy and sell", run: () => skyShopMenu(player) },
     { n: 3, text: "Clan Bank", sub: `${fmtMoney(bankOf(clan))} · ${hoursCovered(clan)}h of tax`, run: () => bankMenu(player) },
     { n: 2, text: "Raids", sub: "Buy a raid", run: () => raidMenu(player) },
     { n: 1, text: "Island Home", sub: "Teleport to your island", run: () => sendHome(player, clan) },

@@ -20,6 +20,7 @@ import { coreTerminal, mainMenu, raidMenu, setFloor } from "./menus.js";
 import { ensureCore, registerCore, setCoreTerminal, settleTax } from "./core.js";
 import { backOut, registerRaids } from "./raids.js";
 import { registerAfterRaid } from "./after.js";
+import { registerCrates } from "./crates.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
 
@@ -88,6 +89,7 @@ setOnHome((clan) => ensureCore(clan));
 setFloor("afterDeposit", (clan) => settleTax(clan));
 registerRaids();
 registerAfterRaid();
+registerCrates();
 
 // ---------------------------------------------------------------------------
 // Commands: /menu, /is, /sc <action> [name]

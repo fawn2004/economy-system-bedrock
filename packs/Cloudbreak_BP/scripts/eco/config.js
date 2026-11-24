@@ -104,6 +104,7 @@ export const CATEGORY_MOVES = {
 // Items that never appear in the shop and can't be sold
 export const DISABLED_ITEMS = [
   // "minecraft:elytra",
+  "minecraft:ender_pearl", // Cloudbreak: no pearls (they would skip the raid bridge)
 ];
 
 const I = "textures/items/";

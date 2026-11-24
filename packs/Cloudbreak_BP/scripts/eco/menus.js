@@ -121,6 +121,10 @@ export async function mainMenu(player) {
 //  SHOP
 // ============================================================================
 export async function shopMenu(player, msg) {
+  return skyShopMenu(player, msg); // Cloudbreak: every shop "Back" leads to the Sky Shop
+}
+
+async function economyShopMenu(player, msg) {
   const { categories, byCategory } = getCatalog();
   const cat = (id) => categories.find((c) => c.id === id);
   const tiles = [];
@@ -1101,3 +1105,65 @@ setNpcOpeners({
   sell: (player) => sellMenu(player),
   menu: (player) => mainMenu(player),
 });
+
+// ============================================================================
+//  CLOUDBREAK: Sky Shop (the full catalogue sorted into the Sky Shop categories)
+// ============================================================================
+const BRIDGING = [
+  "minecraft:cobblestone", "minecraft:dirt", "minecraft:oak_planks", "minecraft:sandstone", "minecraft:netherrack",
+  "minecraft:scaffolding", "minecraft:white_wool", "minecraft:stone", "minecraft:end_stone", "minecraft:obsidian",
+];
+
+function listOf(ids) {
+  const { byId } = getCatalog();
+  return ids.map((id) => byId.get(id)).filter((e) => e && e.buy > 0);
+}
+
+export async function skyShopMenu(player, msg) {
+  const { categories, byCategory } = getCatalog();
+  const cat = (id) => categories.find((c) => c.id === id);
+  const back = () => skyShopMenu(player);
+  const open = (title, theme, desc, items, children) =>
+    itemListMenu(player, { title, theme, desc, items, searchPool: items, children, back });
+  const gear = [...(byCategory.get("tools") ?? []), ...listOf(["minecraft:golden_apple", "minecraft:enchanted_golden_apple", "minecraft:arrow", "minecraft:shield"])];
+  const ores = [...itemsDeep("ores"), ...itemsDeep("buckets")];
+  const more = ["treasure", "redstone", "misc", "mobs", "brewing"].map(cat).filter(Boolean);
+  const tiles = [
+    { text: "§7§lBRIDGING BLOCKS", sub: "§7For raids", icon: "textures/blocks/cobblestone", badge: "HOT", onClick: () => open("BRIDGING BLOCKS", "blue", "Cheap blocks for building across to enemy islands.", listOf(BRIDGING)) },
+    { text: "§c§lRAID GEAR", sub: "§7Armour & weapons", icon: "textures/items/diamond_sword", onClick: () => open("RAID GEAR", "red", "Armour, weapons and golden apples. No ender pearls.", gear) },
+    { text: "§d§lSPAWNERS", sub: `§7${SPAWNERS.filter((s) => !s.disabled).length} mobs`, icon: U + "icon_spawners", onClick: () => spawnersMenu(player) },
+    { text: "§b§lGENERATORS / ORES", sub: "§7Ores, lava & water", icon: "textures/items/lava_bucket", onClick: () => open("GENERATORS / ORES", "blue", "Ores and buckets for your generator.", ores) },
+    { text: "§a§lFARMING", sub: "§7Seeds & saplings", icon: U + "icon_farming", onClick: () => categoryMenu(player, cat("farming"), back) },
+    { text: "§e§lBLOCKS", sub: "§7Build & decorate", icon: U + "icon_blocks", onClick: () => blocksMenu(player) },
+    { text: "§6§lFOOD", sub: "§7Eat up", icon: U + "icon_food", onClick: () => categoryMenu(player, cat("food"), back) },
+    { text: "§e§lMINIONS & HOPPERS", sub: "§7Work while you're away", icon: U + "icon_minion", onClick: () => tileMenu(player, {
+      title: "MINIONS & HOPPERS", theme: "orange", body: balLine(player),
+      tiles: [
+        { text: "§e§lMINIONS", sub: "§7Mine and farm for you", icon: U + "icon_minion", onClick: () => minionShop(player) },
+        { text: "§6§lCHUNK HOPPER", sub: `${priceColor(player, CHUNK_HOPPER.price)}${fmtShort(CHUNK_HOPPER.price)}`, icon: "textures/items/hopper", onClick: () => chunkHopperShop(player) },
+        backTile(back),
+      ],
+    }) },
+    { text: "§f§lMORE", sub: "§7Redstone, brewing...", icon: "textures/items/redstone_dust", onClick: () => tileMenu(player, {
+      title: "MORE", theme: "blue", body: balLine(player),
+      tiles: [...more.map((c) => ({ text: `§e§l${c.name.toUpperCase()}`, sub: `§7${countDeep(c.id)} items`, icon: c.icon, onClick: () => categoryMenu(player, c, back) })), backTile(back)],
+    }) },
+    { text: "§a§lSELL", sub: "§7Sell your loot", icon: ICON.sell, badge: "HOT", onClick: () => sellMenu(player) },
+    { text: "§b§lSEARCH", sub: "§7Find any item", icon: ICON.search, onClick: () => searchMenu(player) },
+  ];
+  tiles.push(backTile(() => mainMenu(player)));
+  await tileMenu(player, { title: "SKY SHOP", theme: "gold", body: `${msgLine(msg)}§7Pick a category    ${balLine(player)}`, tiles });
+}
+
+/** Gives a kit for free (admins). Kit items are tagged so they can't be sold. */
+export function giveKit(target, kit, times = 1) {
+  for (let n = 0; n < times; n++) {
+    for (const i of kit.items) {
+      giveItems(target, i.id, i.amount ?? 1, (stack) => {
+        applyEnchants(stack, i.enchants);
+        if (i.name) stack.nameTag = i.name;
+        stack.setLore(["§8Kit item"]);
+      });
+    }
+  }
+}
