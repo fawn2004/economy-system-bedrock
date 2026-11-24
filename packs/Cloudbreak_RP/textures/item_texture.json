@@ -1,0 +1,7 @@
+{
+  "resource_pack_name": "cloudbreak",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "cb_menu": { "textures": "textures/items/cb/menu" }
+  }
+}
