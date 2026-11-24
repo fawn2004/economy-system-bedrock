@@ -5,7 +5,7 @@
     "description": "Sky Clans: clans, islands and raids",
     "uuid": "499246ed-6a12-48dd-8b30-487435813359",
     "version": [0, 1, 0],
-    "min_engine_version": [1, 21, 100]
+    "min_engine_version": [1, 26, 10]
   },
   "modules": [
     {

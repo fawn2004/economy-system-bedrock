@@ -33,6 +33,7 @@ import { UPGRADES } from "./config.js";
 import { fmt, fmtMoney, getBalance } from "./eco/economy.js";
 import { adminMenu, sellMenu, shopMenu } from "./eco/menus.js";
 import { playerSettingsMenu } from "./eco/playerSettings.js";
+import * as R from "./raids.js";
 
 // Floors that later milestones fill in (raids, insurance, raid log, leaderboards).
 const floorHooks = {};
@@ -65,7 +66,8 @@ async function confirm(player, title, body, yes = "Yes") {
 // Main menu
 // ---------------------------------------------------------------------------
 
-export async function mainMenu(player) {
+export async function mainMenu(player, result) {
+  if (result?.msg) report(player, result);
   const clan = clanOf(player);
   return clan ? clanMenu(player, clan) : noClanMenu(player);
 }
@@ -117,7 +119,7 @@ async function clanMenu(player, clan) {
     { n: 5, text: "Insurance", sub: "Get stolen money back", run: () => floorHooks.insurance?.(player) },
     { n: 4, text: "Sky Shop", sub: "Buy and sell", run: () => floorHooks.shop ? floorHooks.shop(player) : shopMenu(player) },
     { n: 3, text: "Clan Bank", sub: `${fmtMoney(bankOf(clan))} · ${hoursCovered(clan)}h of tax`, run: () => bankMenu(player) },
-    { n: 2, text: "Raids", sub: "Buy a raid", run: () => floorHooks.raids?.(player) },
+    { n: 2, text: "Raids", sub: "Buy a raid", run: () => raidMenu(player) },
     { n: 1, text: "Island Home", sub: "Teleport to your island", run: () => sendHome(player, clan) },
   ];
   const buttons = floors.map((f) => ({ text: `F${f.n} ${f.text}\n§r§8${f.sub}`, run: f.run }));
@@ -318,4 +320,74 @@ async function disbandMenu(player) {
     const p = world.getEntity(id);
     if (p) clearIslandSpawn(p);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Raid Dispatch
+// ---------------------------------------------------------------------------
+
+const RAID_TYPES = [
+  { type: "normal", name: "Normal Raid", sub: "Random clan, no info" },
+  { type: "intel", name: "Intel Raid", sub: "See a hint first, then deploy or walk away" },
+  { type: "cheap", name: "Cheap Raid", sub: "Half price: an island whose core tax is unpaid" },
+  { type: "revenge", name: "Revenge Raid", sub: "Hit the clan that raided you" },
+];
+
+export async function raidMenu(player, msg) {
+  const clan = clanOf(player);
+  if (!clan) return mainMenu(player);
+  const running = R.raidOfClan(clan.id);
+  const manage = canManage(clan, player.id);
+  const revenge = R.revengeAvailable(clan);
+  const cheapCount = R.targetsFor(clan, "cheap").length;
+  const lines = [
+    msg ? msg + "\n" : "",
+    `§7Clan bank §a${fmt(bankOf(clan))}§7 · squad: everyone online (${onlineMembersOf(clan)})`,
+    `§7Islands with their shield down: §f${cheapCount}`,
+    revenge ? `§cRevenge available on §e${revenge.name}§c until ${new Date(clan.revenge.until).toLocaleTimeString()}` : "",
+    running ? `§6Your clan is in a raid right now.` : "",
+    manage ? "" : "§8Only the Owner and Co-Owners can buy raids.",
+  ].filter(Boolean);
+  const form = new ActionFormData().title("Raid Dispatch").body(lines.join("\n"));
+  const opts = [];
+  if (running && R.raidOfPlayer(player)) opts.push({ text: "§cBack out\n§r§8Within 30s of arriving, 50% refund", run: () => mainMenu(player, R.backOut(player)) });
+  if (!running && manage) {
+    for (const t of RAID_TYPES) {
+      if (t.type === "revenge" && !revenge) continue;
+      opts.push({ text: `${t.name} · ${fmtMoney(R.priceOf(t.type))}\n§r§8${t.sub}`, run: () => startRaid(player, t.type) });
+    }
+  }
+  opts.push({ text: "Back", run: () => mainMenu(player) });
+  for (const o of opts) form.button(o.text);
+  const res = await show(player, form);
+  if (!res || res.canceled) return;
+  await opts[res.selection]?.run();
+}
+
+const onlineMembersOf = (clan) => Object.keys(clan.members).filter((id) => world.getEntity(id)).length;
+
+const intelCooldown = new Map();
+
+async function startRaid(player, type) {
+  const prep = R.prepareRaid(player, type);
+  if (!prep.ok) return raidMenu(player, "§c" + prep.msg);
+  if (type === "intel") {
+    // scouting is free, but only once a minute per clan (no endless re-rolls)
+    const last = intelCooldown.get(prep.clan.id) ?? 0;
+    if (Date.now() - last < 60000) return raidMenu(player, `§cYour scouts need ${Math.ceil((60000 - (Date.now() - last)) / 1000)}s before the next Intel Raid.`);
+    intelCooldown.set(prep.clan.id, Date.now());
+    const intel = R.intelOf(prep.target);
+    const ok = await confirm(
+      player,
+      "Intel Report",
+      `§7A target has been scouted:\n\n§fSpawners: §e${intel.spawners}\n§fClan bank: §e${intel.bank}\n§fOnline: §e${intel.online} / ${intel.members}\n\n§7Deploy now for ${fmt(prep.price)}, or walk away for free.`,
+      "Deploy"
+    );
+    if (!ok) return raidMenu(player, "§7You walked away. Nothing was paid.");
+  } else {
+    const ok = await confirm(player, "Buy Raid", `Buy a ${type} raid for ${fmt(prep.price)} from the clan bank? Everyone online in your clan goes.`, "Raid!");
+    if (!ok) return raidMenu(player);
+  }
+  const r = await R.launchRaid(player, prep);
+  if (!r.ok) return raidMenu(player, "§c" + r.msg);
 }

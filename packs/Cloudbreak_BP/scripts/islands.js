@@ -216,10 +216,26 @@ function isContainer(block) {
   }
 }
 
+// Raids change the rules (raiders bridge in the void and loot the target).
+// rule(player, dimId, loc, action, blockType) -> "allow" | a deny message | undefined (normal rules)
+// action: "place" | "break" | "open" | "interact"
+let raidRule = () => undefined;
+export const setRaidRule = (fn) => (raidRule = fn);
+function askRaid(player, dimId, loc, action, blockType) {
+  try {
+    return raidRule(player, dimId, loc, action, blockType);
+  } catch {
+    return undefined;
+  }
+}
+
 /** Why a player may not change the block at loc, or undefined if they may. */
 function buildDenied(player, dimensionId, loc, { breaking = false, blockType } = {}) {
   if (player.hasTag("admin")) return undefined;
   if (!inIslandArea(dimensionId, loc)) return undefined;
+  const r = askRaid(player, dimensionId, loc, breaking ? "break" : "place", blockType);
+  if (r === "allow") return undefined;
+  if (typeof r === "string") return r;
   const own = clanOf(player);
   const here = clanAt(dimensionId, loc);
   if (!own || here?.id !== own.id) return "You can only build on your own island.";
@@ -250,14 +266,15 @@ export function registerProtection() {
     if (player.hasTag("admin")) return;
     const dimId = block.dimension.id;
     if (!inIslandArea(dimId, block.location)) return;
-    // Opening chests and other containers is always allowed on your own island,
-    // and inside the spawn zone (loot stays at risk during raids).
-    if (isContainer(block) && !player.isSneaking) {
-      const own = clanOf(player);
-      if (own && clanAt(dimId, block.location)?.id === own.id) return;
-    }
     const own = clanOf(player);
-    if (!own || clanAt(dimId, block.location)?.id !== own.id) {
+    const here = clanAt(dimId, block.location);
+    const ownHere = !!own && here?.id === own.id;
+    // Opening chests and other containers: on your own island, or as a raider while looting.
+    if (isContainer(block) && !player.isSneaking) {
+      if (ownHere || askRaid(player, dimId, block.location, "open") === "allow") return;
+    }
+    const raidHere = askRaid(player, dimId, block.location, "interact") === "allow";
+    if (!ownHere && !raidHere) {
       ev.cancel = true;
       warn(player, "You can only build on your own island.");
       return;
@@ -266,7 +283,7 @@ export function registerProtection() {
     if (!itemStack) return;
     const [dx, dy, dz] = FACE[ev.blockFace] ?? [0, 0, 0];
     const target = { x: block.location.x + dx, y: block.location.y + dy, z: block.location.z + dz };
-    const why = buildDenied(player, dimId, target) ?? (inSpawnZone(own, block.location) ? "The spawn zone is protected." : undefined);
+    const why = buildDenied(player, dimId, target) ?? (here && inSpawnZone(here, block.location) ? "The spawn zone is protected." : undefined);
     if (why) {
       ev.cancel = true;
       warn(player, why);

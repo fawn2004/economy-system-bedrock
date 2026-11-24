@@ -32,6 +32,18 @@ export const CONFIG = {
     ledgerSize: 50,
   },
 
+  raid: {
+    prices: { normal: 30000, intel: 45000, cheap: 15000, revenge: 20000 },
+    backOutSeconds: 30, // raiders can back out this long after arriving
+    backOutRefund: 0.5, // share of the price paid back when backing out (or walking away from intel)
+    launchDistance: 60, // blocks from the target's border to the launch island
+    lootSeconds: 900, // after a raider lands
+    bankStolen: 0.25, // share of the target's clan bank taken on a win
+    underdogBonus: 0.5, // extra (from the server) when a poorer clan wins against a richer one
+    newClanDays: 3, // new clans can't be raided
+    revengeHours: 24,
+  },
+
   menuItem: {
     id: "cb:menu",
     giveOnJoin: true,

@@ -154,7 +154,7 @@ function flyTick() {
     if (p.hasTag("admin") && p.getGameMode?.() === "creative") continue;
     const clan = clanOf(p);
     const here = clanAt(p.dimension.id, p.location);
-    const allowed = !!clan && here?.id === clan.id && inBorder(clan, p.location) && activeLevel(clan, "fly") > 0 && !p.hasTag("cb:inraid");
+    const allowed = !!clan && here?.id === clan.id && inBorder(clan, p.location) && activeLevel(clan, "fly") > 0 && !p.hasTag("cb:inraid") && !p.hasTag("cb:pvp");
     if (allowed && !flying.has(p.id)) setFly(p, true);
     else if (!allowed && flying.has(p.id)) setFly(p, false);
   }

@@ -53,7 +53,17 @@ function parseKey(key) {
 }
 const isCreative = (p) => String(p.getGameMode()).toLowerCase() === "creative";
 const isAdmin = (p) => p.hasTag(CONFIG.adminTag);
-const canManage = (p, d) => !d.owner || d.owner === p.id || isAdmin(p);
+// Cloudbreak: raiders looting an island may pick up its spawners.
+let manageOverride = () => false;
+export const setSpawnerManageOverride = (fn) => (manageOverride = fn);
+const canManage = (p, d) => {
+  if (!d.owner || d.owner === p.id || isAdmin(p)) return true;
+  try {
+    return !!manageOverride(p, d);
+  } catch {
+    return false;
+  }
+};
 
 function save(key, d) {
   spawners.set(key, d);

@@ -16,8 +16,9 @@ import {
   transferLeadership,
 } from "./clans.js";
 import { clearIslandSpawn, createIsland, registerProtection, sendHome, setOnHome } from "./islands.js";
-import { coreTerminal, mainMenu, setFloor } from "./menus.js";
+import { coreTerminal, mainMenu, raidMenu, setFloor } from "./menus.js";
 import { ensureCore, registerCore, setCoreTerminal, settleTax } from "./core.js";
+import { backOut, registerRaids } from "./raids.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
 
@@ -84,6 +85,7 @@ registerCore();
 setCoreTerminal(coreTerminal);
 setOnHome((clan) => ensureCore(clan));
 setFloor("afterDeposit", (clan) => settleTax(clan));
+registerRaids();
 
 // ---------------------------------------------------------------------------
 // Commands: /menu, /is, /sc <action> [name]
@@ -152,6 +154,10 @@ async function runClanCommand(player, action, arg) {
       }
       return;
     }
+    case "back":
+      return say(player, backOut(player));
+    case "raid":
+      return raidMenu(player);
     default:
       return openMenu(player);
   }
@@ -183,7 +189,7 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
     }
   );
 
-  reg.registerEnum("cb:clanaction", ["create", "invite", "accept", "decline", "leave", "kick", "promote", "demote", "transfer", "disband", "menu"]);
+  reg.registerEnum("cb:clanaction", ["create", "invite", "accept", "decline", "leave", "kick", "promote", "demote", "transfer", "disband", "menu", "back", "raid"]);
   reg.registerCommand(
     { name: "cb:sc", description: "Clan commands", permissionLevel: CommandPermissionLevel.Any,
       mandatoryParameters: [{ name: "cb:clanaction", type: CustomCommandParamType.Enum }],

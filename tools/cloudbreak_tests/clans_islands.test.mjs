@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {mkPlayer,handlers,_props,players} from '@minecraft/server';
+import * as C from './clans.js';
+import * as I from './islands.js';
+import {saveJson,loadJson,deleteJson} from './store.js';
+import {CONFIG} from './config.js';
+let n=0; const t=(name,f)=>{f();n++;console.log('ok -',name);};
+// store
+t('store splits big values',()=>{const big={s:'x'.repeat(70000)};saveJson('k',big);assert.equal(typeof _props.get('k'),'number');assert.deepEqual(loadJson('k'),big);saveJson('k',{a:1});assert.equal(_props.has('k#0'),false);assert.deepEqual(loadJson('k'),{a:1});deleteJson('k');assert.equal(loadJson('k',null),null);});
+const [a,b,c,d,e,f]=['A','B','Cc','D','E','F'].map((x,i)=>mkPlayer('p'+i,x));
+t('name rules',()=>{assert.equal(C.createClan(a,'ab').ok,false);assert.equal(C.createClan(a,'bad name').ok,false);assert.equal(C.createClan(a,'x'.repeat(17)).ok,false);});
+let clan;
+t('create',()=>{const r=C.createClan(a,'Nightfall');assert.ok(r.ok);clan=r.clan;assert.equal(C.roleOf(clan,a.id),'owner');assert.equal(C.createClan(b,'nightFALL').ok,false,'unique ignoring case');assert.equal(C.createClan(a,'Other').ok,false,'already in clan');});
+t('invite rules',()=>{assert.equal(C.invitePlayer(b,c).ok,false,'non-member cannot invite');assert.ok(C.invitePlayer(a,b).ok);assert.ok(C.acceptInvite(b).ok);assert.equal(C.roleOf(C.clanOf(b),b.id),'member');assert.equal(C.invitePlayer(b,c).ok,false,'member cannot invite');});
+t('max 5',()=>{for(const p of [c,d,e]){assert.ok(C.invitePlayer(a,p).ok);assert.ok(C.acceptInvite(p).ok);}assert.equal(C.memberCount(C.clanOf(a)),5);assert.equal(C.invitePlayer(a,f).ok,false);});
+t('promote/demote/kick rules',()=>{assert.ok(C.promoteMember(a,b.id).ok);assert.equal(C.roleOf(C.clanOf(a),b.id),'coowner');assert.ok(C.promoteMember(b,c.id).ok,'co-owner promotes member');assert.equal(C.demoteMember(b,c.id).ok,false,'co-owner cannot demote');assert.equal(C.kickMember(b,c.id).ok,false,'co-owner cannot kick co-owner');assert.ok(C.demoteMember(a,c.id).ok);assert.ok(C.kickMember(b,c.id).ok,'co-owner kicks member');assert.equal(C.clanOf(c),undefined);assert.equal(C.kickMember(b,a.id).ok,false,'cannot kick owner');});
+t('invite expiry + full slot reopened',()=>{assert.ok(C.invitePlayer(a,f).ok);assert.ok(C.acceptInvite(f).ok);assert.equal(C.acceptInvite(f).ok,false);});
+t('transfer',()=>{assert.equal(C.transferLeadership(b,a.id).ok,false);assert.ok(C.transferLeadership(a,d.id).ok);const cl=C.clanOf(a);assert.equal(C.roleOf(cl,d.id),'owner');assert.equal(C.roleOf(cl,a.id),'coowner');});
+t('owner leaves -> longest co-owner',()=>{const cl=C.clanOf(d);assert.ok(C.leaveClan(d).ok);const after=C.getClan(cl.id);assert.equal(after.members[a.id].role,'owner','a (co-owner, joined before b) is owner');});
+t('reload from storage',()=>{const id=C.clanOf(a).id;C.loadClans();assert.equal(C.getClan(id).name,'Nightfall');assert.equal(C.memberCount(C.getClan(id)),4);});
+t('disband',()=>{assert.equal(C.disbandClan(b).ok,false);assert.ok(C.disbandClan(a).ok);for(const p of [a,b,e,f])assert.equal(C.clanOf(p),undefined);assert.equal(C.allClans().length,0);});
+// islands geometry
+t('grid',()=>{const s=I.slotCentre(51);assert.deepEqual(s,{x:21000,y:100,z:21000});assert.equal(I.slotAt('minecraft:overworld',{x:21040,y:0,z:20960}),51);assert.equal(I.slotAt('minecraft:nether',s),undefined);assert.equal(I.inIslandArea('minecraft:overworld',{x:0,y:0,z:0}),false);});
+const r=C.createClan(a,'Sky');const sky=r.clan;sky.island={slot:0,x:20000,y:100,z:20000,size:100};C.saveClan(sky);
+t('border + spawn zone',()=>{assert.ok(I.inBorder(sky,{x:20049,y:0,z:19951}));assert.equal(I.inBorder(sky,{x:20051,y:0,z:20000}),false);assert.ok(I.inSpawnZone(sky,{x:20004,y:3,z:19996}));assert.equal(I.inSpawnZone(sky,{x:20005,y:3,z:20000}),false);});
+I.registerProtection();
+const brk=(p,loc,type='minecraft:dirt')=>{const ev={player:p,dimension:{id:'minecraft:overworld'},block:{location:loc,typeId:type},cancel:false};handlers.break.forEach(h=>h(ev));return ev.cancel;};
+const use=(p,loc,face,item,container=false)=>{const ev={player:p,block:{location:loc,dimension:{id:'minecraft:overworld'},getComponent:()=>container?{}:undefined},blockFace:face,itemStack:item,cancel:false};handlers.interact.forEach(h=>h(ev));return ev.cancel;};
+const admin=mkPlayer('adm','Admin',['admin']);
+t('break rules',()=>{assert.equal(brk(a,{x:20010,y:100,z:20000}),false,'own island');assert.equal(brk(a,{x:20002,y:100,z:20000}),true,'spawn zone');assert.equal(brk(a,{x:20002,y:101,z:20000},'minecraft:mob_spawner'),false,'spawner pickup');assert.equal(brk(b,{x:20010,y:100,z:20000}),true,'non-member');assert.equal(brk(a,{x:20060,y:100,z:20000}),true,'outside border');assert.equal(brk(admin,{x:20002,y:100,z:20000}),false,'admin');assert.equal(brk(b,{x:0,y:64,z:0}),false,'outside island area untouched');});
+t('place rules',()=>{const blk={typeId:'minecraft:dirt'};assert.equal(use(a,{x:20010,y:100,z:20000},'Up',blk),false);assert.equal(use(a,{x:20049,y:100,z:20000},'East',blk),false,'edge ok (x=20050 inside half 50)');assert.equal(use(a,{x:20050,y:100,z:20000},'East',blk),true,'past border');assert.equal(use(a,{x:20005,y:100,z:20000},'West',blk),true,'into spawn zone');assert.equal(use(a,{x:20001,y:101,z:20000},'Up',undefined,true),false,'open chest in zone');assert.equal(use(a,{x:20001,y:101,z:20000},'Up',blk,true),false,'open chest holding item');assert.equal(use(b,{x:20010,y:100,z:20000},'Up',undefined,true),true,'non-member chest');});
+console.log(`\n${n} tests passed`);
