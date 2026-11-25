@@ -31,7 +31,7 @@ import { ART, BANNER, Screen, headFor, spaced } from "./screens.js";
 import * as R from "./raids.js";
 import * as A from "./after.js";
 
-// Floors that other parts fill in (admin panel, tax after a deposit).
+// Hooks other parts fill in (admin panel, tax after a deposit).
 const floorHooks = {};
 export const setFloor = (id, fn) => (floorHooks[id] = fn);
 
@@ -92,70 +92,60 @@ const ago = (t) => {
 const signed = (n) => `${n >= 0 ? "+" : "-"}${fmt(Math.abs(n))}`;
 
 // ---------------------------------------------------------------------------
-// Main menu: the Elevator Tower (floor list on the left, the picked floor on
-// the right; tap a floor to look at it, then GO TO FLOOR to open it)
+// Main menu: one tile per menu, one tap opens it. (The Core Terminal is NOT
+// here: it only opens by tapping the Island Core block.)
 // ---------------------------------------------------------------------------
-
-const COLOR_CODE = { RED: "§c", GOLD: "§6", CYAN: "§b", GREEN: "§a", PURPLE: "§d", GREY: "§7", PINK: "§d", ORANGE: "§6", TEAL: "§3" };
-const lastFloor = new Map();
 
 export async function mainMenu(player, result) {
   if (result?.msg) report(player, result);
   return tower(player);
 }
 
-function floorsFor(player) {
+function tilesFor(player) {
   const clan = clanOf(player);
+  const settings = { name: "Settings", icon: CB.settings, col: "GREY", sub: `${settingsOnCount(player)} of 4 on`, run: () => playerSettingsMenu(player) };
+  const boards = { name: "Leaderboards", icon: CB.leaderboards, col: "PURPLE", sub: "Top clans", run: () => leaderboardsMenu(player) };
+  const shop = { name: "Sky Shop", icon: CB.shop, col: "GOLD", sub: "Buy & sell", run: () => skyShopMenu(player) };
   const admin = player.hasTag("admin")
-    ? [{ n: "A", key: "admin", name: "Admin", icon: CB.admin, col: "PINK", desc: "Control Room: give money, heads, kits and keys, change server rules.", stats: () => [["Online", world.getPlayers().length], ["Active raids", R.activeRaids().length], ["Clans", allClans().length]], run: () => (floorHooks.admin ? floorHooks.admin(player) : adminMenu(player)) }]
+    ? [{ name: "Admin", icon: CB.admin, col: "PINK", sub: "Control Room", run: () => (floorHooks.admin ? floorHooks.admin(player) : adminMenu(player)) }]
     : [];
-  const settings = { n: 9, key: "settings", name: "Settings", icon: CB.settings, col: "GREY", desc: "Chunk borders, full bright, raid alert sound and coordinates. Only you see these.", stats: () => [["Switched on", `${settingsOnCount(player)} / 4`]], run: () => playerSettingsMenu(player, () => tower(player, "settings")) };
-  const boards = { n: 8, key: "boards", name: "Leaderboards", icon: CB.leaderboards, col: "PURPLE", desc: "The top clans for raid wins, defence streaks, money and core level.", stats: () => [["Clans", allClans().length]], run: () => leaderboardsMenu(player) };
-  const shop = { n: 4, key: "shop", name: "Shop", icon: CB.shop, col: "GOLD", desc: "Buy blocks, raid gear and spawners. Sell what you farm.", stats: () => [["Wallet", fmtMoney(getBalance(player))], ["Sell bonus", `x${sellMultiplier(player).toFixed(2)}`]], run: () => skyShopMenu(player) };
   if (!clan) {
     const inv = pendingInvite(player);
-    const floors = [settings, boards, shop];
-    if (inv) floors.push({ n: 2, key: "invite", name: "Join by Invite", icon: CB.yes, col: "GREEN", desc: `${inv.fromName} invited you to ${inv.clan.name}. Join to share their island, or type /sc decline.`, stats: () => [["Clan", inv.clan.name], ["Players", `${memberCount(inv.clan)} / ${CONFIG.clan.maxMembers}`]], run: () => acceptAndGoHome(player) });
-    floors.push({ n: 1, key: "create", name: "Create Clan", icon: CB.home, col: "CYAN", desc: "Start your own clan and get a floating island of your own. Invite up to 4 friends.", stats: () => [["Max players", CONFIG.clan.maxMembers]], run: () => createMenu(player) });
-    return [...floors, ...admin];
+    const tiles = [{ name: "Create Clan", icon: CB.home, col: "CYAN", sub: "Get an island", run: () => createMenu(player) }];
+    if (inv) {
+      tiles.push({ name: "Join Clan", icon: CB.yes, col: "GREEN", sub: inv.clan.name, run: () => acceptAndGoHome(player) });
+      tiles.push({ name: "Decline", icon: CB.no, col: "RED", sub: `Invite from ${inv.fromName}`, run: () => report(player, declineInvite(player)) });
+    }
+    return [...tiles, shop, boards, settings, ...admin];
   }
   const st = clan.stats ?? {};
-  const rev = R.revengeAvailable(clan);
   const owned = clan.insurance ?? 0;
+  const rank = A.board("wins").findIndex((r) => r.clan.id === clan.id) + 1;
   return [
+    { name: "Island Home", icon: CB.home, col: "CYAN", sub: "Teleport home", run: () => (R.raidOfPlayer(player) ? report(player, { ok: false, msg: "You're in a raid. Finish it, or back out with /sc back." }) : sendHome(player, clan)) },
+    { name: "Raids", icon: CB.raids, col: "RED", sub: `${R.targetsFor(clan, "cheap").length} shields down`, badge: !!R.revengeAvailable(clan), run: () => raidMenu(player) },
+    { name: "Clan Bank", icon: CB.bank, col: "GOLD", sub: `${fmtMoney(bankOf(clan))} · ${hoursCovered(clan)}h tax`, run: () => bankMenu(player) },
+    shop,
+    { name: "Insurance", icon: CB.insurance, col: "GREEN", sub: owned ? `${CONFIG.insurance[owned - 1].name} · ${Math.round(CONFIG.insurance[owned - 1].pct * 100)}%` : "No cover yet", run: () => insuranceMenu(player) },
+    { name: "Members", icon: CB.members, col: "TEAL", sub: `${onlineIds(clan).length} / ${memberCount(clan)} online`, run: () => membersMenu(player) },
+    { name: "Raid Log", icon: CB.raidlog, col: "ORANGE", sub: `${st.wins ?? 0} W · ${st.losses ?? 0} L`, run: () => raidLogMenu(player) },
+    { ...boards, sub: rank ? `You're #${rank}` : "Top clans" },
     settings,
-    { ...boards, stats: () => [["Your rank", `#${A.board("wins").findIndex((r) => r.clan.id === clan.id) + 1}`], ["Raid wins", st.wins ?? 0], ["Clans", allClans().length]] },
-    { n: 7, key: "raidlog", name: "Raid Log", icon: CB.raidlog, col: "ORANGE", desc: "Every raid you did and every raid on you, with the money won and lost.", stats: () => [["Wins", st.wins ?? 0], ["Losses", st.losses ?? 0], ["Defences", st.defences ?? 0]], run: () => raidLogMenu(player) },
-    { n: 6, key: "members", name: "Members", icon: CB.members, col: "TEAL", desc: "Your clan's chain of command. Invite, promote, kick and hand over leadership.", stats: () => [["Online", `${onlineIds(clan).length} / ${memberCount(clan)}`], ["Slots open", CONFIG.clan.maxMembers - memberCount(clan)], ["Your role", ROLE_NAME[roleOf(clan, player.id)]]], run: () => membersMenu(player) },
-    { n: 5, key: "insurance", name: "Insurance", icon: CB.insurance, col: "GREEN", desc: "Get part of the money back when your clan is raided. Unlock tiers in order.", stats: () => [["Tier", owned ? CONFIG.insurance[owned - 1].name : "None"], ["Refund", `${owned ? Math.round(CONFIG.insurance[owned - 1].pct * 100) : 0}%`]], run: () => insuranceMenu(player) },
-    { ...shop },
-    { n: 3, key: "bank", name: "Clan Bank", icon: CB.bank, col: "GOLD", desc: "Everyone can deposit. Owners and Co-Owners can withdraw. The core tax comes out of here.", stats: () => [["Balance", fmtMoney(bankOf(clan))], ["Covers", `${hoursCovered(clan)}h of tax`], ["Tax", `${fmtMoney(CONFIG.core.taxPerHour)}/hr`]], run: () => bankMenu(player) },
-    { n: 2, key: "raids", name: "Raids", icon: CB.raids, col: "RED", desc: "Buy a raid, scout one with intel, or hit an island with its shield down.", stats: () => [["Shields down", R.targetsFor(clan, "cheap").length], ["Revenge", rev ? "Ready" : "None"], ["Squad online", `${onlineIds(clan).length} / ${memberCount(clan)}`]], run: () => raidMenu(player) },
-    { n: 1, key: "home", name: "Island Home", icon: CB.home, col: "CYAN", desc: "Teleport back to your island. Tap the Island Core there for the Core Terminal.", stats: () => [["Island", `${clan.island?.size ?? CONFIG.island.startSize} x ${clan.island?.size ?? CONFIG.island.startSize}`], ["Core", `Lv ${coreLevel(clan)}`], ["Shield", shieldUp(clan) ? "Online" : "Down"]], run: () => (R.raidOfPlayer(player) ? report(player, { ok: false, msg: "You're in a raid. Finish it, or back out with /sc back." }) : sendHome(player, clan)) },
     ...admin,
   ];
 }
 
-export async function tower(player, selKey) {
+// $184K style, so the money badges fit on one line
+const compact = (n) => (n >= 1e6 ? fmtMoney(n) : n >= 1000 ? `$${Math.floor(n / 1000)}K` : fmt(n));
+
+export async function tower(player) {
   const clan = clanOf(player);
-  const floors = floorsFor(player);
-  const key = selKey ?? lastFloor.get(player.id);
-  const sel = floors.find((f) => f.key === key) ?? floors.find((f) => f.key === "raids" || f.key === "create") ?? floors[0];
-  lastFloor.set(player.id, sel.key);
   const s = new Screen("tower", "Main Menu");
-  s.text("K", spaced(clan ? `Clan ${clan.name} · Tower` : `${CONFIG.serverName} · Tower`));
-  s.text("BANK", clan ? `§7Bank §e${fmtMoney(bankOf(clan))}` : `§7Wallet §e${fmtMoney(getBalance(player))}`);
-  for (const f of floors) {
-    const on = f === sel ? "ON" : undefined;
-    s.button("FL", `${on ? "§f" : "§7"}${f.name}`, () => tower(player, f.key), { icon: f.icon, states: [on] });
-    s.text("FN", `F${f.n}`);
-  }
-  s.text("P", sel.desc, { states: [`c${sel.col}`] });
-  s.text("PN", `${COLOR_CODE[sel.col] ?? "§f"}${sel.n}`);
-  s.text("PT", sel.name);
-  s.text("PI", "", { icon: sel.icon });
-  for (const [k, v] of sel.stats()) s.text("ST", `${k}\n§f${v}`);
-  s.button("GO", sel.n === "A" ? "OPEN CONTROL ROOM" : `GO TO FLOOR ${sel.n}`, sel.run, { states: [`c${sel.col}`] });
+  for (const t of tilesFor(player)) s.button("TL", `§f${t.name}\n§7${t.sub}`, t.run, { icon: t.icon, states: [`c${t.col}`, t.badge ? "BADGE" : undefined] });
+  s.text("K", spaced(clan ? `Clan ${clan.name} · ${ROLE_NAME[roleOf(clan, player.id)]} · ${onlineIds(clan).length} / ${memberCount(clan)} online` : "No clan yet"));
+  if (clan) s.text("PILL", `Bank §e${compact(bankOf(clan))}`);
+  s.text("PILL", `Wallet §a${compact(getBalance(player))}`);
+  if (clan) s.text("PILL", `Shield ${shieldUp(clan) ? "§aONLINE" : "§cDOWN"}`);
   await s.show(player);
 }
 
@@ -217,7 +207,7 @@ export async function bankMenu(player, opts = {}) {
   const s = new Screen("bank", "Clan Bank");
   for (let i = 0; i < bars; i++) s.text("CN", "", { states: [i >= bars - lit ? "ON" : undefined] });
   s.text("HR", `${hours} hours`);
-  s.text("K", spaced(`Floor 3 · Clan ${clan.name}`));
+  s.text("K", spaced(`Clan ${clan.name}`));
   s.text("BAL", fmt(bankOf(clan)));
   s.text("TAX", `Core tax ${fmt(CONFIG.core.taxPerHour)} / hr · next charge in ${minutesToTax(clan)} min`);
   s.button("MODE", `${mode === "deposit" ? "§0" : "§f"}DEPOSIT`, () => again({ mode: "deposit" }), { states: [mode === "deposit" ? "ON" : undefined] });
@@ -310,7 +300,7 @@ export async function membersMenu(player, selId) {
   const list = Object.entries(clan.members).sort((a, b) => ROLE_ORDER[a[1].role] - ROLE_ORDER[b[1].role] || a[1].joined - b[1].joined);
   const sel = clan.members[selId] ? selId : player.id;
   const s = new Screen("members", "Members");
-  s.text("K", spaced(`Floor 6 · Clan ${clan.name}`));
+  s.text("K", spaced(`Clan ${clan.name}`));
   for (const [id, m] of list) {
     const zone = m.role === "owner" ? "OW" : m.role === "coowner" ? "CO" : "ME";
     const on = world.getEntity(id);

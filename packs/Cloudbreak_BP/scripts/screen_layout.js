@@ -2,16 +2,10 @@
 // grid cells first (padded to gridSize), then one button per single zone, then everything else.
 export const LAYOUT = {
   "tower": {
-    "grid": null,
-    "gridSize": 0,
+    "grid": "TL",
+    "gridSize": 10,
     "singles": [
-      "K",
-      "BANK",
-      "P",
-      "PN",
-      "PT",
-      "PI",
-      "GO"
+      "K"
     ]
   },
   "members": {

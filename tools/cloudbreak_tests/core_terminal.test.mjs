@@ -34,12 +34,15 @@ await t('every menu screen opens with its own marker',async()=>{
     assert.ok(tagsOf(f).every(Boolean),`${id}: every button has a zone tag`);
   }
 });
-await t('tower: tapping a floor selects it, GO opens it',async()=>{
-  await M.tower(a,'bank');
+await t('main menu: one tap on a tile opens that menu (no floors, no Core Terminal)',async()=>{
+  await M.tower(a);
   const f=last();
-  const go=f._buttons.findIndex(b=>b.text.startsWith('[GO]'));
-  assert.ok(f._buttons[go].text.includes('GO TO FLOOR 3'));
-  const sel=f._buttons.find(b=>b.text.startsWith('[FL][ON]'));
-  assert.ok(sel.text.includes('Clan Bank'));
+  const tiles=f._buttons.filter(b=>b.text.startsWith('[TL]'));
+  assert.ok(tiles.length>=9 && tiles.length<=10);
+  assert.ok(!f._buttons.some(b=>/floor|core terminal/i.test(b.text)),'no floors, no terminal tile');
+  const bank=f._buttons.findIndex(b=>b.text.startsWith('[TL]')&&b.text.includes('Clan Bank'));
+  ActionFormData.queue.push(bank);
+  await M.tower(a);
+  assert.ok(last()._title.startsWith('§c§b§2§r'),'the Clan Bank screen opened');
 });
 console.log(`\n${n} tests passed`);

@@ -111,34 +111,25 @@ def shade(c, f=0.7):
 
 
 def tower():
+    """Main menu: one tile per menu; one tap opens it (no floors)."""
     s = Screen("tower", "0", bg="#0C0F14")
-    s.box(R(28, 28, 318, 590), "#10141B", "#262E3C")
-    s.box(R(36, 38, 40, 580), "#262E3C")
-    it = sz(258, 50)
-    s.zone("FL", R(52, 38, 312, 590), it, Face(box("#141A24", "#252D3B"), [("ON", box("#1A2030", "#FF5A4E"))], [
-        Img([16, it[1] / 2 - 4, 8, 8]),
-        Text([28, it[1] / 2, 55], 0.68, anchor="left_middle"),
-        Img([it[0] - 7, it[1] / 2 - 1.5, 3, 3], box("#3A4150"), when="!ON"),
-        Img([it[0] - 7, it[1] / 2 - 1.5, 3, 3], box("#FF5A4E"), when="ON"),
-    ]), gap=2, click=True)
-    s.zone("FN", R(52, 38, 312, 590), it, Face(parts=[Text([4, it[1] / 2, 12], 0.55, "#6B7689", anchor="left_middle")]), gap=2)
-    s.zone("K", R(344, 30, 800, 46), (170, 6), Face(parts=[Text([0, 0, 170], 0.55, "#8E9BB5")]))
-    s.zone("BANK", R(800, 28, 1040, 52), (87, 9), Face(parts=[Text([0, 0, 87], 0.72, align="right")]))
-    pw = sz(728, 524)
-    s.zone("P", R(344, 66, 1072, 590), pw, Face(box("#11151D", "#FF5A4E"), colour_states("#11151D"), [
-        Text([11, 52, 240], 0.72, "#C9D1DD"),
-    ]))
-    s.zone("PN", R(372, 100, 440, 185), (25, 30), Face(parts=[Text([0, 0, 25], 3.0, font=TEN)]))
-    s.text(R(455, 116, 600, 128) [:3], "F L O O R", scale=0.5, color="#8E9BB5")
-    s.zone("PT", R(455, 135, 900, 175), (160, 14), Face(parts=[Text([0, 0, 160], 1.45, font=TEN)]))
-    s.zone("PI", R(958, 101, 1041, 183), sz(83, 82), Face(box("#0C0F14", "#262E3C"), parts=[Img([5, 5, 20, 20])]))
-    st = sz(215, 63)
-    s.zone("ST", R(375, 435, 1045, 497), st, Face(box("#0F131B", "#262E3C"), parts=[Text([4, 4, st[0] - 8], 0.62, "#8E9BB5")]),
-           orient="horizontal", gap=3.6)
-    go = sz(182, 45)
-    s.zone("GO", R(375, 515, 560, 562), go, Face(box(COL["RED"], bottom=shade(COL["RED"])), colour_states(None, bottom=True), [
-        Text([0, go[1] / 2, go[0]], 0.72, "#1A0E0E", font=TEN, align="center", anchor="left_middle"),
-    ]), click=True)
+    s.zone("K", R(34, 34, 700, 48), (240, 6), Face(parts=[Text([0, 0, 240], 0.55, "#8E9BB5")]))
+    s.text(R(34, 54, 400, 90)[:3], "§fCLOUD§bBREAK", scale=1.7, font=TEN)
+    pill = sz(118, 34)
+    s.zone("PILL", R(640, 56, 1066, 90), pill, Face(box("#141A24", "#252D3B"), parts=[
+        Text([0, pill[1] / 2, pill[0]], 0.6, "#8E9BB5", align="center", anchor="left_middle")]), orient="horizontal", gap=3, align="top_right")
+    tile = (71.3, 79)
+    parts = [Img([0, 0, tile[0], 2], box(c), when=f"c{k}") for k, c in COL.items()]
+    parts += [
+        Img([tile[0] / 2 - 12, 15, 24, 24]),
+        Text([2, 45, tile[0] - 4], 0.72, align="center"),
+        Img([tile[0] - 30, 5, 26, 7], box(COL["RED"]), when="BADGE"),
+        Text([tile[0] - 30, 8.5, 26], 0.42, "#2A0E0E", text="REVENGE", font=TEN, align="center", anchor="left_middle", when="BADGE"),
+    ]
+    s.zone("TL", R(34, 107, 1068, 556), tile, Face(box("#141A24", "#252D3B", bottom="#0F131B"), parts=parts,
+           hover=box("#4FD1E8", COL["CYAN"], alpha=26)), grid=True, gap=5, click=True, cols=5, rows=2)
+    s.text(R(34, 572, 500, 584)[:3], "Tap a menu to open it", scale=0.5, color="#6B7689")
+    s.text(R(600, 572, 1066, 584)[:3], "Island Core: tap the core on your island for upgrades", scale=0.5, color="#6B7689", align="right")
     return s
 
 
@@ -223,7 +214,7 @@ def bank():
 def settings():
     s = Screen("settings", "3", bg="#0E1117")
     s.img(R(28, 36, 62, 70), CB + "settings")
-    s.text(R(75, 30, 500, 40)[:3], "F L O O R  9  ·  O N L Y   Y O U   S E E   T H E S E", scale=0.5, color="#8E9BB5")
+    s.text(R(75, 30, 500, 40)[:3], "O N L Y   Y O U   S E E   T H E S E", scale=0.5, color="#8E9BB5")
     s.text(R(75, 50, 500, 80)[:3], "SETTINGS", scale=1.35, font=TEN)
     s.text(R(800, 48, 1040, 60)[:3], "Pull a lever to switch it", scale=0.6, color="#8E9BB5", align="right")
     it = (186, 86)
@@ -536,7 +527,7 @@ def write_server_form(screens):
 
 # Zones that only ever show ONE button: placed by fixed index instead of a factory.
 SINGLES = {
-    "tower": ["K", "BANK", "P", "PN", "PT", "PI", "GO"],
+    "tower": ["K"],
     "members": ["K", "OW", "SA", "ACT2"],
     "bank": ["HR", "K", "BAL", "TAX", "MSG", "CF", "OK"],
     "settings": [],

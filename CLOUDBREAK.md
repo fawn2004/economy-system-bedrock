@@ -4,7 +4,7 @@ Clans of up to 5 share a floating island, grind it up like skyblock, and buy bli
 other islands. The full design is in the Cloudbreak design doc; the UI mockups are on the
 Cloudbreak UI canvas.
 
-Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.5.0). Cloudbreak contains its
+Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.6.0). Cloudbreak contains its
 own copy of the Skyblock Economy code (`scripts/eco`), so it does **not** need the Skyblock
 Economy packs. Don't run both in the same world.
 
@@ -38,7 +38,8 @@ offline tests (`tools/cloudbreak_tests/run.sh`).
 ## Commands
 
 ```
-/menu                       Cloudbreak menu (also the Cloudbreak Menu item, slot 9)
+/menu                       Cloudbreak menu: one tile per menu, one tap opens it (also the menu item, slot 9)
+                            The Core Terminal is not in it: tap the Island Core block for that.
 /is                         teleport to your island
 /sc create <name>           create a clan and its island
 /sc invite <player>         invite an online player (Owner, Co-Owner)
