@@ -141,6 +141,7 @@ class Zone:
     def __init__(self, tag, rect, item, face, orient="vertical", gap=0, click=False, align="top_left", grid=False, scroll=False, tags=(), cols=1, rows=1):
         self.tag, self.rect, self.item, self.face = tag, rect, item, face
         self.cols, self.rows = cols, rows
+        self.single, self.index = False, None  # single zones are placed by fixed button index (see Screen.layout)
         if grid and scroll:
             raise ValueError("grids don't scroll (cells for other zones would make empty space); use pages")
         self.orient, self.gap, self.click, self.align = orient, gap, click, align
@@ -175,6 +176,23 @@ class Screen:
         z = Zone(*a, **kw)
         self.zones.append(z)
         return z
+
+    def layout(self, singles):
+        """Button order the script must send: the grid's cells first (padded to
+        cols x rows), then one button per single zone in this order, then lists."""
+        grids = [z for z in self.zones if z.grid]
+        assert len(grids) <= 1, self.sid
+        self.grid = grids[0] if grids else None
+        size = self.grid.cols * self.grid.rows if self.grid else 0
+        by = {}
+        for z in self.zones:
+            by.setdefault(z.tag, z)
+        self.singles = list(singles)
+        for i, tag in enumerate(self.singles):
+            z = by[tag]
+            assert not z.grid, tag
+            z.single, z.index = True, size + i
+        return {"grid": self.grid.tag if self.grid else None, "gridSize": size, "singles": self.singles}
 
 
 # ---------------------------------------------------------------------------
@@ -335,6 +353,14 @@ def zone_defs(scr, z):
                          {"pressed": {"type": "image", "texture": hl, "size": ["100%", "100%"], "alpha": 0.6}}]}})
     inner = {"type": "panel", "size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left", "controls": kids}
     show = vis(has(f"[{z.tag}]"))
+    if z.single:
+        # one fixed button: no factory, no copies for the other buttons
+        inner["collection_index"] = z.index
+        inner["bindings"] = show
+        if z.click:
+            kids[-1]["button"]["collection_index"] = z.index
+        ctrl = {"type": "panel", "collection_name": "form_buttons", "controls": [{"one": inner}]}
+        return defs, place(ctrl, list(z.rect))
     if z.grid:
         # a grid decides on its own which cells show, so the cell's CONTENT hides itself
         inner["bindings"] = show

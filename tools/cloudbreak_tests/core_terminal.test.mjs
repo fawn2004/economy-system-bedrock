@@ -8,7 +8,7 @@ let n=0; const t=async(name,f)=>{await f();n++;console.log('ok -',name);};
 const a=mkPlayer('ct0','Ash');
 const clan=C.createClan(a,'Night').clan; clan.island={slot:0,x:20000,y:100,z:20000,size:100}; clan.bank=500000; C.saveClan(clan);
 const last=()=>shown[shown.length-1];
-const tagsOf=(f)=>f._buttons.map(b=>b.text.match(/^\[([A-Z0-9]+)\]/)?.[1]);
+const tagsOf=(f)=>f._buttons.map(b=>b.text.match(/^\[([A-Z0-9_]+)\]/)?.[1]);
 await t('core terminal: its screen marker, module cards first, every button tagged',async()=>{
   await M.coreTerminal(a);
   const f=last();

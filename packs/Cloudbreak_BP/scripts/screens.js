@@ -12,8 +12,7 @@ export const SCREEN_CODES = {
   insurance: "6", shop: "7", crate: "8", raidlog: "9", boards: "a", terminal: "t",
 };
 
-// The one grid zone per screen. Grid items must come first in the form.
-const GRID = { settings: "SET", admin: "OPT", shop: "IT", terminal: "MOD" };
+import { LAYOUT } from "./screen_layout.js";
 
 /** "Clan Nightfall" -> "C L A N   N I G H T F A L L" (the mockups' spaced captions). */
 export const spaced = (s) => String(s).toUpperCase().split(" ").map((w) => w.split("").join(" ")).join("   ");
@@ -47,10 +46,25 @@ export class Screen {
     return this;
   }
 
-  /** The ordered list of items as they go into the form (grid zone first). */
+  /** The items in the order the screen expects (screen_layout.js): the grid's cells
+   *  first (padded with blanks), then one item per single zone (a blank if missing),
+   *  then the lists. Blanks carry no zone tag, so they show nowhere. */
   ordered() {
-    const grid = GRID[this.id];
-    return [...this.items.filter((i) => i.tag === grid), ...this.items.filter((i) => i.tag !== grid)];
+    const L = LAYOUT[this.id] ?? { grid: null, gridSize: 0, singles: [] };
+    const blank = { tag: "_", text: "", states: [], run: undefined };
+    const used = new Set();
+    const out = [];
+    const grid = this.items.filter((i) => i.tag === L.grid).slice(0, L.gridSize);
+    grid.forEach((i) => used.add(i));
+    out.push(...grid);
+    while (out.length < L.gridSize) out.push(blank);
+    for (const tag of L.singles) {
+      const it = this.items.find((i) => i.tag === tag && !used.has(i));
+      if (it) used.add(it);
+      out.push(it ?? blank);
+    }
+    for (const i of this.items) if (!used.has(i) && !(L.singles.includes(i.tag)) && i.tag !== L.grid) out.push(i);
+    return out;
   }
 
   form() {
