@@ -15,6 +15,9 @@ import { LAYOUT } from "./screen_layout.js";
 // 2... in its cells, so the grid's items are sent first. Everything else follows.
 // ---------------------------------------------------------------------------
 
+// Temporary: report every tap in chat (set to false once taps are confirmed working).
+const TAP_REPORT = true;
+
 export const SCREEN_CODES = {
   tower: "0", members: "1", bank: "2", settings: "3", admin: "4", dispatch: "5",
   insurance: "6", shop: "7", crate: "8", raidlog: "9", boards: "a", terminal: "t",
@@ -91,8 +94,16 @@ export class Screen {
       if (res.cancelationReason !== FormCancelationReason.UserBusy) break;
       await system.waitTicks(5);
     }
-    if (!res || res.canceled || res.selection === undefined) return undefined;
-    const it = order[res.selection];
+    const it = res && !res.canceled && res.selection !== undefined ? order[res.selection] : undefined;
+    if (TAP_REPORT) {
+      // temporary: shows in chat what the game sent back for every tap, to find why taps do nothing
+      const what = !res ? "no response"
+        : res.canceled ? `menu closed (${res.cancelationReason ?? "no reason"})`
+        : `got button #${res.selection} = ${it ? `[${it.tag}] ${it.text.replace(/§./g, "").split("\n")[0]}` : "nothing at that number"}${it && !it.run ? " (not a button)" : ""}`;
+      try {
+        player.sendMessage(`§8[tap report] ${this.id}: ${what}`);
+      } catch {}
+    }
     if (!it?.run) return it;
     try {
       await it.run();
