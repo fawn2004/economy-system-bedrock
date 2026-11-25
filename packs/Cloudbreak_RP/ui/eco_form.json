@@ -17,8 +17,8 @@
       330,
       236
     ],
-    "$eco_server_name|default": "§l§fSKYBLOCK",
-    "$eco_server_tag|default": "§l§6ECONOMY",
+    "$eco_server_name|default": "§l§fCLOUDBREAK",
+    "$eco_server_tag|default": "§l§bSKY CLANS",
     "controls": [
       {
         "layout": {
@@ -56,9 +56,9 @@
           "font_type": "MinecraftTen",
           "font_scale_factor": 2.0,
           "color": [
-            0.55,
-            0.05,
-            0.12
+            0.12,
+            0.45,
+            0.6
           ],
           "anchor_from": "top_middle",
           "anchor_to": "top_middle",

@@ -1132,7 +1132,7 @@ export async function skyShopMenu(player, msg) {
     { text: "§7§lBRIDGING BLOCKS", sub: "§7For raids", icon: "textures/blocks/cobblestone", badge: "HOT", onClick: () => open("BRIDGING BLOCKS", "blue", "Cheap blocks for building across to enemy islands.", listOf(BRIDGING)) },
     { text: "§c§lRAID GEAR", sub: "§7Armour & weapons", icon: "textures/items/diamond_sword", onClick: () => open("RAID GEAR", "red", "Armour, weapons and golden apples. No ender pearls.", gear) },
     { text: "§d§lSPAWNERS", sub: `§7${SPAWNERS.filter((s) => !s.disabled).length} mobs`, icon: U + "icon_spawners", onClick: () => spawnersMenu(player) },
-    { text: "§b§lGENERATORS / ORES", sub: "§7Ores, lava & water", icon: "textures/items/lava_bucket", onClick: () => open("GENERATORS / ORES", "blue", "Ores and buckets for your generator.", ores) },
+    { text: "§b§lGENERATORS / ORES", sub: "§7Ores, lava & water", icon: "textures/ui/cb/icon_generator", onClick: () => open("GENERATORS / ORES", "blue", "Ores and buckets for your generator.", ores) },
     { text: "§a§lFARMING", sub: "§7Seeds & saplings", icon: U + "icon_farming", onClick: () => categoryMenu(player, cat("farming"), back) },
     { text: "§e§lBLOCKS", sub: "§7Build & decorate", icon: U + "icon_blocks", onClick: () => blocksMenu(player) },
     { text: "§6§lFOOD", sub: "§7Eat up", icon: U + "icon_food", onClick: () => categoryMenu(player, cat("food"), back) },

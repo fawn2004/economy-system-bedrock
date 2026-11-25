@@ -3,7 +3,9 @@
   "minecraft:block": {
     "description": {
       "identifier": "cb:island_core",
-      "menu_category": { "category": "none" }
+      "menu_category": {
+        "category": "none"
+      }
     },
     "components": {
       "minecraft:destructible_by_mining": false,
@@ -11,10 +13,20 @@
       "minecraft:light_emission": 12,
       "minecraft:map_color": "#4FD1E8",
       "minecraft:material_instances": {
-        "*": { "texture": "cb_island_core", "render_method": "opaque" },
-        "up": { "texture": "cb_island_core_top", "render_method": "opaque" },
-        "down": { "texture": "cb_island_core_top", "render_method": "opaque" }
-      }
+        "*": {
+          "texture": "cb_island_core",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "cb_island_core_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "cb_island_core_top",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:geometry": "minecraft:geometry.full_block"
     }
   }
 }

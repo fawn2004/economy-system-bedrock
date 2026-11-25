@@ -72,6 +72,124 @@ def make_icons():
         img.save(os.path.join(OUT, f"icon_{name}.png"))
 
 
+# ---------------------------------------------------------------------------
+# Full-colour 16x16 pixel art: Generators / Ores icon, Ore Generator icon and
+# the Island Core block. "." is see-through; every other letter is a colour.
+# ---------------------------------------------------------------------------
+BLOCKS = os.path.join(ROOT, "packs", "Cloudbreak_RP", "textures", "blocks", "cb")
+
+ART = {
+    "generator": ({
+        "k": "#1B1B22", "L": "#FF7A1A", "l": "#FFC23A", "r": "#C8361A",
+        "W": "#3F76E4", "w": "#7FB0FF", "d": "#2A4FA8",
+        "C": "#8A8A8A", "c": "#5E5E5E", "h": "#B5B5B5", "D": "#5FE8E0", "G": "#F2C14E",
+    }, [
+        "kkkk........kkkk",
+        "klLk........kwWk",
+        "kLlk........kWwk",
+        "kLLk........kWWk",
+        "klLk........kwWk",
+        "kLLkkkkkkkkkkWWk",
+        "kLlkhhCChCCckWwk",
+        "kLLkhCCcCChckWWk",
+        "klLkCCcCDDCckwWk",
+        "kLLkCcCCDDcCkWWk",
+        "kLlkhCCcCCCckWwk",
+        "kLLkCCGGCcCckWWk",
+        "krLkcCGGCCcckdWk",
+        "krrkccCcccCckddk",
+        "rrrkcccccccckddd",
+        "kkkkkkkkkkkkkkkk",
+    ]),
+    "ore": ({
+        "k": "#1B1B22", "S": "#8C8C8C", "s": "#6E6E6E", "t": "#A8A8A8",
+        "D": "#5FE8E0", "d": "#2BB3AB", "E": "#3DDC5A", "e": "#1E9A3A",
+        "G": "#F2C14E", "g": "#C08A20", "R": "#FF3B3B", "r": "#A81E1E",
+    }, [
+        "kkkkkkkkkkkkkkkk",
+        "ktttSSStSSStSSsk",
+        "ktDDSSsSSGGSSssk",
+        "kSDdDSSSGgGgSSsk",
+        "kSSddSSSSGgSSSsk",
+        "kSsSSSStSSSSRRsk",
+        "ktSSSsSSSSSRrRsk",
+        "kSSSEESSssSSRrSk",
+        "kSSEeEESSSSSSSsk",
+        "ksSSEeSSSDDSSSsk",
+        "kSSSSSSSDdDdSSsk",
+        "kSGGSSsSSddSSSsk",
+        "kSGgGSSSSSSRRSsk",
+        "kSSgSSsSSSSRrSsk",
+        "kssssssssssssssk",
+        "kkkkkkkkkkkkkkkk",
+    ]),
+}
+
+CORE_PAL = {
+    "F": "#2A3350", "f": "#1A2036", "h": "#3E4A70", "n": "#111728",
+    "b": "#1F8FA8", "c": "#4FD1E8", "C": "#A8F2FF", "w": "#F3FFFF",
+}
+CORE_SIDE = [
+    "hhhhhhhhhhhhhhhF",
+    "hFFFFFFFFFFFFFFf",
+    "hFnnnnnnnnnnnnFf",
+    "hFnnnnnbbnnnnnFf",
+    "hFnnnnbccbnnnnFf",
+    "hFnnnbcCCcbnnnFf",
+    "hFnnbcCwwCcbnnFf",
+    "hFnbcCwwwwCcbnFf",
+    "hFnbcCwwwwCcbnFf",
+    "hFnnbcCwwCcbnnFf",
+    "hFnnnbcCCcbnnnFf",
+    "hFnnnnbccbnnnnFf",
+    "hFnnnnnbbnnnnnFf",
+    "hFnnnnnnnnnnnnFf",
+    "hFFFFFFFFFFFFFFf",
+    "Ffffffffffffffff",
+]
+CORE_TOP = [
+    "hhhhhhhhhhhhhhhF",
+    "hFFFFFFFFFFFFFFf",
+    "hFnnnnnnnnnnnnFf",
+    "hFnnnbbbbbbnnnFf",
+    "hFnnbccccccbnnFf",
+    "hFnbcCnnnnCcbnFf",
+    "hFnbcnnwwnncbnFf",
+    "hFnbcnwCCwncbnFf",
+    "hFnbcnwCCwncbnFf",
+    "hFnbcnnwwnncbnFf",
+    "hFnbcCnnnnCcbnFf",
+    "hFnnbccccccbnnFf",
+    "hFnnnbbbbbbnnnFf",
+    "hFnnnnnnnnnnnnFf",
+    "hFFFFFFFFFFFFFFf",
+    "Ffffffffffffffff",
+]
+
+
+def paint(pal, rows, scale):
+    assert len(rows) == 16 and all(len(r) == 16 for r in rows), rows
+    img = Image.new("RGBA", (16 * scale, 16 * scale), (0, 0, 0, 0))
+    px = img.load()
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch == ".":
+                continue
+            c = hexc(pal[ch])
+            for dx in range(scale):
+                for dy in range(scale):
+                    px[x * scale + dx, y * scale + dy] = c
+    return img
+
+
+def make_art():
+    for name, (pal, rows) in ART.items():
+        paint(pal, rows, 2).save(os.path.join(OUT, f"icon_{name}.png"))
+    os.makedirs(BLOCKS, exist_ok=True)
+    paint(CORE_PAL, CORE_SIDE, 1).save(os.path.join(BLOCKS, "island_core.png"))
+    paint(CORE_PAL, CORE_TOP, 1).save(os.path.join(BLOCKS, "island_core_top.png"))
+
+
 def recolor_header(src_name, dst_name, target):
     """Copies an eco header texture and tints it to a new colour (keeps shading)."""
     src = Image.open(os.path.join(ECO, f"{src_name}.png")).convert("RGBA")
@@ -116,6 +234,7 @@ def make_sidebar_panel():
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     make_icons()
+    make_art()  # after make_icons: replaces the plain ore icon
     recolor_header("header_blue", "header_cyan", "#2FB8D0")
     recolor_header("header_blue", "header_pink", "#E8559F")
     make_sidebar_panel()
