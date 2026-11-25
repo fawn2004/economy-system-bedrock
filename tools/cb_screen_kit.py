@@ -338,7 +338,7 @@ def zone_defs(scr, z):
         piece = {"button": dict(at, **{
             "type": "button",
             "default_control": "default", "hover_control": "hover", "pressed_control": "pressed",
-            "sound_name": "random.click", "sound_volume": 1.0, "sound_pitch": 1.0, "button_mappings": CLICK,
+            "button_mappings": CLICK,
             "bindings": ([] if not z.grid else show) + [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
             "controls": [{f"default@{NS}.{face}": {}}, {f"hover@{NS}.{face}_hover": {}},
                          {f"pressed@{NS}.{face}_hover": {"offset": [0, 0.5]}}]})}

@@ -1106,9 +1106,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -1797,9 +1794,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -2180,9 +2174,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -2563,9 +2554,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -2990,9 +2978,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -3189,9 +3174,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -3346,9 +3328,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -5267,9 +5246,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -5534,9 +5510,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -5957,9 +5930,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -6314,9 +6284,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -8072,9 +8039,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -8239,9 +8203,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -8722,9 +8683,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -9307,9 +9265,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -9788,9 +9743,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -10202,9 +10154,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -10409,9 +10358,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -10756,9 +10702,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -11316,9 +11259,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -11473,9 +11413,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -12734,9 +12671,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -13185,9 +13119,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -14061,9 +13992,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -15273,9 +15201,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -15875,9 +15800,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -16768,9 +16690,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -17767,9 +17686,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -18044,9 +17960,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -18201,9 +18114,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -19333,9 +19243,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -20744,9 +20651,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -21441,9 +21345,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -23547,9 +23448,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -25038,9 +24936,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -25586,9 +25481,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
@@ -25863,9 +25755,6 @@
      "default_control": "default",
      "hover_control": "hover",
      "pressed_control": "pressed",
-     "sound_name": "random.click",
-     "sound_volume": 1.0,
-     "sound_pitch": 1.0,
      "button_mappings": [
       {
        "from_button_id": "button.menu_select",
