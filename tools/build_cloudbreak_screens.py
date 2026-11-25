@@ -118,7 +118,7 @@ def tower():
     pill = sz(118, 34)
     s.zone("PILL", R(640, 56, 1066, 90), pill, Face(box("#141A24", "#252D3B"), parts=[
         Text([0, pill[1] / 2, pill[0]], 0.6, "#8E9BB5", align="center", anchor="left_middle")]), orient="horizontal", gap=3, align="top_right")
-    tile = (71.3, 79)
+    tile = (70.0, 76.5)  # 5 x (70 + 5) = 375 fits the 376 wide zone; 2 x (76.5 + 5) = 163 fits 163.3
     parts = [Img([0, 0, tile[0], 2], box(c), when=f"c{k}") for k, c in COL.items()]
     parts += [
         Img([tile[0] / 2 - 12, 15, 24, 24]),
@@ -217,7 +217,7 @@ def settings():
     s.text(R(75, 30, 500, 40)[:3], "O N L Y   Y O U   S E E   T H E S E", scale=0.5, color="#8E9BB5")
     s.text(R(75, 50, 500, 80)[:3], "SETTINGS", scale=1.35, font=TEN)
     s.text(R(800, 48, 1040, 60)[:3], "Pull a lever to switch it", scale=0.6, color="#8E9BB5", align="right")
-    it = (186, 86)
+    it = (186, 85)  # 2 x (85 + 4) = 178 fits the 178.9 tall zone
     s.zone("SET", R(28, 100, 1080, 592), it, Face(box("#11151D", "#252D3B"), colour_states("#11151D"), [
         Img([9, 33, 19, 19], box("#0C0F14", "#252D3B")),
         Img([11.5, 35.5, 14, 14]),

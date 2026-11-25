@@ -146,6 +146,11 @@ class Zone:
         self.cols, self.rows = cols, rows
         if grid and scroll:
             raise ValueError("grids don't scroll (cells for other zones would make empty space); use pages")
+        if grid:
+            # Minecraft wraps a grid row that doesn't fit, so the cells must fit the zone exactly.
+            need_w, need_h = cols * (item[0] + gap), rows * (item[1] + gap)
+            if need_w > rect[2] + 0.01 or need_h > rect[3] + 0.01:
+                raise ValueError(f"grid {tag}: {cols}x{rows} cells need {need_w:.1f} x {need_h:.1f} but the zone is {rect[2]:.1f} x {rect[3]:.1f}")
         self.orient, self.gap, self.click, self.align = orient, gap, click, align
         self.grid, self.scroll = grid, scroll
         # every tag an item of this zone can carry (stripped from its text)
