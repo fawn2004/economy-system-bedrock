@@ -1,21 +1,14 @@
 // Skyblock Economy - custom menu layout.
 // Generated layout, but safe to hand-edit.
 //  * Change the server name shown above the menu: $eco_server_name / $eco_server_tag (in eco_screen)
-//  * Textures live in textures/ui/eco/ (regenerate with tools/generate_assets.py)
-//  * Title marker:  §e§c§o§<theme>§r   theme 1 red, 2 gold, 3 green, 4 blue, 5 purple, 6 orange
-//    + §d§b§r after it = dashboard layout (player card + option tiles, used by the main menu)
-//  * Controllers: tile_button / close_button are focusable (gamepad / arrow keys move
-//    between them, A presses) - keep focus_enabled on any new buttons.
-//  * Button badges: put [NEW] or [HOT] anywhere in a button's text
-//  * Navigation: the first 4 buttons, tagged [NAV1]-[NAV4] (+ [NAVX] fillers), are hidden in
-//    the item grid and drawn by nav_row, a 4-cell grid shifted so the buttons are centred
+// SCALED x1.2 (bigger, easier to read) - sizes, offsets and text scales were multiplied once.
 {
   "namespace": "eco_form",
   "eco_screen": {
     "type": "panel",
     "size": [
-      330,
-      236
+      396.0,
+      283.2
     ],
     "$eco_server_name|default": "§l§fCLOUDBREAK",
     "$eco_server_tag|default": "§l§bSKY CLANS",
@@ -46,7 +39,7 @@
     "type": "panel",
     "size": [
       "100%",
-      30
+      36.0
     ],
     "controls": [
       {
@@ -54,7 +47,7 @@
           "type": "label",
           "text": "$eco_server_name",
           "font_type": "MinecraftTen",
-          "font_scale_factor": 2.0,
+          "font_scale_factor": 2.4,
           "color": [
             0.12,
             0.45,
@@ -63,8 +56,8 @@
           "anchor_from": "top_middle",
           "anchor_to": "top_middle",
           "offset": [
-            2,
-            2
+            2.4,
+            2.4
           ],
           "layer": 1
         }
@@ -74,7 +67,7 @@
           "type": "label",
           "text": "$eco_server_name",
           "font_type": "MinecraftTen",
-          "font_scale_factor": 2.0,
+          "font_scale_factor": 2.4,
           "color": [
             1,
             1,
@@ -83,8 +76,8 @@
           "anchor_from": "top_middle",
           "anchor_to": "top_middle",
           "offset": [
-            0,
-            0
+            0.0,
+            0.0
           ],
           "layer": 2
         }
@@ -94,13 +87,13 @@
           "type": "label",
           "text": "$eco_server_tag",
           "font_type": "MinecraftTen",
-          "font_scale_factor": 1.0,
+          "font_scale_factor": 1.2,
           "shadow": true,
           "anchor_from": "bottom_middle",
           "anchor_to": "bottom_middle",
           "offset": [
-            0,
-            -2
+            0.0,
+            -2.4
           ],
           "layer": 2
         }
@@ -120,7 +113,7 @@
           "type": "panel",
           "size": [
             "100%",
-            24
+            28.8
           ],
           "controls": [
             {
@@ -136,8 +129,8 @@
             {
               "close@eco_form.close_button": {
                 "size": [
-                  24,
-                  24
+                  28.8,
+                  28.8
                 ],
                 "anchor_from": "right_middle",
                 "anchor_to": "right_middle"
@@ -151,7 +144,7 @@
           "type": "panel",
           "size": [
             "100%",
-            3
+            3.6
           ]
         }
       },
@@ -328,7 +321,7 @@
           "type": "label",
           "layer": 5,
           "font_type": "MinecraftTen",
-          "font_scale_factor": 1.1,
+          "font_scale_factor": 1.32,
           "color": [
             1,
             1,
@@ -338,8 +331,8 @@
           "anchor_from": "left_middle",
           "anchor_to": "left_middle",
           "offset": [
-            9,
-            1
+            10.8,
+            1.2
           ],
           "size": [
             "100% - 18px",
@@ -398,8 +391,8 @@
           "type": "image",
           "texture": "textures/ui/eco/close_hover",
           "offset": [
-            0,
-            1
+            0.0,
+            1.2
           ]
         }
       }
@@ -496,7 +489,7 @@
               "binding_name": "#form_text"
             }
           ],
-          "font_scale_factor": 0.85
+          "font_scale_factor": 1.02
         }
       }
     ]
@@ -556,7 +549,7 @@
           "type": "panel",
           "size": [
             "100%",
-            4
+            4.8
           ],
           "bindings": [
             {
@@ -591,9 +584,19 @@
                 "grid_rescaling_type": "horizontal",
                 "collection_name": "form_buttons",
                 "bindings": [
-                  { "binding_name": "#title_text" },
-                  { "binding_type": "view", "source_property_name": "(not ((#title_text - '§e§c§o') = #title_text))", "target_property_name": "#visible" },
-                  { "binding_name": "#form_button_length", "binding_name_override": "#maximum_grid_items", "binding_condition": "visible" }
+                  {
+                    "binding_name": "#title_text"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "(not ((#title_text - '§e§c§o') = #title_text))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_name": "#form_button_length",
+                    "binding_name_override": "#maximum_grid_items",
+                    "binding_condition": "visible"
+                  }
                 ]
               }
             },
@@ -608,8 +611,8 @@
   "tile": {
     "type": "panel",
     "size": [
-      74,
-      68
+      88.8,
+      81.6
     ],
     "controls": [
       {
@@ -673,15 +676,15 @@
               "icon": {
                 "type": "image",
                 "size": [
-                  30,
-                  30
+                  36.0,
+                  36.0
                 ],
                 "layer": 2,
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
                 "offset": [
-                  0,
-                  5
+                  0.0,
+                  6.0
                 ],
                 "bindings": [
                   {
@@ -717,15 +720,15 @@
                 "anchor_from": "bottom_middle",
                 "anchor_to": "bottom_middle",
                 "offset": [
-                  0,
-                  -4
+                  0.0,
+                  -4.8
                 ],
                 "size": [
                   "100% - 6px",
                   "default"
                 ],
                 "text_alignment": "center",
-                "font_scale_factor": 0.8,
+                "font_scale_factor": 0.96,
                 "text": "#text",
                 "bindings": [
                   {
@@ -746,15 +749,15 @@
                 "type": "image",
                 "texture": "textures/ui/eco/badge_new",
                 "size": [
-                  26,
-                  10
+                  31.2,
+                  12.0
                 ],
                 "layer": 4,
                 "anchor_from": "top_right",
                 "anchor_to": "top_right",
                 "offset": [
-                  2,
-                  -3
+                  2.4,
+                  -3.6
                 ],
                 "bindings": [
                   {
@@ -775,15 +778,15 @@
                 "type": "image",
                 "texture": "textures/ui/eco/badge_hot",
                 "size": [
-                  26,
-                  10
+                  31.2,
+                  12.0
                 ],
                 "layer": 4,
                 "anchor_from": "top_right",
                 "anchor_to": "top_right",
                 "offset": [
-                  2,
-                  -3
+                  2.4,
+                  -3.6
                 ],
                 "bindings": [
                   {
@@ -815,15 +818,15 @@
               "icon": {
                 "type": "image",
                 "size": [
-                  30,
-                  30
+                  36.0,
+                  36.0
                 ],
                 "layer": 2,
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
                 "offset": [
-                  0,
-                  5
+                  0.0,
+                  6.0
                 ],
                 "bindings": [
                   {
@@ -859,15 +862,15 @@
                 "anchor_from": "bottom_middle",
                 "anchor_to": "bottom_middle",
                 "offset": [
-                  0,
-                  -4
+                  0.0,
+                  -4.8
                 ],
                 "size": [
                   "100% - 6px",
                   "default"
                 ],
                 "text_alignment": "center",
-                "font_scale_factor": 0.8,
+                "font_scale_factor": 0.96,
                 "text": "#text",
                 "bindings": [
                   {
@@ -888,15 +891,15 @@
                 "type": "image",
                 "texture": "textures/ui/eco/badge_new",
                 "size": [
-                  26,
-                  10
+                  31.2,
+                  12.0
                 ],
                 "layer": 4,
                 "anchor_from": "top_right",
                 "anchor_to": "top_right",
                 "offset": [
-                  2,
-                  -3
+                  2.4,
+                  -3.6
                 ],
                 "bindings": [
                   {
@@ -917,15 +920,15 @@
                 "type": "image",
                 "texture": "textures/ui/eco/badge_hot",
                 "size": [
-                  26,
-                  10
+                  31.2,
+                  12.0
                 ],
                 "layer": 4,
                 "anchor_from": "top_right",
                 "anchor_to": "top_right",
                 "offset": [
-                  2,
-                  -3
+                  2.4,
+                  -3.6
                 ],
                 "bindings": [
                   {
@@ -957,15 +960,15 @@
               "icon": {
                 "type": "image",
                 "size": [
-                  30,
-                  30
+                  36.0,
+                  36.0
                 ],
                 "layer": 2,
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
                 "offset": [
-                  0,
-                  6
+                  0.0,
+                  7.2
                 ],
                 "bindings": [
                   {
@@ -1001,15 +1004,15 @@
                 "anchor_from": "bottom_middle",
                 "anchor_to": "bottom_middle",
                 "offset": [
-                  0,
-                  -3
+                  0.0,
+                  -3.6
                 ],
                 "size": [
                   "100% - 6px",
                   "default"
                 ],
                 "text_alignment": "center",
-                "font_scale_factor": 0.8,
+                "font_scale_factor": 0.96,
                 "text": "#text",
                 "bindings": [
                   {
@@ -1030,15 +1033,15 @@
                 "type": "image",
                 "texture": "textures/ui/eco/badge_new",
                 "size": [
-                  26,
-                  10
+                  31.2,
+                  12.0
                 ],
                 "layer": 4,
                 "anchor_from": "top_right",
                 "anchor_to": "top_right",
                 "offset": [
-                  2,
-                  -3
+                  2.4,
+                  -3.6
                 ],
                 "bindings": [
                   {
@@ -1059,15 +1062,15 @@
                 "type": "image",
                 "texture": "textures/ui/eco/badge_hot",
                 "size": [
-                  26,
-                  10
+                  31.2,
+                  12.0
                 ],
                 "layer": 4,
                 "anchor_from": "top_right",
                 "anchor_to": "top_right",
                 "offset": [
-                  2,
-                  -3
+                  2.4,
+                  -3.6
                 ],
                 "bindings": [
                   {
@@ -1095,8 +1098,8 @@
   "nav_row": {
     "type": "grid",
     "size": [
-      296,
-      68
+      355.2,
+      81.6
     ],
     "anchor_from": "top_left",
     "anchor_to": "top_left",
@@ -1111,22 +1114,22 @@
   "nav_cell": {
     "type": "panel",
     "size": [
-      74,
-      68
+      88.8,
+      81.6
     ],
     "controls": [
       {
         "nav_1": {
           "type": "panel",
           "size": [
-            74,
-            68
+            88.8,
+            81.6
           ],
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            111.0,
-            0
+            133.2,
+            0.0
           ],
           "bindings": [
             {
@@ -1151,14 +1154,14 @@
         "nav_2": {
           "type": "panel",
           "size": [
-            74,
-            68
+            88.8,
+            81.6
           ],
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            74.0,
-            0
+            88.8,
+            0.0
           ],
           "bindings": [
             {
@@ -1183,14 +1186,14 @@
         "nav_3": {
           "type": "panel",
           "size": [
-            74,
-            68
+            88.8,
+            81.6
           ],
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
-            37.0,
-            0
+            44.4,
+            0.0
           ],
           "bindings": [
             {
@@ -1215,14 +1218,14 @@
         "nav_4": {
           "type": "panel",
           "size": [
-            74,
-            68
+            88.8,
+            81.6
           ],
           "anchor_from": "top_left",
           "anchor_to": "top_left",
           "offset": [
             0.0,
-            0
+            0.0
           ],
           "bindings": [
             {
@@ -1260,7 +1263,7 @@
         "gap": {
           "type": "panel",
           "size": [
-            6,
+            7.2,
             "100%"
           ]
         }
@@ -1274,7 +1277,7 @@
     "type": "image",
     "texture": "textures/ui/eco/tile",
     "size": [
-      104,
+      124.8,
       "100%"
     ],
     "controls": [
@@ -1283,14 +1286,14 @@
           "type": "image",
           "texture": "textures/ui/eco/icon_player",
           "size": [
-            40,
-            40
+            48.0,
+            48.0
           ],
           "anchor_from": "top_middle",
           "anchor_to": "top_middle",
           "offset": [
-            0,
-            8
+            0.0,
+            9.6
           ],
           "layer": 2
         }
@@ -1306,8 +1309,8 @@
           "anchor_from": "top_middle",
           "anchor_to": "top_middle",
           "offset": [
-            0,
-            52
+            0.0,
+            62.4
           ],
           "layer": 2,
           "controls": [
@@ -1321,8 +1324,8 @@
                 "anchor_from": "top_middle",
                 "anchor_to": "top_middle",
                 "offset": [
-                  0,
-                  5
+                  0.0,
+                  6.0
                 ],
                 "layer": 3,
                 "text_alignment": "center",
@@ -1332,7 +1335,7 @@
                   0.9,
                   0.9
                 ],
-                "font_scale_factor": 0.85,
+                "font_scale_factor": 1.02,
                 "text": "#form_text",
                 "bindings": [
                   {
@@ -1366,9 +1369,19 @@
           "grid_rescaling_type": "horizontal",
           "collection_name": "form_buttons",
           "bindings": [
-            { "binding_name": "#title_text" },
-                  { "binding_type": "view", "source_property_name": "(not ((#title_text - '§e§c§o') = #title_text))", "target_property_name": "#visible" },
-                  { "binding_name": "#form_button_length", "binding_name_override": "#maximum_grid_items", "binding_condition": "visible" }
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§e§c§o') = #title_text))",
+              "target_property_name": "#visible"
+            },
+            {
+              "binding_name": "#form_button_length",
+              "binding_name_override": "#maximum_grid_items",
+              "binding_condition": "visible"
+            }
           ]
         }
       }
@@ -1377,8 +1390,8 @@
   "dash_tile": {
     "type": "panel",
     "size": [
-      69,
-      54
+      82.8,
+      64.8
     ],
     "controls": [
       {
