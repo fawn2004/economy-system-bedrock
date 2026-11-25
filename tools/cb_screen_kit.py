@@ -138,8 +138,11 @@ class Face:
 
 
 class Zone:
-    def __init__(self, tag, rect, item, face, orient="vertical", gap=0, click=False, align="top_left", grid=False, scroll=False, tags=()):
+    def __init__(self, tag, rect, item, face, orient="vertical", gap=0, click=False, align="top_left", grid=False, scroll=False, tags=(), cols=1, rows=1):
         self.tag, self.rect, self.item, self.face = tag, rect, item, face
+        self.cols, self.rows = cols, rows
+        if grid and scroll:
+            raise ValueError("grids don't scroll (cells for other zones would make empty space); use pages")
         self.orient, self.gap, self.click, self.align = orient, gap, click, align
         self.grid, self.scroll = grid, scroll
         # every tag an item of this zone can carry (stripped from its text)
@@ -267,7 +270,10 @@ def img_json(p, icon_ok=True):
     return d
 
 
-def face_controls(face, tags, hover=False):
+HOVER = None  # set on first use (so the texture is registered before textures are written)
+
+
+def face_controls(face, tags):
     ctrls = []
     if face.bg or face.states:
         others = [s for s, _ in face.states]
@@ -286,8 +292,6 @@ def face_controls(face, tags, hover=False):
             ctrls.append({f"img_{i}": img_json(p)})
         else:
             ctrls.append({f"txt_{i}": label_json(p, tags)})
-    if hover:
-        ctrls.append({"hl": {"type": "image", "texture": face.hover or box("#FFFFFF", "#FFFFFF", alpha=28), "size": ["100%", "100%"], "layer": 5}})
     return {"type": "panel", "size": ["100%", "100%"], "controls": ctrls}
 
 
@@ -298,43 +302,43 @@ CLICK = [
 
 
 def zone_defs(scr, z):
+    """One zone = a list (stack) or grid of the form's buttons that carry its tag.
+    Each item draws its face ONCE; a clickable item puts a see-through button on
+    top whose only job is the hover/press highlight (cheap to build)."""
     base = f"{scr.sid}_{re.sub('[^a-z0-9]', '', z.tag.lower())}"
     defs = {}
     iw, ih = z.item
-    gw = iw + (z.gap if z.orient == "horizontal" and not z.grid else 0)
+    gw = iw + (z.gap if z.orient == "horizontal" or z.grid else 0)
     gh = ih + (z.gap if z.orient == "vertical" or z.grid else 0)
-    if z.grid:
-        gw = iw + z.gap
     face_name = base + "_face"
     defs[face_name] = face_controls(z.face, z.tags)
-    defs[face_name + "_hover"] = face_controls(z.face, z.tags, hover=True)
+    kids = [{f"face@{NS}.{face_name}": {}}]
     if z.click:
-        inner = {"type": "button", "size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left",
-                 "default_control": "default", "hover_control": "hover", "pressed_control": "pressed",
-                 "sound_name": "random.click", "sound_volume": 1.0, "sound_pitch": 1.0, "button_mappings": CLICK,
-                 "bindings": [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
-                 "controls": [{f"default@{NS}.{face_name}": {}}, {f"hover@{NS}.{face_name}_hover": {}},
-                              {f"pressed@{NS}.{face_name}_hover": {"offset": [0, 0.5]}}]}
+        hl = z.face.hover or box("#FFFFFF", "#FFFFFF", alpha=28)
+        kids.append({"button": {
+            "type": "button", "size": ["100%", "100%"], "layer": 7,
+            "default_control": "default", "hover_control": "hover", "pressed_control": "pressed",
+            "sound_name": "random.click", "sound_volume": 1.0, "sound_pitch": 1.0, "button_mappings": CLICK,
+            "bindings": [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
+            "controls": [{"default": {"type": "panel"}},
+                         {"hover": {"type": "image", "texture": hl, "size": ["100%", "100%"]}},
+                         {"pressed": {"type": "image", "texture": hl, "size": ["100%", "100%"], "alpha": 0.6}}]}})
+    inner = {"type": "panel", "size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left", "controls": kids}
+    show = vis(has(f"[{z.tag}]"))
+    if z.grid:
+        # a grid decides on its own which cells show, so the cell's CONTENT hides itself
+        inner["bindings"] = show
+        defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "controls": [{"inner": inner}]}
     else:
-        inner = {"type": "panel", "size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left",
-                 "controls": [{f"face@{NS}.{face_name}": {}}]}
-    defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "bindings": vis(has(f"[{z.tag}]")), "controls": [{"inner": inner}]}
+        # in a list, a hidden item takes no space
+        defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "bindings": show, "controls": [{"inner": inner}]}
 
     x, y, w, h = z.rect
     if z.grid:
-        grid = {"type": "grid", "size": ["100%", "default"], "anchor_from": "top_left", "anchor_to": "top_left",
-                "grid_item_template": f"{NS}.{base}_item", "grid_rescaling_type": "horizontal", "collection_name": "form_buttons",
+        grid = {"type": "grid", "size": ["100%", "100%"], "anchor_from": "top_left", "anchor_to": "top_left",
+                "grid_item_template": f"{NS}.{base}_item", "grid_dimensions": [z.cols, z.rows], "collection_name": "form_buttons",
                 "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#maximum_grid_items"}]}
-        if z.scroll:
-            defs[base + "_content"] = {"type": "panel", "size": ["100% - 6px", "100%c"], "anchor_from": "top_left", "anchor_to": "top_left",
-                                       "controls": [{"grid": grid}]}
-            ctrl = {"type": "panel", "controls": [{"scrolling_panel@common.scrolling_panel": {
-                "anchor_to": "top_left", "anchor_from": "top_left", "$show_background": False, "size": ["100%", "100%"],
-                "$scrolling_content": f"{NS}.{base}_content", "$scroll_size": [4, "100% - 2px"],
-                "$scrolling_pane_size": ["100% - 2px", "100%"], "$scrolling_pane_offset": [0, 0],
-                "$scroll_bar_right_padding_size": [0, 0]}}]}
-        else:
-            ctrl = {"type": "panel", "controls": [{"grid": grid}]}
+        ctrl = {"type": "panel", "clips_children": True, "controls": [{"grid": grid}]}
         return defs, place(ctrl, [x, y, w, h])
     stack = {"type": "stack_panel", "orientation": z.orient, "size": ["100%c", "100%c"],
              "factory": {"name": "buttons", "control_name": f"{NS}.{base}_item"}, "collection_name": "form_buttons",
@@ -396,16 +400,28 @@ def font(px, ten=False):
     return _fonts[key]
 
 
+# Minecraft font advance widths (UI units at scale 1), measured from the game.
+NARROW = {"i": 2, "!": 2, ".": 2, ",": 2, ":": 2, ";": 2, "|": 2, "'": 2, "l": 3, "`": 3, "t": 4, "I": 4, " ": 4,
+          "[": 4, "]": 4, "(": 4, ")": 4, "f": 5, "k": 5, "<": 5, ">": 5, "·": 2, "■": 6, "×": 6}
+
+
+def adv(ch, ten):
+    return 5.5 if ten else NARROW.get(ch, 6)  # MinecraftTen measured from "SKY SHOP" in game
+
+
+def mc_width(s, scale, ten):
+    return sum(adv(c, ten) for c in s) * scale
+
+
 def draw_text(d, t, text, ox, oy):
-    """Minecraft-ish text: 8-unit lines, § colours, wraps at the label width."""
+    """Minecraft-sized text: game letter widths, 10-unit lines, § colours, word wrap at the label width."""
     if not text:
         return
-    scale = t.scale * (1.15 if t.font else 1)
-    px = 7 * scale * PS
-    line_h = 9.5 * scale * PS
-    fnt = font(px, bool(t.font))
+    ten = bool(t.font)
+    scale = t.scale
+    line_h = 10 * scale
+    fnt = font(7.2 * scale * PS, ten)
     x, y, w = t.rect[0], t.rect[1], t.rect[2]
-    maxw = w * PS
     lines = []
     for raw in text.split("\n"):
         col = t.color
@@ -424,39 +440,39 @@ def draw_text(d, t, text, ox, oy):
             i += 1
         if cur:
             segs.append((cur, col))
-        # wrap by words
         words = []
-        for s, c in segs:
-            for k, wd in enumerate(re.split(r"(\s+)", s)):
+        for sg, c in segs:
+            for wd in re.split(r"(\s+)", sg):
                 if wd:
                     words.append((wd, c))
         line, lw = [], 0
         for wd, c in words:
-            ww = d.textlength(wd, font=fnt)
-            if lw + ww > maxw and line and not wd.isspace():
+            ww = mc_width(wd, scale, ten)
+            if lw + ww > w + 0.01 and line and not wd.isspace():
                 lines.append(line)
                 line, lw = [], 0
-                if wd.isspace():
-                    continue
+            if not line and wd.isspace():
+                continue
             line.append((wd, c))
             lw += ww
         lines.append(line)
     total = len(lines) * line_h
-    sx, sy = (ox + x) * PS, (oy + y) * PS
+    sy = oy + y
     if t.anchor == "left_middle":
         sy -= total / 2
+    if len(lines) > 1 and getattr(t, "max_lines", 99) < len(lines):
+        print(f"WARNING: text wraps to {len(lines)} lines: {text!r}")
     for li, line in enumerate(lines):
-        lw = sum(d.textlength(wd, font=fnt) for wd, _ in line)
-        cx = sx
+        lw = sum(mc_width(wd, scale, ten) for wd, _ in line)
+        cx = ox + x
         if t.align == "center":
-            cx = sx + (maxw - lw) / 2
+            cx += (w - lw) / 2
         elif t.align == "right":
-            cx = sx + maxw - lw
+            cx += w - lw
         for wd, c in line:
-            if t.shadow:
-                d.text((cx + scale * PS, sy + li * line_h + scale * PS), wd, font=fnt, fill=(40, 40, 40))
-            d.text((cx, sy + li * line_h), wd, font=fnt, fill=hexc(c)[:3])
-            cx += d.textlength(wd, font=fnt)
+            for ch in wd:
+                d.text((cx * PS, (sy + li * line_h) * PS), ch, font=fnt, fill=hexc(c)[:3])
+                cx += adv(ch, ten) * scale
 
 
 _texcache = {}
@@ -557,13 +573,13 @@ def preview(scr, form, out):
         x0, y0, zw, zh = z.rect
         iw, ih = z.item
         if z.grid:
-            cols = max(1, int(zw // (iw + z.gap)))
+            cols = z.cols
             idx = 0
             for b in btns:  # holes for untagged buttons, like the game
                 if has_tag(b["text"], z.tag):
                     cx = x0 + (idx % cols) * (iw + z.gap)
                     cy = y0 + (idx // cols) * (ih + z.gap)
-                    if cy + ih <= y0 + zh + 0.5:
+                    if idx < z.cols * z.rows:
                         draw_face(canvas, d, z, b["text"], b.get("icon"), cx, cy)
                 idx += 1
             continue

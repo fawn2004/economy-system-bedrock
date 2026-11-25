@@ -163,7 +163,7 @@ export async function crateScreen(player, crate, win) {
   for (const [r, x] of Object.entries(RARITY)) {
     const items = table.filter((w) => w.r === r).map(rewardName);
     if (!items.length) continue;
-    s.text("OD", `${x.col}${x.name}\n§7${items.slice(0, 2).join(", ")}`, { states: [RARITY_TAG[r]] });
+    s.text("OD", `${x.col}${x.name}\n§7${items[0]}`, { states: [RARITY_TAG[r]] });
     s.text("ODP", `${x.chance}%`);
   }
   await s.show(player);

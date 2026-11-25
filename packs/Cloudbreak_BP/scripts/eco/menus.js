@@ -1120,7 +1120,7 @@ function listOf(ids) {
   return ids.map((id) => byId.get(id)).filter((e) => e && e.buy > 0);
 }
 
-const SHOP_PAGE = 40;
+const SHOP_PAGE = 8; // 4 x 2 cards, like the mockup
 const CBI = "textures/ui/cb/icon_";
 
 /** Sky Shop screen: category rail on the left, item cards on the right. Tap a card to pick how many. */
@@ -1155,20 +1155,22 @@ export async function skyShopMenu(player, msg, st = {}) {
   const page = Math.min(Math.max(0, st.page ?? 0), pages - 1);
 
   const sc = new Screen("shop", "Sky Shop");
-  if (page > 0) sc.button("IT", "§f« Previous\n§7Page " + page, () => skyShopMenu(player, { cat: sel.id, page: page - 1 }), { icon: CBI + "back" });
   for (const e of items.slice(page * SHOP_PAGE, (page + 1) * SHOP_PAGE))
     sc.button("IT", `§f${clip(e.name, 14)}\n${priceColor(player, e.buy)}${fmtShort(e.buy)} §7each`, () => buyItemMenu(player, e, back), { icon: e.icon });
-  if (page < pages - 1) sc.button("IT", `§fNext »\n§7Page ${page + 2} of ${pages}`, () => skyShopMenu(player, { cat: sel.id, page: page + 1 }), { icon: CBI + "yes" });
+  if (pages > 1) {
+    sc.button("PG", page > 0 ? "« Prev" : "§8« Prev", () => skyShopMenu(player, { cat: sel.id, page: page - 1 }), { states: [page > 0 ? undefined : "OFF"] });
+    sc.text("PG", `§7${page + 1} / ${pages}`, { states: ["OFF"] });
+    sc.button("PG", page < pages - 1 ? "Next »" : "§8Next »", () => skyShopMenu(player, { cat: sel.id, page: page + 1 }), { states: [page < pages - 1 ? undefined : "OFF"] });
+  }
   for (const r of rail) {
     const on = r === sel;
     sc.button("CAT", on ? `§e${r.name}` : r.name, () => (r.open ? r.open() : skyShopMenu(player, { cat: r.id })), { icon: r.icon, states: [on ? "ON" : undefined] });
-    sc.text("CATN", r.count ?? (r.items ? r.items().length : ""));
   }
   sc.text("HI", "", { icon: sel.icon });
   sc.text("HT", `§f${sel.name}\n§7${sel.desc}`);
   sc.text("SELL", `SELL x${Number(sellMultiplier(player).toFixed(2))}`);
   sc.text("BAL", `§7Balance §e${fmtMoney(getBalance(player))}`);
-  if (msg) sc.text("MSG", msg);
+  if (msg) player.sendMessage(msg);
   await sc.show(player);
 }
 

@@ -71,15 +71,15 @@ function giveStack(target, stack) {
 // ---------------------------------------------------------------------------
 
 const CATS = [
-  { id: "money", name: "Money", icon: "textures/ui/eco/icon_coin", head: "CHOOSE WHAT TO DO", steps: [["-10k", -10000], ["+10k", 10000], ["+100k", 100000]], def: 10000 },
+  { id: "money", name: "Money", icon: "textures/ui/eco/icon_coin", head: "CHOOSE WHAT TO DO", steps: [["-10k", -10000], ["+10k", 10000], ["+1M", 1000000]], def: 10000 },
   { id: "heads", name: "Heads", icon: CB.skull, head: "CHOOSE A MOB", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
   { id: "kits", name: "Kits", icon: CB.chest, head: "CHOOSE A KIT", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
   { id: "keys", name: "Crate Keys", icon: CB.key, head: "CHOOSE A CRATE", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
 ];
 const KEY_ART = { raider: "key_pink", defender: "key_cyan", legendary: "key_gold" };
 const MONEY_MODES = [
-  { id: "give", name: "Give", sub: "Add to their wallet", icon: CB.sell },
-  { id: "take", name: "Take", sub: "Remove from their wallet", icon: CB.no },
+  { id: "give", name: "Give", sub: "To their wallet", icon: CB.sell },
+  { id: "take", name: "Take", sub: "From their wallet", icon: CB.no },
   { id: "set", name: "Set", sub: "Set their wallet", icon: "textures/ui/eco/icon_coin" },
 ];
 
@@ -100,14 +100,19 @@ export async function adminPanel(player, st = {}) {
   const opts = optionsFor(cat.id);
   const opt = opts.find((o) => o.id === st.opt) ?? opts[0];
   const n = Math.max(cat.id === "money" ? 0 : 1, st.n ?? cat.def);
-  const again = (o) => adminPanel(player, { targetId: target.id, cat: cat.id, opt: opt?.id, n, filter: st.filter, ...o });
+  const again = (o) => adminPanel(player, { targetId: target.id, cat: cat.id, opt: opt?.id, n, filter: st.filter, optPage: st.optPage, ...o });
   const isAdmin = target.hasTag(ADMIN);
   const clan = (p) => allClans().find((c) => c.members[p.id]);
 
   const s = new Screen("admin", "Control Room");
-  for (const o of opts) s.button("OPT", `§f${o.name}\n§7${o.sub}`, () => again({ opt: o.id }), { icon: o.icon, states: [o === opt ? "ON" : undefined] });
+  // 6 choices fit; with more, show 5 and a "More" card that flips the page
+  const per = opts.length > 6 ? 5 : 6;
+  const pages = Math.max(1, Math.ceil(opts.length / per));
+  const op = Math.min(st.optPage ?? 0, pages - 1);
+  for (const o of opts.slice(op * per, op * per + per)) s.button("OPT", `§f${o.name}\n§7${o.sub}`, () => again({ opt: o.id, optPage: op }), { icon: o.icon, states: [o === opt ? "ON" : undefined] });
+  if (pages > 1) s.button("OPT", `§fMore\n§7Page ${op + 1} of ${pages}`, () => again({ optPage: (op + 1) % pages }), { icon: CB.plus });
   s.text("PILL", `§7Online §f${all.length}`);
-  s.text("PILL", `§7Active raids §c${activeRaids().length}`);
+  s.text("PILL", `§7Raids §c${activeRaids().length}`);
   s.text("PILL", `§7Clans §f${allClans().length}`);
   s.button("SR", filter ? `§fSearch: ${st.filter}` : "Search name...", async () => {
     const res = await show(player, new ModalFormData().title("Search players").textField("Name (leave empty to show everyone)", "e.g. Kai", { defaultValue: st.filter ?? "" }));
@@ -122,7 +127,7 @@ export async function adminPanel(player, st = {}) {
   }
   const tc = clan(target);
   s.text("SC", `§f${target.name}\n§7${tc ? `${tc.name} · ${tc.members[target.id].role === "coowner" ? "Co-owner" : tc.members[target.id].role === "owner" ? "Owner" : "Member"}` : "No clan"} · wallet ${fmtMoney(getBalance(target))}`, { icon: headFor(target.name) });
-  for (const c of CATS) s.button("CAT", c.id === cat.id ? `§d${c.name}` : c.name, () => again({ cat: c.id, opt: undefined, n: undefined }), { icon: c.icon, states: [c.id === cat.id ? "ON" : undefined] });
+  for (const c of CATS) s.button("CAT", c.id === cat.id ? `§d${c.name}` : c.name, () => again({ cat: c.id, opt: undefined, n: undefined, optPage: 0 }), { icon: c.icon, states: [c.id === cat.id ? "ON" : undefined] });
   s.text("CH", cat.head);
   for (const [label, d] of cat.steps) s.button("STEP", label, () => again({ n: Math.max(0, n + d) }));
   s.button("STEP", "Type", async () => {

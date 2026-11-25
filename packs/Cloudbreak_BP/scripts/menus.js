@@ -195,6 +195,14 @@ const ledgerIcon = (l) => {
   return l.amt >= 0 ? ART("arrow_up") : ART("arrow_down");
 };
 
+const clip = (s, n) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+function ledgerLine(l) {
+  const w = String(l.what);
+  if (/^deposit/i.test(w) && l.who) return `${l.who} deposited`;
+  if (/^withdr/i.test(w) && l.who) return `${l.who} withdrew`;
+  return w;
+}
+
 export async function bankMenu(player, opts = {}) {
   const clan = clanOf(player);
   if (!clan) return tower(player);
@@ -224,14 +232,14 @@ export async function bankMenu(player, opts = {}) {
   if (opts.msg) s.text("MSG", opts.msg);
   const wallet = getBalance(player);
   const value = amt === "all" ? (mode === "deposit" ? wallet : bankOf(clan)) : amt;
-  s.text("CF", mode === "deposit" ? `Deposit §e${fmt(value)}§7 from your wallet (${fmt(wallet)})` : `Withdraw §e${fmt(value)}§7 to your wallet (${fmt(wallet)})`);
+  s.text("CF", `${mode === "deposit" ? "Deposit" : "Withdraw"} §e${fmt(value)}§7 · wallet ${fmtMoney(wallet)}`);
   s.button("OK", "CONFIRM", () => {
     const r = (mode === "deposit" ? deposit : withdraw)(player, value);
     if (r.ok && mode === "deposit") floorHooks.afterDeposit?.(r.clan);
     return again({ msg: (r.ok ? "§a" : "§c") + r.msg });
   }, { states: [value > 0 ? undefined : "OFF"] });
   for (const l of (clan.ledger ?? []).slice(0, 8)) {
-    s.text("LG", `§f${l.who === "Island core" || !l.who ? l.what : `${l.who} · ${l.what}`}\n§8${ago(l.t)}`, { icon: ledgerIcon(l) });
+    s.text("LG", `§f${clip(ledgerLine(l), 16)}\n§8${ago(l.t)}`, { icon: ledgerIcon(l) });
     s.text("LA", `${l.amt >= 0 ? "§a" : "§c"}${signed(l.amt)}`);
   }
   await s.show(player);
@@ -254,7 +262,7 @@ export async function coreTerminal(player, msg) {
     const off = !up && u.id !== "size" && lvl > 0;
     const bars = u.max === 1 ? (lvl ? "§b■■■■■■■■" : "§8■■■■■■■■") : pips(lvl, u.max);
     const foot = maxed ? (u.max === 1 ? "§aOWNED" : "§aMAXED") : `§e${fmtMoney(upgradeCost(u, lvl + 1))}`;
-    s.button("MOD", `§f${u.name}\n§8Lv ${lvl}/${u.max}${off ? " §c(off)" : ""}\n${bars}\n§7${u.desc(maxed ? lvl : lvl + 1)}\n${foot}`, () => upgradeFlow(player, u), {
+    s.button("MOD", `§f${u.name} §8${lvl}/${u.max}${off ? " §c(off)" : ""}\n${bars}\n§7${u.desc(maxed ? lvl : lvl + 1)}\n${foot}`, () => upgradeFlow(player, u), {
       icon: UPGRADE_ICON[u.id], states: [maxed ? "MAX" : undefined, off ? "OFF" : undefined],
     });
   }
@@ -312,10 +320,11 @@ export async function membersMenu(player, selId) {
   }
   const open = CONFIG.clan.maxMembers - list.length;
   if (open > 0 && canManage(clan, player.id))
-    s.button("ME", `§fInvite\n§8■ ${open} slot${open === 1 ? "" : "s"} open`, () => inviteMenu(player), { icon: CB.plus });
+    s.button("ME", `§fInvite\n§8■ ${open} open`, () => inviteMenu(player), { icon: CB.plus });
   const m = clan.members[sel];
   const st = clan.stats ?? {};
-  s.text("SA", `§f${m.name}\n§7${ROLE_NAME[m.role]} · joined ${new Date(m.joined).toLocaleDateString()}`, { icon: headFor(m.name) });
+  const days = Math.max(0, Math.floor((Date.now() - m.joined) / 864e5));
+  s.text("SA", `§f${m.name}\n§7${ROLE_NAME[m.role]} · joined ${days ? `${days}d ago` : "today"}`, { icon: headFor(m.name) });
   const mine = roleOf(clan, player.id);
   const theirs = m.role;
   const act = (label, color, run, ask) => s.button("ACT", label, async () => {
@@ -557,7 +566,8 @@ export async function leaderboardsMenu(player, id = "wins") {
   const own = clanOf(player);
   const rows = A.board(id);
   const s = new Screen("boards", "Leaderboards");
-  for (const b of A.BOARDS) s.button("TAB", b.id === id ? `§0${b.name}` : b.name, () => leaderboardsMenu(player, b.id), { icon: BOARD_ICON[b.id], states: [b.id === id ? "ON" : undefined] });
+  const SHORT = { wins: "Raid Wins", streak: "Defence", richest: "Richest", core: "Core Level" };
+  for (const b of A.BOARDS) s.button("TAB", b.id === id ? `§0${SHORT[b.id] ?? b.name}` : SHORT[b.id] ?? b.name, () => leaderboardsMenu(player, b.id), { icon: BOARD_ICON[b.id], states: [b.id === id ? "ON" : undefined] });
   const short = (r) => (id === "wins" ? `${r.v} wins` : r.text);
   rows.slice(0, 3).forEach((r, i) => s.text(`P${i + 1}`, `§f${r.clan.name}\n§7${short(r)}`, { icon: bannerOf(r.clan) }));
   rows.slice(3, 10).forEach((r, i) => {

@@ -154,14 +154,14 @@ def members():
     card = sz(154, 76)
     face = Face(box("#0F1219", "#2A3140"), [("SEL", box("#141B28", "#4FD1E8", 1)), ("OWN", box("#0F1219", "#F2C14E"))], [
         Img([4, card[1] / 2 - 7.5, 15, 15]),
-        Text([22, card[1] / 2, 33], 0.66, anchor="left_middle"),
+        Text([22, card[1] / 2, 33], 0.58, anchor="left_middle"),
     ])
     s.zone("OW", R(294, 121, 448, 197), card, face, click=True)
     s.zone("CO", R(12, 267, 730, 343), card, face, orient="horizontal", gap=6, align="top_middle", click=True)
     s.zone("ME", R(12, 448, 730, 524), card, face, orient="horizontal", gap=6, align="top_middle", click=True)
     s.box(R(764, 28, 1072, 242), "#121620", "#4FD1E8")
     s.text(R(782, 46, 900, 56)[:3], "S E L E C T E D", scale=0.5, color="#8E9BB5")
-    s.zone("SA", R(782, 70, 1060, 130), sz(278, 60), Face(parts=[Img([0, 1, 19, 19]), Text([24, 11, 75], 0.72, anchor="left_middle")]))
+    s.zone("SA", R(782, 70, 1060, 130), sz(278, 60), Face(parts=[Img([0, 1, 19, 19]), Text([24, 11, 77], 0.6, anchor="left_middle")]))
     act = sz(132, 35)
     s.zone("ACT", R(782, 140, 1056, 176), act, Face(box("#252D3B", "#2E3748"), [
         ("cCYAN", box(COL["CYAN"], bottom="#2B8FA3")), ("cRED", box("#4A1A1A", "#4A1A1A")),
@@ -174,7 +174,7 @@ def members():
     for x, t, c in ((862, "OWNER", "#F2C14E"), (930, "CO", "#4FD1E8"), (990, "MEMBER", "#8E9BB5")):
         s.text(R(x, 294, x + 60, 302)[:3], t, scale=0.45, color=c)
     rows = [("Invite", 1, 1, 0), ("Kick", 1, 1, 0), ("Promote", 1, 1, 0), ("Buy raids", 1, 1, 0),
-            ("Withdraw bank", 1, 1, 0), ("Transfer leader", 1, 0, 0), ("Deposit", 1, 1, 1)]
+            ("Withdraw", 1, 1, 0), ("Transfer", 1, 0, 0), ("Deposit", 1, 1, 1)]
     for i, (name, a, b, c) in enumerate(rows):
         y = 318 + i * 27
         s.text(R(780, y - 5, 860, y + 5)[:3], name, scale=0.55, color="#C9D1DD")
@@ -207,15 +207,15 @@ def bank():
         Text([0, amt[1] / 2, amt[0]], 0.62, "#FFFFFF", align="center", anchor="left_middle")]), orient="horizontal", gap=2.4, click=True)
     s.zone("MSG", R(272, 360, 768, 400), (180, 14), Face(parts=[Text([0, 0, 180], 0.62, align="center")]))
     s.box(R(272, 532, 768, 590), "#121620", "#252D3B")
-    s.zone("CF", R(287, 553, 645, 572), (128, 7), Face(parts=[Text([0, 3.5, 128], 0.58, "#C9D1DD", anchor="left_middle")]))
+    s.zone("CF", R(287, 553, 645, 572), (128, 7), Face(parts=[Text([0, 3.5, 128], 0.52, "#C9D1DD", anchor="left_middle")]))
     ok = sz(102, 35)
     s.zone("OK", R(651, 543, 753, 578), ok, Face(box("#3DDC97", bottom="#2A9C6B"), [("OFF", box("#2A3140"))], [
         Text([0, ok[1] / 2, ok[0]], 0.62, "#0E1A14", font=TEN, align="center", anchor="left_middle")]), click=True)
     s.box(R(790, 28, 1072, 590), "#121620", "#252D3B")
     s.text(R(806, 46, 1000, 60)[:3], "Ledger", scale=0.85, font=TEN)
     row = sz(250, 46)
-    s.zone("LG", R(806, 75, 1056, 590), row, Face(box("#1A202C"), parts=[Img([3, row[1] / 2 - 4, 8, 8]), Text([14, row[1] / 2, 52], 0.55, anchor="left_middle")]), gap=1.8)
-    s.zone("LA", R(806, 75, 1056, 590), row, Face(parts=[Text([40, row[1] / 2, row[0] - 43], 0.65, align="right", anchor="left_middle")]), gap=1.8)
+    s.zone("LG", R(806, 75, 1056, 590), row, Face(box("#1A202C"), parts=[Img([3, row[1] / 2 - 4, 8, 8]), Text([14, row[1] / 2, 50], 0.5, anchor="left_middle")]), gap=1.8)
+    s.zone("LA", R(806, 75, 1056, 590), row, Face(parts=[Text([40, row[1] / 2, row[0] - 43], 0.58, align="right", anchor="left_middle")]), gap=1.8)
     return s
 
 
@@ -232,7 +232,7 @@ def settings():
         Text([37, 43, 105], 0.68, anchor="left_middle"),
         Img([150, 26, 26, 23], LEVER_ON, when="ON"),
         Img([150, 26, 26, 23], LEVER_OFF, when="!ON"),
-    ]), grid=True, gap=4, click=True)
+    ]), grid=True, gap=4, click=True, cols=2, rows=2)
     s.close = True
     return s
 
@@ -242,8 +242,8 @@ def admin():
     s.box(R(24, 28, 82, 52), COL["PINK"])
     s.text(R(24, 36, 82, 46)[:3], "ADMIN", scale=0.5, color="#2A0E1E", align="center", font=TEN)
     s.text(R(96, 30, 600, 60)[:3], "CONTROL ROOM", scale=1.35, font=TEN)
-    pill = sz(95, 30)
-    s.zone("PILL", R(700, 26, 1040, 56), pill, Face(box("#141A24", "#252D3B"), parts=[Text([0, pill[1] / 2, pill[0]], 0.55, align="center", anchor="left_middle")]),
+    pill = sz(100, 30)
+    s.zone("PILL", R(680, 26, 1040, 56), pill, Face(box("#141A24", "#252D3B"), parts=[Text([0, pill[1] / 2, pill[0]], 0.55, align="center", anchor="left_middle")]),
            orient="horizontal", gap=2, align="top_right")
     s.box(R(24, 71, 229, 593), "#11151D", "#252D3B")
     s.text(R(36, 86, 200, 96)[:3], "P L A Y E R S", scale=0.5, color="#8E9BB5")
@@ -265,13 +265,13 @@ def admin():
         Img([cat[0] / 2 - 5, 3, 10, 10]), Text([0, 15, cat[0]], 0.55, align="center")]), orient="horizontal", gap=2.3, click=True)
     s.box(R(245, 215, 778, 593), "#11151D", "#252D3B")
     s.zone("CH", R(261, 230, 700, 242), (150, 5), Face(parts=[Text([0, 0, 150], 0.5, "#8E9BB5")]))
-    opt = sz(160, 80)
+    opt = (58.2, 27.5)
     s.zone("OPT", R(261, 253, 766, 420), opt, Face(box("#0F1219", "#252D3B"), [("ON", box("#2A1424", COL["PINK"]))], [
-        Img([opt[0] / 2 - 6, 3, 12, 12]), Text([1, 17, opt[0] - 2], 0.52, align="center")]), grid=True, gap=2.5, click=True, scroll=True)
+        Img([opt[0] / 2 - 6, 3, 12, 12]), Text([1, 16, opt[0] - 2], 0.48, align="center")]), grid=True, gap=2.5, click=True, cols=3, rows=2)
     s.text(R(261, 438, 400, 450)[:3], "Amount", scale=0.62, color="#C9D1DD")
     stp = sz(38, 36)
     s.zone("STEP", R(520, 426, 690, 462), stp, Face(box("#1A202C", "#252D3B"), parts=[
-        Text([0, stp[1] / 2, stp[0]], 0.6, align="center", anchor="left_middle")]), orient="horizontal", gap=2, click=True, align="top_right")
+        Text([0, stp[1] / 2, stp[0]], 0.52, align="center", anchor="left_middle")]), orient="horizontal", gap=2, click=True, align="top_right")
     s.zone("N", R(695, 426, 762, 462), sz(67, 36), Face(parts=[Text([0, 6.5, 24], 0.62, font=TEN, align="center", anchor="left_middle")]))
     give = sz(500, 42)
     s.zone("GIVE", R(261, 537, 761, 580), give, Face(box(COL["PINK"], bottom="#C94F92"), [("OFF", box("#2A3140"))], [
@@ -316,12 +316,12 @@ def dispatch():
         Text([6, 136.5, card[0] - 12], 0.6, "#2A0E0E", font=TEN, align="center", anchor="left_middle")]), orient="horizontal", gap=pitch_gap)
     s.box(R(846, 172, 1068, 588), "#1C1513", "#3A2E2A")
     s.text(R(862, 190, 1060, 205)[:3], "Your squad", scale=0.8, font=TEN)
-    s.text(R(862, 220, 1060, 230)[:3], "Everyone online deploys together", scale=0.5, color="#A8968A")
+    s.text(R(862, 220, 1060, 230)[:3], "Everyone online goes", scale=0.5, color="#A8968A")
     sq = sz(189, 46)
     s.zone("SQ", R(862, 243, 1052, 510), sq, Face(box("#241B18"), parts=[Img([3, sq[1] / 2 - 5, 10, 10]), Text([16, sq[1] / 2, 40], 0.62, anchor="left_middle")]), gap=2)
     s.zone("SQS", R(862, 243, 1052, 510), sq, Face(parts=[Text([40, sq[1] / 2, 26], 0.5, align="right", anchor="left_middle")]), gap=2)
-    s.text(R(862, 528, 960, 575)[:3], "Lives each\nClan bank", scale=0.68, color="#A8968A")
-    s.zone("FT", R(940, 528, 1052, 575), sz(112, 47), Face(parts=[Text([0, 0, 40.7], 0.68, align="right")]))
+    s.text(R(862, 528, 1000, 575)[:3], "Lives each\nClan bank", scale=0.62, color="#A8968A")
+    s.zone("FT", R(940, 528, 1052, 575), sz(112, 47), Face(parts=[Text([0, 0, 40.7], 0.62, align="right")]))
     return s
 
 
@@ -359,26 +359,27 @@ def shop():
     s.text(R(28, 32, 300, 60)[:3], "SKY SHOP", scale=1.3, font=TEN)
     cat = sz(205, 37)
     s.zone("CAT", R(28, 77, 236, 600), cat, Face(box("#172036", "#2A3654"), [("ON", box("#2A2412", COL["GOLD"]))], [
-        Img([3, cat[1] / 2 - 3.5, 7, 7]), Text([13, cat[1] / 2, 45], 0.6, anchor="left_middle")]), gap=2.3, click=True)
-    s.zone("CATN", R(28, 77, 236, 600), cat, Face(parts=[Text([55, cat[1] / 2, 17], 0.52, "#8E9BB5", align="right", anchor="left_middle")]), gap=2.3)
+        Img([3, cat[1] / 2 - 3.5, 7, 7]), Text([13, cat[1] / 2, 60], 0.55, anchor="left_middle")]), gap=2.3, click=True)
     s.box(R(252, 28, 1072, 92), "#172036", "#2A3654")
     s.zone("HI", R(266, 40, 305, 80), (14, 14), Face(parts=[Img([0, 0, 14, 14])]))
-    s.zone("HT", R(316, 40, 800, 82), (170, 14), Face(parts=[Text([0, 7.6, 170], 0.7, anchor="left_middle")]))
+    s.zone("HT", R(316, 40, 815, 82), (181, 15), Face(parts=[Text([0, 7.6, 181], 0.6, anchor="left_middle")]))
     chip = sz(74, 28)
     s.zone("SELL", R(820, 46, 894, 74), chip, Face(box("#2A2412", COL["GOLD"]), parts=[Text([0, chip[1] / 2, chip[0]], 0.52, COL["GOLD"], font=TEN, align="center", anchor="left_middle")]))
     s.zone("BAL", R(900, 47, 1060, 73), (58, 9), Face(parts=[Text([0, 4.7, 58], 0.72, align="right", anchor="left_middle")]))
-    it = (70, 86)
-    s.zone("IT", R(252, 107, 1076, 595), it, Face(box("#172036", "#2A3654"), [("BEST", box("#172036", "#5A4A1A"))], [
+    it = (70, 81)
+    s.zone("IT", R(252, 106, 1076, 580), it, Face(box("#172036", "#2A3654"), [("BEST", box("#172036", "#5A4A1A"))], [
         Img([4, 4, 62, 25], box("#121828")),
         Img([25, 6.5, 20, 20]),
         Text([5, 33, 60], 0.62),
-        Img([4, 74, 18, 8], box("#222B44")), Img([24, 74, 20, 8], box("#222B44")), Img([46, 74, 20, 8], box(COL["GOLD"])),
-        Text([4, 75.2, 18], 0.45, "#C9D1DD", text="x1", align="center"),
-        Text([24, 75.2, 20], 0.45, "#C9D1DD", text="x16", align="center"),
-        Text([46, 75.2, 20], 0.45, "#1A1206", text="x64", align="center"),
+        Img([4, 69, 18, 8], box("#222B44")), Img([24, 69, 20, 8], box("#222B44")), Img([46, 69, 20, 8], box(COL["GOLD"])),
+        Text([4, 70.6, 18], 0.45, "#C9D1DD", text="x1", align="center"),
+        Text([24, 70.6, 20], 0.45, "#C9D1DD", text="x16", align="center"),
+        Text([46, 70.6, 20], 0.45, "#1A1206", text="x64", align="center"),
         Img([46, 0, 24, 9], "textures/ui/eco/badge_hot", when="HOT"),
-    ]), grid=True, gap=3, click=True, scroll=True)
-    s.zone("MSG", R(252, 598, 1072, 616), (298, 6), Face(parts=[Text([0, 0, 298], 0.55, align="center")]))
+    ]), grid=True, gap=3, click=True, cols=4, rows=2)
+    pg = (34, 10)
+    s.zone("PG", R(252, 582, 1076, 612), pg, Face(box("#172036", "#2A3654"), [("OFF", box("#121828", "#1E2740"))], [
+        Text([0, pg[1] / 2, pg[0]], 0.5, align="center", anchor="left_middle")]), orient="horizontal", gap=3, align="top_middle", click=True)
     return s
 
 
@@ -485,13 +486,13 @@ def terminal():
         Text([0, dep[1] / 2, dep[0]], 0.68, "#1A1206", font=TEN, align="center", anchor="left_middle")]), click=True)
     s.text(R(358, 110, 600, 125)[:3], "Core Modules", scale=0.85, font=TEN)
     s.zone("HDR", R(560, 112, 1069, 124), (185, 5), Face(parts=[Text([0, 0, 185], 0.5, "#8E9BB5", align="right")]))
-    it = (81, 63)
+    it = (83.5, 45.5)
     s.zone("MOD", R(358, 135, 1072, 535), it, Face(box("#141B2D", "#26324D"), [("OFF", box("#141B2D", "#4A2A2A"))], [
-        Img([it[0] - 12, 4, 8, 8]),
-        Text([5, 4, it[0] - 18], 0.58),
-        Img([it[0] - 36, it[1] - 13, 32, 9], box("#1F5566", COL["CYAN"]), when="!MAX"),
-        Text([it[0] - 36, it[1] - 8.5, 32], 0.45, text="UPGRADE", font=TEN, align="center", anchor="left_middle", when="!MAX"),
-    ], hover=box("#4FD1E8", COL["CYAN"], alpha=30)), grid=True, gap=3, click=True, scroll=True)
+        Img([it[0] - 10, 3, 7, 7]),
+        Text([4, 3, it[0] - 15], 0.5),
+        Img([it[0] - 29, it[1] - 10.5, 26, 8], box("#1F5566", COL["CYAN"]), when="!MAX"),
+        Text([it[0] - 29, it[1] - 6.5, 26], 0.4, text="UPGRADE", font=TEN, align="center", anchor="left_middle", when="!MAX"),
+    ], hover=box("#4FD1E8", COL["CYAN"], alpha=30)), grid=True, gap=3, click=True, cols=3, rows=3)
     tab = sz(184, 38)
     s.zone("TAB", R(31, 548, 1069, 588), tab, Face(box("#141B2D", "#26324D"), [("ON", box("#1A2440", "#FFFFFF"))], [
         Text([0, tab[1] / 2, tab[0]], 0.58, "#B7C3D9", align="center", anchor="left_middle")]), orient="horizontal", gap=3, align="top_middle", click=True)
@@ -532,8 +533,8 @@ def write_server_form(screens):
 
 def build():
     screens = [f() for f in SCREENS]
+    write_ui(screens, os.path.join(RP, "ui", "cb_screens.json"))  # first: it registers the hover textures too
     n = write_textures()
-    write_ui(screens, os.path.join(RP, "ui", "cb_screens.json"))
     write_server_form(screens)
     print(f"Built {len(screens)} screens, {n} textures.")
     return screens
