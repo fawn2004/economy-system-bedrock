@@ -113,6 +113,15 @@
     "eco_chunk_hopper": {
       "textures": "textures/items/hopper"
     },
+    "cb_key_raider": {
+      "textures": "textures/items/cb/key_raider"
+    },
+    "cb_key_defender": {
+      "textures": "textures/items/cb/key_defender"
+    },
+    "cb_key_legendary": {
+      "textures": "textures/items/cb/key_legendary"
+    },
     "eco_mloot_snow": {
       "textures": "textures/blocks/snow"
     },
@@ -352,15 +361,6 @@
     },
     "eco_mloot_enchanted_golden_apple": {
       "textures": "textures/items/apple_golden"
-    },
-    "cb_key_raider": {
-      "textures": "textures/items/cb/key_raider"
-    },
-    "cb_key_defender": {
-      "textures": "textures/items/cb/key_defender"
-    },
-    "cb_key_legendary": {
-      "textures": "textures/items/cb/key_legendary"
     }
   }
 }

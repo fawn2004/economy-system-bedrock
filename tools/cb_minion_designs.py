@@ -4,6 +4,8 @@ Every design keeps the bone names the mining animation moves
 (body, head, rightArm with the tool on "pickaxe"), so one animation works for all.
 Model units: 16 = one block. The entity is scaled to 0.55 in game.
 """
+import copy
+
 from cb_models import Bone, Cube, Model, band, combine, dot, face_eyes, hexc, shade, speckle, stripes
 
 SKIN = "#e8b07a"
@@ -15,7 +17,16 @@ SKIN = "#e8b07a"
 
 
 def pick(head="#5ee6e6", handle="#8a5a2b"):
-    return [Cube([-6.5, 12.5, -10], [1, 1, 8], handle), Cube([-6.5, 9.5, -11], [1, 7, 1], head)]
+    """A real pickaxe: a long handle and a curved head whose two points sweep back."""
+    hc = hexc(head)
+    light, dark = shade(hc, 0.35), shade(hc, -0.3)
+    return [
+        Cube([-6.5, 12.5, -12], [1, 1, 10], handle),             # handle
+        Cube([-7, 12, -13.5], [2, 2, 2], dark),                   # head socket
+        Cube([-6.5, 14, -13], [1, 2, 1], hc), Cube([-6.5, 10, -13], [1, 2, 1], hc),
+        Cube([-6.5, 16, -12], [1, 1, 1], hc), Cube([-6.5, 9, -12], [1, 1, 1], hc),
+        Cube([-6.5, 17, -11], [1, 1, 1], light), Cube([-6.5, 8, -11], [1, 1, 1], light),  # points
+    ]
 
 
 def hoe(head="#cfcfcf", handle="#8a5a2b"):
@@ -44,15 +55,29 @@ def humanoid(ident, *, body, head, arm, leg, tool, head_extra=(), body_extra=(),
              cubes(head, lambda c: Cube([-hs / 2, 24, -hs / 2], [hs, hs, hs], c, inflate=inflate)) + list(head_extra)),
         Bone("rightArm", [-5, 22, 0], "body", cubes(arm, lambda c: Cube([-8, 24 - arm_len, -2], [4, arm_len, 4], c))),
         Bone("pickaxe", [-6, 13, 0], "rightArm", tool),
-        Bone("leftArm", [5, 22, 0], "body", cubes(arm_col or arm, lambda c: Cube([4, 24 - arm_len, -2], [4, arm_len, 4], c))),
+        Bone("leftArm", [5, 22, 0], "body", cubes(arm_col, lambda c: Cube([4, 24 - arm_len, -2], [4, arm_len, 4], c))
+             if arm_col else [mirror(c) for c in cubes(arm, lambda c: Cube([-8, 24 - arm_len, -2], [4, arm_len, 4], c))]),
     ]
     if legs:
         bones += [
             Bone("rightLeg", [-1.9, 12, 0], "root", cubes(leg, lambda c: Cube([-3.9, 0, -2], [4, 12, 4], c))),
-            Bone("leftLeg", [1.9, 12, 0], "root", cubes(leg_col or leg, lambda c: Cube([-0.1, 0, -2], [4, 12, 4], c))),
+            Bone("leftLeg", [1.9, 12, 0], "root", cubes(leg_col, lambda c: Cube([-0.1, 0, -2], [4, 12, 4], c))
+                 if leg_col else [mirror(c) for c in cubes(leg, lambda c: Cube([-3.9, 0, -2], [4, 12, 4], c))]),
         ]
     bones += list(extra_bones)
     return Model(ident, bones, tex)
+
+
+def mirror(c):
+    """The same cube on the other side of the body (x flipped)."""
+    m = copy.copy(c)
+    m.origin = [-(c.origin[0] + c.size[0])] + c.origin[1:]
+    if c.pivot:
+        m.pivot = [-c.pivot[0]] + list(c.pivot[1:])
+    if c.rotation:
+        m.rotation = [c.rotation[0], -c.rotation[1], -c.rotation[2]]
+    m.uv = None
+    return m
 
 
 def sleeve(col, hand=SKIN, glove=None):
@@ -110,7 +135,7 @@ def cloud_a():
                     Cube([-3, 30, -3], [6, 3, 6], white)],
         arm=Cube([-8, 14, -1.5], [3, 6, 3], white),
         leg=None, legs=False,
-        tool=[Cube([-6.5, 12.5, -10], [1, 1, 8], "#9bd6ef"), Cube([-6.5, 9.5, -11], [1, 7, 1], "#e8fbff")],
+        tool=pick("#bff3ff", "#9bd6ef"),
         extra_bones=[Bone("rain", [0, 6, 0], "root", [
             Cube([-4, 5, -2], [8, 4, 4], "#aab8cc"),
             Cube([-3, 1, -1], [1, 3, 1], "#5fb4ff"), Cube([0, 0, 0], [1, 3, 1], "#5fb4ff"), Cube([2, 2, -1], [1, 2, 1], "#5fb4ff")])],
@@ -130,7 +155,7 @@ def cloud_b():
                     Cube([5, 31, -1], [2, 4, 2], "#bff3ff", rotation=[0, 0, -25], pivot=[6, 31, 0])],
         arm=Cube([-8, 11, -2], [4, 13, 4], fur, decal=combine(speckle(furd, 2, 3), sleeve(fur, blue))),
         leg=Cube([-3.9, 0, -2], [4, 12, 4], fur, decal=combine(speckle(furd, 2, 5), boots(fur, blue))),
-        tool=[Cube([-6.5, 12.5, -10], [1, 1, 8], "#7a5a3a"), Cube([-6.5, 9.5, -11], [1, 7, 1], "#bff3ff")],
+        tool=pick("#bff3ff", "#7a5a3a"),
     )
 
 
