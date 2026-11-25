@@ -27,6 +27,7 @@ import { adminPanel, applySavedRules } from "./admin.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
 import { setBack } from "./screens.js";
+import { isAdmin } from "./admin_check.js";
 
 const MENU_ITEM = CONFIG.menuItem.id;
 
@@ -56,6 +57,7 @@ function setupPlayer(player) {
   if (CONFIG.menuItem.giveOnJoin) giveMenuItem(player);
   payOwedKeys(player);
   player.sendMessage(`${CONFIG.prefix}§aCloudbreak v${CONFIG.version} is running.`);
+  player.sendMessage(`${CONFIG.prefix}${isAdmin(player) ? "§dYou're an admin: the Admin tile is on the main menu (or type /admin)." : "§7Not an admin. Admins: /tag <name> add admin, or be a world operator."}`);
   if (!player.getDynamicProperty("cb:joined")) {
     player.setDynamicProperty("cb:joined", true);
     player.sendMessage(`${CONFIG.prefix}Welcome to §b${CONFIG.serverName}§7! Use the menu item or type §f/menu§7 to create a clan.`);

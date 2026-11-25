@@ -13,6 +13,7 @@ import {
 import { CONFIG, SHOP_LAYOUT } from "./config.js";
 import { fmt } from "./economy.js";
 import { ICON, askSearch, fail, pagedMenu, showForm, success, tileMenu } from "./ui.js";
+import { isAdmin } from "../admin_check.js";
 
 // ============================================================================
 //  SHOP EDITOR (admins only)
@@ -21,7 +22,6 @@ import { ICON, askSearch, fail, pagedMenu, showForm, success, tileMenu } from ".
 //  Realms and survive restarts and add-on updates.
 // ============================================================================
 
-const isAdmin = (p) => p.hasTag(CONFIG.adminTag);
 const clip = (s, n = 18) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 
 export async function editorMenu(player, back, msg) {

@@ -6,6 +6,7 @@ import { addHeadPoints, headMob, mobName } from "./spawners.js";
 import { addCropPoints, cropName, enchantedCrop } from "./tools.js";
 import { addHeadsCollected } from "./leaderboards.js";
 import { ICON, backTile, fail, success, tileMenu } from "./ui.js";
+import { isAdmin } from "../admin_check.js";
 
 // ============================================================================
 //  CHUNK HOPPER
@@ -26,7 +27,6 @@ const pretty = (id) =>
   headMob(id) ? `${mobName(headMob(id))} Head` : enchantedCrop(id) ? `Enchanted ${cropName(enchantedCrop(id))}` : titleCase(id);
 const keyOf = (dimId, l) => `${KEY}${dimId}:${l.x},${l.y},${l.z}`;
 const chunkOf = (l) => `${Math.floor(l.x / 16)},${Math.floor(l.z / 16)}`;
-const isAdmin = (p) => p.hasTag(CONFIG.adminTag);
 const canManage = (p, d) => !d.owner || d.owner === p.id || isAdmin(p);
 export const capacityOf = (d) => CH.baseStorage + (d.level ?? 0) * CH.storagePerLevel;
 const stored = (d) => Object.values(d.store ?? {}).reduce((a, b) => a + b, 0);

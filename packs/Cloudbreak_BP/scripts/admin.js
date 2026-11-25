@@ -14,6 +14,7 @@ import { makeHopperItem } from "./eco/chunkHopper.js";
 import { clearGroundItems } from "./eco/groundItems.js";
 import { ecoTitle } from "./eco/ui.js";
 import { loadJson, saveJson } from "./store.js";
+import { isAdmin } from "./admin_check.js";
 
 // ---------------------------------------------------------------------------
 // Admin Control Room (players tagged "admin").
@@ -90,7 +91,7 @@ function optionsFor(cat) {
 }
 
 export async function adminPanel(player, st = {}) {
-  if (!player.hasTag(ADMIN)) return say(player, "Only admins can open this.", false);
+  if (!isAdmin(player)) return say(player, "Only admins can open this.", false);
   const all = world.getPlayers().sort((a, b) => a.name.localeCompare(b.name));
   const filter = (st.filter ?? "").toLowerCase();
   const players = filter ? all.filter((p) => p.name.toLowerCase().includes(filter)) : all;
@@ -100,7 +101,7 @@ export async function adminPanel(player, st = {}) {
   const opt = opts.find((o) => o.id === st.opt) ?? opts[0];
   const n = Math.max(cat.id === "money" ? 0 : 1, st.n ?? cat.def);
   const again = (o) => adminPanel(player, { targetId: target.id, cat: cat.id, opt: opt?.id, n, filter: st.filter, optPage: st.optPage, ...o });
-  const isAdmin = target.hasTag(ADMIN);
+  const targetIsAdmin = isAdmin(target);
   const clan = (p) => allClans().find((c) => c.members[p.id]);
 
   const s = new Screen("admin", "Control Room");
@@ -121,7 +122,7 @@ export async function adminPanel(player, st = {}) {
   for (const p of players) {
     const c = clan(p);
     s.button("PL", `§f${p.name}\n§7${c ? c.name : "No clan"}`, () => again({ targetId: p.id }), {
-      icon: headFor(p.name), states: [p.id === target.id ? "SEL" : undefined, p.hasTag(ADMIN) ? "ADM" : undefined, "ON"],
+      icon: headFor(p.name), states: [p.id === target.id ? "SEL" : undefined, isAdmin(p) ? "ADM" : undefined, "ON"],
     });
   }
   const tc = clan(target);
@@ -163,8 +164,8 @@ export async function adminPanel(player, st = {}) {
     say(player, msg);
     return again({});
   }, { states: [opt ? undefined : "OFF"] });
-  s.text("LOCK", isAdmin ? "Admin player" : "Normal player", { states: [isAdmin ? "ADM" : undefined] });
-  s.text("LOCKT", isAdmin
+  s.text("LOCK", targetIsAdmin ? "Admin player" : "Normal player", { states: [targetIsAdmin ? "ADM" : undefined] });
+  s.text("LOCKT", targetIsAdmin
     ? "This player has the admin tag, so the tools below are unlocked for them."
     : "You can only give this player Money, Heads, Kits and Crate Keys. The options below only appear when the selected player has the admin tag, so you can't give them by accident.");
   const back = () => again({});
@@ -181,7 +182,7 @@ export async function adminPanel(player, st = {}) {
     ["Economy Settings", CB.shop, () => ecoAdminMenu(player)],
   ];
   for (const [name, icon, run] of tools)
-    s.button("TOOL", isAdmin ? `§f${name}` : `§8${name}`, isAdmin ? run : () => again({}), { icon, states: [isAdmin ? undefined : "OFF"] });
+    s.button("TOOL", targetIsAdmin ? `§f${name}` : `§8${name}`, targetIsAdmin ? run : () => again({}), { icon, states: [targetIsAdmin ? undefined : "OFF"] });
   await s.show(player);
 }
 

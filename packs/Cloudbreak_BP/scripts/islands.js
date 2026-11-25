@@ -1,6 +1,7 @@
 import { BlockPermutation, BlockVolume, ItemStack, ItemTypes, system, world } from "@minecraft/server";
 import { CONFIG } from "./config.js";
 import { allClans, clanOf, saveClan } from "./clans.js";
+import { isAdmin } from "./admin_check.js";
 
 const I = CONFIG.island;
 const overworld = () => world.getDimension("overworld");
@@ -231,7 +232,7 @@ function askRaid(player, dimId, loc, action, blockType) {
 
 /** Why a player may not change the block at loc, or undefined if they may. */
 function buildDenied(player, dimensionId, loc, { breaking = false, blockType } = {}) {
-  if (player.hasTag("admin")) return undefined;
+  if (isAdmin(player)) return undefined;
   if (!inIslandArea(dimensionId, loc)) return undefined;
   const r = askRaid(player, dimensionId, loc, breaking ? "break" : "place", blockType);
   if (r === "allow") return undefined;
@@ -263,7 +264,7 @@ export function registerProtection() {
 
   world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const { player, block, itemStack } = ev;
-    if (player.hasTag("admin")) return;
+    if (isAdmin(player)) return;
     const dimId = block.dimension.id;
     if (!inIslandArea(dimId, block.location)) return;
     const own = clanOf(player);

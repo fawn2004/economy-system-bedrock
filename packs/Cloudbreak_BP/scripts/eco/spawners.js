@@ -4,6 +4,7 @@ import { container } from "./inventory.js";
 import { headChanceBonus } from "./tools.js";
 import { addHeadsCollected } from "./leaderboards.js";
 import { ICON, fail, success, tileMenu } from "./ui.js";
+import { isAdmin } from "../admin_check.js";
 
 // ============================================================================
 //  SPAWNERS
@@ -52,7 +53,6 @@ function parseKey(key) {
   return { dim: rest.slice(0, i), x, y, z };
 }
 const isCreative = (p) => String(p.getGameMode()).toLowerCase() === "creative";
-const isAdmin = (p) => p.hasTag(CONFIG.adminTag);
 // Cloudbreak: raiders looting an island may pick up its spawners.
 let manageOverride = () => false;
 export const setSpawnerManageOverride = (fn) => (manageOverride = fn);

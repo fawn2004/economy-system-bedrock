@@ -2,6 +2,7 @@ import { BlockVolume, system, world } from "@minecraft/server";
 import { clanAt, inBorder, sendHome } from "./islands.js";
 import { raidOfPlayer } from "./raids.js";
 import { loadJson, saveJson } from "./store.js";
+import { isAdmin } from "./admin_check.js";
 
 // ---------------------------------------------------------------------------
 // Visible, solid island border. A patch of see-through red wall (cb:border_x /
@@ -106,7 +107,7 @@ const safe = new Map(); // player id -> last allowed { location, rotation }
 /** May this player be at loc? Everyone may be inside a border; admins anywhere;
  *  raiders anywhere in the grid cell of the island they're raiding. */
 export function allowedAt(player, loc) {
-  if (player.hasTag("admin")) return true;
+  if (isAdmin(player)) return true;
   if (player.dimension.id !== "minecraft:overworld") return true;
   const clan = clanAt("minecraft:overworld", loc);
   if (!clan?.island) return true; // not near any island

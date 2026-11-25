@@ -30,6 +30,7 @@ import { ecoTitle } from "./eco/ui.js";
 import { ART, BANNER, Screen, headFor, setBack, setDefaultBack, spaced } from "./screens.js";
 import * as R from "./raids.js";
 import * as A from "./after.js";
+import { isAdmin } from "./admin_check.js";
 
 // Hooks other parts fill in (admin panel, tax after a deposit).
 const floorHooks = {};
@@ -108,7 +109,7 @@ function tilesFor(player) {
   const settings = { name: "Settings", icon: CB.settings, col: "GREY", sub: `${settingsOnCount(player)} of 4 on`, run: () => playerSettingsMenu(player) };
   const boards = { name: "Leaderboards", icon: CB.leaderboards, col: "PURPLE", sub: "Top clans", run: () => leaderboardsMenu(player) };
   const shop = { name: "Sky Shop", icon: CB.shop, col: "GOLD", sub: "Buy & sell", run: () => skyShopMenu(player) };
-  const admin = player.hasTag("admin")
+  const admin = isAdmin(player)
     ? [{ name: "Admin", icon: CB.admin, col: "PINK", sub: "Control Room", run: () => (floorHooks.admin ? floorHooks.admin(player) : adminMenu(player)) }]
     : [];
   if (!clan) {

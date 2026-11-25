@@ -29,12 +29,12 @@ import {
 import { clearSidebar } from "./sidebar.js";
 import { mobIcon } from "./spawners.js";
 import { ICON, backTile, fail, pagedMenu, showForm, success, tileMenu } from "./ui.js";
+import { isAdmin } from "../admin_check.js";
 
 // ============================================================================
 //  ADMIN > SETTINGS   (edit the whole pack in-game)
 // ============================================================================
 
-const isAdmin = (p) => p.hasTag(CONFIG.adminTag);
 const clip = (s, n = 18) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
 const pretty = (id) => id.replace(/^minecraft:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 

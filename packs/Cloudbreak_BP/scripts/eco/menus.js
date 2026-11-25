@@ -47,6 +47,7 @@ import {
 } from "./tools.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
 import { Screen } from "../screens.js";
+import { isAdmin } from "../admin_check.js";
 
 const U = "textures/ui/eco/";
 const pretty = (id) =>
@@ -101,7 +102,7 @@ export async function mainMenu(player) {
     icon: "textures/items/clock_item",
     onClick: () => playerSettingsMenu(player, () => mainMenu(player)),
   });
-  if (player.hasTag(CONFIG.adminTag)) {
+  if (isAdmin(player)) {
     tiles.push({ text: "§c§lADMIN", sub: "§7Settings & tools", icon: ICON.admin, onClick: () => adminMenu(player) });
   }
   // The player card on the left of the dashboard shows the form body
@@ -263,7 +264,7 @@ async function buyItemMenu(player, item, back, msg) {
       onClick: () => buyItemMenu(player, item, back, buyItem(player, item, n)),
     };
   });
-  if (player.hasTag(CONFIG.adminTag)) {
+  if (isAdmin(player)) {
     tiles.push({
       text: "§c§lEDIT",
       sub: "§7Admin only",
@@ -706,7 +707,7 @@ async function topMenu(player, back) {
 //  ADMIN  (players with the "admin" tag)
 // ============================================================================
 export async function adminMenu(player, msg) {
-  if (!player.hasTag(CONFIG.adminTag)) return;
+  if (!isAdmin(player)) return;
   const back = () => adminMenu(player);
   await tileMenu(player, {
     title: "ADMIN PANEL",
@@ -735,7 +736,7 @@ export async function adminMenu(player, msg) {
 
 // ---- admin: money ------------------------------------------------------------
 async function adminMoneyMenu(player) {
-  if (!player.hasTag(CONFIG.adminTag)) return;
+  if (!isAdmin(player)) return;
   const tiles = world.getPlayers().map((p) => ({
     text: `§f${clip(p.name)}`,
     sub: `§a${fmtShort(getBalance(p))}`,
@@ -801,7 +802,7 @@ async function adminPlayerMenu(player, target, msg) {
 // ---- admin: heads ------------------------------------------------------------
 // ---- admin: NPCs -----------------------------------------------------------------
 async function adminNpcMenu(player, msg) {
-  if (!player.hasTag(CONFIG.adminTag)) return;
+  if (!isAdmin(player)) return;
   const spawn = (type, label) => () => {
     spawnNpc(player, type);
     success(player, `Spawned a ${label} NPC where you're standing.`);
@@ -835,7 +836,7 @@ async function adminNpcMenu(player, msg) {
 
 // ---- admin: skills ------------------------------------------------------------
 async function adminSkillsMenu(player) {
-  if (!player.hasTag(CONFIG.adminTag)) return;
+  if (!isAdmin(player)) return;
   const tiles = world.getPlayers().map((p) => ({
     text: `§f${clip(p.name)}`,
     sub: "§7Set skill levels",
@@ -876,7 +877,7 @@ async function adminSkillsPlayer(player, target, msg) {
 
 // ---- admin: enchanted crops --------------------------------------------------
 async function adminCropsMenu(player) {
-  if (!player.hasTag(CONFIG.adminTag)) return;
+  if (!isAdmin(player)) return;
   const tiles = world.getPlayers().map((p) => ({
     text: `§f${clip(p.name)}`,
     sub: `§a${CROPS.reduce((n, c) => n + getCropPoints(p, c.id), 0)} ench.`,
@@ -941,7 +942,7 @@ async function adminCropOne(player, target, cid, msg) {
 }
 
 async function adminHeadsMenu(player) {
-  if (!player.hasTag(CONFIG.adminTag)) return;
+  if (!isAdmin(player)) return;
   const tiles = world.getPlayers().map((p) => {
     const total = allHeadPoints(p).reduce((n, h) => n + h.points, 0);
     return { text: `§f${clip(p.name)}`, sub: `§d${total} heads`, icon: ICON.player, onClick: () => adminHeadsPlayer(player, p) };
