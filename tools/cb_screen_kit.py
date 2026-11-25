@@ -144,7 +144,6 @@ class Zone:
     def __init__(self, tag, rect, item, face, orient="vertical", gap=0, click=False, align="top_left", grid=False, scroll=False, tags=(), cols=1, rows=1):
         self.tag, self.rect, self.item, self.face = tag, rect, item, face
         self.cols, self.rows = cols, rows
-        self.single, self.index = False, None  # single zones are placed by fixed button index (see Screen.layout)
         if grid and scroll:
             raise ValueError("grids don't scroll (cells for other zones would make empty space); use pages")
         self.orient, self.gap, self.click, self.align = orient, gap, click, align
@@ -187,24 +186,14 @@ class Screen:
                   click=True)
         return self
 
-    def layout(self, singles):
-        """Button order the script must send: the grid's cells first (padded to
-        cols x rows), then one button per single zone in this order, then lists."""
+    def layout(self):
+        """What the script needs to know: which zone is the grid (its items go first,
+        in cell order) and whether the screen has a back arrow."""
         grids = [z for z in self.zones if z.grid]
         assert len(grids) <= 1, self.sid
-        self.grid = grids[0] if grids else None
-        size = self.grid.cols * self.grid.rows if self.grid else 0
-        by = {}
-        for z in self.zones:
-            by.setdefault(z.tag, z)
-        # Only text/pictures go in the singles grid. Its cells have no size, and a button in a
-        # cell with no size never receives taps, so tappable zones stay normal lists.
-        self.singles = [t for t in singles if not by[t].click]
-        for i, tag in enumerate(self.singles):
-            z = by[tag]
-            assert not z.grid, tag
-            z.single, z.index = True, size + i
-        return {"grid": self.grid.tag if self.grid else None, "gridSize": size, "singles": self.singles, "back": "BACK" in by}
+        g = grids[0] if grids else None
+        return {"grid": g.tag if g else None, "gridSize": g.cols * g.rows if g else 0,
+                "back": any(z.tag == "BACK" for z in self.zones)}
 
 
 # ---------------------------------------------------------------------------
@@ -300,10 +289,9 @@ def img_json(p, icon_ok=True):
     return d
 
 
-HOVER = None  # set on first use (so the texture is registered before textures are written)
-
-
-def face_controls(face, tags):
+def face_controls(face, tags, highlight=None):
+    """The picture of one item: background (by state), pictures and text. With
+    highlight, a hover glow is added on top (used for the button's hover look)."""
     ctrls = []
     if face.bg or face.states:
         others = [s for s, _ in face.states]
@@ -318,10 +306,9 @@ def face_controls(face, tags):
             expr = has(f"[{s}]") + (f" and {earlier}" if earlier else "")
             ctrls.append({f"bg_{i}": {"type": "image", "texture": tex, "size": ["100%", "100%"], "layer": 1, "bindings": vis(f"({expr})")}})
     for i, p in enumerate(face.parts):
-        if isinstance(p, Img):
-            ctrls.append({f"img_{i}": img_json(p)})
-        else:
-            ctrls.append({f"txt_{i}": label_json(p, tags)})
+        ctrls.append({f"img_{i}": img_json(p)} if isinstance(p, Img) else {f"txt_{i}": label_json(p, tags)})
+    if highlight:
+        ctrls.append({"hl": {"type": "image", "texture": highlight, "size": ["100%", "100%"], "layer": 7}})
     return {"type": "panel", "size": ["100%", "100%"], "controls": ctrls}
 
 
@@ -331,111 +318,63 @@ CLICK = [
 ]
 
 
-def only_when_shown(scr, target):
-    """Every form contains every screen (all but one hidden). A zone only learns how many
-    buttons there are while its own screen is the one shown, so hidden screens build nothing."""
-    return [
-        {"binding_name": "#title_text"},
-        {"binding_type": "view", "source_property_name": f"(not ((#title_text - '{scr.marker}') = #title_text))", "target_property_name": "#visible"},
-        {"binding_name": "#form_button_length", "binding_name_override": target, "binding_condition": "visible"},
-    ]
-
-
 def zone_defs(scr, z):
-    """One zone = a list (stack) or grid of the form's buttons that carry its tag.
-    Each item draws its face ONCE; a clickable item puts a see-through button on
-    top whose only job is the hover/press highlight (cheap to build)."""
+    """One zone = the form buttons that carry its tag, drawn as a list (stack panel
+    factory) or a grid. Built the way known to work in game (v3 and the tile menus):
+      row/cell panel (hidden unless the button has this zone's tag)
+        -> button, directly inside it, whose default/hover/pressed controls ARE the picture
+    Grids also hide the button itself, because a grid shows its cells regardless."""
     base = f"{scr.sid}_{re.sub('[^a-z0-9]', '', z.tag.lower())}"
     defs = {}
     iw, ih = z.item
     gw = iw + (z.gap if z.orient == "horizontal" or z.grid else 0)
     gh = ih + (z.gap if z.orient == "vertical" or z.grid else 0)
-    face_name = base + "_face"
-    defs[face_name] = face_controls(z.face, z.tags)
     show = vis(has(f"[{z.tag}]"))
+    face = base + "_face"
+    defs[face] = face_controls(z.face, z.tags)
     at = {"size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left"}
     if z.click:
-        # v3 style (the way that's known to work, like the tile menus): the button sits directly
-        # in the row/cell and CONTAINS its picture: default = the face, hover/pressed = the face
-        # with a highlight on top.
-        hl = z.face.hover or box("#FFFFFF", "#FFFFFF", alpha=28)
-        hover = face_controls(z.face, z.tags)
-        hover["controls"] = hover["controls"] + [{"hl": {"type": "image", "texture": hl, "size": ["100%", "100%"], "layer": 7}}]
-        defs[face_name + "_hover"] = hover
+        defs[face + "_hover"] = face_controls(z.face, z.tags, highlight=z.face.hover or box("#FFFFFF", "#FFFFFF", alpha=28))
         piece = {"button": dict(at, **{
             "type": "button",
             "default_control": "default", "hover_control": "hover", "pressed_control": "pressed",
             "sound_name": "random.click", "sound_volume": 1.0, "sound_pitch": 1.0, "button_mappings": CLICK,
-            "bindings": [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
-            "controls": [{f"default@{NS}.{face_name}": {}}, {f"hover@{NS}.{face_name}_hover": {}},
-                         {f"pressed@{NS}.{face_name}_hover": {"offset": [0, 0.5]}}]})}
+            "bindings": ([] if not z.grid else show) + [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
+            "controls": [{f"default@{NS}.{face}": {}}, {f"hover@{NS}.{face}_hover": {}},
+                         {f"pressed@{NS}.{face}_hover": {"offset": [0, 0.5]}}]})}
     else:
-        piece = {f"face@{NS}.{face_name}": dict(at)}
-    if z.single:
-        # text/pictures only (see Screen.layout): a variant at the zone's spot in the singles grid
-        return defs, {"type": "panel", "size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left",
-                      "offset": [z.rect[0], z.rect[1]], "bindings": show, "controls": [piece]}
-    if z.grid:
-        # a grid decides on its own which cells show, so the cell's button hides itself
-        ctrl = list(piece.values())[0]
-        ctrl["bindings"] = show + ctrl.get("bindings", [])
-        defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "controls": [piece]}
-    else:
-        # in a list, a hidden row takes no space
-        defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "bindings": show, "controls": [piece]}
+        piece = {f"face@{NS}.{face}": dict(at, **({"bindings": show} if z.grid else {}))}
+    defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "bindings": show, "controls": [piece]}
 
     x, y, w, h = z.rect
     if z.grid:
         grid = {"type": "grid", "size": ["100%", "100%"], "anchor_from": "top_left", "anchor_to": "top_left",
                 "grid_item_template": f"{NS}.{base}_item", "grid_dimensions": [z.cols, z.rows], "collection_name": "form_buttons",
-                "bindings": only_when_shown(scr, "#maximum_grid_items")}
-        ctrl = {"type": "panel", "clips_children": True, "controls": [{"grid": grid}]}
-        return defs, place(ctrl, [x, y, w, h])
+                "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#maximum_grid_items"}]}
+        return defs, place({"type": "panel", "controls": [{"grid": grid}]}, [x, y, w, h])
     stack = {"type": "stack_panel", "orientation": z.orient, "size": ["100%c", "100%c"],
              "factory": {"name": "buttons", "control_name": f"{NS}.{base}_item"}, "collection_name": "form_buttons",
-             "bindings": only_when_shown(scr, "#collection_length"),
+             "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#collection_length"}],
              "anchor_from": z.align, "anchor_to": z.align}
     if z.scroll:
         stack.update(anchor_from="top_left", anchor_to="top_left")
         defs[base + "_content"] = stack
-        ctrl = {"type": "panel", "controls": [{"scrolling_panel@common.scrolling_panel": {
+        return defs, place({"type": "panel", "controls": [{"scrolling_panel@common.scrolling_panel": {
             "anchor_to": "top_left", "anchor_from": "top_left", "$show_background": False, "size": ["100%", "100%"],
             "$scrolling_content": f"{NS}.{base}_content", "$scroll_size": [4, "100% - 2px"],
             "$scrolling_pane_size": ["100% - 2px", "100%"], "$scrolling_pane_offset": [0, 0],
-            "$scroll_bar_right_padding_size": [0, 0]}}]}
-        return defs, place(ctrl, [x, y, w, h])
-    ctrl = {"type": "panel", "controls": [{"stack": stack}]}
-    return defs, place(ctrl, [x, y, w, h])
+            "$scroll_bar_right_padding_size": [0, 0]}}]}, [x, y, w, h])
+    return defs, place({"type": "panel", "controls": [{"stack": stack}]}, [x, y, w, h])
 
 
 def screen_json(scr):
-    defs = {}
-    ctrls = []
+    defs, ctrls = {}, []
     for i, p in enumerate(scr.static):
         ctrls.append({f"s{i}": img_json(p) if isinstance(p, Img) else label_json(p)})
-    variants = []
     for z in scr.zones:
         d, c = zone_defs(scr, z)
         defs.update(d)
-        name = f"z_{re.sub('[^a-z0-9]', '', z.tag.lower())}"
-        if z.single:
-            if not variants:
-                ctrls.append({"singles": None})  # placeholder: drawn where the first single zone sits
-            variants.append({name: c})
-        else:
-            ctrls.append({name: c})
-    if variants:
-        # One grid cell per button index up to the last single. Cells have no size, so every
-        # cell sits at the screen's top-left and its variants are placed absolutely. Cell i
-        # holds button i; only the variant whose tag that button carries shows. This reaches
-        # "button number i" without building a copy of every button per zone.
-        count = max(z.index for z in scr.zones if z.single) + 1
-        defs[scr.sid + "_one_cell"] = {"type": "panel", "size": [0, 0], "controls": variants}
-        grid = {"type": "grid", "size": [0, 0], "anchor_from": "top_left", "anchor_to": "top_left",
-                "grid_item_template": f"{NS}.{scr.sid}_one_cell", "grid_dimensions": [count, 1], "collection_name": "form_buttons",
-                "bindings": only_when_shown(scr, "#maximum_grid_items")}
-        i = next(k for k, c in enumerate(ctrls) if "singles" in c)
-        ctrls[i] = {"singles": {"type": "panel", "size": [W, H], "anchor_from": "top_left", "anchor_to": "top_left", "controls": [{"grid": grid}]}}
+        ctrls.append({f"z_{re.sub('[^a-z0-9]', '', z.tag.lower())}": c})
     if scr.close:
         ctrls.append({"close@eco_form.close_button": {"size": [12, 12], "anchor_from": "top_right", "anchor_to": "top_right", "offset": [-2, 2], "layer": 8}})
     defs[scr.sid + "_screen"] = {"type": "image", "texture": scr.bg, "size": [W, H], "controls": ctrls}

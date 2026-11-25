@@ -1,18 +1,24 @@
 import { system } from "@minecraft/server";
 import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
+import { LAYOUT } from "./screen_layout.js";
 
-// Cloudbreak screens (resource pack ui/cb_screens.json, built by
-// tools/build_cloudbreak_screens.py). A form whose title starts with a
-// screen's marker is drawn with that screen. Every button starts with a zone
-// tag ("[FL]") that says where it goes, plus optional state tags ("[ON]").
-// Zones that aren't clickable just show the text/icon.
+// ---------------------------------------------------------------------------
+// Cloudbreak screens. The resource pack (ui/cb_screens.json, built by
+// tools/build_cloudbreak_screens.py) draws a form with a custom screen when its
+// title starts with that screen's marker "§c§b§<code>§r".
+//
+// Every button's text starts with a zone tag, e.g. "[TL]Clan Bank": the screen
+// shows it in the zone with that tag. Extra state tags ("[ON]", "[cRED]") pick
+// colours. Items in a non-tappable zone are just text/pictures.
+//
+// Button order: the screen's grid zone (if it has one) shows form buttons 0, 1,
+// 2... in its cells, so the grid's items are sent first. Everything else follows.
+// ---------------------------------------------------------------------------
 
 export const SCREEN_CODES = {
   tower: "0", members: "1", bank: "2", settings: "3", admin: "4", dispatch: "5",
   insurance: "6", shop: "7", crate: "8", raidlog: "9", boards: "a", terminal: "t",
 };
-
-import { LAYOUT } from "./screen_layout.js";
 
 /** "Clan Nightfall" -> "C L A N   N I G H T F A L L" (the mockups' spaced captions). */
 export const spaced = (s) => String(s).toUpperCase().split(" ").map((w) => w.split("").join(" ")).join("   ");
@@ -24,17 +30,17 @@ export function headFor(name) {
   return `textures/ui/cb/s/head_${h % 7}`;
 }
 
+export const BANNER = (i) => `textures/ui/cb/s/banner_${((i % 10) + 10) % 10}`;
+export const ART = (name) => `textures/ui/cb/s/${name}`;
+
 // ---- Back arrow ---------------------------------------------------------------
-// Each player remembers where Back should go: the main menu, or the Core Terminal
-// when a menu was opened from it. Menus that redraw themselves keep it.
+// Each player remembers where Back goes: the main menu, or the Core Terminal when a
+// menu was opened from it. A menu that redraws itself keeps the same target.
 const backTo = new Map();
 let defaultBack = () => {};
 export const setDefaultBack = (fn) => (defaultBack = fn);
 export const setBack = (player, fn) => backTo.set(player.id, fn);
 const goBack = (player) => (backTo.get(player.id) ?? defaultBack)(player);
-
-export const BANNER = (i) => `textures/ui/cb/s/banner_${((i % 10) + 10) % 10}`;
-export const ART = (name) => `textures/ui/cb/s/${name}`;
 
 export class Screen {
   constructor(id, title = "") {
@@ -55,25 +61,11 @@ export class Screen {
     return this;
   }
 
-  /** The items in the order the screen expects (screen_layout.js): the grid's cells
-   *  first (padded with blanks), then one item per single zone (a blank if missing),
-   *  then the lists. Blanks carry no zone tag, so they show nowhere. */
+  /** The items in the order they go into the form: the grid zone's items first. */
   ordered() {
-    const L = LAYOUT[this.id] ?? { grid: null, gridSize: 0, singles: [] };
-    const blank = { tag: "_", text: "", states: [], run: undefined };
-    const used = new Set();
-    const out = [];
-    const grid = this.items.filter((i) => i.tag === L.grid).slice(0, L.gridSize);
-    grid.forEach((i) => used.add(i));
-    out.push(...grid);
-    while (out.length < L.gridSize) out.push(blank);
-    for (const tag of L.singles) {
-      const it = this.items.find((i) => i.tag === tag && !used.has(i));
-      if (it) used.add(it);
-      out.push(it ?? blank);
-    }
-    for (const i of this.items) if (!used.has(i) && !(L.singles.includes(i.tag)) && i.tag !== L.grid) out.push(i);
-    return out;
+    const grid = LAYOUT[this.id]?.grid;
+    if (!grid) return [...this.items];
+    return [...this.items.filter((i) => i.tag === grid), ...this.items.filter((i) => i.tag !== grid)];
   }
 
   form() {
@@ -86,13 +78,12 @@ export class Screen {
     return form;
   }
 
-  /** Shows the screen; runs the tapped item. Resolves to the tapped item (or undefined). */
+  /** Shows the screen and runs the tapped item. Resolves to the tapped item (or undefined). */
   async show(player) {
-    if (LAYOUT[this.id]?.back && !this.items.some((i) => i.tag === "BACK"))
-      this.button("BACK", "", () => goBack(player));
+    if (LAYOUT[this.id]?.back && !this.items.some((i) => i.tag === "BACK")) this.button("BACK", "", () => goBack(player));
+    const order = this.ordered();
     const form = this.form();
     Screen.last = this;
-    const order = this.ordered();
     let res;
     for (let tries = 0; tries < 40; tries++) {
       if (!player.isValid) return undefined;
@@ -102,7 +93,16 @@ export class Screen {
     }
     if (!res || res.canceled || res.selection === undefined) return undefined;
     const it = order[res.selection];
-    if (it?.run) await it.run();
+    if (!it?.run) return it;
+    try {
+      await it.run();
+    } catch (e) {
+      // never fail silently: say what went wrong, in chat and in the content log
+      console.warn(`[cloudbreak] ${this.id} button "${it.tag}": ${e?.stack ?? e}`);
+      try {
+        player.sendMessage(`§c[Cloudbreak] That button hit an error: ${e?.message ?? e}`);
+      } catch {}
+    }
     return it;
   }
 }

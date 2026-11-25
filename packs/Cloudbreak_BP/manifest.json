@@ -1,29 +1,58 @@
 {
   "format_version": 2,
   "header": {
-    "name": "§bCloudbreak §7(Behaviour) §ev6.7",
+    "name": "§bCloudbreak §7(Behaviour) §ev7",
     "description": "Sky Clans: clans, islands and raids",
-    "uuid": "3a761b71-2da4-4a97-afcc-beee7190ca84",
-    "version": [0, 6, 7],
-    "min_engine_version": [1, 26, 10]
+    "uuid": "4340ae66-161b-4fb5-b517-7e7ac2385e7c",
+    "version": [
+      1,
+      0,
+      0
+    ],
+    "min_engine_version": [
+      1,
+      26,
+      10
+    ]
   },
   "modules": [
     {
       "type": "data",
-      "uuid": "7f3afbc7-0a77-440c-8172-f1cb051e071c",
-      "version": [0, 6, 7]
+      "uuid": "679ff640-505c-4913-bb5c-eaa7bc9295fa",
+      "version": [
+        1,
+        0,
+        0
+      ]
     },
     {
       "type": "script",
       "language": "javascript",
-      "uuid": "3f2b9eb3-b94f-412c-8fea-4a7aa0867e35",
+      "uuid": "41d2e95a-0c80-4a26-94ca-0681418a1da0",
       "entry": "scripts/main.js",
-      "version": [0, 6, 7]
+      "version": [
+        1,
+        0,
+        0
+      ]
     }
   ],
   "dependencies": [
-    { "module_name": "@minecraft/server", "version": "2.6.0" },
-    { "module_name": "@minecraft/server-ui", "version": "2.0.0" },
-    { "uuid": "499246ed-6a12-48dd-8b30-487435813359", "version": [0, 6, 7] }
+    {
+      "module_name": "@minecraft/server",
+      "version": "2.6.0"
+    },
+    {
+      "module_name": "@minecraft/server-ui",
+      "version": "2.0.0"
+    },
+    {
+      "uuid": "19d1dcce-7289-4c95-9a73-97db827feaa3",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
   ]
 }

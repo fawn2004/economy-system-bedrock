@@ -99,14 +99,16 @@ await grab("normal", () => AD.adminPanel(fawn, { targetId: kai.id, cat: "keys", 
 await grab("admin", () => AD.adminPanel(fawn, { targetId: frost.id, cat: "money" }));
 const RAR = CR.CRATE_REWARDS.raider;
 await grab("won", () => CR.crateScreen(fawn, "raider", RAR.find((w) => w.r === "rare")));
-// every single zone's button must sit at its fixed index, and grids must start at 0
+// the grid zone's items must come first (cell i shows form button i)
 const { LAYOUT } = await import("./screen_layout.js");
 let bad = 0;
 for (const [key, f] of Object.entries(out)) {
   const L = LAYOUT[key.split(":")[0]];
-  const tag = (i) => f.buttons[i]?.text.match(/^\[([A-Z0-9_]+)\]/)?.[1];
-  for (let i = 0; i < L.gridSize; i++) if (![L.grid, "_"].includes(tag(i))) { bad++; console.error(`${key}: cell ${i} has ${tag(i)}`); }
-  L.singles.forEach((t, k) => { const got = tag(L.gridSize + k); if (![t, "_"].includes(got)) { bad++; console.error(`${key}: index ${L.gridSize + k} should be ${t}, is ${got}`); } });
+  if (!L.grid) continue;
+  const tags = f.buttons.map((b) => b.text.match(/^\[([A-Z0-9_]+)\]/)?.[1]);
+  const n = tags.filter((t) => t === L.grid).length;
+  if (tags.slice(0, n).some((t) => t !== L.grid)) { bad++; console.error(`${key}: grid items aren't first`); }
+  if (n > L.gridSize) { bad++; console.error(`${key}: ${n} grid items but only ${L.gridSize} cells`); }
 }
 console.error(bad ? `LAYOUT CHECK FAILED (${bad})` : "layout check ok");
 console.log(JSON.stringify(out));

@@ -4,7 +4,7 @@ Clans of up to 5 share a floating island, grind it up like skyblock, and buy bli
 other islands. The full design is in the Cloudbreak design doc; the UI mockups are on the
 Cloudbreak UI canvas.
 
-Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.6.7). Cloudbreak contains its
+Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (v7, version 1.0.0, new pack IDs since v7). Cloudbreak contains its
 own copy of the Skyblock Economy code (`scripts/eco`), so it does **not** need the Skyblock
 Economy packs. Don't run both in the same world.
 
@@ -25,6 +25,12 @@ offline tests (`tools/cloudbreak_tests/run.sh`).
 | + | Economy merged in (spawners, chunk hopper, NPCs). Minions were removed in v5. |
 
 ## Install
+
+v7 is a rebuild with brand-new pack IDs, so Minecraft treats it as a new addon. Remove every
+older Cloudbreak pack from the world and from Settings > Storage first. Clan/island data from
+worlds that used older versions doesn't carry over (wallet money does): use a fresh world.
+On join, chat shows "Cloudbreak v7 is running." when the behaviour pack is active.
+
 
 1. Run `tools/build_cloudbreak.sh` and open `dist/Cloudbreak_v<version>.mcaddon`.
 2. Make a **void world** (Flat world, "The Void" preset). Islands are built at y = 100 from
