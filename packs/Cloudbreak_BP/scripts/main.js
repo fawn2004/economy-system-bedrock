@@ -22,6 +22,7 @@ import { backOut, registerRaids } from "./raids.js";
 import { registerAfterRaid } from "./after.js";
 import { registerCrates } from "./crates.js";
 import { registerSidebar } from "./sidebar.js";
+import { adminPanel, applySavedRules } from "./admin.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
 
@@ -58,6 +59,7 @@ function setupPlayer(player) {
 }
 
 world.afterEvents.worldLoad.subscribe(() => {
+  applySavedRules();
   loadClans();
   for (const p of world.getPlayers()) setupPlayer(p);
 });
@@ -92,6 +94,7 @@ registerRaids();
 registerAfterRaid();
 registerCrates();
 registerSidebar();
+setFloor("admin", (player) => adminPanel(player));
 
 // ---------------------------------------------------------------------------
 // Commands: /menu, /is, /sc <action> [name]
@@ -191,6 +194,16 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
       const p = player(origin);
       if (!p) return notPlayer;
       system.run(() => sendHome(p).catch((e) => console.warn(`[cloudbreak] home error: ${e}`)));
+      return ok;
+    }
+  );
+
+  reg.registerCommand(
+    { name: "cb:admin", description: "Open the Cloudbreak admin panel", permissionLevel: CommandPermissionLevel.Any },
+    (origin) => {
+      const p = player(origin);
+      if (!p) return notPlayer;
+      system.run(() => adminPanel(p).catch((e) => console.warn(`[cloudbreak] admin error: ${e}`)));
       return ok;
     }
   );

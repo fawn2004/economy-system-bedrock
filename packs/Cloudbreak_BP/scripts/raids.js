@@ -537,3 +537,20 @@ export function registerRaids() {
 
 // for the offline rule tests (tools) only
 export const _tickForTests = () => tick();
+
+/** Admin: ends a raid with no payouts. refund = give the attackers their raid fee back. */
+export function forceEndRaid(raidId, refund = true) {
+  const raid = raids.get(raidId);
+  if (!raid) return false;
+  const attacker = getClan(raid.attacker);
+  if (refund && attacker) {
+    attacker.bank = bankOf(attacker) + raid.price;
+    addLedger(attacker, "Raid ended by an admin (refund)", "Admin", raid.price);
+    saveClan(attacker);
+  }
+  if (attacker) tellClan(attacker, "§7An admin ended your raid.");
+  const target = getClan(raid.target);
+  if (target) tellClan(target, "§7An admin ended the raid on your island.");
+  finish(raid, "cancelled");
+  return true;
+}

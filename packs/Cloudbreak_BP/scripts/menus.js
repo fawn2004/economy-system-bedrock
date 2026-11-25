@@ -33,6 +33,7 @@ import { UPGRADES } from "./config.js";
 import { fmt, fmtMoney, getBalance } from "./eco/economy.js";
 import { adminMenu, sellMenu, shopMenu, skyShopMenu } from "./eco/menus.js";
 import { playerSettingsMenu } from "./eco/playerSettings.js";
+import { ecoTitle } from "./eco/ui.js";
 import * as R from "./raids.js";
 import * as A from "./after.js";
 
@@ -43,8 +44,36 @@ export const setFloor = (id, fn) => (floorHooks[id] = fn);
 // Milestone 1 uses plain Bedrock forms. Milestone 6 swaps in the chosen
 // custom layouts (Elevator Tower, Chain of Command, ...) from the resource pack.
 
+// Cloudbreak icons (textures/ui/cb, built by tools/build_cloudbreak_ui.py)
+const CB = new Proxy({}, { get: (_, name) => `textures/ui/cb/icon_${String(name)}` });
+const UPGRADE_ICON = { size: CB.size, sell: CB.sell, fly: CB.fly, ore: CB.ore, spawners: CB.spawners, crops: CB.crops, shield: CB.insurance, defence: CB.clock, lives: CB.heart };
+
+/** A form drawn with the styled tile layout (title bar in a theme colour, icon tiles). */
+function styled(theme = "blue") {
+  return {
+    styledTheme: theme, _title: "", _body: "", _buttons: [],
+    title(t) { this._title = t; return this; },
+    body(b) { this._body = b; return this; },
+    button(text, icon) { this._buttons.push([text, icon]); return this; },
+  };
+}
+
+function toForm(f) {
+  if (!f.styledTheme) return f;
+  const form = new ActionFormData().title(ecoTitle(f._title, f.styledTheme)).body(f._body);
+  for (const [text, icon] of f._buttons) {
+    const [head, ...rest] = String(text).split("\n");
+    const label = /^§[0-9a-f]/.test(head) ? head : `§f§l${head.toUpperCase()}`;
+    const t = rest.length ? `${label}\n§r${rest.join(" ")}` : label;
+    if (icon) form.button(t, icon);
+    else form.button(t);
+  }
+  return form;
+}
+
 /** form.show() that waits while the player is busy (e.g. chat still open). */
-async function show(player, form) {
+async function show(player, rawForm) {
+  const form = toForm(rawForm);
   for (let tries = 0; tries < 40; tries++) {
     if (!player.isValid) return undefined;
     const res = await form.show(player);
@@ -59,8 +88,9 @@ function report(player, result) {
 }
 
 async function confirm(player, title, body, yes = "Yes") {
-  const res = await show(player, new MessageFormData().title(title).body(body).button1(yes).button2("Cancel"));
-  return res?.selection === 0;
+  const form = styled("orange").title(title).body(body).button(`§a§l${yes.toUpperCase()}`, CB.yes).button("§c§lCANCEL", CB.no);
+  const res = await show(player, form);
+  return !!res && !res.canceled && res.selection === 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -76,13 +106,13 @@ export async function mainMenu(player, result) {
 async function noClanMenu(player) {
   const inv = pendingInvite(player);
   const buttons = [];
-  if (inv) buttons.push({ text: `§2Accept invite\n§r§8${inv.clan.name} · from ${inv.fromName}`, run: () => acceptAndGoHome(player) });
-  buttons.push({ text: "Create a Clan\n§r§8Get your own island", run: () => createMenu(player) });
-  if (inv) buttons.push({ text: "Decline invite", run: () => report(player, declineInvite(player)) });
-  const form = new ActionFormData()
-    .title(CONFIG.serverName)
+  if (inv) buttons.push({ text: `§a§lACCEPT INVITE\n§r§7${inv.clan.name} · from ${inv.fromName}`, icon: CB.yes, run: () => acceptAndGoHome(player) });
+  buttons.push({ text: "§b§lCREATE A CLAN\n§r§7Get your own island", icon: CB.home, run: () => createMenu(player) });
+  if (inv) buttons.push({ text: "§c§lDECLINE INVITE", icon: CB.no, run: () => report(player, declineInvite(player)) });
+  const form = styled("cyan")
+    .title(CONFIG.serverName.toUpperCase())
     .body("§7You are not in a clan yet.\n\nCreate one to get an island, or ask a clan to invite you.");
-  for (const b of buttons) form.button(b.text);
+  for (const b of buttons) form.button(b.text, b.icon);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   await buttons[res.selection]?.run();
@@ -113,25 +143,25 @@ async function clanMenu(player, clan) {
   const role = roleOf(clan, player.id);
   const online = Object.keys(clan.members).filter((id) => world.getEntity(id)).length;
   const floors = [
-    { n: 9, text: "Settings", sub: "Chunk borders, full bright, raid sound, coords", run: () => playerSettingsMenu(player, () => mainMenu(player)) },
-    { n: 8, text: "Leaderboards", sub: "Raid wins, streaks, richest, core level", run: () => leaderboardsMenu(player) },
-    { n: 7, text: "Raid Log", sub: "Raids you did and raids on you", run: () => raidLogMenu(player) },
-    { n: 6, text: "Members", sub: `${online} / ${memberCount(clan)} online`, run: () => membersMenu(player) },
-    { n: 5, text: "Insurance", sub: "Get stolen money back", run: () => insuranceMenu(player) },
-    { n: 4, text: "Sky Shop", sub: "Buy and sell", run: () => skyShopMenu(player) },
-    { n: 3, text: "Clan Bank", sub: `${fmtMoney(bankOf(clan))} · ${hoursCovered(clan)}h of tax`, run: () => bankMenu(player) },
-    { n: 2, text: "Raids", sub: "Buy a raid", run: () => raidMenu(player) },
-    { n: 1, text: "Island Home", sub: "Teleport to your island", run: () => sendHome(player, clan) },
+    { n: 9, icon: CB.settings, text: "Settings", sub: "Chunk borders, full bright, raid sound, coords", run: () => playerSettingsMenu(player, () => mainMenu(player)) },
+    { n: 8, icon: CB.leaderboards, text: "Leaderboards", sub: "Raid wins, streaks, richest, core level", run: () => leaderboardsMenu(player) },
+    { n: 7, icon: CB.raidlog, text: "Raid Log", sub: "Raids you did and raids on you", run: () => raidLogMenu(player) },
+    { n: 6, icon: CB.members, text: "Members", sub: `${online} / ${memberCount(clan)} online`, run: () => membersMenu(player) },
+    { n: 5, icon: CB.insurance, text: "Insurance", sub: "Get stolen money back", run: () => insuranceMenu(player) },
+    { n: 4, icon: CB.shop, text: "Sky Shop", sub: "Buy and sell", run: () => skyShopMenu(player) },
+    { n: 3, icon: CB.bank, text: "Clan Bank", sub: `${fmtMoney(bankOf(clan))} · ${hoursCovered(clan)}h of tax`, run: () => bankMenu(player) },
+    { n: 2, icon: CB.raids, text: "Raids", sub: "Buy a raid", run: () => raidMenu(player) },
+    { n: 1, icon: CB.home, text: "Island Home", sub: "Teleport to your island", run: () => sendHome(player, clan) },
   ];
-  const buttons = floors.map((f) => ({ text: `F${f.n} ${f.text}\n§r§8${f.sub}`, run: f.run }));
-  if (player.hasTag("admin")) buttons.push({ text: "§4Admin\n§r§8Server tools", run: () => (floorHooks.admin ? floorHooks.admin(player) : adminMenu(player)) });
-  const form = new ActionFormData()
+  const buttons = floors.map((f) => ({ text: `§b§lF${f.n} §f§l${f.text.toUpperCase()}\n§r§7${f.sub}`, icon: f.icon, run: f.run }));
+  if (player.hasTag("admin")) buttons.push({ text: "§d§lADMIN\n§r§7Server tools", icon: CB.admin, run: () => (floorHooks.admin ? floorHooks.admin(player) : adminMenu(player)) });
+  const form = styled("cyan")
     .title(`${CONFIG.serverName} · ${clan.name}`)
     .body(
       `§7Clan §b${clan.name}§7 · ${ROLE_NAME[role]} · ${memberCount(clan)}/${CONFIG.clan.maxMembers} players\n` +
         `§7Bank §a${fmtMoney(bankOf(clan))}§7 · Shield ${shieldUp(clan) ? "§aONLINE" : "§cDOWN"}`
     );
-  for (const b of buttons) form.button(b.text);
+  for (const b of buttons) form.button(b.text, b.icon);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   await buttons[res.selection]?.run();
@@ -146,7 +176,7 @@ export async function bankMenu(player, msg) {
   if (!clan) return mainMenu(player);
   const manage = canManage(clan, player.id);
   const ledger = (clan.ledger ?? []).slice(0, 8).map((l) => `§8- §7${l.what} §8(${l.who})§r ${l.amt >= 0 ? "§a+" : "§c-"}${fmt(Math.abs(l.amt))}`);
-  const form = new ActionFormData()
+  const form = styled("gold")
     .title("Clan Bank")
     .body(
       (msg ? msg + "\n\n" : "") +
@@ -154,10 +184,10 @@ export async function bankMenu(player, msg) {
         `§7Covers §f${hoursCovered(clan)} hours§7 · your wallet §a${fmt(getBalance(player))}\n\n§fLedger\n` +
         (ledger.length ? ledger.join("\n") : "§8No transactions yet.")
     );
-  const buttons = [{ text: "Deposit", run: () => amountMenu(player, "Deposit", deposit) }];
-  if (manage) buttons.push({ text: "Withdraw", run: () => amountMenu(player, "Withdraw", withdraw) });
-  buttons.push({ text: "Back", run: () => mainMenu(player) });
-  for (const b of buttons) form.button(b.text);
+  const buttons = [{ text: "§a§lDEPOSIT\n§r§7From your wallet", icon: CB.bank, run: () => amountMenu(player, "Deposit", deposit) }];
+  if (manage) buttons.push({ text: "§c§lWITHDRAW\n§r§7To your wallet", icon: CB.sell, run: () => amountMenu(player, "Withdraw", withdraw) });
+  buttons.push({ text: "§cBACK\n§r§7Go back", icon: CB.back, run: () => mainMenu(player) });
+  for (const b of buttons) form.button(b.text, b.icon);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   await buttons[res.selection]?.run();
@@ -166,10 +196,10 @@ export async function bankMenu(player, msg) {
 const QUICK = [1000, 10000, 100000, 1000000];
 
 async function amountMenu(player, label, action) {
-  const form = new ActionFormData().title(label).body(`§7Your wallet §a${fmt(getBalance(player))}§7 · clan bank §a${fmt(bankOf(clanOf(player)))}`);
+  const form = styled("gold").title(label).body(`§7Your wallet §a${fmt(getBalance(player))}§7 · clan bank §a${fmt(bankOf(clanOf(player)))}`);
   const picks = QUICK.map((v) => ({ text: fmtMoney(v), v }));
   picks.push({ text: "All", v: "all" }, { text: "Other amount...", v: "custom" }, { text: "Back", v: "back" });
-  for (const p of picks) form.button(p.text);
+  for (const p of picks) form.button(p.text, p.icon ?? CB.bank);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   let v = picks[res.selection]?.v;
@@ -193,7 +223,7 @@ export async function coreTerminal(player, msg) {
   const clan = clanOf(player);
   if (!clan) return;
   const up = shieldUp(clan);
-  const form = new ActionFormData()
+  const form = styled("cyan")
     .title(`Core Terminal · ${clan.name}`)
     .body(
       (msg ? msg + "\n\n" : "") +
@@ -205,10 +235,10 @@ export async function coreTerminal(player, msg) {
     const lvl = levelOf(clan, u.id);
     const maxed = lvl >= u.max;
     const off = !up && u.id !== "size" && lvl > 0 ? " §c(off)" : "";
-    form.button(`${u.name} §8Lv ${lvl}/${u.max}${off}\n§r§8${maxed ? u.desc(lvl) + " · MAX" : `${fmtMoney(upgradeCost(u, lvl + 1))}: ${u.desc(lvl + 1)}`}`);
+    form.button(`${u.name} §8Lv ${lvl}/${u.max}${off}\n§r§8${maxed ? u.desc(lvl) + " · MAX" : `${fmtMoney(upgradeCost(u, lvl + 1))}: ${u.desc(lvl + 1)}`}`, UPGRADE_ICON[u.id]);
   }
-  form.button("Deposit to Bank");
-  form.button("Close");
+  form.button("§e§lDEPOSIT\n§r§7Add money to the clan bank", CB.bank);
+  form.button("§cCLOSE", CB.back);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   if (res.selection < UPGRADES.length) {
@@ -236,12 +266,12 @@ async function membersMenu(player) {
   const list = Object.entries(clan.members).sort(
     (a, b) => ROLE_ORDER[a[1].role] - ROLE_ORDER[b[1].role] || a[1].joined - b[1].joined
   );
-  const form = new ActionFormData().title(`Members · ${clan.name}`).body("§7Pick a player to see what you can do.");
+  const form = styled("blue").title(`Members · ${clan.name}`).body("§7Pick a player to see what you can do.");
   for (const [id, m] of list) {
     const on = world.getEntity(id) ? "§2online" : "§8offline";
-    form.button(`${m.name}${id === player.id ? " §8(you)" : ""}\n§r§8${ROLE_NAME[m.role]} · ${on}`);
+    form.button(`${m.name}${id === player.id ? " §8(you)" : ""}\n§r§8${ROLE_NAME[m.role]} · ${on}`, m.role === "owner" ? CB.crown : CB.members);
   }
-  form.button("Back");
+  form.button("§cBACK\n§r§7Go back", CB.back);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   if (res.selection === list.length) return mainMenu(player);
@@ -263,11 +293,11 @@ async function memberActions(player, targetId, targetName) {
   if (mine === ROLE.owner)
     actions.push(["Transfer Leadership", () => transferLeadership(player, targetId), `Make ${targetName} the Owner? You become a Co-Owner.`]);
 
-  const form = new ActionFormData()
+  const form = styled("blue")
     .title(targetName)
     .body(`§7${ROLE_NAME[theirs]} · joined ${new Date(clan.members[targetId].joined).toDateString()}`);
-  for (const [label] of actions) form.button(label);
-  form.button("Back");
+  for (const [label] of actions) form.button(label, CB.members);
+  form.button("§cBACK\n§r§7Go back", CB.back);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   const pick = actions[res.selection];
@@ -292,8 +322,8 @@ async function inviteMenu(player) {
     player.sendMessage(`${CONFIG.prefix}Nobody online is without a clan right now.`);
     return;
   }
-  const form = new ActionFormData().title("Invite a Player").body("§7Online players with no clan:");
-  for (const p of candidates) form.button(p.name);
+  const form = styled("blue").title("Invite a Player").body("§7Online players with no clan:");
+  for (const p of candidates) form.button(p.name, CB.members);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   const target = candidates[res.selection];
@@ -349,17 +379,17 @@ export async function raidMenu(player, msg) {
     running ? `§6Your clan is in a raid right now.` : "",
     manage ? "" : "§8Only the Owner and Co-Owners can buy raids.",
   ].filter(Boolean);
-  const form = new ActionFormData().title("Raid Dispatch").body(lines.join("\n"));
+  const form = styled("red").title("Raid Dispatch").body(lines.join("\n"));
   const opts = [];
-  if (running && R.raidOfPlayer(player)) opts.push({ text: "§cBack out\n§r§8Within 30s of arriving, 50% refund", run: () => mainMenu(player, R.backOut(player)) });
+  if (running && R.raidOfPlayer(player)) opts.push({ text: "§c§lBACK OUT\n§r§7Within 30s of arriving, 50% refund", icon: CB.stop, run: () => mainMenu(player, R.backOut(player)) });
   if (!running && manage) {
     for (const t of RAID_TYPES) {
       if (t.type === "revenge" && !revenge) continue;
-      opts.push({ text: `${t.name} · ${fmtMoney(R.priceOf(t.type))}\n§r§8${t.sub}`, run: () => startRaid(player, t.type) });
+      opts.push({ text: `§c§l${t.name.toUpperCase()} §r§e${fmtMoney(R.priceOf(t.type))}\n§r§7${t.sub}`, icon: { normal: CB.raids, intel: CB.intel, cheap: CB.broken, revenge: CB.skull }[t.type], run: () => startRaid(player, t.type) });
     }
   }
-  opts.push({ text: "Back", run: () => mainMenu(player) });
-  for (const o of opts) form.button(o.text);
+  opts.push({ text: "§cBACK\n§r§7Go back", icon: CB.back, run: () => mainMenu(player) });
+  for (const o of opts) form.button(o.text, o.icon);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   await opts[res.selection]?.run();
@@ -403,7 +433,7 @@ export async function insuranceMenu(player, msg) {
   const owned = clan.insurance ?? 0;
   const tiers = CONFIG.insurance;
   const lines = tiers.map((t, i) => `${i < owned ? "§a✔" : i === owned ? "§e›" : "§8✖"} §f${t.name} §7${Math.round(t.pct * 100)}% back · ${fmt(t.price)}`);
-  const form = new ActionFormData()
+  const form = styled("green")
     .title("Insurance Vault")
     .body(
       (msg ? msg + "\n\n" : "") +
@@ -412,13 +442,13 @@ export async function insuranceMenu(player, msg) {
         `\n\n§7Clan bank §a${fmt(bankOf(clan))}`
     );
   const opts = [];
-  if (owned < tiers.length) opts.push({ text: `Buy ${tiers[owned].name} · ${fmtMoney(tiers[owned].price)}`, run: async () => {
+  if (owned < tiers.length) opts.push({ text: `§a§lBUY ${tiers[owned].name.toUpperCase()} §r§e${fmtMoney(tiers[owned].price)}\n§r§7${Math.round(tiers[owned].pct * 100)}% of stolen money back`, icon: CB.insurance, run: async () => {
     if (!(await confirm(player, "Insurance", `Buy ${tiers[owned].name} insurance for ${fmt(tiers[owned].price)} from the clan bank?`, "Buy"))) return insuranceMenu(player);
     const r = A.buyInsurance(player);
     return insuranceMenu(player, (r.ok ? "§a" : "§c") + r.msg);
   } });
-  opts.push({ text: "Back", run: () => mainMenu(player) });
-  for (const o of opts) form.button(o.text);
+  opts.push({ text: "§cBACK\n§r§7Go back", icon: CB.back, run: () => mainMenu(player) });
+  for (const o of opts) form.button(o.text, o.icon);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   await opts[res.selection]?.run();
@@ -447,10 +477,10 @@ export async function raidLogMenu(player, filter = "all") {
     (list.length
       ? list.slice(0, 15).map((e) => `${LOG_LABEL[e.kind] ?? e.kind} §f${e.other} §7${e.money >= 0 ? "§a+" : "§c-"}${fmt(Math.abs(e.money))} §8${ago(e.t)}\n §8${e.detail ?? ""}`).join("\n")
       : "§8Nothing here yet.");
-  const form = new ActionFormData().title("Raid Log").body(body);
+  const form = styled("orange").title("Raid Log").body(body);
   const tabs = [["all", "All"], ["ours", "Our raids"], ["theirs", "Raids on us"]];
-  for (const [id, label] of tabs) form.button(`${id === filter ? "§l" : ""}${label}`);
-  form.button("Back");
+  for (const [id, label] of tabs) form.button(`${id === filter ? "§e§l" : ""}${label}`, CB.raidlog);
+  form.button("§cBACK\n§r§7Go back", CB.back);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   if (res.selection < tabs.length) return raidLogMenu(player, tabs[res.selection][0]);
@@ -463,11 +493,11 @@ export async function leaderboardsMenu(player, id = "wins") {
   const b = A.BOARDS.find((x) => x.id === id) ?? A.BOARDS[0];
   const rank = own ? rows.findIndex((r) => r.clan.id === own.id) + 1 : 0;
   const top = rows.slice(0, 10).map((r, i) => `${i < 3 ? ["§6", "§f", "§c"][i] : "§7"}#${i + 1} §f${r.clan.name} §7${r.text}${own && r.clan.id === own.id ? " §b(you)" : ""}`);
-  const form = new ActionFormData()
+  const form = styled("purple")
     .title(`Leaderboards · ${b.name}`)
     .body((top.length ? top.join("\n") : "§8No clans yet.") + (own && rank > 10 ? `\n\n§b#${rank} ${own.name} §7${rows[rank - 1].text}` : ""));
-  for (const x of A.BOARDS) form.button(`${x.id === id ? "§l" : ""}${x.name}`);
-  form.button("Back");
+  for (const x of A.BOARDS) form.button(`${x.id === id ? "§e§l" : ""}${x.name}`, { wins: CB.raids, streak: CB.insurance, richest: CB.bank, core: CB.core }[x.id]);
+  form.button("§cBACK\n§r§7Go back", CB.back);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   if (res.selection < A.BOARDS.length) return leaderboardsMenu(player, A.BOARDS[res.selection].id);

@@ -38,6 +38,9 @@ export const CONFIG = {
     backOutSeconds: 30, // raiders can back out this long after arriving
     backOutRefund: 0.5, // share of the price paid back when backing out (or walking away from intel)
     launchDistance: 60, // blocks from the target's border to the launch island
+    bridgeSeconds: 600, // time to bridge across (Defence Time takes 30s off per level)
+    lives: 3, // per raider (Extra Raid Life adds more)
+    immunityHours: 12, // raid shield after being raided (Raid Shield Length adds 3h per level)
     lootSeconds: 900, // after a raider lands
     bankStolen: 0.25, // share of the target's clan bank taken on a win
     underdogBonus: 0.5, // extra (from the server) when a poorer clan wins against a richer one
@@ -87,9 +90,9 @@ export const UPGRADES = [
   { id: "ore", name: "Ore Generator", max: 8, base: 50000, icon: "bolt", desc: (l) => (l ? `${4 * l}% ore chance, up to ${ORE_NAMES[l - 1]}` : "Cobblestone only") },
   { id: "spawners", name: "Spawner Cap", max: 8, base: 50000, icon: "cage", desc: (l) => `Up to ${10 + 5 * l} spawners` },
   { id: "crops", name: "Crop Growth", max: 8, base: 50000, icon: "wheat", desc: (l) => `Crops grow x${(1 + 0.25 * l).toFixed(2)} faster` },
-  { id: "shield", name: "Raid Shield Length", max: 4, base: 100000, icon: "shield", desc: (l) => `Immune ${12 + 3 * l}h after a raid` },
-  { id: "defence", name: "Defence Time", max: 4, base: 100000, icon: "clock", desc: (l) => `Raiders get ${10 * 60 - 30 * l}s to bridge to you` },
-  { id: "lives", name: "Extra Raid Life", max: 2, base: 250000, icon: "heart", desc: (l) => `Your raiders get ${3 + l} lives` },
+  { id: "shield", name: "Raid Shield Length", max: 4, base: 100000, icon: "shield", desc: (l) => `Immune ${CONFIG.raid.immunityHours + 3 * l}h after a raid` },
+  { id: "defence", name: "Defence Time", max: 4, base: 100000, icon: "clock", desc: (l) => `Raiders get ${CONFIG.raid.bridgeSeconds - 30 * l}s to bridge to you` },
+  { id: "lives", name: "Extra Raid Life", max: 2, base: 250000, icon: "heart", desc: (l) => `Your raiders get ${CONFIG.raid.lives + l} lives` },
 ];
 
 // Ore Generator: ores unlocked per level (best last) and their weights.

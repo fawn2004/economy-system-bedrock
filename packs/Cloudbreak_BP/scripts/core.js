@@ -28,9 +28,9 @@ export const upgradeCost = (u, nextLevel) => u.base * 2 ** (nextLevel - 1);
 export const sellMult = (clan) => 1 + 0.25 * activeLevel(clan, "sell");
 export const spawnerCap = (clan) => 10 + 5 * activeLevel(clan, "spawners");
 export const cropMult = (clan) => 1 + 0.25 * activeLevel(clan, "crops");
-export const raidImmunityHours = (clan) => 12 + 3 * activeLevel(clan, "shield");
-export const defenceSeconds = (clan) => 10 * 60 - 30 * activeLevel(clan, "defence");
-export const raidLives = (clan) => 3 + activeLevel(clan, "lives");
+export const raidImmunityHours = (clan) => CONFIG.raid.immunityHours + 3 * activeLevel(clan, "shield");
+export const defenceSeconds = (clan) => Math.max(60, CONFIG.raid.bridgeSeconds - 30 * activeLevel(clan, "defence"));
+export const raidLives = (clan) => CONFIG.raid.lives + activeLevel(clan, "lives");
 
 /** Hours of tax the bank can pay for. */
 export const hoursCovered = (clan) => Math.floor(bankOf(clan) / K.taxPerHour);
