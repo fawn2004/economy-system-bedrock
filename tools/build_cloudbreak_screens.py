@@ -266,8 +266,9 @@ def admin():
         Text([0, stp[1] / 2, stp[0]], 0.52, align="center", anchor="left_middle")]), orient="horizontal", gap=2, click=True, align="top_right")
     s.zone("N", R(695, 426, 762, 462), sz(67, 36), Face(parts=[Text([0, 6.5, 24], 0.62, font=TEN, align="center", anchor="left_middle")]))
     give = sz(500, 42)
-    s.zone("GIVE", R(261, 537, 761, 580), give, Face(box(COL["PINK"], bottom="#C94F92"), [("OFF", box("#2A3140"))], [
-        Text([0, give[1] / 2, give[0]], 0.65, "#2A0E1E", font=TEN, align="center", anchor="left_middle")]), click=True)
+    # bright green with a white outline, like CONFIRM in the Clan Bank: easy to spot
+    s.zone("GIVE", R(261, 537, 761, 580), give, Face(box("#3DDC97", "#FFFFFF", bottom="#2A9C6B"), [("OFF", box("#2A3140"))], [
+        Text([0, give[1] / 2, give[0]], 0.7, "#0E1A14", font=TEN, align="center", anchor="left_middle")]), click=True)
     s.box(R(792, 71, 1076, 593), "#11151D", "#252D3B")
     s.zone("LOCK", R(806, 85, 1062, 280), sz(256, 195), Face(parts=[
         Img([38, 2, 16, 13], LOCK, when="!ADM"), Img([38, 2, 16, 13], UNLOCK, when="ADM"),
