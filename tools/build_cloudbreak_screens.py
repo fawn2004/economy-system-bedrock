@@ -235,7 +235,7 @@ def admin():
     s.text(R(24, 36, 82, 46)[:3], "ADMIN", scale=0.5, color="#2A0E1E", align="center", font=TEN)
     s.text(R(96, 30, 600, 60)[:3], "CONTROL ROOM", scale=1.35, font=TEN)
     pill = sz(100, 30)
-    s.zone("PILL", R(680, 26, 1040, 56), pill, Face(box("#141A24", "#252D3B"), parts=[Text([0, pill[1] / 2, pill[0]], 0.55, align="center", anchor="left_middle")]),
+    s.zone("PILL", R(640, 26, 1000, 56), pill, Face(box("#141A24", "#252D3B"), parts=[Text([0, pill[1] / 2, pill[0]], 0.55, align="center", anchor="left_middle")]),
            orient="horizontal", gap=2, align="top_right")
     s.box(R(24, 71, 229, 593), "#11151D", "#252D3B")
     s.text(R(36, 86, 200, 96)[:3], "P L A Y E R S", scale=0.5, color="#8E9BB5")
@@ -550,8 +550,14 @@ def write_layout_js(layouts):
         f.write("export const LAYOUT = " + json.dumps(layouts, indent=2) + ";\n")
 
 
+NO_BACK = {"tower", "terminal", "crate"}  # main menu, Core Terminal (block only), crate (opened from a key)
+
+
 def build():
     screens = [f() for f in SCREENS]
+    for sc in screens:
+        if sc.sid not in NO_BACK:
+            sc.back_button()
     layouts = {s.sid: s.layout(SINGLES[s.sid]) for s in screens}
     write_layout_js(layouts)
     write_ui(screens, os.path.join(RP, "ui", "cb_screens.json"))  # first: it registers the hover textures too

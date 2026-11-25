@@ -26,6 +26,7 @@ import { registerBorder } from "./border.js";
 import { adminPanel, applySavedRules } from "./admin.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
+import { setBack } from "./screens.js";
 
 const MENU_ITEM = CONFIG.menuItem.id;
 
@@ -169,6 +170,7 @@ async function runClanCommand(player, action, arg) {
     case "back":
       return say(player, backOut(player));
     case "raid":
+      setBack(player, (p) => mainMenu(p));
       return raidMenu(player);
     default:
       return openMenu(player);

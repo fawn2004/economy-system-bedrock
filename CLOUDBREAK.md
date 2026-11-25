@@ -4,7 +4,7 @@ Clans of up to 5 share a floating island, grind it up like skyblock, and buy bli
 other islands. The full design is in the Cloudbreak design doc; the UI mockups are on the
 Cloudbreak UI canvas.
 
-Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.6.2). Cloudbreak contains its
+Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.6.3). Cloudbreak contains its
 own copy of the Skyblock Economy code (`scripts/eco`), so it does **not** need the Skyblock
 Economy packs. Don't run both in the same world.
 
@@ -16,7 +16,7 @@ offline tests (`tools/cloudbreak_tests/run.sh`).
 | Milestone | What |
 | --- | --- |
 | 1 | Clans (Owner / Co-Owner / Member, max 5) and islands on a void grid |
-| 2 | Island Core, hourly core tax, 9 core upgrades, clan bank |
+| 2 | Island Core, hourly core tax, 8 core upgrades, clan bank |
 | 3 | Raids: Normal, Intel, Cheap, Revenge; bridge, lives, loot, cleanup |
 | 4 | Raid immunity, insurance, revenge, raid log, leaderboards, crate keys |
 | 5 | Sky Shop, crates (reel animation), kits |
@@ -69,9 +69,9 @@ If another addon already uses one of these names, add the namespace: `/cb:menu`,
 - **Island Core:** tap it for the Core Terminal. It charges $10,000 from the clan bank for every
   hour a member is online. If the bank can't pay: a 30-minute grace, then the shield drops, all
   upgrades switch off and the island shows up in Cheap Raids. Paying brings everything back.
-- **Upgrades:** Island Size, Sell Multiplier (up to x3, every sell), Island Fly, Ore Generator
-  (cobblestone generators sometimes make ores), Spawner Cap (10 → 50), Crop Growth (up to x3),
-  Raid Shield Length, Defence Time (raiders get less time to reach you), Extra Raid Life.
+- **Upgrades:** Island Size, Sell Multiplier (up to x3, every sell), Island Fly, Spawner Cap
+  (10 → 50), Crop Growth (up to x3), Raid Shield Length, Defence Time (raiders get less time to
+  reach you), Extra Raid Life. One tap on a card buys it.
 - **Raids:** bought by the Owner or a Co-Owner. Everyone online goes to a launch island 60 blocks
   out and has 10 minutes to bridge across. Landing wins: 25% of the target's bank (+50% from the
   server if the raiders' clan is poorer), then 15 minutes of looting. Failing pays the raid fee to

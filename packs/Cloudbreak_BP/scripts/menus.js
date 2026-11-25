@@ -27,7 +27,7 @@ import { fmt, fmtMoney, getBalance, sellMultiplier } from "./eco/economy.js";
 import { adminMenu, skyShopMenu } from "./eco/menus.js";
 import { playerSettingsMenu, settingsOnCount } from "./eco/playerSettings.js";
 import { ecoTitle } from "./eco/ui.js";
-import { ART, BANNER, Screen, headFor, spaced } from "./screens.js";
+import { ART, BANNER, Screen, headFor, setBack, setDefaultBack, spaced } from "./screens.js";
 import * as R from "./raids.js";
 import * as A from "./after.js";
 
@@ -37,7 +37,7 @@ export const setFloor = (id, fn) => (floorHooks[id] = fn);
 
 // Cloudbreak icons (textures/ui/cb, built by tools/build_cloudbreak_ui.py)
 const CB = new Proxy({}, { get: (_, name) => `textures/ui/cb/icon_${String(name)}` });
-const UPGRADE_ICON = { size: CB.size, sell: CB.sell, fly: CB.fly, ore: CB.ore, spawners: CB.spawners, crops: CB.crops, shield: CB.insurance, defence: CB.clock, lives: CB.heart };
+const UPGRADE_ICON = { size: CB.size, sell: CB.sell, fly: CB.fly, spawners: CB.spawners, crops: CB.crops, shield: CB.insurance, defence: CB.clock, lives: CB.heart };
 
 /** Small confirm/info dialogs still use the coloured tile layout. */
 function styled(theme = "blue") {
@@ -96,6 +96,8 @@ const signed = (n) => `${n >= 0 ? "+" : "-"}${fmt(Math.abs(n))}`;
 // here: it only opens by tapping the Island Core block.)
 // ---------------------------------------------------------------------------
 
+setDefaultBack((player) => tower(player));
+
 export async function mainMenu(player, result) {
   if (result?.msg) report(player, result);
   return tower(player);
@@ -141,7 +143,8 @@ const compact = (n) => (n >= 1e6 ? fmtMoney(n) : n >= 1000 ? `$${Math.floor(n / 
 export async function tower(player) {
   const clan = clanOf(player);
   const s = new Screen("tower", "Main Menu");
-  for (const t of tilesFor(player)) s.button("TL", `§f${t.name}\n§7${t.sub}`, t.run, { icon: t.icon, states: [`c${t.col}`, t.badge ? "BADGE" : undefined] });
+  // Back on any menu opened from here returns to this main menu
+  for (const t of tilesFor(player)) s.button("TL", `§f${t.name}\n§7${t.sub}`, () => (setBack(player, tower), t.run()), { icon: t.icon, states: [`c${t.col}`, t.badge ? "BADGE" : undefined] });
   s.text("K", spaced(clan ? `Clan ${clan.name} · ${ROLE_NAME[roleOf(clan, player.id)]} · ${onlineIds(clan).length} / ${memberCount(clan)} online` : "No clan yet"));
   if (clan) s.text("PILL", `Bank §e${compact(bankOf(clan))}`);
   s.text("PILL", `Wallet §a${compact(getBalance(player))}`);
@@ -263,14 +266,15 @@ export async function coreTerminal(player, msg) {
   s.text("UPV", `§f${fmtMoney(CONFIG.core.taxPerHour)} / hr\n§f${minutesToTax(clan)} min\n${hours >= 24 ? "§a" : "§c"}${hours} hours`);
   const lit = Math.max(0, Math.min(10, Math.round(hours / 24)));
   for (let i = 0; i < 10; i++) s.text("BAR", "", { states: [i < lit ? "ON" : undefined] });
-  s.button("DEP", "DEPOSIT TO BANK", () => bankMenu(player, { mode: "deposit" }));
+  const fromCore = (fn) => () => (setBack(player, (p) => coreTerminal(p)), fn());
+  s.button("DEP", "DEPOSIT TO BANK", fromCore(() => bankMenu(player, { mode: "deposit" })));
   s.text("HDR", msg ?? "Upgrades only work while upkeep is paid");
   const tabs = [
     ["Modules", () => coreTerminal(player), true],
-    ["Upkeep", () => bankMenu(player)],
-    ["Raid Log", () => raidLogMenu(player)],
-    ["Insurance", () => insuranceMenu(player)],
-    ["Settings", () => playerSettingsMenu(player, () => coreTerminal(player))],
+    ["Upkeep", fromCore(() => bankMenu(player))],
+    ["Raid Log", fromCore(() => raidLogMenu(player))],
+    ["Insurance", fromCore(() => insuranceMenu(player))],
+    ["Settings", fromCore(() => playerSettingsMenu(player))],
   ];
   for (const [name, run, on] of tabs) s.button("TAB", on ? `§f${name}` : name, run, { states: [on ? "ON" : undefined] });
   await s.show(player);

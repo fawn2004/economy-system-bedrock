@@ -24,6 +24,15 @@ export function headFor(name) {
   return `textures/ui/cb/s/head_${h % 7}`;
 }
 
+// ---- Back arrow ---------------------------------------------------------------
+// Each player remembers where Back should go: the main menu, or the Core Terminal
+// when a menu was opened from it. Menus that redraw themselves keep it.
+const backTo = new Map();
+let defaultBack = () => {};
+export const setDefaultBack = (fn) => (defaultBack = fn);
+export const setBack = (player, fn) => backTo.set(player.id, fn);
+const goBack = (player) => (backTo.get(player.id) ?? defaultBack)(player);
+
 export const BANNER = (i) => `textures/ui/cb/s/banner_${((i % 10) + 10) % 10}`;
 export const ART = (name) => `textures/ui/cb/s/${name}`;
 
@@ -79,6 +88,8 @@ export class Screen {
 
   /** Shows the screen; runs the tapped item. Resolves to the tapped item (or undefined). */
   async show(player) {
+    if ((LAYOUT[this.id]?.singles ?? []).includes("BACK") && !this.items.some((i) => i.tag === "BACK"))
+      this.button("BACK", "", () => goBack(player));
     const form = this.form();
     Screen.last = this;
     const order = this.ordered();

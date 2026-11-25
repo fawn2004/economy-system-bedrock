@@ -49,4 +49,23 @@ await t('main menu: one tap on a tile opens that menu (no floors, no Core Termin
   await M.tower(a);
   assert.ok(last()._title.startsWith('§c§b§2§r'),'the Clan Bank screen opened');
 });
+await t('Back returns to the main menu, or to the Core Terminal when opened from it',async()=>{
+  const backIdx=()=>last()._buttons.findIndex(b=>b.text.startsWith('[BACK]'));
+  // main menu -> Clan Bank -> Back
+  await M.tower(a);
+  const bankTile=last()._buttons.findIndex(b=>b.text.startsWith('[TL]')&&b.text.includes('Clan Bank'));
+  ActionFormData.queue.push(bankTile); await M.tower(a);
+  assert.ok(last()._title.startsWith('§c§b§2§r'),'bank open'); assert.ok(backIdx()>=0,'bank has a back arrow');
+  ActionFormData.queue.push(backIdx()); await M.bankMenu(a);
+  assert.ok(last()._title.startsWith('§c§b§0§r'),'back to the main menu');
+  // Core Terminal -> Upkeep tab -> Back
+  await M.coreTerminal(a);
+  const upkeep=last()._buttons.findIndex(b=>b.text.startsWith('[TAB]')&&b.text.includes('Upkeep'));
+  ActionFormData.queue.push(upkeep); await M.coreTerminal(a);
+  ActionFormData.queue.push(backIdx()); await M.bankMenu(a);
+  assert.ok(last()._title.startsWith('§c§b§t§r'),'back to the Core Terminal');
+  // no back arrow on the main menu or the Core Terminal
+  await M.tower(a); assert.equal(backIdx(),-1);
+  await M.coreTerminal(a); assert.equal(backIdx(),-1);
+});
 console.log(`\n${n} tests passed`);

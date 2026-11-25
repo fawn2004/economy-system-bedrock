@@ -1,5 +1,5 @@
 import { BlockPermutation, BlockStates, BlockVolume, system, world } from "@minecraft/server";
-import { CONFIG, ORES, UPGRADES } from "./config.js";
+import { CONFIG, UPGRADES } from "./config.js";
 import { allClans, clanOf, onlineMembers, saveClan, tellClan } from "./clans.js";
 import { addLedger, bankOf, spend } from "./bank.js";
 import { clanAt, inBorder, inIslandArea } from "./islands.js";
@@ -182,43 +182,6 @@ function flyTick() {
 }
 
 // ---------------------------------------------------------------------------
-// Ore Generator: a cobblestone generator sometimes refills with an ore
-// ---------------------------------------------------------------------------
-
-const GEN_BLOCKS = new Set(["minecraft:cobblestone", "minecraft:stone"]);
-const LAVA = new Set(["minecraft:lava", "minecraft:flowing_lava"]);
-
-function nearLava(dim, loc) {
-  for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, 1, 0], [0, -1, 0]]) {
-    try {
-      if (LAVA.has(dim.getBlock({ x: loc.x + dx, y: loc.y + dy, z: loc.z + dz })?.typeId)) return true;
-    } catch {}
-  }
-  return false;
-}
-
-function pickOre(level) {
-  const pool = ORES.slice(0, level);
-  let r = Math.random() * pool.reduce((n, o) => n + o[1], 0);
-  for (const [id, w] of pool) if ((r -= w) <= 0) return id;
-  return pool[0][0];
-}
-
-function onGeneratorBreak(dim, loc, typeId) {
-  if (!GEN_BLOCKS.has(typeId) || !inIslandArea(dim.id, loc)) return;
-  const clan = clanAt(dim.id, loc);
-  const lvl = activeLevel(clan, "ore");
-  if (!lvl || !nearLava(dim, loc)) return;
-  // wait for the generator to refill, then maybe swap the new block for an ore
-  system.runTimeout(() => {
-    try {
-      const b = dim.getBlock(loc);
-      if (b && GEN_BLOCKS.has(b.typeId) && Math.random() < 0.04 * lvl) b.setPermutation(BlockPermutation.resolve(pickOre(lvl)));
-    } catch {}
-  }, 30);
-}
-
-// ---------------------------------------------------------------------------
 // Crop Growth: extra growth for crops near clan members on their own island
 // ---------------------------------------------------------------------------
 
@@ -285,10 +248,6 @@ export function registerCore() {
     if (!clan) return Infinity;
     const used = countSpawnersWhere((d) => d.dim === dimId && inBorder(clan, d));
     return spawnerCap(clan) - used;
-  });
-
-  world.afterEvents.playerBreakBlock.subscribe(({ block, brokenBlockPermutation, dimension }) => {
-    onGeneratorBreak(dimension, block.location, brokenBlockPermutation.type.id);
   });
 
   // The core can't be broken or blown up; tapping it opens the Core Terminal.

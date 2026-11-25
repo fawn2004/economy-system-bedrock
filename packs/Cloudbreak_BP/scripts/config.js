@@ -87,7 +87,6 @@ export const UPGRADES = [
   { id: "size", name: "Island Size", max: 8, base: 50000, icon: "expand", desc: (l) => `Border ${100 + 25 * l} x ${100 + 25 * l}` },
   { id: "sell", name: "Sell Multiplier", max: 8, base: 50000, icon: "coin", desc: (l) => `Sell prices x${(1 + 0.25 * l).toFixed(2)}` },
   { id: "fly", name: "Island Fly", max: 1, base: 250000, icon: "feather", desc: (l) => (l ? "Fly anywhere on your island" : "Not unlocked") },
-  { id: "ore", name: "Ore Generator", max: 8, base: 50000, icon: "bolt", desc: (l) => (l ? `${4 * l}% ore chance, up to ${ORE_NAMES[l - 1]}` : "Cobblestone only") },
   { id: "spawners", name: "Spawner Cap", max: 8, base: 50000, icon: "cage", desc: (l) => `Up to ${10 + 5 * l} spawners` },
   { id: "crops", name: "Crop Growth", max: 8, base: 50000, icon: "wheat", desc: (l) => `Crops grow x${(1 + 0.25 * l).toFixed(2)} faster` },
   { id: "shield", name: "Raid Shield Length", max: 4, base: 100000, icon: "shield", desc: (l) => `Immune ${CONFIG.raid.immunityHours + 3 * l}h after a raid` },
@@ -95,15 +94,3 @@ export const UPGRADES = [
   { id: "lives", name: "Extra Raid Life", max: 2, base: 250000, icon: "heart", desc: (l) => `Your raiders get ${CONFIG.raid.lives + l} lives` },
 ];
 
-// Ore Generator: ores unlocked per level (best last) and their weights.
-export const ORES = [
-  ["minecraft:coal_ore", 40],
-  ["minecraft:iron_ore", 25],
-  ["minecraft:copper_ore", 20],
-  ["minecraft:gold_ore", 12],
-  ["minecraft:redstone_ore", 10],
-  ["minecraft:lapis_ore", 8],
-  ["minecraft:diamond_ore", 4],
-  ["minecraft:emerald_ore", 2],
-];
-export const ORE_NAMES = ["Coal", "Iron", "Copper", "Gold", "Redstone", "Lapis", "Diamond", "Emerald"];

@@ -15,7 +15,8 @@ export const LAYOUT = {
       "K",
       "OW",
       "SA",
-      "ACT2"
+      "ACT2",
+      "BACK"
     ]
   },
   "bank": {
@@ -28,13 +29,16 @@ export const LAYOUT = {
       "TAX",
       "MSG",
       "CF",
-      "OK"
+      "OK",
+      "BACK"
     ]
   },
   "settings": {
     "grid": "SET",
     "gridSize": 4,
-    "singles": []
+    "singles": [
+      "BACK"
+    ]
   },
   "admin": {
     "grid": "OPT",
@@ -46,7 +50,8 @@ export const LAYOUT = {
       "N",
       "GIVE",
       "LOCK",
-      "LOCKT"
+      "LOCKT",
+      "BACK"
     ]
   },
   "dispatch": {
@@ -56,7 +61,8 @@ export const LAYOUT = {
       "K",
       "RV",
       "RVP",
-      "FT"
+      "FT",
+      "BACK"
     ]
   },
   "insurance": {
@@ -64,7 +70,8 @@ export const LAYOUT = {
     "gridSize": 0,
     "singles": [
       "K",
-      "LC"
+      "LC",
+      "BACK"
     ]
   },
   "shop": {
@@ -74,7 +81,8 @@ export const LAYOUT = {
       "HI",
       "HT",
       "SELL",
-      "BAL"
+      "BAL",
+      "BACK"
     ]
   },
   "crate": {
@@ -94,7 +102,8 @@ export const LAYOUT = {
       "K",
       "V1",
       "V2",
-      "V3"
+      "V3",
+      "BACK"
     ]
   },
   "boards": {
@@ -108,7 +117,8 @@ export const LAYOUT = {
       "MER",
       "MEW",
       "MES",
-      "NONE"
+      "NONE",
+      "BACK"
     ]
   },
   "terminal": {

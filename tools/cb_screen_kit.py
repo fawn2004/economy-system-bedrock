@@ -180,6 +180,13 @@ class Screen:
         self.zones.append(z)
         return z
 
+    def back_button(self):
+        """A small back arrow left of the close X. The script decides where it goes."""
+        bk = (11, 11)
+        self.zone("BACK", [W - 27, 2, bk[0], bk[1]], bk, Face(box("#1A202C", "#3A4458"), parts=[Img([1.5, 1.5, 8, 8], "textures/ui/cb/icon_back")]),
+                  click=True)
+        return self
+
     def layout(self, singles):
         """Button order the script must send: the grid's cells first (padded to
         cols x rows), then one button per single zone in this order, then lists."""
@@ -190,7 +197,7 @@ class Screen:
         by = {}
         for z in self.zones:
             by.setdefault(z.tag, z)
-        self.singles = list(singles)
+        self.singles = list(singles) + (["BACK"] if "BACK" in by and "BACK" not in singles else [])
         for i, tag in enumerate(self.singles):
             z = by[tag]
             assert not z.grid, tag
