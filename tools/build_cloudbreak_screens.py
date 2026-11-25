@@ -508,9 +508,9 @@ def write_server_form(screens):
     title = "#title_text"
     def has(m):
         return f"(not (({title} - '{m}') = {title}))"
-    # plain form only when the title has none of our markers (each checked in full, no lone "§", no double "not")
-    no = lambda m: f"(({title} - '{m}') = {title})"
-    vanilla = "(" + " and ".join([no("§e§c§o")] + [no(s.marker) for s in screens]) + ")"
+    # plain form only when the title has neither marker. Kept to exactly two checks:
+    # longer "and" chains aren't read reliably. Every screen marker starts with "§c§b".
+    vanilla = f"((({title} - '§e§c§o') = {title}) and (({title} - '§c§b') = {title}))"
     ctrls = [
         {"vanilla_long_form": {
             "type": "panel", "size": [225, 200],
