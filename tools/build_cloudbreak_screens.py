@@ -553,6 +553,28 @@ def write_layout_js(layouts):
 NO_BACK = {"tower", "terminal", "crate"}  # main menu, Core Terminal (block only), crate (opened from a key)
 
 
+def check_buttons(path):
+    """A form button only knows which button it is when it sits DIRECTLY in the row/cell
+    that a factory or grid creates (an "_item" definition). Fail the build otherwise."""
+    import re as _re
+    ui = json.loads(_re.sub(r"^\s*//.*$", "", open(path).read(), flags=_re.M))
+
+    def buttons(node, depth, where):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if isinstance(v, dict) and v.get("type") == "button":
+                    if not (where.endswith("_item") and depth == 1):
+                        raise SystemExit(f"button '{k}' in {where} is not a direct child of a row/cell")
+                if isinstance(v, (dict, list)):
+                    buttons(v, depth + (1 if k == "controls" else 0), where)
+        elif isinstance(node, list):
+            for x in node:
+                buttons(x, depth, where)
+    for name, d in ui.items():
+        if isinstance(d, dict):
+            buttons(d, 0, name)
+
+
 def build():
     screens = [f() for f in SCREENS]
     for sc in screens:
@@ -561,6 +583,7 @@ def build():
     layouts = {s.sid: s.layout(SINGLES[s.sid]) for s in screens}
     write_layout_js(layouts)
     write_ui(screens, os.path.join(RP, "ui", "cb_screens.json"))  # first: it registers the hover textures too
+    check_buttons(os.path.join(RP, "ui", "cb_screens.json"))
     n = write_textures()
     write_server_form(screens)
     print(f"Built {len(screens)} screens, {n} textures.")
