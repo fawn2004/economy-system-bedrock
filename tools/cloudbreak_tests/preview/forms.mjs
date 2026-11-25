@@ -99,6 +99,7 @@ await grab("normal", () => AD.adminPanel(fawn, { targetId: kai.id, cat: "keys", 
 await grab("admin", () => AD.adminPanel(fawn, { targetId: frost.id, cat: "money" }));
 const RAR = CR.CRATE_REWARDS.raider;
 await grab("won", () => CR.crateScreen(fawn, "raider", RAR.find((w) => w.r === "rare")));
+await grab("spin", () => CR.crateScreen(fawn, "raider", RAR.find((w) => w.r === "epic"), true));
 // the grid zone's items must come first (cell i shows form button i)
 const { LAYOUT } = await import("./screen_layout.js");
 let bad = 0;

@@ -118,17 +118,18 @@ class Text:
     rect = [x, y, w] (item- or canvas-relative). anchor "top_left": y is the
     top of the text; "left_middle": y is its middle line."""
 
-    def __init__(self, rect, scale=0.75, color="#FFFFFF", font=None, align="left", text=None, anchor="top_left", shadow=False, when=None):
+    def __init__(self, rect, scale=0.75, color="#FFFFFF", font=None, align="left", text=None, anchor="top_left", shadow=False, when=None, fade_in_after=None):
         self.rect, self.scale, self.color, self.font = rect, scale, color, font
         self.align, self.text, self.anchor, self.shadow, self.when = align, text, anchor, shadow, when
+        self.fade_in_after = fade_in_after  # seconds: stay invisible this long, then fade in
 
 
 class Img:
     """A picture. texture=None means "the button's own icon". when = state
     tag that must be present ("!TAG" = must be absent; None = always)."""
 
-    def __init__(self, rect, texture=None, when=None):
-        self.rect, self.texture, self.when = rect, texture, when
+    def __init__(self, rect, texture=None, when=None, top=False):
+        self.rect, self.texture, self.when, self.top = rect, texture, when, top
 
 
 class Face:
@@ -141,8 +142,9 @@ class Face:
 
 
 class Zone:
-    def __init__(self, tag, rect, item, face, orient="vertical", gap=0, click=False, align="top_left", grid=False, scroll=False, tags=(), cols=1, rows=1):
+    def __init__(self, tag, rect, item, face, orient="vertical", gap=0, click=False, align="top_left", grid=False, scroll=False, tags=(), cols=1, rows=1, slide=None, clip=False):
         self.tag, self.rect, self.item, self.face = tag, rect, item, face
+        self.slide, self.clip = slide, clip  # slide = (from_x, to_x, seconds): the list slides sideways once when shown
         self.cols, self.rows = cols, rows
         if grid and scroll:
             raise ValueError("grids don't scroll (cells for other zones would make empty space); use pages")
@@ -168,8 +170,8 @@ class Screen:
         self.zones = []
         self.close = True
 
-    def img(self, rect, texture):
-        self.static.append(Img(rect, texture))
+    def img(self, rect, texture, top=False):
+        self.static.append(Img(rect, texture, top=top))
         return self
 
     def box(self, rect, fill, border=None, **kw):
@@ -205,6 +207,17 @@ class Screen:
 # JSON UI
 # ---------------------------------------------------------------------------
 NS = "cb_screens"
+EXTRA = {}  # animation definitions made while building screens (written into the ui file)
+
+
+def anim_chain(name, steps):
+    """steps = [anim dict, ...] played one after the other. Returns the first one's reference."""
+    for i, st in enumerate(steps):
+        d = dict(st)
+        if i + 1 < len(steps):
+            d["next"] = f"@{NS}.{name}_{i + 1}"
+        EXTRA[f"{name}_{i}"] = d
+    return f"@{NS}.{name}_0"
 COLL = {"binding_collection_name": "form_buttons", "binding_type": "collection"}
 
 
@@ -256,6 +269,11 @@ def label_json(t, item_tags=None):
     else:
         d["text"] = "#text"
         d["bindings"] = text_binding() + [{"binding_type": "view", "source_property_name": strip(item_tags), "target_property_name": "#text"}]
+    if t.fade_in_after:
+        key = f"fade_{str(t.fade_in_after).replace('.', '_')}"
+        d["anims"] = [anim_chain(key, [
+            {"anim_type": "alpha", "from": 0, "to": 0, "duration": t.fade_in_after},
+            {"anim_type": "alpha", "from": 0, "to": 1, "duration": 0.35}])]
     if t.when:
         d.setdefault("bindings", text_binding())
         d["bindings"].append({"binding_type": "view", "source_property_name": cond_expr(t.when), "target_property_name": "#visible"})
@@ -323,6 +341,16 @@ CLICK = [
 ]
 
 
+def only_when_shown(scr, target):
+    """Every form contains all 12 screens (11 hidden). A list/grid only gets the button
+    count while its own screen is the one shown, so hidden screens build no buttons."""
+    return [
+        {"binding_name": "#title_text"},
+        {"binding_type": "view", "source_property_name": f"(not ((#title_text - '{scr.marker}') = #title_text))", "target_property_name": "#visible"},
+        {"binding_name": "#form_button_length", "binding_name_override": target, "binding_condition": "visible"},
+    ]
+
+
 def zone_defs(scr, z):
     """One zone = the form buttons that carry its tag, drawn as a list (stack panel
     factory) or a grid. Built the way known to work in game (v3 and the tile menus):
@@ -342,11 +370,11 @@ def zone_defs(scr, z):
         defs[face + "_hover"] = face_controls(z.face, z.tags, highlight=z.face.hover or box("#FFFFFF", "#FFFFFF", alpha=28))
         piece = {"button": dict(at, **{
             "type": "button",
-            "default_control": "default", "hover_control": "hover", "pressed_control": "pressed",
+            "default_control": "default", "hover_control": "hover", "pressed_control": "hover",
             "button_mappings": CLICK,
             "bindings": ([] if not z.grid else show) + [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
-            "controls": [{f"default@{NS}.{face}": {}}, {f"hover@{NS}.{face}_hover": {}},
-                         {f"pressed@{NS}.{face}_hover": {"offset": [0, 0.5]}}]})}
+            # pressed reuses the hover picture: two copies per button instead of three
+            "controls": [{f"default@{NS}.{face}": {}}, {f"hover@{NS}.{face}_hover": {}}]})}
     else:
         piece = {f"face@{NS}.{face}": dict(at, **({"bindings": show} if z.grid else {}))}
     defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "bindings": show, "controls": [piece]}
@@ -355,11 +383,11 @@ def zone_defs(scr, z):
     if z.grid:
         grid = {"type": "grid", "size": ["100%", "100%"], "anchor_from": "top_left", "anchor_to": "top_left",
                 "grid_item_template": f"{NS}.{base}_item", "grid_dimensions": [z.cols, z.rows], "collection_name": "form_buttons",
-                "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#maximum_grid_items"}]}
+                "bindings": only_when_shown(scr, "#maximum_grid_items")}
         return defs, place({"type": "panel", "controls": [{"grid": grid}]}, [x, y, w, h])
     stack = {"type": "stack_panel", "orientation": z.orient, "size": ["100%c", "100%c"],
              "factory": {"name": "buttons", "control_name": f"{NS}.{base}_item"}, "collection_name": "form_buttons",
-             "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#collection_length"}],
+             "bindings": only_when_shown(scr, "#collection_length"),
              "anchor_from": z.align, "anchor_to": z.align}
     if z.scroll:
         stack.update(anchor_from="top_left", anchor_to="top_left")
@@ -369,7 +397,14 @@ def zone_defs(scr, z):
             "$scrolling_content": f"{NS}.{base}_content", "$scroll_size": [4, "100% - 2px"],
             "$scrolling_pane_size": ["100% - 2px", "100%"], "$scrolling_pane_offset": [0, 0],
             "$scroll_bar_right_padding_size": [0, 0]}}]}, [x, y, w, h])
-    return defs, place({"type": "panel", "controls": [{"stack": stack}]}, [x, y, w, h])
+    if z.slide:
+        fx, tx, secs = z.slide
+        stack["anims"] = [anim_chain(f"{base}_slide", [{"anim_type": "offset", "easing": "out_cubic", "duration": secs, "from": [fx, 0], "to": [tx, 0]}])]
+        stack["offset"] = [tx, 0]
+    holder = {"type": "panel", "controls": [{"stack": stack}]}
+    if z.clip:
+        holder["clips_children"] = True
+    return defs, place(holder, [x, y, w, h])
 
 
 def screen_json(scr):
@@ -379,7 +414,7 @@ def screen_json(scr):
     # above them (layer 10), so a box can never cover a button. Fixed captions stay on top.
     for i, p in enumerate(scr.static):
         if isinstance(p, Img):
-            ctrls.append({f"s{i}": dict(img_json(p), layer=1)})
+            ctrls.append({f"s{i}": dict(img_json(p), layer=25 if p.top else 1)})
         else:
             ctrls.append({f"s{i}": dict(label_json(p), layer=20)})
     for z in scr.zones:
@@ -399,6 +434,8 @@ def scaled(node, k):
         for key, v in node.items():
             if key in ("offset", "size") and isinstance(v, list):
                 out[key] = [round(x * k, 2) if isinstance(x, (int, float)) and not isinstance(x, bool) else x for x in v]
+            elif key in ("from", "to") and node.get("anim_type") == "offset" and isinstance(v, list):
+                out[key] = [round(x * k, 2) for x in v]
             elif key == "font_scale_factor" and isinstance(v, (int, float)):
                 out[key] = round(v * k, 3)
             else:
@@ -413,6 +450,7 @@ def write_ui(screens, path):
     ui = {"namespace": NS}
     for s in screens:
         ui.update(scaled(screen_json(s), SCALE))
+    ui.update(scaled(EXTRA, SCALE))
     with open(path, "w") as f:
         f.write("// AUTO-GENERATED by tools/build_cloudbreak_screens.py - edit that instead.\n")
         json.dump(ui, f, indent=1, ensure_ascii=False)

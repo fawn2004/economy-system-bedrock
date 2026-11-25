@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from cb_screen_kit import ROOT, RP, F, Face, Img, R, Screen, Text, art, box, preview, write_textures, write_ui  # noqa: E402
 
 TEN = "MinecraftTen"
+SPIN_COUNT, SPIN_WIN, SPIN_SECONDS = 24, 20, 4.0  # crate reel: rewards on the strip, where the win sits, spin time
 ROOT_BP = os.path.join(ROOT, "packs", "Cloudbreak_BP")
 CB = "textures/ui/cb/icon_"
 COL = {"RED": "#FF5A4E", "GOLD": "#F2C14E", "CYAN": "#4FD1E8", "GREEN": "#3DDC97", "PURPLE": "#A78BFA",
@@ -262,8 +263,9 @@ def admin():
         Img([opt[0] / 2 - 6, 3, 12, 12]), Text([1, 16, opt[0] - 2], 0.48, align="center")]), grid=True, gap=2.5, click=True, cols=3, rows=2)
     s.text(R(261, 438, 400, 450)[:3], "Amount", scale=0.62, color="#C9D1DD")
     stp = sz(38, 36)
-    s.zone("STEP", R(520, 426, 690, 462), stp, Face(box("#1A202C", "#252D3B"), parts=[
-        Text([0, stp[1] / 2, stp[0]], 0.52, align="center", anchor="left_middle")]), orient="horizontal", gap=2, click=True, align="top_right")
+    # up to 6 buttons (+1 +5 +10 +64 Type Reset), right-aligned next to the amount
+    s.zone("STEP", R(330, 426, 690, 462), stp, Face(box("#252D3B", "#4A5468"), parts=[
+        Text([0, stp[1] / 2, stp[0]], 0.5, "#FFFFFF", align="center", anchor="left_middle")]), orient="horizontal", gap=2, click=True, align="top_right")
     s.zone("N", R(695, 426, 762, 462), sz(67, 36), Face(parts=[Text([0, 6.5, 24], 0.62, font=TEN, align="center", anchor="left_middle")]))
     give = sz(500, 42)
     # bright green with a white outline, like CONFIRM in the Clan Bank: easy to spot
@@ -388,13 +390,27 @@ def crate():
     s.zone("RL", R(80, 130, 1020, 266), it, Face(box("#1C1830", "#2E2850"), [("WIN", box("#2A2412", COL["GOLD"]))], [
         Img([it[0] / 2 - 9.5, 9, 19, 19]), Text([1, 32, it[0] - 2], 0.48, align="center")] +
         [Img([0, it[1] - 2, it[0], 2], box(c), when=t) for t, c in rar]), orient="horizontal", gap=3.3, align="top_middle")
-    s.box(R(547, 112, 552, 287), COL["GOLD"])
-    s.box(R(540, 108, 559, 118), COL["GOLD"])
-    s.box(R(540, 281, 559, 291), COL["GOLD"])
+    # The spin: "RS" is a long strip (SPIN_COUNT rewards, the win at SPIN_WIN) that slides
+    # left once under the pointer, slowing down, and stops with the win in the middle.
+    # crates.js sends the same numbers.
+    band = R(80, 130, 1020, 266)
+    pitch = it[0] + 3.3
+    pointer = 549.5 * F - band[0]  # pointer centre, measured from the band's left edge
+    start = round(pointer - (3 * pitch + it[0] / 2), 2)
+    stop = round(pointer - (SPIN_WIN * pitch + it[0] / 2), 2)
+    s.zone("RS", band, it, Face(box("#1C1830", "#2E2850"), [("WIN", box("#2A2412", COL["GOLD"]))], [
+        Img([it[0] / 2 - 9.5, 9, 19, 19]), Text([1, 32, it[0] - 2], 0.48, align="center")] +
+        [Img([0, it[1] - 2, it[0], 2], box(c), when=t) for t, c in rar]), orient="horizontal", gap=3.3,
+        slide=(start, stop, SPIN_SECONDS), clip=True)
+    s.img(R(547, 112, 552, 287), box(COL["GOLD"]), top=True)
+    s.img(R(540, 108, 559, 118), box(COL["GOLD"]), top=True)
+    s.img(R(540, 281, 559, 291), box(COL["GOLD"]), top=True)
     op = sz(240, 48)
     s.zone("OP", R(430, 312, 672, 362), op, Face(box(COL["GOLD"], bottom="#B98F2A"), [("OFF", box("#3A3358"))], [
         Text([0, op[1] / 2, op[0]], 0.72, "#1A1206", font=TEN, align="center", anchor="left_middle")]), click=True)
     s.zone("MSG", R(200, 385, 900, 440), (255, 20), Face(parts=[Text([0, 0, 255], 0.8, align="center")]))
+    # the win message during a spin: invisible until the reel stops, then fades in
+    s.zone("MSGS", R(200, 385, 900, 440), (255, 20), Face(parts=[Text([0, 0, 255], 0.8, align="center", fade_in_after=SPIN_SECONDS)]))
     od = sz(232, 55)
     s.zone("OD", R(70, 533, 1032, 590), od, Face(box("#1A1530", "#2E2850", bar="#9AA3B5"), [(t, box("#1A1530", "#2E2850", bar=c)) for t, c in rar], [
         Text([5, od[1] / 2, 55], 0.5, anchor="left_middle")]), orient="horizontal", gap=4)

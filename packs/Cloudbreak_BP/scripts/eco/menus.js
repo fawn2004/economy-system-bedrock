@@ -1052,6 +1052,8 @@ function listOf(ids) {
 }
 
 const SHOP_PAGE = 8; // 4 x 2 cards, like the mockup
+// What one sells for (with the clan's Sell Multiplier), shown under the buy price on each card
+const sellLine = (player, e) => (e.sell > 0 ? `§7Sells §6${fmtShort(Math.floor(e.sell * sellMultiplier(player)))}` : "§8Can't be sold");
 const CBI = "textures/ui/cb/icon_";
 
 /** Sky Shop screen: category rail on the left, item cards on the right. Tap a card to pick how many. */
@@ -1080,7 +1082,7 @@ export async function skyShopMenu(player, msg, st = {}) {
 
   const sc = new Screen("shop", "Sky Shop");
   for (const e of items.slice(page * SHOP_PAGE, (page + 1) * SHOP_PAGE))
-    sc.button("IT", `§f${clip(e.name, 14)}\n${priceColor(player, e.buy)}${fmtShort(e.buy)} §7each`, () => buyItemMenu(player, e, back), { icon: e.icon });
+    sc.button("IT", `§f${clip(e.name, 14)}\n${priceColor(player, e.buy)}${fmtShort(e.buy)} §7each\n${sellLine(player, e)}`, () => buyItemMenu(player, e, back), { icon: e.icon });
   if (pages > 1) {
     sc.button("PG", page > 0 ? "« Prev" : "§8« Prev", () => skyShopMenu(player, { cat: sel.id, page: page - 1 }), { states: [page > 0 ? undefined : "OFF"] });
     sc.text("PG", `§7${page + 1} / ${pages}`, { states: ["OFF"] });

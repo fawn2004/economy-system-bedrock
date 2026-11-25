@@ -74,7 +74,9 @@ export class Screen {
   form() {
     const form = new ActionFormData().title(`§c§b§${SCREEN_CODES[this.id]}§r${this.title}`).body("");
     for (const it of this.ordered()) {
-      const text = `[${it.tag}]${it.states.filter(Boolean).map((s) => `[${s}]`).join("")}${it.text}`;
+      // "§r" in front of the text: harmless, and stops Minecraft reading texts like "+1" or "29"
+      // as numbers (it left those labels blank)
+      const text = `[${it.tag}]${it.states.filter(Boolean).map((s) => `[${s}]`).join("")}§r${it.text}`;
       if (it.icon) form.button(text, it.icon);
       else form.button(text);
     }

@@ -3,7 +3,7 @@
 
 export const CONFIG = {
   serverName: "Cloudbreak",
-  version: "7.7", // shown in chat on join, so you can check the right behaviour pack is active
+  version: "7.8", // shown in chat on join, so you can check the right behaviour pack is active
   prefix: "§b§lCloudbreak §r§8» §7",
   sidebarFooter: "", // bottom line of the sidebar, e.g. your server address ("" hides it)
 

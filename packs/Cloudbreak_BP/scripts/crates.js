@@ -4,7 +4,6 @@ import { addMoney, fmt } from "./eco/economy.js";
 import { makeSpawnerItem, mobIcon, mobName } from "./eco/spawners.js";
 import { getCatalog } from "./eco/catalog.js";
 import { Screen } from "./screens.js";
-import { pauseSidebar } from "./titles.js";
 
 // ---------------------------------------------------------------------------
 // Crates: use a crate key to open its crate. A reel spins through the rewards
@@ -79,13 +78,12 @@ function give(player, w) {
   if (left) player.dimension.spawnItem(left, player.location);
 }
 
-const opening = new Set();
 
 /** Spins the reel on screen, then gives the reward. */
 export async function openCrate(player, crate) {
   const c = CONFIG.crates[crate];
   const table = CRATE_REWARDS[crate];
-  if (!c || !table || opening.has(player.id)) return;
+  if (!c || !table) return;
   // take one key: the held stack first, else any stack in the inventory
   const inv = player.getComponent("minecraft:inventory")?.container;
   if (!inv) return;
@@ -101,29 +99,32 @@ export async function openCrate(player, crate) {
     inv.setItem(slot, held);
   } else inv.setItem(slot, undefined);
 
-  opening.add(player.id);
   const win = roll(table);
-  give(player, win); // paid straight away, so leaving mid-spin never loses the reward
-  // reel: random rewards, slowing down, ending on the win
-  const frames = 22;
-  for (let i = 0; i < frames && player.isValid; i++) {
-    const w = i === frames - 1 ? win : table[Math.floor(Math.random() * table.length)];
-    const rr = RARITY[w.r];
-    pauseSidebar(player, 80);
-    player.onScreenDisplay.setTitle(`${c.color}${c.name}`, {
-      subtitle: `§8» ${rr.col}${rewardName(w)} §8«`,
-      fadeInDuration: 0, stayDuration: i === frames - 1 ? 60 : 10, fadeOutDuration: i === frames - 1 ? 10 : 0,
-    });
-    player.playSound("random.click", { pitch: 0.8 + i / frames, volume: 0.6 });
-    await system.waitTicks(2 + Math.floor((i * i) / 40));
-  }
-  opening.delete(player.id);
-  if (!player.isValid) return;
+  give(player, win); // paid straight away, so closing the menu mid-spin never loses the reward
   const rr = RARITY[win.r];
-  player.playSound(win.r === "legendary" || win.r === "epic" ? "random.totem" : "random.levelup", { volume: 0.8 });
   player.sendMessage(`${CONFIG.prefix}${c.color}${c.name}§7: you won ${rr.col}${rr.name} §f${rewardName(win)}§7!`);
-  if (win.r === "legendary") world.sendMessage(`${CONFIG.prefix}§e${player.name}§7 won ${rr.col}${rewardName(win)}§7 from a ${c.color}${c.name}§7!`);
-  return crateScreen(player, crate, win);
+  spinSounds(player, win);
+  // the reel spins INSIDE the crate screen (a sliding strip, see build_cloudbreak_screens.py)
+  return crateScreen(player, crate, win, true);
+}
+
+// Clicks that slow down with the reel, then a win sound when it stops (the screen stays open).
+function spinSounds(player, win) {
+  const end = SPIN_SECONDS * 20;
+  let t = 2;
+  for (let i = 0; t < end - 4; i++) {
+    const at = t;
+    system.runTimeout(() => player.isValid && player.playSound("random.click", { pitch: 0.7 + at / end, volume: 0.5 }), at);
+    t += 2 + Math.floor((i * i) / 30);
+  }
+  system.runTimeout(() => {
+    if (!player.isValid) return;
+    player.playSound(win.r === "legendary" || win.r === "epic" ? "random.totem" : "random.levelup", { volume: 0.8 });
+    if (win.r === "legendary") {
+      const rr = RARITY[win.r];
+      world.sendMessage(`${CONFIG.prefix}§e${player.name}§7 won ${rr.col}${rewardName(win)}§7!`);
+    }
+  }, end);
 }
 
 const RARITY_TAG = { common: "rC", rare: "rR", epic: "rE", legendary: "rL" };
@@ -146,7 +147,13 @@ function rewardIcon(w) {
 }
 
 /** Crate Opening screen. win = the reward just won (shown in the middle of the reel). */
-export async function crateScreen(player, crate, win) {
+// The reel strip the screen slides: SPIN_COUNT rewards with the win at SPIN_WIN
+// (must match tools/build_cloudbreak_screens.py).
+const SPIN_COUNT = 24;
+const SPIN_WIN = 20;
+const SPIN_SECONDS = 4;
+
+export async function crateScreen(player, crate, win, spinning = false) {
   const c = CONFIG.crates[crate];
   const table = CRATE_REWARDS[crate];
   if (!c || !table || !player.isValid) return;
@@ -154,12 +161,20 @@ export async function crateScreen(player, crate, win) {
   const s = new Screen("crate", c.name);
   s.text("CT", c.name.toUpperCase());
   s.text("KEYS", `§7Keys §e${keys}`, { icon: `textures/ui/cb/s/${KEY_ICON[crate] ?? "key_gold"}` });
-  for (let i = 0; i < 7; i++) {
-    const w = i === 3 && win ? win : table[Math.floor(Math.random() * table.length)];
-    s.text("RL", rewardName(w), { icon: rewardIcon(w), states: [RARITY_TAG[w.r], i === 3 && win ? "WIN" : undefined] });
+  const pick = () => table[Math.floor(Math.random() * table.length)];
+  if (spinning) {
+    for (let i = 0; i < SPIN_COUNT; i++) {
+      const w = i === SPIN_WIN ? win : pick();
+      s.text("RS", rewardName(w), { icon: rewardIcon(w), states: [RARITY_TAG[w.r], i === SPIN_WIN ? "WIN" : undefined] });
+    }
+  } else {
+    for (let i = 0; i < 7; i++) {
+      const w = i === 3 && win ? win : pick();
+      s.text("RL", rewardName(w), { icon: rewardIcon(w), states: [RARITY_TAG[w.r], i === 3 && win ? "WIN" : undefined] });
+    }
   }
   s.button("OP", keys ? (win ? "OPEN ANOTHER · 1 KEY" : "OPEN CRATE · 1 KEY") : "NO KEYS LEFT", () => (keys ? openCrate(player, crate) : crateScreen(player, crate, win)), { states: [keys ? undefined : "OFF"] });
-  if (win) s.text("MSG", `§7You won ${RARITY[win.r].col}${RARITY[win.r].name} §f${rewardName(win)}§7!`);
+  if (win) s.text(spinning ? "MSGS" : "MSG", `§7You won ${RARITY[win.r].col}${RARITY[win.r].name} §f${rewardName(win)}§7!`);
   for (const [r, x] of Object.entries(RARITY)) {
     const items = table.filter((w) => w.r === r).map(rewardName);
     if (!items.length) continue;

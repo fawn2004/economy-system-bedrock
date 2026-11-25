@@ -71,10 +71,10 @@ function giveStack(target, stack) {
 // ---------------------------------------------------------------------------
 
 const CATS = [
-  { id: "money", name: "Money", icon: "textures/ui/eco/icon_coin", head: "CHOOSE WHAT TO DO", steps: [["-10k", -10000], ["+10k", 10000], ["+1M", 1000000]], def: 10000 },
-  { id: "heads", name: "Heads", icon: CB.skull, head: "CHOOSE A MOB", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
-  { id: "kits", name: "Kits", icon: CB.chest, head: "CHOOSE A KIT", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
-  { id: "keys", name: "Crate Keys", icon: CB.key, head: "CHOOSE A CRATE", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
+  { id: "money", name: "Money", icon: "textures/ui/eco/icon_coin", head: "CHOOSE WHAT TO DO", steps: [["+10k", 10000], ["+100k", 100000], ["+1M", 1000000]], def: 0 },
+  { id: "heads", name: "Heads", icon: CB.skull, head: "CHOOSE A MOB", steps: [["+1", 1], ["+5", 5], ["+10", 10], ["+64", 64]], def: 0 },
+  { id: "kits", name: "Kits", icon: CB.chest, head: "CHOOSE A KIT", steps: [["+1", 1], ["+5", 5], ["+10", 10], ["+64", 64]], def: 0 },
+  { id: "keys", name: "Crate Keys", icon: CB.key, head: "CHOOSE A CRATE", steps: [["+1", 1], ["+5", 5], ["+10", 10], ["+64", 64]], def: 0 },
 ];
 const KEY_ART = { raider: "key_pink", defender: "key_cyan", legendary: "key_gold" };
 const MONEY_MODES = [
@@ -99,7 +99,7 @@ export async function adminPanel(player, st = {}) {
   const cat = CATS.find((c) => c.id === st.cat) ?? CATS[3];
   const opts = optionsFor(cat.id);
   const opt = opts.find((o) => o.id === st.opt) ?? opts[0];
-  const n = Math.max(cat.id === "money" ? 0 : 1, st.n ?? cat.def);
+  const n = Math.max(0, st.n ?? cat.def);
   const again = (o) => adminPanel(player, { targetId: target.id, cat: cat.id, opt: opt?.id, n, filter: st.filter, optPage: st.optPage, ...o });
   const targetIsAdmin = isAdmin(target);
   const clan = (p) => allClans().find((c) => c.members[p.id]);
@@ -129,12 +129,15 @@ export async function adminPanel(player, st = {}) {
   s.text("SC", `§f${target.name}\n§7${tc ? `${tc.name} · ${tc.members[target.id].role === "coowner" ? "Co-owner" : tc.members[target.id].role === "owner" ? "Owner" : "Member"}` : "No clan"} · wallet ${fmtMoney(getBalance(target))}`, { icon: headFor(target.name) });
   for (const c of CATS) s.button("CAT", c.id === cat.id ? `§d${c.name}` : c.name, () => again({ cat: c.id, opt: undefined, n: undefined, optPage: 0 }), { icon: c.icon, states: [c.id === cat.id ? "ON" : undefined] });
   s.text("CH", cat.head);
-  for (const [label, d] of cat.steps) s.button("STEP", label, () => again({ n: Math.max(0, n + d) }));
-  s.button("STEP", "Type", async () => {
+  // amount starts at 0; each button adds its number. The leading colour code stops
+  // Minecraft reading "+1" as a number (which left the buttons blank).
+  for (const [label, d] of cat.steps) s.button("STEP", `§f${label}`, () => again({ n: n + d }));
+  s.button("STEP", "§fType", async () => {
     const v = await askNumber(player, "Amount", cat.id === "money" ? "Amount ($)" : "How many?", n);
     return again({ n: v ?? n });
   });
-  s.text("N", cat.id === "money" ? fmtMoney(n) : String(n));
+  s.button("STEP", "§cReset", () => again({ n: 0 }));
+  s.text("N", `§f${cat.id === "money" ? fmtMoney(n) : n}`);
   const who = target.name.toUpperCase();
   const giveText = !opt ? "NOTHING TO GIVE"
     : cat.id === "money" ? { give: `GIVE ${fmt(n)} TO ${who}`, take: `TAKE ${fmt(n)} FROM ${who}`, set: `SET ${who}'S WALLET TO ${fmt(n)}` }[opt.id]
@@ -143,6 +146,10 @@ export async function adminPanel(player, st = {}) {
     : `GIVE ${n} × ${opt.name.toUpperCase()} KEYS TO ${who}`;
   s.button("GIVE", giveText, () => {
     if (!opt || !target.isValid) return again({});
+    if (n <= 0 && !(cat.id === "money" && opt.id === "set")) {
+      say(player, "Pick an amount first: tap +1, +5, +10... or Type.", false);
+      return again({});
+    }
     let msg;
     if (cat.id === "money") {
       if (opt.id === "give") addMoney(target, n);
@@ -163,7 +170,7 @@ export async function adminPanel(player, st = {}) {
     }
     say(player, msg);
     return again({});
-  }, { states: [opt ? undefined : "OFF"] });
+  }, { states: [opt && (n > 0 || (cat.id === "money" && opt.id === "set")) ? undefined : "OFF"] });
   s.text("LOCK", targetIsAdmin ? "Admin player" : "Normal player", { states: [targetIsAdmin ? "ADM" : undefined] });
   s.text("LOCKT", targetIsAdmin
     ? "This player has the admin tag, so the tools below are unlocked for them."
