@@ -508,7 +508,9 @@ def write_server_form(screens):
     title = "#title_text"
     def has(m):
         return f"(not (({title} - '{m}') = {title}))"
-    vanilla = f"((not {has('§e§c§o')}) and (not {has('§c§b§')}))"
+    # plain form only when the title has none of our markers (each checked in full, no lone "§", no double "not")
+    no = lambda m: f"(({title} - '{m}') = {title})"
+    vanilla = "(" + " and ".join([no("§e§c§o")] + [no(s.marker) for s in screens]) + ")"
     ctrls = [
         {"vanilla_long_form": {
             "type": "panel", "size": [225, 200],

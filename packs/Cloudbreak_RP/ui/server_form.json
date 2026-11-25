@@ -23,7 +23,7 @@
       },
       {
        "binding_type": "view",
-       "source_property_name": "((not (not ((#title_text - '§e§c§o') = #title_text))) and (not (not ((#title_text - '§c§b§') = #title_text))))",
+       "source_property_name": "(((#title_text - '§e§c§o') = #title_text) and ((#title_text - '§c§b§0§r') = #title_text) and ((#title_text - '§c§b§1§r') = #title_text) and ((#title_text - '§c§b§2§r') = #title_text) and ((#title_text - '§c§b§3§r') = #title_text) and ((#title_text - '§c§b§4§r') = #title_text) and ((#title_text - '§c§b§5§r') = #title_text) and ((#title_text - '§c§b§6§r') = #title_text) and ((#title_text - '§c§b§7§r') = #title_text) and ((#title_text - '§c§b§8§r') = #title_text) and ((#title_text - '§c§b§9§r') = #title_text) and ((#title_text - '§c§b§a§r') = #title_text) and ((#title_text - '§c§b§t§r') = #title_text))",
        "target_property_name": "#visible"
       }
      ],
