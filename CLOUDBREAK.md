@@ -4,7 +4,7 @@ Clans of up to 5 share a floating island, grind it up like skyblock, and buy bli
 other islands. The full design is in the Cloudbreak design doc; the UI mockups are on the
 Cloudbreak UI canvas.
 
-Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.4.2). Cloudbreak contains its
+Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.4.3). Cloudbreak contains its
 own copy of the Skyblock Economy code (`scripts/eco`), so it does **not** need the Skyblock
 Economy packs. Don't run both in the same world.
 

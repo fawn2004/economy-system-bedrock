@@ -301,6 +301,16 @@ CLICK = [
 ]
 
 
+def only_when_shown(scr, target):
+    """Every form contains every screen (all but one hidden). A zone only learns how many
+    buttons there are while its own screen is the one shown, so hidden screens build nothing."""
+    return [
+        {"binding_name": "#title_text"},
+        {"binding_type": "view", "source_property_name": f"(not ((#title_text - '{scr.marker}') = #title_text))", "target_property_name": "#visible"},
+        {"binding_name": "#form_button_length", "binding_name_override": target, "binding_condition": "visible"},
+    ]
+
+
 def zone_defs(scr, z):
     """One zone = a list (stack) or grid of the form's buttons that carry its tag.
     Each item draws its face ONCE; a clickable item puts a see-through button on
@@ -337,12 +347,12 @@ def zone_defs(scr, z):
     if z.grid:
         grid = {"type": "grid", "size": ["100%", "100%"], "anchor_from": "top_left", "anchor_to": "top_left",
                 "grid_item_template": f"{NS}.{base}_item", "grid_dimensions": [z.cols, z.rows], "collection_name": "form_buttons",
-                "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#maximum_grid_items"}]}
+                "bindings": only_when_shown(scr, "#maximum_grid_items")}
         ctrl = {"type": "panel", "clips_children": True, "controls": [{"grid": grid}]}
         return defs, place(ctrl, [x, y, w, h])
     stack = {"type": "stack_panel", "orientation": z.orient, "size": ["100%c", "100%c"],
              "factory": {"name": "buttons", "control_name": f"{NS}.{base}_item"}, "collection_name": "form_buttons",
-             "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#collection_length"}],
+             "bindings": only_when_shown(scr, "#collection_length"),
              "anchor_from": z.align, "anchor_to": z.align}
     if z.scroll:
         stack.update(anchor_from="top_left", anchor_to="top_left")
