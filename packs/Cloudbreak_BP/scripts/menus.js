@@ -281,10 +281,9 @@ async function upgradeFlow(player, u) {
   if (!clan) return;
   const lvl = levelOf(clan, u.id);
   if (lvl >= u.max) return coreTerminal(player, `§7${u.name} is maxed.`);
-  const cost = upgradeCost(u, lvl + 1);
-  if (!(await confirm(player, u.name, `Upgrade ${u.name} to level ${lvl + 1} for ${fmt(cost)} from the clan bank?\n\n${u.desc(lvl + 1)}`, "Upgrade")))
-    return coreTerminal(player);
+  // one tap upgrades straight away (no confirm screen); the result shows above the cards
   const r = buyUpgrade(player, u.id);
+  if (r.ok) player.playSound("random.levelup", { volume: 0.6 });
   return coreTerminal(player, (r.ok ? "§a" : "§c") + r.msg);
 }
 

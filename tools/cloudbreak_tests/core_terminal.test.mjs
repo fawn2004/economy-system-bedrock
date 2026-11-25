@@ -18,11 +18,15 @@ await t('core terminal: its screen marker, module cards first, every button tagg
   assert.ok(tags.every(Boolean),'every button has a zone tag');
   for(const b of f._buttons.slice(0,UPGRADES.length)) assert.ok(b.icon,'module icon');
 });
-await t('tapping a module card asks to upgrade it',async()=>{
-  const before=shown.length;
-  ActionFormData.queue.push(0);
+await t('tapping a module card upgrades it straight away (no confirm)',async()=>{
+  const before=C.getClan(clan.id).up?.size ?? 0;
+  const bank=C.getClan(clan.id).bank;
+  ActionFormData.queue.push(0); // first card = Island Size
   await M.coreTerminal(a);
-  assert.ok(shown.length>=before+2,'opened the confirm');
+  const c=C.getClan(clan.id);
+  assert.equal(c.up.size, before+1, 'level went up');
+  assert.ok(c.bank < bank, 'paid from the clan bank');
+  assert.ok(last()._title.startsWith('§c§b§t§r'), 'back on the Core Terminal, not a confirm screen');
 });
 await t('every menu screen opens with its own marker',async()=>{
   const want={tower:'0',members:'1',bank:'2',dispatch:'5',insurance:'6',raidlog:'9',boards:'a'};
