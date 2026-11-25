@@ -369,14 +369,20 @@ def zone_defs(scr, z):
 
 def screen_json(scr):
     defs, ctrls = {}, []
+    # Drawing order goes by layer number, not by list order. Background boxes and
+    # pictures go on the bottom (layer 1); every zone (buttons, lists, text) sits
+    # above them (layer 10), so a box can never cover a button. Fixed captions stay on top.
     for i, p in enumerate(scr.static):
-        ctrls.append({f"s{i}": img_json(p) if isinstance(p, Img) else label_json(p)})
+        if isinstance(p, Img):
+            ctrls.append({f"s{i}": dict(img_json(p), layer=1)})
+        else:
+            ctrls.append({f"s{i}": dict(label_json(p), layer=20)})
     for z in scr.zones:
         d, c = zone_defs(scr, z)
         defs.update(d)
-        ctrls.append({f"z_{re.sub('[^a-z0-9]', '', z.tag.lower())}": c})
+        ctrls.append({f"z_{re.sub('[^a-z0-9]', '', z.tag.lower())}": dict(c, layer=10)})
     if scr.close:
-        ctrls.append({"close@eco_form.close_button": {"size": [12, 12], "anchor_from": "top_right", "anchor_to": "top_right", "offset": [-2, 2], "layer": 8}})
+        ctrls.append({"close@eco_form.close_button": {"size": [12, 12], "anchor_from": "top_right", "anchor_to": "top_right", "offset": [-2, 2], "layer": 30}})
     defs[scr.sid + "_screen"] = {"type": "image", "texture": scr.bg, "size": [W, H], "controls": ctrls}
     return defs
 
