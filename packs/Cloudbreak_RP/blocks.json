@@ -1,9 +1,5 @@
 {
-  "format_version": [
-    1,
-    1,
-    0
-  ],
+  "format_version": "1.21.40",
   "cb:island_core": {
     "sound": "amethyst_block",
     "textures": {
