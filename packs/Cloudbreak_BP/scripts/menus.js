@@ -223,35 +223,62 @@ export async function coreTerminal(player, msg) {
   const clan = clanOf(player);
   if (!clan) return;
   const up = shieldUp(clan);
-  const form = styled("cyan")
-    .title(`Core Terminal · ${clan.name}`)
+  const pips = (n, max, on = "§b", off = "§8") => on + "■".repeat(n) + off + "■".repeat(max - n);
+  const hours = hoursCovered(clan);
+  const covered = Math.max(0, Math.min(10, Math.round(hours / 24))); // one bar per day of tax, up to 10
+
+  // Built by hand (not styled()): this form uses the Core Terminal screen, ui/cb_terminal.json.
+  // Buttons are tagged: [MOD] module card, [DEP] deposit, [TAB] bottom tab ([ON] = open), [HDR] line above the cards.
+  const form = new ActionFormData()
+    .title(`§c§t§m§r§7${clan.name} · Bank §e${fmtMoney(bankOf(clan))}${up ? "[ON]" : "[DOWN]"}`)
     .body(
-      (msg ? msg + "\n\n" : "") +
-        `§7Core level §f${coreLevel(clan)}§7 · shield ${up ? "§aONLINE" : "§cDOWN - upgrades are off"}\n` +
-        `§7Core tax §f${fmt(CONFIG.core.taxPerHour)}/hour§7 · bank §a${fmt(bankOf(clan))}§7 · covers §f${hoursCovered(clan)}h\n` +
-        `§8Upgrades are paid from the clan bank.`
+      `§7ISLAND CORE\n§fLEVEL ${coreLevel(clan)}\n\n` +
+        `§7Upkeep §f${fmtMoney(CONFIG.core.taxPerHour)}/hr\n` +
+        `§7Next charge §f${minutesToTax(clan)} min\n` +
+        `§7Bank covers ${hours >= 24 ? "§a" : "§c"}${hours}h\n` +
+        pips(covered, 10, "§a", "§8")
     );
+  const actions = [];
   for (const u of UPGRADES) {
     const lvl = levelOf(clan, u.id);
     const maxed = lvl >= u.max;
     const off = !up && u.id !== "size" && lvl > 0 ? " §c(off)" : "";
-    form.button(`${u.name} §8Lv ${lvl}/${u.max}${off}\n§r§8${maxed ? u.desc(lvl) + " · MAX" : `${fmtMoney(upgradeCost(u, lvl + 1))}: ${u.desc(lvl + 1)}`}`, UPGRADE_ICON[u.id]);
+    const bars = u.max === 1 ? (lvl ? "§b■■■■■■■■" : "§8■■■■■■■■") : pips(lvl, u.max);
+    const foot = maxed ? (u.max === 1 ? "§aOWNED" : "§aMAXED") : `§e${fmtMoney(upgradeCost(u, lvl + 1))}  §b» UPGRADE`;
+    form.button(`[MOD]§f${u.name} §8Lv ${lvl}/${u.max}${off}\n${bars}\n§7${u.desc(maxed ? lvl : lvl + 1)}\n${foot}`, UPGRADE_ICON[u.id]);
+    actions.push(() => upgradeFlow(player, u));
   }
-  form.button("§e§lDEPOSIT\n§r§7Add money to the clan bank", CB.bank);
-  form.button("§cCLOSE", CB.back);
+  form.button("[DEP]DEPOSIT TO BANK");
+  actions.push(() => amountMenu(player, "Deposit", deposit));
+  const tabs = [
+    ["Modules", () => coreTerminal(player), true],
+    ["Upkeep", () => bankMenu(player)],
+    ["Raid Log", () => raidLogMenu(player)],
+    ["Insurance", () => insuranceMenu(player)],
+    ["Settings", () => playerSettingsMenu(player, () => coreTerminal(player))],
+  ];
+  for (const [name, run, on] of tabs) {
+    form.button(`[TAB]${on ? "[ON]§f" : ""}${name}`);
+    actions.push(run);
+  }
+  form.button(`[HDR]${msg ? msg : "§fCore Modules  §8Upgrades only work while upkeep is paid"}`);
+  actions.push(() => coreTerminal(player, msg));
+
   const res = await show(player, form);
   if (!res || res.canceled) return;
-  if (res.selection < UPGRADES.length) {
-    const u = UPGRADES[res.selection];
-    const lvl = levelOf(clan, u.id);
-    if (lvl >= u.max) return coreTerminal(player, `§7${u.name} is maxed.`);
-    const cost = upgradeCost(u, lvl + 1);
-    if (!(await confirm(player, u.name, `Upgrade ${u.name} to level ${lvl + 1} for ${fmt(cost)} from the clan bank?\n\n${u.desc(lvl + 1)}`, "Upgrade")))
-      return coreTerminal(player);
-    const r = buyUpgrade(player, u.id);
-    return coreTerminal(player, (r.ok ? "§a" : "§c") + r.msg);
-  }
-  if (res.selection === UPGRADES.length) return amountMenu(player, "Deposit", deposit);
+  await actions[res.selection]?.();
+}
+
+async function upgradeFlow(player, u) {
+  const clan = clanOf(player);
+  if (!clan) return;
+  const lvl = levelOf(clan, u.id);
+  if (lvl >= u.max) return coreTerminal(player, `§7${u.name} is maxed.`);
+  const cost = upgradeCost(u, lvl + 1);
+  if (!(await confirm(player, u.name, `Upgrade ${u.name} to level ${lvl + 1} for ${fmt(cost)} from the clan bank?\n\n${u.desc(lvl + 1)}`, "Upgrade")))
+    return coreTerminal(player);
+  const r = buyUpgrade(player, u.id);
+  return coreTerminal(player, (r.ok ? "§a" : "§c") + r.msg);
 }
 
 // ---------------------------------------------------------------------------

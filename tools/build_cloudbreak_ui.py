@@ -190,6 +190,74 @@ def make_art():
     paint(CORE_PAL, CORE_TOP, 1).save(os.path.join(BLOCKS, "island_core_top.png"))
 
 
+# ---------------------------------------------------------------------------
+# Core Terminal screen (ui/cb_terminal.json): panels, cards, tabs, the deposit
+# button, shield badges and the big core picture. Colours from the mockup.
+# ---------------------------------------------------------------------------
+def box(name, fill, border, width=2, bottom=None, size=16):
+    img = Image.new("RGBA", (size, size), hexc(fill) if isinstance(fill, str) else fill)
+    px = img.load()
+    for i in range(size):
+        for w in range(width):
+            for c in ((i, w), (i, size - 1 - w), (w, i), (size - 1 - w, i)):
+                px[c] = hexc(border)
+    if bottom:
+        for i in range(width, size - width):
+            for w in range(width, width + 2):
+                px[i, size - 1 - w] = hexc(bottom)
+    img.save(os.path.join(OUT, f"{name}.png"))
+    with open(os.path.join(OUT, f"{name}.json"), "w") as f:
+        json.dump({"nineslice_size": width + (2 if bottom else 1), "base_size": [size, size]}, f)
+
+
+def make_terminal():
+    box("term_bg", hexc("#0B1020", 245), "#26324D", 1)
+    box("term_box", "#141B2D", "#26324D")
+    box("term_card", "#141B2D", "#26324D")
+    box("term_card_hover", "#18213A", "#4FD1E8")
+    box("term_tab", "#141B2D", "#26324D")
+    box("term_tab_hover", "#18213A", "#4FD1E8")
+    box("term_tab_on", "#1A2440", "#FFFFFF")
+    box("term_deposit", "#F2C14E", "#F2C14E", 1, bottom="#B8862E")
+    box("term_deposit_hover", "#FFD66B", "#FFD66B", 1, bottom="#C99A3A")
+    box("term_chip_on", "#0F2A24", "#3DDC97", 1)
+    box("term_chip_off", "#2A0F0F", "#FF5A4E", 1)
+    # the little cyan square next to "CORE TERMINAL"
+    sq = Image.new("RGBA", (10, 10), hexc("#4FD1E8"))
+    sp = sq.load()
+    for i in range(10):
+        for c in ((i, 0), (i, 9), (0, i), (9, i)):
+            sp[c] = hexc("#4FD1E8")
+    for x in range(2, 8):
+        for y in range(2, 8):
+            sp[x, y] = hexc("#0B1020") if x in (2, 7) or y in (2, 7) else hexc("#4FD1E8")
+    sq.save(os.path.join(OUT, "term_square.png"))
+    # the core: a diamond ring inside a dark screen, a bright gem in the middle
+    n = 48
+    core = Image.new("RGBA", (n, n), hexc("#0B1020"))
+    cp = core.load()
+    c = (n - 1) / 2
+    for x in range(n):
+        for y in range(n):
+            if x in (0, n - 1) or y in (0, n - 1):
+                cp[x, y] = hexc("#26324D")
+                continue
+            d = abs(x - c) + abs(y - c)
+            if d <= 6:
+                cp[x, y] = hexc("#4FD1E8")
+            elif d <= 8:
+                cp[x, y] = hexc("#9BE7F4")
+            elif d <= 16:
+                cp[x, y] = hexc("#10263A")
+            elif d <= 19:
+                cp[x, y] = hexc("#4FD1E8")
+            elif d <= 20:
+                cp[x, y] = hexc("#0B1020")
+            elif d <= 21:
+                cp[x, y] = hexc("#1F5566")
+    core.save(os.path.join(OUT, "term_core.png"))
+
+
 def recolor_header(src_name, dst_name, target):
     """Copies an eco header texture and tints it to a new colour (keeps shading)."""
     src = Image.open(os.path.join(ECO, f"{src_name}.png")).convert("RGBA")
@@ -234,6 +302,7 @@ def make_sidebar_panel():
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     make_icons()
+    make_terminal()
     make_art()  # after make_icons: replaces the plain ore icon
     recolor_header("header_blue", "header_cyan", "#2FB8D0")
     recolor_header("header_blue", "header_pink", "#E8559F")
