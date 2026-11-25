@@ -392,6 +392,8 @@ const scouted = new Map(); // clanId -> { prep, intel, until }
 export async function raidMenu(player, msg) {
   const clan = clanOf(player);
   if (!clan) return tower(player);
+  // why a raid didn't start (no targets, not enough in the bank...): also in chat, it's easy to miss on the card
+  if (msg) player.sendMessage(CONFIG.prefix + msg);
   const running = R.raidOfClan(clan.id);
   const manage = canManage(clan, player.id);
   const rev = R.revengeAvailable(clan);
