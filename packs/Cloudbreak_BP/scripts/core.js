@@ -136,22 +136,43 @@ const flying = new Set();
 let abilityWarned = false;
 
 function setFly(player, on) {
+  let ok = false;
   try {
-    player.runCommand(`ability @s mayfly ${on}`);
-    if (on) flying.add(player.id);
-    else flying.delete(player.id);
+    const r = player.runCommand(`ability @s mayfly ${on}`);
+    ok = (r?.successCount ?? 1) > 0;
   } catch {
+    ok = false;
+  }
+  if (on && !ok) {
     if (!abilityWarned) {
       abilityWarned = true;
       console.warn("[cloudbreak] Island Fly needs Education Edition turned on in the world settings.");
     }
-    if (on) player.sendMessage(`${CONFIG.prefix}§cIsland Fly needs Education Edition switched on in the world settings. Ask an admin.`);
+    flying.add(player.id); // don't retry every tick; it is cleared when they leave the island
+    player.sendMessage(`${CONFIG.prefix}§cIsland Fly needs Education Edition switched on in the world settings. Ask an admin.`);
+    return;
+  }
+  if (on) flying.add(player.id);
+  else {
+    flying.delete(player.id);
+    // don't drop them into the void when flight switches off mid-air
+    try {
+      player.addEffect("slow_falling", 200, { showParticles: false });
+    } catch {}
   }
 }
 
+const isCreative = (p) => {
+  const m = String(p.getGameMode?.() ?? "").toLowerCase();
+  return m === "creative" || m === "spectator";
+};
+
 function flyTick() {
   for (const p of world.getPlayers()) {
-    if (p.hasTag("admin") && p.getGameMode?.() === "creative") continue;
+    if (isCreative(p)) {
+      flying.delete(p.id); // creative flying is the game's, not ours
+      continue;
+    }
     const clan = clanOf(p);
     const here = clanAt(p.dimension.id, p.location);
     const allowed = !!clan && here?.id === clan.id && inBorder(clan, p.location) && activeLevel(clan, "fly") > 0 && !p.hasTag("cb:inraid") && !p.hasTag("cb:pvp");

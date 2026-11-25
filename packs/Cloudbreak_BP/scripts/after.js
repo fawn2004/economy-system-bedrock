@@ -67,7 +67,7 @@ function onRaidEnd(raid, outcome) {
     log(attacker, "won", target.name, stolen + raid.bonus, `${typeName} · ${squad} raiders${raid.bonus ? ` · +${fmt(raid.bonus)} underdog bonus` : ""}`);
     log(target, "raided", attacker.name, -stolen, `${squad} raiders${refund ? ` · insurance paid ${fmt(refund)}` : ""}`);
     tellClan(target, `§7You're immune to raids for §f${raidImmunityHours(target)}h§7. Revenge Raid unlocked on §e${attacker.name}§7 for ${CONFIG.raid.revengeHours}h.`);
-    keysFor = Object.keys(raid.raiders).map((id) => [world.getEntity(id), "raider"]);
+    keysFor = Object.keys(raid.raiders).map((id) => [id, "raider", attacker]);
   } else if (outcome === "defended") {
     stats(attacker).losses += 1;
     const ts = stats(target);
@@ -76,13 +76,32 @@ function onRaidEnd(raid, outcome) {
     ts.bestStreak = Math.max(ts.bestStreak, ts.streak);
     log(attacker, "failed", target.name, -raid.price, `${typeName} · didn't land in time`);
     log(target, "defended", attacker.name, raid.price, `${squad} raiders held off · fee paid to you`);
-    keysFor = onlineMembers(target).map((p) => [p, "defender"]);
+    keysFor = onlineMembers(target).map((p) => [p.id, "defender", target]);
   } else if (outcome === "backout") {
     log(attacker, "backout", target.name, -Math.ceil(raid.price * (1 - CONFIG.raid.backOutRefund)), "Called off in time");
   }
+  // offline players get their key the next time they join
+  for (const [id, crate, clan] of keysFor) {
+    const m = clan.members[id];
+    if (!world.getEntity(id) && m) m.owedKeys = { ...(m.owedKeys ?? {}), [crate]: (m.owedKeys?.[crate] ?? 0) + 1 };
+  }
   saveClan(attacker);
   saveClan(target);
-  for (const [p, crate] of keysFor) giveKey(p, crate);
+  for (const [id, crate] of keysFor) {
+    const p = world.getEntity(id);
+    if (p) giveKey(p, crate);
+  }
+}
+
+/** Gives a player any crate keys they earned while offline. */
+export function payOwedKeys(player) {
+  const clan = clanOf(player);
+  const m = clan?.members[player.id];
+  if (!m?.owedKeys) return;
+  const owed = m.owedKeys;
+  m.owedKeys = undefined;
+  saveClan(clan);
+  for (const [crate, n] of Object.entries(owed)) giveKey(player, crate, n);
 }
 
 // ---------------------------------------------------------------------------

@@ -151,7 +151,7 @@ async function clanMenu(player, clan) {
     { n: 4, icon: CB.shop, text: "Sky Shop", sub: "Buy and sell", run: () => skyShopMenu(player) },
     { n: 3, icon: CB.bank, text: "Clan Bank", sub: `${fmtMoney(bankOf(clan))} · ${hoursCovered(clan)}h of tax`, run: () => bankMenu(player) },
     { n: 2, icon: CB.raids, text: "Raids", sub: "Buy a raid", run: () => raidMenu(player) },
-    { n: 1, icon: CB.home, text: "Island Home", sub: "Teleport to your island", run: () => sendHome(player, clan) },
+    { n: 1, icon: CB.home, text: "Island Home", sub: "Teleport to your island", run: () => (R.raidOfPlayer(player) ? report(player, { ok: false, msg: "You're in a raid. Finish it, or back out with /sc back." }) : sendHome(player, clan)) },
   ];
   const buttons = floors.map((f) => ({ text: `§b§lF${f.n} §f§l${f.text.toUpperCase()}\n§r§7${f.sub}`, icon: f.icon, run: f.run }));
   if (player.hasTag("admin")) buttons.push({ text: "§d§lADMIN\n§r§7Server tools", icon: CB.admin, run: () => (floorHooks.admin ? floorHooks.admin(player) : adminMenu(player)) });
@@ -269,7 +269,7 @@ async function membersMenu(player) {
   const form = styled("blue").title(`Members · ${clan.name}`).body("§7Pick a player to see what you can do.");
   for (const [id, m] of list) {
     const on = world.getEntity(id) ? "§2online" : "§8offline";
-    form.button(`${m.name}${id === player.id ? " §8(you)" : ""}\n§r§8${ROLE_NAME[m.role]} · ${on}`, m.role === "owner" ? CB.crown : CB.members);
+    form.button(`§f${m.name}${id === player.id ? " §8(you)" : ""}\n§r§8${ROLE_NAME[m.role]} · ${on}`, m.role === "owner" ? CB.crown : CB.members);
   }
   form.button("§cBACK\n§r§7Go back", CB.back);
   const res = await show(player, form);
@@ -323,7 +323,7 @@ async function inviteMenu(player) {
     return;
   }
   const form = styled("blue").title("Invite a Player").body("§7Online players with no clan:");
-  for (const p of candidates) form.button(p.name, CB.members);
+  for (const p of candidates) form.button(`§f${p.name}`, CB.members);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   const target = candidates[res.selection];

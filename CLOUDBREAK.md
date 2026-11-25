@@ -1,34 +1,43 @@
 # Cloudbreak — Sky Clans
 
-Clans of up to 5 share a floating island and (from Milestone 3) buy blind raids on other islands.
-The full design is in the Cloudbreak design doc; the UI mockups are on the Cloudbreak UI canvas.
+Clans of up to 5 share a floating island, grind it up like skyblock, and buy blind raids on
+other islands. The full design is in the Cloudbreak design doc; the UI mockups are on the
+Cloudbreak UI canvas.
 
-Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP`. They run alongside the Skyblock Economy packs.
+Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.2.0). Cloudbreak contains its
+own copy of the Skyblock Economy code (`scripts/eco`), so it does **not** need the Skyblock
+Economy packs. Don't run both in the same world.
 
 ## Status
 
-| Milestone | What | State |
-| --- | --- | --- |
-| 1 | Clans and islands | **Built (v0.1.0)** — needs in-game testing |
-| 2 | Island Core and clan bank | Not started |
-| 3 | Raids | Not started |
-| 4 | After the raid (insurance, revenge, logs, keys) | Not started |
-| 5 | Shop, crates and kits | Not started |
-| 6 | Custom menus, sidebar, admin panel | Not started |
+All six milestones are built. Nothing has been tested in Minecraft yet; the rules are covered by
+offline tests (`tools/cloudbreak_tests/run.sh`).
 
-Milestone 1 uses plain Bedrock forms; the chosen custom layouts come in Milestone 6.
+| Milestone | What |
+| --- | --- |
+| 1 | Clans (Owner / Co-Owner / Member, max 5) and islands on a void grid |
+| 2 | Island Core, hourly core tax, 9 core upgrades, clan bank |
+| 3 | Raids: Normal, Intel, Cheap, Revenge; bridge, lives, loot, cleanup |
+| 4 | Raid immunity, insurance, revenge, raid log, leaderboards, crate keys |
+| 5 | Sky Shop, crates (reel animation), kits |
+| 6 | Styled menus with icons, Core Monitor sidebar, raid sidebars, admin Control Room |
+| + | Economy merged in; 10 new minions with their own models |
 
 ## Install
 
 1. Run `tools/build_cloudbreak.sh` and open `dist/Cloudbreak_v<version>.mcaddon`.
-2. Make a **void world** (Flat world with the "The Void" preset, or any world with nothing far out
-   at x/z 20,000+). Islands are built at y = 100 from x = 20,000, z = 20,000, 1,000 blocks apart.
-3. Turn on both Cloudbreak packs. Needs Minecraft 1.21.100 or newer (Script API 2.1.0).
+2. Make a **void world** (Flat world, "The Void" preset). Islands are built at y = 100 from
+   x = 20,000, z = 20,000, 1,000 blocks apart.
+3. Turn on **Education Edition** in the world settings (needed for Island Fly).
+4. Turn on both Cloudbreak packs. Needs **Minecraft 1.26.10 or newer** (Script API 2.6.0).
+5. Make sure PvP is on in the world settings; Cloudbreak itself blocks player damage outside raids.
+6. Give staff the admin tag: `/tag <name> add admin`.
+7. Optional: put your server address in `sidebarFooter` in `scripts/config.js`.
 
 ## Commands
 
 ```
-/menu                       open the Cloudbreak menu (also: the Cloudbreak Menu item, slot 9)
+/menu                       Cloudbreak menu (also the Cloudbreak Menu item, slot 9)
 /is                         teleport to your island
 /sc create <name>           create a clan and its island
 /sc invite <player>         invite an online player (Owner, Co-Owner)
@@ -39,28 +48,54 @@ Milestone 1 uses plain Bedrock forms; the chosen custom layouts come in Mileston
 /sc demote <player>         Co-Owner -> Member (Owner)
 /sc transfer <player>       make someone the Owner (Owner)
 /sc disband                 delete the clan (Owner)
+/sc raid                    open Raid Dispatch
+/sc back                    back out of a raid in the first 30 seconds (50% refund)
+/admin                      admin Control Room (players tagged admin)
 /scriptevent cb:menu        open the menu from NPCs / command blocks (/execute as)
 /scriptevent cb:item        get the menu item back
-/tag <player> add admin     admins can build anywhere
 ```
 
-If another addon already has a `/menu` or `/is` command, use `/cb:menu`, `/cb:is`, `/cb:sc`.
+If another addon already uses one of these names, add the namespace: `/cb:menu`, `/cb:is`,
+`/cb:sc`, `/cb:admin`.
 
-## Rules in this version
+## How it plays
 
-- Max 5 players per clan; names are 3–16 letters, numbers or `_`, unique (ignoring case).
-- Roles: see the Clans and roles table in the design doc. If the Owner leaves, the longest-serving
-  Co-Owner (else Member) takes over; the last player leaving disbands the clan.
-- A new clan gets a 15 × 15 starter island (tree + starter chest) inside a 100 × 100 border.
-- In the island area you can only build on your own island, inside its border.
-- The 9 × 9 stone-brick spawn zone can't be broken or built on; chests in it still open and
-  spawners in it can still be picked up. Explosions don't damage it.
+- **Islands:** 15×15 starter island inside a 100×100 border (Island Size grows it to 300×300).
+  The 9×9 stone-brick spawn zone can't be broken or built on; chests there still open and
+  spawners can still be picked up. You can only build on your own island.
+- **Island Core:** tap it for the Core Terminal. It charges $10,000 from the clan bank for every
+  hour a member is online. If the bank can't pay: a 30-minute grace, then the shield drops, all
+  upgrades switch off and the island shows up in Cheap Raids. Paying brings everything back.
+- **Upgrades:** Island Size, Sell Multiplier (up to x3, every sell), Island Fly, Ore Generator
+  (cobblestone generators sometimes make ores), Spawner Cap (10 → 50), Crop Growth (up to x3),
+  Raid Shield Length, Defence Time (raiders get less time to reach you), Extra Raid Life.
+- **Raids:** bought by the Owner or a Co-Owner. Everyone online goes to a launch island 60 blocks
+  out and has 10 minutes to bridge across. Landing wins: 25% of the target's bank (+50% from the
+  server if the raiders' clan is poorer), then 15 minutes of looting. Failing pays the raid fee to
+  the defenders. 3 lives each. PvP only works between players in a raid. Intel Raids show a hint
+  first (free to scout, once a minute) and you only pay if you deploy.
+- **After a raid:** the raided clan gets 12h immunity, its insurance payout and a 24h Revenge
+  Raid. Winners get Raider Crate keys, defenders get Defender Crate keys (kept for you if you were
+  offline).
+- **Admins:** every rule above can be changed in /admin → (an admin-tagged player) → Server Rules.
 
-## Milestone 1 test checklist
+## Tools
 
-- [ ] Create a clan; the island is built and you are teleported to it (and respawn there)
-- [ ] Invite, accept, decline, kick, promote, demote, transfer and disband follow the roles table
-- [ ] A 6th player can't join; a second clan can't reuse a name in different capitals
-- [ ] You can't build outside your border or on someone else's island; admins can
-- [ ] Spawn zone: can't break or place; chests open; spawners can be picked up; TNT doesn't damage it
-- [ ] Kick a player while they're offline: when they rejoin they're clanless and respawn at world spawn
+```
+tools/build_cloudbreak.sh            build the .mcaddon
+tools/build_cloudbreak_minions.py    rebuild minion models, entities, loot items, minion_types.js
+tools/build_cloudbreak_ui.py         rebuild icons, menu header themes, sidebar panels
+tools/cloudbreak_tests/run.sh        offline rule tests (no Minecraft needed)
+```
+
+## Test checklist (in game)
+
+- [ ] Create a clan: island, core and respawn point appear; invite/kick/promote/transfer/disband
+- [ ] Spawn zone rules; can't build outside the border or on other islands; admins can
+- [ ] Deposit / withdraw; tax after an hour online; grace → shield down → deposit restores
+- [ ] Each upgrade works (Island Fly needs Education Edition)
+- [ ] Raid: launch island, back out, bridge, defenders warned + sidebar, lives, landing, 25%,
+      loot 15 min, cleanup; defended raid pays the fee; logging off / restart mid-raid
+- [ ] Insurance payout, immunity, revenge, raid log, leaderboards, crate keys and crate reel
+- [ ] Sky Shop categories, Sell with multiplier, minions (all 10 models), chunk hopper
+- [ ] Admin panel: normal vs admin-tagged player, Server Rules saved after restart

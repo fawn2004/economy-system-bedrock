@@ -465,6 +465,16 @@ export function registerRaids() {
     const src = ev.damageSource?.damagingEntity;
     if (victim?.typeId !== "minecraft:player" || src?.typeId !== "minecraft:player" || src.id === victim.id) return;
     if (!(victim.hasTag(TAG_PVP) && src.hasTag(TAG_PVP))) ev.cancel = true;
+    else if (clanOf(victim)?.id === clanOf(src)?.id) ev.cancel = true; // no friendly fire
+  });
+
+  // nothing on a raided island can be blown up before the raiders land
+  world.beforeEvents.explosion.subscribe((ev) => {
+    const bridging = activeRaids().filter((r) => r.phase === "bridge").map((r) => getClan(r.target)).filter(Boolean);
+    if (!bridging.length) return;
+    const blocks = ev.getImpactedBlocks();
+    const keep = blocks.filter((b) => !bridging.some((t) => b.dimension.id === "minecraft:overworld" && inBorder(t, b.location)));
+    if (keep.length !== blocks.length) ev.setImpactedBlocks(keep);
   });
 
   world.afterEvents.entityDie.subscribe(({ deadEntity }) => {

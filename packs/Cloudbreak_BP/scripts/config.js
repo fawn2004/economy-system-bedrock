@@ -4,7 +4,7 @@
 export const CONFIG = {
   serverName: "Cloudbreak",
   prefix: "§b§lCloudbreak §r§8» §7",
-  sidebarFooter: "[YOUR SERVER IP]", // bottom line of the sidebar ("" to hide)
+  sidebarFooter: "", // bottom line of the sidebar, e.g. your server address ("" hides it)
 
   clan: {
     maxMembers: 5,

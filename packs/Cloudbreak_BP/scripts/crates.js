@@ -97,6 +97,7 @@ export async function openCrate(player, crate) {
 
   opening.add(player.id);
   const win = roll(table);
+  give(player, win); // paid straight away, so leaving mid-spin never loses the reward
   // reel: random rewards, slowing down, ending on the win
   const frames = 22;
   for (let i = 0; i < frames && player.isValid; i++) {
@@ -112,7 +113,6 @@ export async function openCrate(player, crate) {
   }
   opening.delete(player.id);
   if (!player.isValid) return;
-  give(player, win);
   const rr = RARITY[win.r];
   player.playSound(win.r === "legendary" || win.r === "epic" ? "random.totem" : "random.levelup", { volume: 0.8 });
   player.sendMessage(`${CONFIG.prefix}${c.color}${c.name}§7: you won ${rr.col}${rr.name} §f${rewardName(win)}§7!`);

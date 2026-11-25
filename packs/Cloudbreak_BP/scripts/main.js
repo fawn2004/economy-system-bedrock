@@ -18,8 +18,8 @@ import {
 import { clearIslandSpawn, createIsland, registerProtection, sendHome, setOnHome } from "./islands.js";
 import { coreTerminal, mainMenu, raidMenu, setFloor } from "./menus.js";
 import { ensureCore, registerCore, setCoreTerminal, settleTax } from "./core.js";
-import { backOut, registerRaids } from "./raids.js";
-import { registerAfterRaid } from "./after.js";
+import { backOut, raidOfPlayer, registerRaids } from "./raids.js";
+import { payOwedKeys, registerAfterRaid } from "./after.js";
 import { registerCrates } from "./crates.js";
 import { registerSidebar } from "./sidebar.js";
 import { adminPanel, applySavedRules } from "./admin.js";
@@ -52,6 +52,7 @@ function setupPlayer(player) {
     player.setDynamicProperty("cb:homeSet", undefined);
   }
   if (CONFIG.menuItem.giveOnJoin) giveMenuItem(player);
+  payOwedKeys(player);
   if (!player.getDynamicProperty("cb:joined")) {
     player.setDynamicProperty("cb:joined", true);
     player.sendMessage(`${CONFIG.prefix}Welcome to §b${CONFIG.serverName}§7! Use the menu item or type §f/menu§7 to create a clan.`);
@@ -193,7 +194,10 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
     (origin) => {
       const p = player(origin);
       if (!p) return notPlayer;
-      system.run(() => sendHome(p).catch((e) => console.warn(`[cloudbreak] home error: ${e}`)));
+      system.run(() => {
+        if (raidOfPlayer(p)) return p.sendMessage(`${CONFIG.prefix}§cYou're in a raid. Finish it, or back out with §f/sc back§c.`);
+        sendHome(p).catch((e) => console.warn(`[cloudbreak] home error: ${e}`));
+      });
       return ok;
     }
   );
