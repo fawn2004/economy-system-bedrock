@@ -22,6 +22,7 @@ import { backOut, raidOfPlayer, registerRaids } from "./raids.js";
 import { payOwedKeys, registerAfterRaid } from "./after.js";
 import { registerCrates } from "./crates.js";
 import { registerSidebar } from "./sidebar.js";
+import { registerBorder } from "./border.js";
 import { adminPanel, applySavedRules } from "./admin.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
@@ -95,6 +96,7 @@ registerRaids();
 registerAfterRaid();
 registerCrates();
 registerSidebar();
+registerBorder();
 setFloor("admin", (player) => adminPanel(player));
 
 // ---------------------------------------------------------------------------

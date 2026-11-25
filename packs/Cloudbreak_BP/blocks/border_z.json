@@ -1,0 +1,29 @@
+{
+  "format_version": "1.21.80",
+  "minecraft:block": {
+    "description": {
+      "identifier": "cb:border_z",
+      "menu_category": {
+        "category": "none"
+      }
+    },
+    "components": {
+      "minecraft:geometry": "geometry.cb_border_z",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "cb_border",
+          "render_method": "blend",
+          "ambient_occlusion": false,
+          "face_dimming": false
+        }
+      },
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": false,
+      "minecraft:light_dampening": 0,
+      "minecraft:replaceable": {},
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:map_color": "#FF3B3B"
+    }
+  }
+}

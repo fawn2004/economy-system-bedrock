@@ -4,7 +4,14 @@
   "padding": 8,
   "num_mip_levels": 4,
   "texture_data": {
-    "cb_island_core": { "textures": "textures/blocks/cb/island_core" },
-    "cb_island_core_top": { "textures": "textures/blocks/cb/island_core_top" }
+    "cb_island_core": {
+      "textures": "textures/blocks/cb/island_core"
+    },
+    "cb_island_core_top": {
+      "textures": "textures/blocks/cb/island_core_top"
+    },
+    "cb_border": {
+      "textures": "textures/blocks/cb/border"
+    }
   }
 }

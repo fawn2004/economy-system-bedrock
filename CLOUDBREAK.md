@@ -4,7 +4,7 @@ Clans of up to 5 share a floating island, grind it up like skyblock, and buy bli
 other islands. The full design is in the Cloudbreak design doc; the UI mockups are on the
 Cloudbreak UI canvas.
 
-Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.4.5). Cloudbreak contains its
+Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.4.6). Cloudbreak contains its
 own copy of the Skyblock Economy code (`scripts/eco`), so it does **not** need the Skyblock
 Economy packs. Don't run both in the same world.
 
@@ -63,7 +63,8 @@ If another addon already uses one of these names, add the namespace: `/cb:menu`,
 
 - **Islands:** 15×15 starter island inside a 100×100 border (Island Size grows it to 300×300).
   The 9×9 stone-brick spawn zone can't be broken or built on; chests there still open and
-  spawners can still be picked up. You can only build on your own island.
+  spawners can still be picked up. You can only build on your own island. A see-through red wall shows the border when you get within
+  10 blocks of it (you can walk and bridge through it).
 - **Island Core:** tap it for the Core Terminal. It charges $10,000 from the clan bank for every
   hour a member is online. If the bank can't pay: a 30-minute grace, then the shield drops, all
   upgrades switch off and the island shows up in Cheap Raids. Paying brings everything back.
