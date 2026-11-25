@@ -1,5 +1,6 @@
 import { system, world } from "@minecraft/server";
-import { backTile, success, tileMenu } from "./ui.js";
+import { success } from "./ui.js";
+import { Screen } from "../screens.js";
 
 // ============================================================================
 //  PLAYER SETTINGS  (main menu > Player Settings)
@@ -14,44 +15,34 @@ export const pref = (player, id, def) => {
 };
 const setPref = (player, id, v) => player.setDynamicProperty(`eco:pref:${id}`, v);
 
+const CBI = "textures/ui/cb/icon_";
 const SETTINGS = [
-  { id: "chunks", name: "CHUNK BORDERS", label: "Chunk Borders", desc: "Glowing lines around the chunk you're in", def: false, icon: "textures/blocks/glass" },
-  { id: "fullbright", name: "FULL BRIGHT", label: "Full Bright", desc: "See clearly in the dark", def: false, icon: "textures/items/potion_bottle_nightVision" },
-  { id: "raidsound", name: "RAID ALERT SOUND", label: "Raid Alert Sound", desc: "Warning sound when raiders bridge to you", def: true, icon: "textures/items/bell" },
-  { id: "coords", name: "COORDINATES", label: "Coordinates", desc: "Your X / Y / Z on the action bar", def: false, icon: "textures/items/compass_item" },
+  { id: "chunks", label: "Chunk Borders", desc: "Outline the chunk you are standing in. Only you see it.", def: false, icon: CBI + "grid", col: "cCYAN", on: "§bON" },
+  { id: "fullbright", label: "Full Bright", desc: "See clearly at night without torches or particles.", def: false, icon: CBI + "sun", col: "cGOLD", on: "§6ON" },
+  { id: "raidsound", label: "Raid Alert Sound", desc: "Play a warning sound when raiders start bridging.", def: true, icon: CBI + "bell", col: "cRED", on: "§cON" },
+  { id: "coords", label: "Coordinates", desc: "Show X / Y / Z and facing on the action bar.", def: false, icon: CBI + "compass", col: "cPURPLE", on: "§dON" },
 ];
 export const PLAYER_SETTINGS = SETTINGS;
 export const setPlayerPref = (player, id, v) => setPref(player, id, v);
+export const settingsOnCount = (player) => SETTINGS.filter((s) => pref(player, s.id, s.def)).length;
 
+/** Settings: Levers. Tap a card to pull its lever. (back is kept for callers; the X closes it.) */
 export async function playerSettingsMenu(player, back, msg) {
-  const reopen = (m) => playerSettingsMenu(player, back, m);
-  const tiles = SETTINGS.map((s) => {
-    const on = pref(player, s.id, s.def);
-    return {
-      text: `${on ? "§a" : "§c"}§l${s.name}`,
-      sub: on ? "§aON §7- tap to turn off" : "§cOFF §7- tap to turn on",
-      icon: s.icon,
-      onClick: () => {
-        setPref(player, s.id, !on);
-        if (s.id === "fullbright" && on) {
-          try {
-            player.removeEffect("night_vision");
-          } catch {}
-        }
-        success(player, `${s.label} turned ${!on ? "on" : "off"}.`);
-        return reopen(`§f${s.name} §7is now ${!on ? "§aON" : "§cOFF"}`);
-      },
-    };
-  });
-  tiles.push(backTile(back));
-  await tileMenu(player, {
-    title: "PLAYER SETTINGS",
-    theme: "blue",
-    body:
-      (msg ? msg + "\n" : "") +
-      SETTINGS.map((s) => `§f${s.label}: ${pref(player, s.id, s.def) ? "§aON" : "§cOFF"} §8- ${s.desc}`).join("\n"),
-    tiles,
-  });
+  const s = new Screen("settings", "Settings");
+  for (const st of SETTINGS) {
+    const on = pref(player, st.id, st.def);
+    s.button("SET", `§f${st.label}\n§7${st.desc}\n${on ? st.on : "§8OFF"}`, () => {
+      setPref(player, st.id, !on);
+      if (st.id === "fullbright" && on) {
+        try {
+          player.removeEffect("night_vision");
+        } catch {}
+      }
+      success(player, `${st.label} turned ${!on ? "on" : "off"}.`);
+      return playerSettingsMenu(player, back);
+    }, { icon: st.icon, states: on ? ["ON", st.col] : [] });
+  }
+  await s.show(player);
 }
 
 // ---- chunk borders ------------------------------------------------------------

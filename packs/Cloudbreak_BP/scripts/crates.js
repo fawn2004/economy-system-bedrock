@@ -1,8 +1,9 @@
 import { ItemStack, system, world } from "@minecraft/server";
-import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
 import { CONFIG } from "./config.js";
 import { addMoney, fmt } from "./eco/economy.js";
-import { makeSpawnerItem, mobName } from "./eco/spawners.js";
+import { makeSpawnerItem, mobIcon, mobName } from "./eco/spawners.js";
+import { getCatalog } from "./eco/catalog.js";
+import { Screen } from "./screens.js";
 import { pauseSidebar } from "./titles.js";
 
 // ---------------------------------------------------------------------------
@@ -85,11 +86,16 @@ export async function openCrate(player, crate) {
   const c = CONFIG.crates[crate];
   const table = CRATE_REWARDS[crate];
   if (!c || !table || opening.has(player.id)) return;
-  // take one key from the held stack
+  // take one key: the held stack first, else any stack in the inventory
   const inv = player.getComponent("minecraft:inventory")?.container;
-  const slot = player.selectedSlotIndex;
-  const held = inv?.getItem(slot);
-  if (held?.typeId !== c.key) return;
+  if (!inv) return;
+  let slot = player.selectedSlotIndex;
+  if (inv.getItem(slot)?.typeId !== c.key) {
+    slot = -1;
+    for (let i = 0; i < inv.size; i++) if (inv.getItem(i)?.typeId === c.key) { slot = i; break; }
+    if (slot < 0) return;
+  }
+  const held = inv.getItem(slot);
   if (held.amount > 1) {
     held.amount -= 1;
     inv.setItem(slot, held);
@@ -117,28 +123,55 @@ export async function openCrate(player, crate) {
   player.playSound(win.r === "legendary" || win.r === "epic" ? "random.totem" : "random.levelup", { volume: 0.8 });
   player.sendMessage(`${CONFIG.prefix}${c.color}${c.name}§7: you won ${rr.col}${rr.name} §f${rewardName(win)}§7!`);
   if (win.r === "legendary") world.sendMessage(`${CONFIG.prefix}§e${player.name}§7 won ${rr.col}${rewardName(win)}§7 from a ${c.color}${c.name}§7!`);
+  return crateScreen(player, crate, win);
 }
 
-async function crateInfo(player, crate) {
+const RARITY_TAG = { common: "rC", rare: "rR", epic: "rE", legendary: "rL" };
+const KEY_ICON = { raider: "key_pink", defender: "key_cyan", legendary: "key_gold" };
+
+function countKeys(player, key) {
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  let n = 0;
+  if (inv) for (let i = 0; i < inv.size; i++) {
+    const it = inv.getItem(i);
+    if (it?.typeId === key) n += it.amount;
+  }
+  return n;
+}
+
+function rewardIcon(w) {
+  if (w.money) return "textures/ui/cb/icon_sell";
+  if (w.spawner) return mobIcon(w.spawner);
+  return getCatalog().all.get(w.item)?.icon ?? "textures/ui/cb/icon_chest";
+}
+
+/** Crate Opening screen. win = the reward just won (shown in the middle of the reel). */
+export async function crateScreen(player, crate, win) {
   const c = CONFIG.crates[crate];
   const table = CRATE_REWARDS[crate];
-  const lines = Object.entries(RARITY).map(([r, x]) => {
-    const items = table.filter((w) => w.r === r).map(rewardName);
-    return items.length ? `${x.col}${x.name} §8(${x.chance}%)§r §7${items.join(", ")}` : "";
-  }).filter(Boolean);
-  const form = new ActionFormData().title(c.name).body(`§7Possible rewards:\n\n${lines.join("\n")}`).button("§aOpen Crate").button("Not now");
-  let res;
-  for (let i = 0; i < 40; i++) {
-    res = await form.show(player);
-    if (res.cancelationReason !== FormCancelationReason.UserBusy) break;
-    await system.waitTicks(5);
+  if (!c || !table || !player.isValid) return;
+  const keys = countKeys(player, c.key);
+  const s = new Screen("crate", c.name);
+  s.text("CT", c.name.toUpperCase());
+  s.text("KEYS", `§7Keys §e${keys}`, { icon: `textures/ui/cb/s/${KEY_ICON[crate] ?? "key_gold"}` });
+  for (let i = 0; i < 7; i++) {
+    const w = i === 3 && win ? win : table[Math.floor(Math.random() * table.length)];
+    s.text("RL", rewardName(w), { icon: rewardIcon(w), states: [RARITY_TAG[w.r], i === 3 && win ? "WIN" : undefined] });
   }
-  if (res && !res.canceled && res.selection === 0) await openCrate(player, crate);
+  s.button("OP", keys ? (win ? "OPEN ANOTHER · 1 KEY" : "OPEN CRATE · 1 KEY") : "NO KEYS LEFT", () => (keys ? openCrate(player, crate) : crateScreen(player, crate, win)), { states: [keys ? undefined : "OFF"] });
+  if (win) s.text("MSG", `§7You won ${RARITY[win.r].col}${RARITY[win.r].name} §f${rewardName(win)}§7!`);
+  for (const [r, x] of Object.entries(RARITY)) {
+    const items = table.filter((w) => w.r === r).map(rewardName);
+    if (!items.length) continue;
+    s.text("OD", `${x.col}${x.name}\n§7${items.slice(0, 2).join(", ")}`, { states: [RARITY_TAG[r]] });
+    s.text("ODP", `${x.chance}%`);
+  }
+  await s.show(player);
 }
 
 export function registerCrates() {
   world.afterEvents.itemUse.subscribe(({ source, itemStack }) => {
     const crate = Object.keys(CONFIG.crates).find((k) => CONFIG.crates[k].key === itemStack?.typeId);
-    if (crate) crateInfo(source, crate).catch((e) => console.warn(`[cloudbreak] crate: ${e}`));
+    if (crate) crateScreen(source, crate).catch((e) => console.warn(`[cloudbreak] crate: ${e}`));
   });
 }

@@ -47,6 +47,7 @@ import {
   skillToolTiles,
 } from "./tools.js";
 import { ICON, askSearch, backTile, fail, showForm, success, tileMenu, withNav } from "./ui.js";
+import { Screen } from "../screens.js";
 
 const U = "textures/ui/eco/";
 const pretty = (id) =>
@@ -1119,24 +1120,24 @@ function listOf(ids) {
   return ids.map((id) => byId.get(id)).filter((e) => e && e.buy > 0);
 }
 
-export async function skyShopMenu(player, msg) {
-  const { categories, byCategory } = getCatalog();
-  const cat = (id) => categories.find((c) => c.id === id);
-  const back = () => skyShopMenu(player);
-  const open = (title, theme, desc, items, children) =>
-    itemListMenu(player, { title, theme, desc, items, searchPool: items, children, back });
-  const gear = [...(byCategory.get("tools") ?? []), ...listOf(["minecraft:golden_apple", "minecraft:enchanted_golden_apple", "minecraft:arrow", "minecraft:shield"])];
-  const ores = [...itemsDeep("ores"), ...itemsDeep("buckets")];
-  const more = ["treasure", "redstone", "misc", "mobs", "brewing"].map(cat).filter(Boolean);
-  const tiles = [
-    { text: "§7§lBRIDGING BLOCKS", sub: "§7For raids", icon: "textures/blocks/cobblestone", badge: "HOT", onClick: () => open("BRIDGING BLOCKS", "blue", "Cheap blocks for building across to enemy islands.", listOf(BRIDGING)) },
-    { text: "§c§lRAID GEAR", sub: "§7Armour & weapons", icon: "textures/items/diamond_sword", onClick: () => open("RAID GEAR", "red", "Armour, weapons and golden apples. No ender pearls.", gear) },
-    { text: "§d§lSPAWNERS", sub: `§7${SPAWNERS.filter((s) => !s.disabled).length} mobs`, icon: U + "icon_spawners", onClick: () => spawnersMenu(player) },
-    { text: "§b§lGENERATORS / ORES", sub: "§7Ores, lava & water", icon: "textures/ui/cb/icon_generator", onClick: () => open("GENERATORS / ORES", "blue", "Ores and buckets for your generator.", ores) },
-    { text: "§a§lFARMING", sub: "§7Seeds & saplings", icon: U + "icon_farming", onClick: () => categoryMenu(player, cat("farming"), back) },
-    { text: "§e§lBLOCKS", sub: "§7Build & decorate", icon: U + "icon_blocks", onClick: () => blocksMenu(player) },
-    { text: "§6§lFOOD", sub: "§7Eat up", icon: U + "icon_food", onClick: () => categoryMenu(player, cat("food"), back) },
-    { text: "§e§lMINIONS & HOPPERS", sub: "§7Work while you're away", icon: U + "icon_minion", onClick: () => tileMenu(player, {
+const SHOP_PAGE = 40;
+const CBI = "textures/ui/cb/icon_";
+
+/** Sky Shop screen: category rail on the left, item cards on the right. Tap a card to pick how many. */
+export async function skyShopMenu(player, msg, st = {}) {
+  if (typeof msg === "object" && msg) [st, msg] = [msg, undefined];
+  const deep = (...ids) => ids.flatMap((id) => itemsDeep(id)).filter((e) => e.buy > 0); // "blocks" is only a group name, not a category
+  const gear = [...(getCatalog().byCategory.get("tools") ?? []), ...listOf(["minecraft:golden_apple", "minecraft:enchanted_golden_apple", "minecraft:arrow", "minecraft:shield"])];
+  const back = () => skyShopMenu(player, { cat: sel.id, page });
+  const rail = [
+    { id: "bridging", name: "Bridging Blocks", desc: "Cheap blocks for building across to enemy islands", icon: CBI + "bridging", items: () => listOf(BRIDGING) },
+    { id: "gear", name: "Raid Gear", desc: "Armour, weapons and golden apples. No ender pearls.", icon: "textures/items/diamond_sword", items: () => gear.filter((e) => e.buy > 0) },
+    { id: "spawners", name: "Spawners", desc: "Mob spawners and their upgrades", icon: CBI + "spawners", count: SPAWNERS.filter((x) => !x.disabled).length, open: () => spawnersMenu(player) },
+    { id: "ores", name: "Generators / Ores", desc: "Ores and buckets for your generator", icon: CBI + "generator", items: () => deep("ores", "buckets") },
+    { id: "farming", name: "Farming", desc: "Seeds, saplings and crops", icon: CBI + "crops", items: () => deep("farming") },
+    { id: "blocks", name: "Blocks", desc: "Build and decorate your island", icon: U + "icon_blocks", items: () => deep("blocks") },
+    { id: "food", name: "Food", desc: "Eat up before a raid", icon: U + "icon_food", items: () => deep("food") },
+    { id: "minions", name: "Minions & Hoppers", desc: "They work while you're away", icon: U + "icon_minion", count: MINION_TYPES.length + 1, open: () => tileMenu(player, {
       title: "MINIONS & HOPPERS", theme: "orange", body: balLine(player),
       tiles: [
         { text: "§e§lMINIONS", sub: "§7Mine and farm for you", icon: U + "icon_minion", onClick: () => minionShop(player) },
@@ -1144,15 +1145,31 @@ export async function skyShopMenu(player, msg) {
         backTile(back),
       ],
     }) },
-    { text: "§f§lMORE", sub: "§7Redstone, brewing...", icon: "textures/items/redstone_dust", onClick: () => tileMenu(player, {
-      title: "MORE", theme: "blue", body: balLine(player),
-      tiles: [...more.map((c) => ({ text: `§e§l${c.name.toUpperCase()}`, sub: `§7${countDeep(c.id)} items`, icon: c.icon, onClick: () => categoryMenu(player, c, back) })), backTile(back)],
-    }) },
-    { text: "§a§lSELL", sub: "§7Sell your loot", icon: ICON.sell, badge: "HOT", onClick: () => sellMenu(player) },
-    { text: "§b§lSEARCH", sub: "§7Find any item", icon: ICON.search, onClick: () => searchMenu(player) },
+    { id: "more", name: "More", desc: "Redstone, brewing, mob drops and treasure", icon: "textures/items/redstone_dust", items: () => deep("treasure", "redstone", "misc", "mobs", "brewing") },
+    { id: "search", name: "Search", desc: "Find any item", icon: ICON.search, count: "", open: () => searchMenu(player) },
+    { id: "sell", name: "Sell", desc: "Sell your loot", icon: CBI + "sell", count: "", open: () => sellMenu(player) },
   ];
-  tiles.push(backTile(() => mainMenu(player)));
-  await tileMenu(player, { title: "SKY SHOP", theme: "gold", body: `${msgLine(msg)}§7Pick a category    ${balLine(player)}`, tiles });
+  const sel = rail.find((r) => r.id === st.cat && r.items) ?? rail[0];
+  const items = sel.items();
+  const pages = Math.max(1, Math.ceil(items.length / SHOP_PAGE));
+  const page = Math.min(Math.max(0, st.page ?? 0), pages - 1);
+
+  const sc = new Screen("shop", "Sky Shop");
+  if (page > 0) sc.button("IT", "§f« Previous\n§7Page " + page, () => skyShopMenu(player, { cat: sel.id, page: page - 1 }), { icon: CBI + "back" });
+  for (const e of items.slice(page * SHOP_PAGE, (page + 1) * SHOP_PAGE))
+    sc.button("IT", `§f${clip(e.name, 14)}\n${priceColor(player, e.buy)}${fmtShort(e.buy)} §7each`, () => buyItemMenu(player, e, back), { icon: e.icon });
+  if (page < pages - 1) sc.button("IT", `§fNext »\n§7Page ${page + 2} of ${pages}`, () => skyShopMenu(player, { cat: sel.id, page: page + 1 }), { icon: CBI + "yes" });
+  for (const r of rail) {
+    const on = r === sel;
+    sc.button("CAT", on ? `§e${r.name}` : r.name, () => (r.open ? r.open() : skyShopMenu(player, { cat: r.id })), { icon: r.icon, states: [on ? "ON" : undefined] });
+    sc.text("CATN", r.count ?? (r.items ? r.items().length : ""));
+  }
+  sc.text("HI", "", { icon: sel.icon });
+  sc.text("HT", `§f${sel.name}\n§7${sel.desc}`);
+  sc.text("SELL", `SELL x${Number(sellMultiplier(player).toFixed(2))}`);
+  sc.text("BAL", `§7Balance §e${fmtMoney(getBalance(player))}`);
+  if (msg) sc.text("MSG", msg);
+  await sc.show(player);
 }
 
 /** Gives a kit for free (admins). Kit items are tagged so they can't be sold. */

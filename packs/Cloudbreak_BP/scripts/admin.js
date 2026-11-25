@@ -7,7 +7,8 @@ import { activeRaids, forceEndRaid, raidStatus } from "./raids.js";
 import { giveKey } from "./after.js";
 import { addMoney, fmt, fmtMoney, getBalance, setBalance } from "./eco/economy.js";
 import { KITS, MINION_TYPES, SPAWNERS } from "./eco/config.js";
-import { addHeadPoints, getHeadPoints, makeSpawnerItem } from "./eco/spawners.js";
+import { addHeadPoints, makeSpawnerItem, mobIcon } from "./eco/spawners.js";
+import { Screen, headFor } from "./screens.js";
 import { adminMenu as ecoAdminMenu, giveKit } from "./eco/menus.js";
 import { makeMinionItem } from "./eco/minions.js";
 import { makeHopperItem } from "./eco/chunkHopper.js";
@@ -65,135 +66,119 @@ function giveStack(target, stack) {
 }
 
 // ---------------------------------------------------------------------------
-// Player list -> one player
+// Control Room screen: players on the left, the picked player in the middle,
+// admin-only tools on the right (unlocked only when the picked player is an admin)
 // ---------------------------------------------------------------------------
 
-export async function adminPanel(player) {
+const CATS = [
+  { id: "money", name: "Money", icon: "textures/ui/eco/icon_coin", head: "CHOOSE WHAT TO DO", steps: [["-10k", -10000], ["+10k", 10000], ["+100k", 100000]], def: 10000 },
+  { id: "heads", name: "Heads", icon: CB.skull, head: "CHOOSE A MOB", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
+  { id: "kits", name: "Kits", icon: CB.chest, head: "CHOOSE A KIT", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
+  { id: "keys", name: "Crate Keys", icon: CB.key, head: "CHOOSE A CRATE", steps: [["-1", -1], ["+1", 1], ["+5", 5]], def: 1 },
+];
+const KEY_ART = { raider: "key_pink", defender: "key_cyan", legendary: "key_gold" };
+const MONEY_MODES = [
+  { id: "give", name: "Give", sub: "Add to their wallet", icon: CB.sell },
+  { id: "take", name: "Take", sub: "Remove from their wallet", icon: CB.no },
+  { id: "set", name: "Set", sub: "Set their wallet", icon: "textures/ui/eco/icon_coin" },
+];
+
+function optionsFor(cat) {
+  if (cat === "money") return MONEY_MODES;
+  if (cat === "heads") return SPAWNERS.filter((s) => !s.disabled).map((s) => ({ id: s.mob, name: s.name, sub: "Heads", icon: mobIcon(s.mob) }));
+  if (cat === "kits") return KITS.filter((k) => !k.disabled).map((k) => ({ id: k.name, name: k.name, sub: `${k.items.length} items`, icon: CB.chest, kit: k }));
+  return Object.entries(CONFIG.crates).map(([id, c]) => ({ id, name: c.name, sub: { raider: "Raid gear, money", defender: "Defence rewards", legendary: "Spawners, big money" }[id] ?? "", icon: `textures/ui/cb/s/${KEY_ART[id] ?? "key_gold"}` }));
+}
+
+export async function adminPanel(player, st = {}) {
   if (!player.hasTag(ADMIN)) return say(player, "Only admins can open this.", false);
-  const players = world.getPlayers().sort((a, b) => a.name.localeCompare(b.name));
-  await tiles(
-    player,
-    "CONTROL ROOM",
-    `§7Online §f${players.length}§7 · active raids §c${activeRaids().length}§7 · clans §f${allClans().length}\n§7Pick a player. §d[ADMIN]§7 players also show the admin-only tools.`,
-    [
-      ...players.map((p) => ({
-        text: `§f${p.name}${p.hasTag(ADMIN) ? " §d[ADMIN]" : ""}`,
-        sub: `§7${fmtMoney(getBalance(p))}`,
-        icon: p.hasTag(ADMIN) ? CB.admin : CB.members,
-        run: () => playerPanel(player, p),
-      })),
-    ]
-  );
-}
-
-async function playerPanel(player, target, msg) {
-  if (!target.isValid) return adminPanel(player);
+  const all = world.getPlayers().sort((a, b) => a.name.localeCompare(b.name));
+  const filter = (st.filter ?? "").toLowerCase();
+  const players = filter ? all.filter((p) => p.name.toLowerCase().includes(filter)) : all;
+  const target = all.find((p) => p.id === st.targetId) ?? players[0] ?? player;
+  const cat = CATS.find((c) => c.id === st.cat) ?? CATS[3];
+  const opts = optionsFor(cat.id);
+  const opt = opts.find((o) => o.id === st.opt) ?? opts[0];
+  const n = Math.max(cat.id === "money" ? 0 : 1, st.n ?? cat.def);
+  const again = (o) => adminPanel(player, { targetId: target.id, cat: cat.id, opt: opt?.id, n, filter: st.filter, ...o });
   const isAdmin = target.hasTag(ADMIN);
-  const reopen = (m) => playerPanel(player, target, m);
-  const list = [
-    { text: "§e§lMONEY", sub: "§7Give, take or set", icon: CB.sell, run: () => moneyPanel(player, target) },
-    { text: "§f§lHEADS", sub: "§7Give or set", icon: CB.skull, run: () => headsPanel(player, target) },
-    { text: "§6§lKITS", sub: "§7Pick a kit and amount", icon: CB.chest, run: () => kitsPanel(player, target) },
-    { text: "§d§lCRATE KEYS", sub: "§7Pick a crate and amount", icon: CB.key, run: () => keysPanel(player, target) },
-  ];
-  if (isAdmin) {
-    list.push(
-      { text: "§5§lCUSTOM ITEMS", sub: "§7Admin tag only", icon: CB.star, run: () => customPanel(player, target) },
-      { text: "§b§lSERVER RULES", sub: "§7Prices, tax, timers", icon: CB.settings, run: () => rulesPanel(player, () => reopen()) },
-      { text: "§d§lCLANS", sub: "§7View, reset, delete", icon: CB.banner, run: () => clansPanel(player, () => reopen()) },
-      { text: "§c§lFORCE END RAID", sub: `§7${activeRaids().length} running`, icon: CB.stop, run: () => raidsPanel(player, () => reopen()) },
-      { text: "§c§lCLEAR ITEMS", sub: "§7Remove floor items", icon: CB.bin, run: () => {
-        const n = clearGroundItems();
-        return reopen(`§aRemoved ${n} dropped item piles.`);
-      } },
-      { text: "§e§lECONOMY SETTINGS", sub: "§7Shop editor, spawners, minions, NPCs", icon: CB.shop, run: () => ecoAdminMenu(player) }
-    );
+  const clan = (p) => allClans().find((c) => c.members[p.id]);
+
+  const s = new Screen("admin", "Control Room");
+  for (const o of opts) s.button("OPT", `§f${o.name}\n§7${o.sub}`, () => again({ opt: o.id }), { icon: o.icon, states: [o === opt ? "ON" : undefined] });
+  s.text("PILL", `§7Online §f${all.length}`);
+  s.text("PILL", `§7Active raids §c${activeRaids().length}`);
+  s.text("PILL", `§7Clans §f${allClans().length}`);
+  s.button("SR", filter ? `§fSearch: ${st.filter}` : "Search name...", async () => {
+    const res = await show(player, new ModalFormData().title("Search players").textField("Name (leave empty to show everyone)", "e.g. Kai", { defaultValue: st.filter ?? "" }));
+    if (!res || res.canceled) return again({});
+    return again({ filter: String(res.formValues?.[0] ?? "").trim() });
+  });
+  for (const p of players) {
+    const c = clan(p);
+    s.button("PL", `§f${p.name}\n§7${c ? c.name : "No clan"}`, () => again({ targetId: p.id }), {
+      icon: headFor(p.name), states: [p.id === target.id ? "SEL" : undefined, p.hasTag(ADMIN) ? "ADM" : undefined, "ON"],
+    });
   }
-  list.push(back(() => adminPanel(player)));
-  await tiles(
-    player,
-    target.name.toUpperCase(),
-    `${msg ? msg + "\n" : ""}§7${isAdmin ? "§dADMIN TAG §7· all tools" : "Normal player · Money, Heads, Kits and Crate Keys only"}\n§7Wallet §e${fmt(getBalance(target))}`,
-    list
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Money, heads, kits, keys
-// ---------------------------------------------------------------------------
-
-async function moneyPanel(player, target) {
-  const modes = [["Give", "give"], ["Take", "take"], ["Set", "set"]];
-  await tiles(player, "MONEY", `§7${target.name}: §e${fmt(getBalance(target))}`, [
-    ...modes.map(([label, mode]) => ({
-      text: `§l${label.toUpperCase()}`,
-      icon: mode === "take" ? CB.no : CB.sell,
-      run: async () => {
-        const n = await askNumber(player, `${label} money`, `Amount to ${mode} ($)`);
-        if (n === undefined) return moneyPanel(player, target);
-        if (mode === "give") addMoney(target, n);
-        else if (mode === "take") setBalance(target, Math.max(0, getBalance(target) - n));
-        else setBalance(target, n);
-        say(target, `An admin ${mode === "set" ? "set your balance to" : mode === "give" ? "gave you" : "took"} ${fmt(n)}.`);
-        return playerPanel(player, target, `§a${label}: ${fmt(n)} · now ${fmt(getBalance(target))}`);
-      },
-    })),
-    back(() => playerPanel(player, target)),
-  ]);
-}
-
-async function headsPanel(player, target) {
-  const mobs = SPAWNERS.filter((s) => !s.disabled);
-  await tiles(player, "HEADS", `§7Pick a mob for ${target.name}.`, [
-    ...mobs.map((s) => ({
-      text: `§f${s.name}`,
-      sub: `§7Has ${getHeadPoints(target, s.mob)}`,
-      run: async () => {
-        const res = await show(player, new ModalFormData().title(`${s.name} heads`).dropdown("Mode", ["Give", "Set"]).textField("Amount", "a number"));
-        if (!res || res.canceled) return headsPanel(player, target);
-        const mode = res.formValues?.[0];
-        const n = Math.max(0, Math.floor(Number(res.formValues?.[1]) || 0));
-        if (mode === 1) addHeadPoints(target, s.mob, n - getHeadPoints(target, s.mob));
-        else addHeadPoints(target, s.mob, n);
-        return playerPanel(player, target, `§a${s.name} heads: ${getHeadPoints(target, s.mob)}`);
-      },
-    })),
-    back(() => playerPanel(player, target)),
-  ]);
-}
-
-async function kitsPanel(player, target) {
-  await tiles(player, "GIVE A KIT", `§7Pick a kit for ${target.name}.`, [
-    ...KITS.filter((k) => !k.disabled).map((k) => ({
-      text: `§6§l${k.name.toUpperCase()}`,
-      sub: `§7${k.items.length} items`,
-      icon: CB.chest,
-      run: async () => {
-        const n = await askNumber(player, k.name, "How many?", 1);
-        if (!n) return kitsPanel(player, target);
-        giveKit(target, k, Math.min(n, 64));
-        say(target, `An admin gave you ${n}x ${k.name}.`);
-        return playerPanel(player, target, `§aGave ${n}x ${k.name}.`);
-      },
-    })),
-    back(() => playerPanel(player, target)),
-  ]);
-}
-
-async function keysPanel(player, target) {
-  await tiles(player, "GIVE CRATE KEYS", `§7Pick a crate for ${target.name}.`, [
-    ...Object.entries(CONFIG.crates).map(([id, c]) => ({
-      text: `${c.color}§l${c.name.toUpperCase()}`,
-      icon: CB.key,
-      run: async () => {
-        const n = await askNumber(player, c.name, "How many keys?", 1);
-        if (!n) return keysPanel(player, target);
-        giveKey(target, id, Math.min(n, 640));
-        return playerPanel(player, target, `§aGave ${n}x ${c.name} Key.`);
-      },
-    })),
-    back(() => playerPanel(player, target)),
-  ]);
+  const tc = clan(target);
+  s.text("SC", `§f${target.name}\n§7${tc ? `${tc.name} · ${tc.members[target.id].role === "coowner" ? "Co-owner" : tc.members[target.id].role === "owner" ? "Owner" : "Member"}` : "No clan"} · wallet ${fmtMoney(getBalance(target))}`, { icon: headFor(target.name) });
+  for (const c of CATS) s.button("CAT", c.id === cat.id ? `§d${c.name}` : c.name, () => again({ cat: c.id, opt: undefined, n: undefined }), { icon: c.icon, states: [c.id === cat.id ? "ON" : undefined] });
+  s.text("CH", cat.head);
+  for (const [label, d] of cat.steps) s.button("STEP", label, () => again({ n: Math.max(0, n + d) }));
+  s.button("STEP", "Type", async () => {
+    const v = await askNumber(player, "Amount", cat.id === "money" ? "Amount ($)" : "How many?", n);
+    return again({ n: v ?? n });
+  });
+  s.text("N", cat.id === "money" ? fmtMoney(n) : String(n));
+  const who = target.name.toUpperCase();
+  const giveText = !opt ? "NOTHING TO GIVE"
+    : cat.id === "money" ? { give: `GIVE ${fmt(n)} TO ${who}`, take: `TAKE ${fmt(n)} FROM ${who}`, set: `SET ${who}'S WALLET TO ${fmt(n)}` }[opt.id]
+    : cat.id === "heads" ? `GIVE ${n} × ${opt.name.toUpperCase()} HEADS TO ${who}`
+    : cat.id === "kits" ? `GIVE ${n} × ${opt.name.toUpperCase()} TO ${who}`
+    : `GIVE ${n} × ${opt.name.toUpperCase()} KEYS TO ${who}`;
+  s.button("GIVE", giveText, () => {
+    if (!opt || !target.isValid) return again({});
+    let msg;
+    if (cat.id === "money") {
+      if (opt.id === "give") addMoney(target, n);
+      else if (opt.id === "take") setBalance(target, Math.max(0, getBalance(target) - n));
+      else setBalance(target, n);
+      say(target, `An admin ${opt.id === "set" ? "set your balance to" : opt.id === "give" ? "gave you" : "took"} ${fmt(n)}.`);
+      msg = `${opt.name}: ${fmt(n)} · ${target.name} now has ${fmt(getBalance(target))}`;
+    } else if (cat.id === "heads") {
+      addHeadPoints(target, opt.id, n);
+      msg = `Gave ${n} ${opt.name} heads to ${target.name}.`;
+    } else if (cat.id === "kits") {
+      giveKit(target, opt.kit, Math.min(n, 64));
+      say(target, `An admin gave you ${n}x ${opt.name}.`);
+      msg = `Gave ${n}x ${opt.name} to ${target.name}.`;
+    } else {
+      giveKey(target, opt.id, Math.min(n, 640));
+      msg = `Gave ${n}x ${opt.name} Key to ${target.name}.`;
+    }
+    say(player, msg);
+    return again({});
+  }, { states: [opt ? undefined : "OFF"] });
+  s.text("LOCK", isAdmin ? "Admin player" : "Normal player", { states: [isAdmin ? "ADM" : undefined] });
+  s.text("LOCKT", isAdmin
+    ? "This player has the admin tag, so the tools below are unlocked for them."
+    : "You can only give this player Money, Heads, Kits and Crate Keys. The options below only appear when the selected player has the admin tag, so you can't give them by accident.");
+  const back = () => again({});
+  const tools = [
+    ["Custom Items", CB.star, () => customPanel(player, target)],
+    ["Server Rules", CB.settings, () => rulesPanel(player, back)],
+    ["Clans", CB.banner, () => clansPanel(player, back)],
+    [`Force End Raid (${activeRaids().length})`, CB.stop, () => raidsPanel(player, back)],
+    ["Clear Items", CB.bin, () => {
+      const cleared = clearGroundItems();
+      say(player, `Removed ${cleared} dropped item piles.`);
+      return back();
+    }],
+    ["Economy Settings", CB.shop, () => ecoAdminMenu(player)],
+  ];
+  for (const [name, icon, run] of tools)
+    s.button("TOOL", isAdmin ? `§f${name}` : `§8${name}`, isAdmin ? run : () => again({}), { icon, states: [isAdmin ? undefined : "OFF"] });
+  await s.show(player);
 }
 
 async function customPanel(player, target) {
@@ -216,10 +201,11 @@ async function customPanel(player, target) {
         const n = await askNumber(player, it.name, "How many?", 1);
         if (!n) return customPanel(player, target);
         for (let i = 0; i < Math.min(n, 64); i++) giveStack(target, it.make());
-        return playerPanel(player, target, `§aGave ${n}x ${it.name}.`);
+        say(player, `Gave ${n}x ${it.name}.`);
+        return adminPanel(player, { targetId: target.id });
       },
     })),
-    back(() => playerPanel(player, target)),
+    back(() => adminPanel(player, { targetId: target.id })),
   ]);
 }
 

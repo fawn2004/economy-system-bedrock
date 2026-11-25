@@ -66,6 +66,7 @@ function onRaidEnd(raid, outcome) {
     ts.streak = 0;
     log(attacker, "won", target.name, stolen + raid.bonus, `${typeName} · ${squad} raiders${raid.bonus ? ` · +${fmt(raid.bonus)} underdog bonus` : ""}`);
     log(target, "raided", attacker.name, -stolen, `${squad} raiders${refund ? ` · insurance paid ${fmt(refund)}` : ""}`);
+    if (refund) target.log[0].refund = refund; // shown on the Raid Log and Insurance Vault
     tellClan(target, `§7You're immune to raids for §f${raidImmunityHours(target)}h§7. Revenge Raid unlocked on §e${attacker.name}§7 for ${CONFIG.raid.revengeHours}h.`);
     keysFor = Object.keys(raid.raiders).map((id) => [id, "raider", attacker]);
   } else if (outcome === "defended") {

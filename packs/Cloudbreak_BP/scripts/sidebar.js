@@ -61,7 +61,7 @@ function raiderLines(player, raid) {
     `§7Target  §f${s.targetName}`,
     looting ? `§7Taken  §e${fmtMoney(s.stolen)}` : `§7To go  §f${s.distance} blocks`,
     `§7Time left  §e${s.timeLeft}`,
-    `§7Lives  §c${r?.lives ?? 0}`,
+    `§7Your lives  §c${"■".repeat(Math.max(0, r?.lives ?? 0))}§8${"■".repeat(Math.max(0, raidLivesOf(raid) - (r?.lives ?? 0)))}`,
     `§7Squad  §f${s.raiders}`,
   ].join("\n");
 }
@@ -75,11 +75,22 @@ function defenderLines(raid) {
     "",
     `§7Raiders  §f${s.raiders} §8(${s.attackerName})`,
     looting ? `§7Taken  §c${fmtMoney(s.stolen)}` : `§7Distance  §c${s.distance} blocks`,
+    looting ? "" : distanceBar(s.distance),
     `§7Time left  §e${s.timeLeft}`,
-    `§7Defenders  §f${target ? onlineMembers(target).length : 0}`,
-    looting ? "" : "§8Type §f/is §8to defend",
+    `§7Defenders  §f${target ? onlineMembers(target).length : 0} / ${target ? Object.keys(target.members).length : 0}`,
+    `§7Shield  ${target && shieldUp(target) ? "§aON" : "§cOFF"}`,
+    looting ? "" : "§8Run §f/is §8to defend",
   ].join("\n");
 }
+
+// how far the raiders have got: 10 squares, red = bridged
+function distanceBar(distance) {
+  const total = Math.max(1, CONFIG.raid.launchDistance);
+  const done = Math.max(0, Math.min(10, Math.round(((total - Number(distance || 0)) / total) * 10)));
+  return `§c${"■".repeat(done)}§8${"■".repeat(10 - done)}`;
+}
+
+const raidLivesOf = (raid) => Math.max(...Object.values(raid.raiders).map((x) => x.maxLives ?? x.lives), 0);
 
 let tickNo = 0;
 function refresh() {

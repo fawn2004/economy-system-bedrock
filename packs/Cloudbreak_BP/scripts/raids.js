@@ -152,7 +152,7 @@ export async function launchRaid(player, prep) {
     started: now(),
     backOutUntil: now() + R.backOutSeconds * 1000,
     bridgeEnd: now() + defenceSeconds(target) * 1000,
-    raiders: Object.fromEntries(squad.map((p) => [p.id, { name: p.name, lives: raidLives(clan), out: false }])),
+    raiders: Object.fromEntries(squad.map((p) => [p.id, { name: p.name, lives: raidLives(clan), maxLives: raidLives(clan), out: false }])),
     launch, placed: [], stolen: 0, bonus: 0,
   };
   raids.set(raid.id, raid);

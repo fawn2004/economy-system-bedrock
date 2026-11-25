@@ -1,6 +1,6 @@
 {
   "ui_defs": [
     "ui/eco_form.json",
-    "ui/cb_terminal.json"
+    "ui/cb_screens.json"
   ]
 }

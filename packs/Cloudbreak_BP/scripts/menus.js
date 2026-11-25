@@ -1,8 +1,9 @@
 import { system, world } from "@minecraft/server";
-import { ActionFormData, FormCancelationReason, MessageFormData, ModalFormData } from "@minecraft/server-ui";
+import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import { CONFIG, ROLE, ROLE_NAME } from "./config.js";
 import {
   acceptInvite,
+  allClans,
   canManage,
   clanOf,
   createClan,
@@ -20,35 +21,25 @@ import {
 } from "./clans.js";
 import { clearIslandSpawn, createIsland, sendHome } from "./islands.js";
 import { bankOf, deposit, withdraw } from "./bank.js";
-import {
-  buyUpgrade,
-  coreLevel,
-  hoursCovered,
-  levelOf,
-  minutesToTax,
-  shieldUp,
-  upgradeCost,
-} from "./core.js";
+import { buyUpgrade, coreLevel, hoursCovered, levelOf, minutesToTax, raidLives, shieldUp, upgradeCost } from "./core.js";
 import { UPGRADES } from "./config.js";
-import { fmt, fmtMoney, getBalance } from "./eco/economy.js";
-import { adminMenu, sellMenu, shopMenu, skyShopMenu } from "./eco/menus.js";
-import { playerSettingsMenu } from "./eco/playerSettings.js";
+import { fmt, fmtMoney, getBalance, sellMultiplier } from "./eco/economy.js";
+import { adminMenu, skyShopMenu } from "./eco/menus.js";
+import { playerSettingsMenu, settingsOnCount } from "./eco/playerSettings.js";
 import { ecoTitle } from "./eco/ui.js";
+import { ART, BANNER, Screen, headFor, spaced } from "./screens.js";
 import * as R from "./raids.js";
 import * as A from "./after.js";
 
-// Floors that later milestones fill in (raids, insurance, raid log, leaderboards).
+// Floors that other parts fill in (admin panel, tax after a deposit).
 const floorHooks = {};
 export const setFloor = (id, fn) => (floorHooks[id] = fn);
-
-// Milestone 1 uses plain Bedrock forms. Milestone 6 swaps in the chosen
-// custom layouts (Elevator Tower, Chain of Command, ...) from the resource pack.
 
 // Cloudbreak icons (textures/ui/cb, built by tools/build_cloudbreak_ui.py)
 const CB = new Proxy({}, { get: (_, name) => `textures/ui/cb/icon_${String(name)}` });
 const UPGRADE_ICON = { size: CB.size, sell: CB.sell, fly: CB.fly, ore: CB.ore, spawners: CB.spawners, crops: CB.crops, shield: CB.insurance, defence: CB.clock, lives: CB.heart };
 
-/** A form drawn with the styled tile layout (title bar in a theme colour, icon tiles). */
+/** Small confirm/info dialogs still use the coloured tile layout. */
 function styled(theme = "blue") {
   return {
     styledTheme: theme, _title: "", _body: "", _buttons: [],
@@ -87,35 +78,85 @@ function report(player, result) {
   player.sendMessage(CONFIG.prefix + (result.ok ? "" : "§c") + result.msg);
 }
 
-async function confirm(player, title, body, yes = "Yes") {
+export async function confirm(player, title, body, yes = "Yes") {
   const form = styled("orange").title(title).body(body).button(`§a§l${yes.toUpperCase()}`, CB.yes).button("§c§lCANCEL", CB.no);
   const res = await show(player, form);
   return !!res && !res.canceled && res.selection === 0;
 }
 
+const onlineIds = (clan) => Object.keys(clan.members).filter((id) => world.getEntity(id));
+const ago = (t) => {
+  const m = Math.max(0, Math.floor((Date.now() - t) / 60000));
+  return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.floor(m / 60)}h ago` : `${Math.floor(m / 1440)}d ago`;
+};
+const signed = (n) => `${n >= 0 ? "+" : "-"}${fmt(Math.abs(n))}`;
+
 // ---------------------------------------------------------------------------
-// Main menu
+// Main menu: the Elevator Tower (floor list on the left, the picked floor on
+// the right; tap a floor to look at it, then GO TO FLOOR to open it)
 // ---------------------------------------------------------------------------
+
+const COLOR_CODE = { RED: "§c", GOLD: "§6", CYAN: "§b", GREEN: "§a", PURPLE: "§d", GREY: "§7", PINK: "§d", ORANGE: "§6", TEAL: "§3" };
+const lastFloor = new Map();
 
 export async function mainMenu(player, result) {
   if (result?.msg) report(player, result);
-  const clan = clanOf(player);
-  return clan ? clanMenu(player, clan) : noClanMenu(player);
+  return tower(player);
 }
 
-async function noClanMenu(player) {
-  const inv = pendingInvite(player);
-  const buttons = [];
-  if (inv) buttons.push({ text: `§a§lACCEPT INVITE\n§r§7${inv.clan.name} · from ${inv.fromName}`, icon: CB.yes, run: () => acceptAndGoHome(player) });
-  buttons.push({ text: "§b§lCREATE A CLAN\n§r§7Get your own island", icon: CB.home, run: () => createMenu(player) });
-  if (inv) buttons.push({ text: "§c§lDECLINE INVITE", icon: CB.no, run: () => report(player, declineInvite(player)) });
-  const form = styled("cyan")
-    .title(CONFIG.serverName.toUpperCase())
-    .body("§7You are not in a clan yet.\n\nCreate one to get an island, or ask a clan to invite you.");
-  for (const b of buttons) form.button(b.text, b.icon);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  await buttons[res.selection]?.run();
+function floorsFor(player) {
+  const clan = clanOf(player);
+  const admin = player.hasTag("admin")
+    ? [{ n: "A", key: "admin", name: "Admin", icon: CB.admin, col: "PINK", desc: "Control Room: give money, heads, kits and keys, change server rules.", stats: () => [["Online", world.getPlayers().length], ["Active raids", R.activeRaids().length], ["Clans", allClans().length]], run: () => (floorHooks.admin ? floorHooks.admin(player) : adminMenu(player)) }]
+    : [];
+  const settings = { n: 9, key: "settings", name: "Settings", icon: CB.settings, col: "GREY", desc: "Chunk borders, full bright, raid alert sound and coordinates. Only you see these.", stats: () => [["Switched on", `${settingsOnCount(player)} / 4`]], run: () => playerSettingsMenu(player, () => tower(player, "settings")) };
+  const boards = { n: 8, key: "boards", name: "Leaderboards", icon: CB.leaderboards, col: "PURPLE", desc: "The top clans for raid wins, defence streaks, money and core level.", stats: () => [["Clans", allClans().length]], run: () => leaderboardsMenu(player) };
+  const shop = { n: 4, key: "shop", name: "Shop", icon: CB.shop, col: "GOLD", desc: "Buy blocks, raid gear, spawners and minions. Sell what you farm.", stats: () => [["Wallet", fmtMoney(getBalance(player))], ["Sell bonus", `x${sellMultiplier(player).toFixed(2)}`]], run: () => skyShopMenu(player) };
+  if (!clan) {
+    const inv = pendingInvite(player);
+    const floors = [settings, boards, shop];
+    if (inv) floors.push({ n: 2, key: "invite", name: "Join by Invite", icon: CB.yes, col: "GREEN", desc: `${inv.fromName} invited you to ${inv.clan.name}. Join to share their island, or type /sc decline.`, stats: () => [["Clan", inv.clan.name], ["Players", `${memberCount(inv.clan)} / ${CONFIG.clan.maxMembers}`]], run: () => acceptAndGoHome(player) });
+    floors.push({ n: 1, key: "create", name: "Create Clan", icon: CB.home, col: "CYAN", desc: "Start your own clan and get a floating island of your own. Invite up to 4 friends.", stats: () => [["Max players", CONFIG.clan.maxMembers]], run: () => createMenu(player) });
+    return [...floors, ...admin];
+  }
+  const st = clan.stats ?? {};
+  const rev = R.revengeAvailable(clan);
+  const owned = clan.insurance ?? 0;
+  return [
+    settings,
+    { ...boards, stats: () => [["Your rank", `#${A.board("wins").findIndex((r) => r.clan.id === clan.id) + 1}`], ["Raid wins", st.wins ?? 0], ["Clans", allClans().length]] },
+    { n: 7, key: "raidlog", name: "Raid Log", icon: CB.raidlog, col: "ORANGE", desc: "Every raid you did and every raid on you, with the money won and lost.", stats: () => [["Wins", st.wins ?? 0], ["Losses", st.losses ?? 0], ["Defences", st.defences ?? 0]], run: () => raidLogMenu(player) },
+    { n: 6, key: "members", name: "Members", icon: CB.members, col: "TEAL", desc: "Your clan's chain of command. Invite, promote, kick and hand over leadership.", stats: () => [["Online", `${onlineIds(clan).length} / ${memberCount(clan)}`], ["Slots open", CONFIG.clan.maxMembers - memberCount(clan)], ["Your role", ROLE_NAME[roleOf(clan, player.id)]]], run: () => membersMenu(player) },
+    { n: 5, key: "insurance", name: "Insurance", icon: CB.insurance, col: "GREEN", desc: "Get part of the money back when your clan is raided. Unlock tiers in order.", stats: () => [["Tier", owned ? CONFIG.insurance[owned - 1].name : "None"], ["Refund", `${owned ? Math.round(CONFIG.insurance[owned - 1].pct * 100) : 0}%`]], run: () => insuranceMenu(player) },
+    { ...shop },
+    { n: 3, key: "bank", name: "Clan Bank", icon: CB.bank, col: "GOLD", desc: "Everyone can deposit. Owners and Co-Owners can withdraw. The core tax comes out of here.", stats: () => [["Balance", fmtMoney(bankOf(clan))], ["Covers", `${hoursCovered(clan)}h of tax`], ["Tax", `${fmtMoney(CONFIG.core.taxPerHour)}/hr`]], run: () => bankMenu(player) },
+    { n: 2, key: "raids", name: "Raids", icon: CB.raids, col: "RED", desc: "Buy a raid, scout one with intel, or hit an island with its shield down.", stats: () => [["Shields down", R.targetsFor(clan, "cheap").length], ["Revenge", rev ? "Ready" : "None"], ["Squad online", `${onlineIds(clan).length} / ${memberCount(clan)}`]], run: () => raidMenu(player) },
+    { n: 1, key: "home", name: "Island Home", icon: CB.home, col: "CYAN", desc: "Teleport back to your island. Tap the Island Core there for the Core Terminal.", stats: () => [["Island", `${clan.island?.size ?? CONFIG.island.startSize} x ${clan.island?.size ?? CONFIG.island.startSize}`], ["Core", `Lv ${coreLevel(clan)}`], ["Shield", shieldUp(clan) ? "Online" : "Down"]], run: () => (R.raidOfPlayer(player) ? report(player, { ok: false, msg: "You're in a raid. Finish it, or back out with /sc back." }) : sendHome(player, clan)) },
+    ...admin,
+  ];
+}
+
+export async function tower(player, selKey) {
+  const clan = clanOf(player);
+  const floors = floorsFor(player);
+  const key = selKey ?? lastFloor.get(player.id);
+  const sel = floors.find((f) => f.key === key) ?? floors.find((f) => f.key === "raids" || f.key === "create") ?? floors[0];
+  lastFloor.set(player.id, sel.key);
+  const s = new Screen("tower", "Main Menu");
+  s.text("K", spaced(clan ? `Clan ${clan.name} · Tower` : `${CONFIG.serverName} · Tower`));
+  s.text("BANK", clan ? `§7Bank §e${fmtMoney(bankOf(clan))}` : `§7Wallet §e${fmtMoney(getBalance(player))}`);
+  for (const f of floors) {
+    const on = f === sel ? "ON" : undefined;
+    s.button("FL", `${on ? "§f" : "§7"}${f.name}`, () => tower(player, f.key), { icon: f.icon, states: [on] });
+    s.text("FN", `F${f.n}`);
+  }
+  s.text("P", sel.desc, { states: [`c${sel.col}`] });
+  s.text("PN", `${COLOR_CODE[sel.col] ?? "§f"}${sel.n}`);
+  s.text("PT", sel.name);
+  s.text("PI", "", { icon: sel.icon });
+  for (const [k, v] of sel.stats()) s.text("ST", `${k}\n§f${v}`);
+  s.button("GO", sel.n === "A" ? "OPEN CONTROL ROOM" : `GO TO FLOOR ${sel.n}`, sel.run, { states: [`c${sel.col}`] });
+  await s.show(player);
 }
 
 async function acceptAndGoHome(player) {
@@ -132,87 +173,68 @@ async function createMenu(player) {
       .title("Create a Clan")
       .textField(`Clan name (${c.nameMin}-${c.nameMax} letters, numbers or _)`, "e.g. Nightfall")
   );
-  if (!res || res.canceled) return;
+  if (!res || res.canceled) return tower(player);
   const r = createClan(player, String(res.formValues?.[0] ?? ""));
   report(player, r);
   if (r.ok) await createIsland(player, r.clan);
 }
 
-// The Elevator Tower: one floor per screen, top floor first.
-async function clanMenu(player, clan) {
-  const role = roleOf(clan, player.id);
-  const online = Object.keys(clan.members).filter((id) => world.getEntity(id)).length;
-  const floors = [
-    { n: 9, icon: CB.settings, text: "Settings", sub: "Chunk borders, full bright, raid sound, coords", run: () => playerSettingsMenu(player, () => mainMenu(player)) },
-    { n: 8, icon: CB.leaderboards, text: "Leaderboards", sub: "Raid wins, streaks, richest, core level", run: () => leaderboardsMenu(player) },
-    { n: 7, icon: CB.raidlog, text: "Raid Log", sub: "Raids you did and raids on you", run: () => raidLogMenu(player) },
-    { n: 6, icon: CB.members, text: "Members", sub: `${online} / ${memberCount(clan)} online`, run: () => membersMenu(player) },
-    { n: 5, icon: CB.insurance, text: "Insurance", sub: "Get stolen money back", run: () => insuranceMenu(player) },
-    { n: 4, icon: CB.shop, text: "Sky Shop", sub: "Buy and sell", run: () => skyShopMenu(player) },
-    { n: 3, icon: CB.bank, text: "Clan Bank", sub: `${fmtMoney(bankOf(clan))} · ${hoursCovered(clan)}h of tax`, run: () => bankMenu(player) },
-    { n: 2, icon: CB.raids, text: "Raids", sub: "Buy a raid", run: () => raidMenu(player) },
-    { n: 1, icon: CB.home, text: "Island Home", sub: "Teleport to your island", run: () => (R.raidOfPlayer(player) ? report(player, { ok: false, msg: "You're in a raid. Finish it, or back out with /sc back." }) : sendHome(player, clan)) },
-  ];
-  const buttons = floors.map((f) => ({ text: `§b§lF${f.n} §f§l${f.text.toUpperCase()}\n§r§7${f.sub}`, icon: f.icon, run: f.run }));
-  if (player.hasTag("admin")) buttons.push({ text: "§d§lADMIN\n§r§7Server tools", icon: CB.admin, run: () => (floorHooks.admin ? floorHooks.admin(player) : adminMenu(player)) });
-  const form = styled("cyan")
-    .title(`${CONFIG.serverName} · ${clan.name}`)
-    .body(
-      `§7Clan §b${clan.name}§7 · ${ROLE_NAME[role]} · ${memberCount(clan)}/${CONFIG.clan.maxMembers} players\n` +
-        `§7Bank §a${fmtMoney(bankOf(clan))}§7 · Shield ${shieldUp(clan) ? "§aONLINE" : "§cDOWN"}`
-    );
-  for (const b of buttons) form.button(b.text, b.icon);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  await buttons[res.selection]?.run();
-}
-
 // ---------------------------------------------------------------------------
-// Clan Bank (Coin Tower)
+// Clan Bank: Coin Tower
 // ---------------------------------------------------------------------------
 
-export async function bankMenu(player, msg) {
+const QUICK = [["$1k", 1000], ["$10k", 10000], ["$100k", 100000], ["$1M", 1000000], ["ALL", "all"]];
+const ledgerIcon = (l) => {
+  const w = l.what.toLowerCase();
+  if (w.includes("withdr")) return ART("arrow_down");
+  if (w.includes("tax")) return CB.clock;
+  if (w.includes("raided") || w.includes("stolen")) return CB.broken;
+  if (w.includes("raid")) return CB.raids;
+  if (w.includes("insurance")) return CB.insurance;
+  if (w.includes("upgrade")) return CB.core;
+  return l.amt >= 0 ? ART("arrow_up") : ART("arrow_down");
+};
+
+export async function bankMenu(player, opts = {}) {
   const clan = clanOf(player);
-  if (!clan) return mainMenu(player);
+  if (!clan) return tower(player);
+  if (typeof opts === "string") opts = { msg: opts };
   const manage = canManage(clan, player.id);
-  const ledger = (clan.ledger ?? []).slice(0, 8).map((l) => `§8- §7${l.what} §8(${l.who})§r ${l.amt >= 0 ? "§a+" : "§c-"}${fmt(Math.abs(l.amt))}`);
-  const form = styled("gold")
-    .title("Clan Bank")
-    .body(
-      (msg ? msg + "\n\n" : "") +
-        `§7Balance §a${fmt(bankOf(clan))}\n§7Core tax §f${fmt(CONFIG.core.taxPerHour)}/hour§7 · next in §f${minutesToTax(clan)} min§7 online\n` +
-        `§7Covers §f${hoursCovered(clan)} hours§7 · your wallet §a${fmt(getBalance(player))}\n\n§fLedger\n` +
-        (ledger.length ? ledger.join("\n") : "§8No transactions yet.")
-    );
-  const buttons = [{ text: "§a§lDEPOSIT\n§r§7From your wallet", icon: CB.bank, run: () => amountMenu(player, "Deposit", deposit) }];
-  if (manage) buttons.push({ text: "§c§lWITHDRAW\n§r§7To your wallet", icon: CB.sell, run: () => amountMenu(player, "Withdraw", withdraw) });
-  buttons.push({ text: "§cBACK\n§r§7Go back", icon: CB.back, run: () => mainMenu(player) });
-  for (const b of buttons) form.button(b.text, b.icon);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  await buttons[res.selection]?.run();
-}
-
-const QUICK = [1000, 10000, 100000, 1000000];
-
-async function amountMenu(player, label, action) {
-  const form = styled("gold").title(label).body(`§7Your wallet §a${fmt(getBalance(player))}§7 · clan bank §a${fmt(bankOf(clanOf(player)))}`);
-  const picks = QUICK.map((v) => ({ text: fmtMoney(v), v }));
-  picks.push({ text: "All", v: "all" }, { text: "Other amount...", v: "custom" }, { text: "Back", v: "back" });
-  for (const p of picks) form.button(p.text, p.icon ?? CB.bank);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  let v = picks[res.selection]?.v;
-  if (v === "back") return bankMenu(player);
-  if (v === "all") v = label === "Deposit" ? getBalance(player) : bankOf(clanOf(player));
-  if (v === "custom") {
-    const m = await show(player, new ModalFormData().title(label).textField("Amount", "e.g. 25000"));
-    if (!m || m.canceled) return bankMenu(player);
-    v = Number(String(m.formValues?.[0] ?? "").replace(/[$,\s]/g, ""));
+  const mode = opts.mode === "withdraw" && manage ? "withdraw" : "deposit";
+  const amt = opts.amt ?? 100000;
+  const again = (o) => bankMenu(player, { mode, amt, ...o });
+  const hours = hoursCovered(clan);
+  const bars = 22;
+  const lit = Math.max(0, Math.min(bars, Math.round((Math.min(hours, 400) / 400) * bars)));
+  const s = new Screen("bank", "Clan Bank");
+  for (let i = 0; i < bars; i++) s.text("CN", "", { states: [i >= bars - lit ? "ON" : undefined] });
+  s.text("HR", `${hours} hours`);
+  s.text("K", spaced(`Floor 3 · Clan ${clan.name}`));
+  s.text("BAL", fmt(bankOf(clan)));
+  s.text("TAX", `Core tax ${fmt(CONFIG.core.taxPerHour)} / hr · next charge in ${minutesToTax(clan)} min`);
+  s.button("MODE", `${mode === "deposit" ? "§0" : "§f"}DEPOSIT`, () => again({ mode: "deposit" }), { states: [mode === "deposit" ? "ON" : undefined] });
+  s.button("MODE", `${mode === "withdraw" ? "§0" : manage ? "§f" : "§8"}WITHDRAW`, () => (manage ? again({ mode: "withdraw" }) : again({ msg: "§cOnly the Owner and Co-Owners can withdraw." })), { states: [mode === "withdraw" ? "ON" : undefined] });
+  for (const [label, v] of QUICK) s.button("AMT", label, () => again({ amt: v }), { states: [amt === v ? "ON" : undefined] });
+  s.button("AMT", "Other", async () => {
+    const m = await show(player, new ModalFormData().title(mode === "deposit" ? "Deposit" : "Withdraw").textField("Amount", "e.g. 25000"));
+    if (!m || m.canceled) return again({});
+    const v = Math.floor(Number(String(m.formValues?.[0] ?? "").replace(/[$,\s]/g, "")));
+    return again({ amt: Number.isFinite(v) && v > 0 ? v : amt });
+  }, { states: [QUICK.some(([, v]) => v === amt) ? undefined : "ON"] });
+  if (opts.msg) s.text("MSG", opts.msg);
+  const wallet = getBalance(player);
+  const value = amt === "all" ? (mode === "deposit" ? wallet : bankOf(clan)) : amt;
+  s.text("CF", mode === "deposit" ? `Deposit §e${fmt(value)}§7 from your wallet (${fmt(wallet)})` : `Withdraw §e${fmt(value)}§7 to your wallet (${fmt(wallet)})`);
+  s.button("OK", "CONFIRM", () => {
+    const r = (mode === "deposit" ? deposit : withdraw)(player, value);
+    if (r.ok && mode === "deposit") floorHooks.afterDeposit?.(r.clan);
+    return again({ msg: (r.ok ? "§a" : "§c") + r.msg });
+  }, { states: [value > 0 ? undefined : "OFF"] });
+  for (const l of (clan.ledger ?? []).slice(0, 8)) {
+    s.text("LG", `§f${l.who === "Island core" || !l.who ? l.what : `${l.who} · ${l.what}`}\n§8${ago(l.t)}`, { icon: ledgerIcon(l) });
+    s.text("LA", `${l.amt >= 0 ? "§a" : "§c"}${signed(l.amt)}`);
   }
-  const r = action(player, v);
-  if (r.ok && label === "Deposit") floorHooks.afterDeposit?.(r.clan);
-  return bankMenu(player, (r.ok ? "§a" : "§c") + r.msg);
+  await s.show(player);
 }
 
 // ---------------------------------------------------------------------------
@@ -223,33 +245,28 @@ export async function coreTerminal(player, msg) {
   const clan = clanOf(player);
   if (!clan) return;
   const up = shieldUp(clan);
-  const pips = (n, max, on = "§b", off = "§8") => on + "■".repeat(n) + off + "■".repeat(max - n);
+  const pips = (n, max) => "§b" + "■".repeat(n) + "§8" + "■".repeat(max - n);
   const hours = hoursCovered(clan);
-  const covered = Math.max(0, Math.min(10, Math.round(hours / 24))); // one bar per day of tax, up to 10
-
-  // Built by hand (not styled()): this form uses the Core Terminal screen, ui/cb_terminal.json.
-  // Buttons are tagged: [MOD] module card, [DEP] deposit, [TAB] bottom tab ([ON] = open), [HDR] line above the cards.
-  const form = new ActionFormData()
-    .title(`§c§t§m§r§7${clan.name} · Bank §e${fmtMoney(bankOf(clan))}${up ? "[ON]" : "[DOWN]"}`)
-    .body(
-      `§7ISLAND CORE\n§fLEVEL ${coreLevel(clan)}\n\n` +
-        `§7Upkeep §f${fmtMoney(CONFIG.core.taxPerHour)}/hr\n` +
-        `§7Next charge §f${minutesToTax(clan)} min\n` +
-        `§7Bank covers ${hours >= 24 ? "§a" : "§c"}${hours}h\n` +
-        pips(covered, 10, "§a", "§8")
-    );
-  const actions = [];
+  const s = new Screen("terminal", "Core Terminal");
   for (const u of UPGRADES) {
     const lvl = levelOf(clan, u.id);
     const maxed = lvl >= u.max;
-    const off = !up && u.id !== "size" && lvl > 0 ? " §c(off)" : "";
+    const off = !up && u.id !== "size" && lvl > 0;
     const bars = u.max === 1 ? (lvl ? "§b■■■■■■■■" : "§8■■■■■■■■") : pips(lvl, u.max);
-    const foot = maxed ? (u.max === 1 ? "§aOWNED" : "§aMAXED") : `§e${fmtMoney(upgradeCost(u, lvl + 1))}  §b» UPGRADE`;
-    form.button(`[MOD]§f${u.name} §8Lv ${lvl}/${u.max}${off}\n${bars}\n§7${u.desc(maxed ? lvl : lvl + 1)}\n${foot}`, UPGRADE_ICON[u.id]);
-    actions.push(() => upgradeFlow(player, u));
+    const foot = maxed ? (u.max === 1 ? "§aOWNED" : "§aMAXED") : `§e${fmtMoney(upgradeCost(u, lvl + 1))}`;
+    s.button("MOD", `§f${u.name}\n§8Lv ${lvl}/${u.max}${off ? " §c(off)" : ""}\n${bars}\n§7${u.desc(maxed ? lvl : lvl + 1)}\n${foot}`, () => upgradeFlow(player, u), {
+      icon: UPGRADE_ICON[u.id], states: [maxed ? "MAX" : undefined, off ? "OFF" : undefined],
+    });
   }
-  form.button("[DEP]DEPOSIT TO BANK");
-  actions.push(() => amountMenu(player, "Deposit", deposit));
+  s.text("HC", `Clan ${clan.name}`);
+  s.text("BK", `§7Clan bank §e${fmtMoney(bankOf(clan))}`);
+  s.text("SH", up ? "§aSHIELD ONLINE" : "§cSHIELD DOWN", { states: [up ? undefined : "DOWN"] });
+  s.text("CL", spaced(`Island Core · Level ${coreLevel(clan)}`));
+  s.text("UPV", `§f${fmtMoney(CONFIG.core.taxPerHour)} / hr\n§f${minutesToTax(clan)} min\n${hours >= 24 ? "§a" : "§c"}${hours} hours`);
+  const lit = Math.max(0, Math.min(10, Math.round(hours / 24)));
+  for (let i = 0; i < 10; i++) s.text("BAR", "", { states: [i < lit ? "ON" : undefined] });
+  s.button("DEP", "DEPOSIT TO BANK", () => bankMenu(player, { mode: "deposit" }));
+  s.text("HDR", msg ?? "Upgrades only work while upkeep is paid");
   const tabs = [
     ["Modules", () => coreTerminal(player), true],
     ["Upkeep", () => bankMenu(player)],
@@ -257,16 +274,8 @@ export async function coreTerminal(player, msg) {
     ["Insurance", () => insuranceMenu(player)],
     ["Settings", () => playerSettingsMenu(player, () => coreTerminal(player))],
   ];
-  for (const [name, run, on] of tabs) {
-    form.button(`[TAB]${on ? "[ON]§f" : ""}${name}`);
-    actions.push(run);
-  }
-  form.button(`[HDR]${msg ? msg : "§fCore Modules  §8Upgrades only work while upkeep is paid"}`);
-  actions.push(() => coreTerminal(player, msg));
-
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  await actions[res.selection]?.();
+  for (const [name, run, on] of tabs) s.button("TAB", on ? `§f${name}` : name, run, { states: [on ? "ON" : undefined] });
+  await s.show(player);
 }
 
 async function upgradeFlow(player, u) {
@@ -282,251 +291,289 @@ async function upgradeFlow(player, u) {
 }
 
 // ---------------------------------------------------------------------------
-// Members (Chain of Command)
+// Members: Chain of Command
 // ---------------------------------------------------------------------------
 
 const ROLE_ORDER = { owner: 0, coowner: 1, member: 2 };
 
-async function membersMenu(player) {
+export async function membersMenu(player, selId) {
   const clan = clanOf(player);
-  if (!clan) return;
-  const list = Object.entries(clan.members).sort(
-    (a, b) => ROLE_ORDER[a[1].role] - ROLE_ORDER[b[1].role] || a[1].joined - b[1].joined
-  );
-  const form = styled("blue").title(`Members · ${clan.name}`).body("§7Pick a player to see what you can do.");
+  if (!clan) return tower(player);
+  const list = Object.entries(clan.members).sort((a, b) => ROLE_ORDER[a[1].role] - ROLE_ORDER[b[1].role] || a[1].joined - b[1].joined);
+  const sel = clan.members[selId] ? selId : player.id;
+  const s = new Screen("members", "Members");
+  s.text("K", spaced(`Floor 6 · Clan ${clan.name}`));
   for (const [id, m] of list) {
-    const on = world.getEntity(id) ? "§2online" : "§8offline";
-    form.button(`§f${m.name}${id === player.id ? " §8(you)" : ""}\n§r§8${ROLE_NAME[m.role]} · ${on}`, m.role === "owner" ? CB.crown : CB.members);
+    const zone = m.role === "owner" ? "OW" : m.role === "coowner" ? "CO" : "ME";
+    const on = world.getEntity(id);
+    s.button(zone, `§f${m.name}\n${on ? "§a■ Online" : "§8■ Offline"}`, () => membersMenu(player, id), {
+      icon: headFor(m.name), states: [id === sel ? "SEL" : undefined, m.role === "owner" ? "OWN" : undefined],
+    });
   }
-  form.button("§cBACK\n§r§7Go back", CB.back);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  if (res.selection === list.length) return mainMenu(player);
-  const [targetId, m] = list[res.selection];
-  if (targetId === player.id) return membersMenu(player);
-  return memberActions(player, targetId, m.name);
-}
-
-async function memberActions(player, targetId, targetName) {
-  const clan = clanOf(player);
-  if (!clan?.members[targetId]) return membersMenu(player);
+  const open = CONFIG.clan.maxMembers - list.length;
+  if (open > 0 && canManage(clan, player.id))
+    s.button("ME", `§fInvite\n§8■ ${open} slot${open === 1 ? "" : "s"} open`, () => inviteMenu(player), { icon: CB.plus });
+  const m = clan.members[sel];
+  const st = clan.stats ?? {};
+  s.text("SA", `§f${m.name}\n§7${ROLE_NAME[m.role]} · joined ${new Date(m.joined).toLocaleDateString()}`, { icon: headFor(m.name) });
   const mine = roleOf(clan, player.id);
-  const theirs = roleOf(clan, targetId);
-  const actions = [];
-  if (canManage(clan, player.id) && theirs === ROLE.member) actions.push(["Promote to Co-Owner", () => promoteMember(player, targetId)]);
-  if (mine === ROLE.owner && theirs === ROLE.coowner) actions.push(["Demote to Member", () => demoteMember(player, targetId)]);
-  if (canManage(clan, player.id) && ROLE_ORDER[theirs] > ROLE_ORDER[mine])
-    actions.push(["§4Kick", () => kickMember(player, targetId), `Kick ${targetName} from ${clan.name}?`]);
-  if (mine === ROLE.owner)
-    actions.push(["Transfer Leadership", () => transferLeadership(player, targetId), `Make ${targetName} the Owner? You become a Co-Owner.`]);
-
-  const form = styled("blue")
-    .title(targetName)
-    .body(`§7${ROLE_NAME[theirs]} · joined ${new Date(clan.members[targetId].joined).toDateString()}`);
-  for (const [label] of actions) form.button(label, CB.members);
-  form.button("§cBACK\n§r§7Go back", CB.back);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  const pick = actions[res.selection];
-  if (!pick) return membersMenu(player);
-  if (pick[2] && !(await confirm(player, pick[0].replace(/§./g, ""), pick[2]))) return memberActions(player, targetId, targetName);
-  const r = pick[1]();
-  report(player, r);
-  if (r.kickedId) {
-    const kicked = world.getEntity(r.kickedId);
-    if (kicked) clearIslandSpawn(kicked);
+  const theirs = m.role;
+  const act = (label, color, run, ask) => s.button("ACT", label, async () => {
+    if (ask && !(await confirm(player, label.replace(/§./g, ""), ask))) return membersMenu(player, sel);
+    const r = run();
+    report(player, r);
+    if (r.kickedId) {
+      const kicked = world.getEntity(r.kickedId);
+      if (kicked) clearIslandSpawn(kicked);
+    }
+    return clanOf(player) ? membersMenu(player, sel) : tower(player);
+  }, { states: [color] });
+  if (sel === player.id) {
+    if (mine === ROLE.owner) act("§fDISBAND CLAN", "cRED", () => disbandAll(player), `Disband ${clan.name} for everyone? The island is lost. This can't be undone.`);
+    else act("§fLEAVE CLAN", "cRED", () => leaveAndClear(player), `Leave ${clan.name}? You lose access to its island.`);
+  } else {
+    if (canManage(clan, player.id) && theirs === ROLE.member) act("§0PROMOTE", "cCYAN", () => promoteMember(player, sel));
+    if (mine === ROLE.owner && theirs === ROLE.coowner) act("§fDEMOTE", undefined, () => demoteMember(player, sel));
+    if (canManage(clan, player.id) && ROLE_ORDER[theirs] > ROLE_ORDER[mine]) act("§cKICK", "cRED", () => kickMember(player, sel), `Kick ${m.name} from ${clan.name}?`);
+    if (mine === ROLE.owner)
+      s.button("ACT2", "TRANSFER LEADERSHIP", async () => {
+        if (!(await confirm(player, "Transfer Leadership", `Make ${m.name} the Owner? You become a Co-Owner.`))) return membersMenu(player, sel);
+        report(player, transferLeadership(player, sel));
+        return membersMenu(player, sel);
+      });
   }
-  return membersMenu(player);
+  await s.show(player);
 }
 
-// ---------------------------------------------------------------------------
-// Invite / leave / disband
-// ---------------------------------------------------------------------------
+function leaveAndClear(player) {
+  const r = leaveClan(player);
+  if (r.ok) clearIslandSpawn(player);
+  return r;
+}
+
+function disbandAll(player) {
+  const clan = clanOf(player);
+  const ids = clan ? Object.keys(clan.members) : [];
+  const r = disbandClan(player);
+  if (r.ok) for (const id of ids) {
+    const p = world.getEntity(id);
+    if (p) clearIslandSpawn(p);
+  }
+  return r;
+}
 
 async function inviteMenu(player) {
   const candidates = world.getPlayers().filter((p) => p.id !== player.id && !clanOf(p));
   if (candidates.length === 0) {
     player.sendMessage(`${CONFIG.prefix}Nobody online is without a clan right now.`);
-    return;
+    return membersMenu(player);
   }
   const form = styled("blue").title("Invite a Player").body("§7Online players with no clan:");
-  for (const p of candidates) form.button(`§f${p.name}`, CB.members);
+  for (const p of candidates) form.button(`§f${p.name}`, headFor(p.name));
+  form.button("§cBACK", CB.back);
   const res = await show(player, form);
   if (!res || res.canceled) return;
   const target = candidates[res.selection];
-  if (target?.isValid) report(player, invitePlayer(player, target));
-}
-
-async function leaveMenu(player) {
-  const clan = clanOf(player);
-  if (!clan) return;
-  if (!(await confirm(player, "Leave Clan", `Leave §b${clan.name}§r? You lose access to its island.`, "Leave"))) return;
-  const r = leaveClan(player);
-  report(player, r);
-  if (r.ok) clearIslandSpawn(player);
-}
-
-async function disbandMenu(player) {
-  const clan = clanOf(player);
-  if (!clan) return;
-  if (!(await confirm(player, "Disband Clan", `Disband §b${clan.name}§r for everyone? The island is lost. This can't be undone.`, "Disband")))
-    return;
-  const members = Object.keys(clan.members);
-  const r = disbandClan(player);
-  report(player, r);
-  if (r.ok) for (const id of members) {
-    const p = world.getEntity(id);
-    if (p) clearIslandSpawn(p);
-  }
+  if (!target) return membersMenu(player);
+  if (target.isValid) report(player, invitePlayer(player, target));
+  return membersMenu(player);
 }
 
 // ---------------------------------------------------------------------------
 // Raid Dispatch
 // ---------------------------------------------------------------------------
 
-const RAID_TYPES = [
-  { type: "normal", name: "Normal Raid", sub: "Random clan, no info" },
-  { type: "intel", name: "Intel Raid", sub: "See a hint first, then deploy or walk away" },
-  { type: "cheap", name: "Cheap Raid", sub: "Half price: an island whose core tax is unpaid" },
-  { type: "revenge", name: "Revenge Raid", sub: "Hit the clan that raided you" },
-];
+const intelCooldown = new Map();
+const scouted = new Map(); // clanId -> { prep, intel, until }
 
 export async function raidMenu(player, msg) {
   const clan = clanOf(player);
-  if (!clan) return mainMenu(player);
+  if (!clan) return tower(player);
   const running = R.raidOfClan(clan.id);
   const manage = canManage(clan, player.id);
-  const revenge = R.revengeAvailable(clan);
-  const cheapCount = R.targetsFor(clan, "cheap").length;
-  const lines = [
-    msg ? msg + "\n" : "",
-    `§7Clan bank §a${fmt(bankOf(clan))}§7 · squad: everyone online (${onlineMembersOf(clan)})`,
-    `§7Islands with their shield down: §f${cheapCount}`,
-    revenge ? `§cRevenge available on §e${revenge.name}§c until ${new Date(clan.revenge.until).toLocaleTimeString()}` : "",
-    running ? `§6Your clan is in a raid right now.` : "",
-    manage ? "" : "§8Only the Owner and Co-Owners can buy raids.",
-  ].filter(Boolean);
-  const form = styled("red").title("Raid Dispatch").body(lines.join("\n"));
-  const opts = [];
-  if (running && R.raidOfPlayer(player)) opts.push({ text: "§c§lBACK OUT\n§r§7Within 30s of arriving, 50% refund", icon: CB.stop, run: () => mainMenu(player, R.backOut(player)) });
-  if (!running && manage) {
-    for (const t of RAID_TYPES) {
-      if (t.type === "revenge" && !revenge) continue;
-      opts.push({ text: `§c§l${t.name.toUpperCase()} §r§e${fmtMoney(R.priceOf(t.type))}\n§r§7${t.sub}`, icon: { normal: CB.raids, intel: CB.intel, cheap: CB.broken, revenge: CB.skull }[t.type], run: () => startRaid(player, t.type) });
-    }
+  const rev = R.revengeAvailable(clan);
+  const st = clan.stats ?? {};
+  const s = new Screen("dispatch", "Raid Dispatch");
+  s.text("K", spaced(`Clan ${clan.name} · War Table`));
+  s.text("PILL", `Wins §a${st.wins ?? 0}`, { icon: CB.raids });
+  s.text("PILL", `Losses §c${st.losses ?? 0}`, { icon: CB.skull });
+  s.text("PILL", `Streak §e${st.streak ?? 0}`, { icon: CB.insurance });
+  if (running && R.raidOfPlayer(player)) {
+    s.button("RV", `§fYou're in a raid. §7Back out within ${CONFIG.raid.backOutSeconds}s of arriving for a ${Math.round(CONFIG.raid.backOutRefund * 100)}% refund.`, () => tower(player, R.backOut(player)), { icon: CB.stop });
+    s.text("RVP", "BACK OUT");
+  } else if (rev && !running) {
+    s.button("RV", `§fRevenge available. §7Clan ${rev.name} raided you. Hit them back.`, () => (manage ? startRaid(player, "revenge") : raidMenu(player, "§cOnly the Owner and Co-Owners can buy raids.")), { icon: CB.raids });
+    s.text("RVP", `REVENGE · ${fmtMoney(R.priceOf("revenge"))}`);
   }
-  opts.push({ text: "§cBACK\n§r§7Go back", icon: CB.back, run: () => mainMenu(player) });
-  for (const o of opts) form.button(o.text, o.icon);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  await opts[res.selection]?.run();
+  const intel = scouted.get(clan.id);
+  const intelLive = intel && intel.until > Date.now() ? intel : undefined;
+  const cheap = R.targetsFor(clan, "cheap").length;
+  const cards = [
+    { type: "normal", kick: "§6BLIND DROP", name: "Normal Raid", icon: CB.raids, pic: ART("qbox"), inner: "", desc: "Random clan. Could be loaded, could be empty. No info." },
+    { type: "intel", kick: "§6SCOUTED FIRST", name: "Intel Raid", icon: CB.intel, on: true,
+      inner: intelLive ? `§7INTEL REPORT\n§fSpawners §e${intelLive.intel.spawners}\n§fBank §e${intelLive.intel.bank}\n§fOnline §e${intelLive.intel.online} / ${intelLive.intel.members}\n§fClan §8■■■■■■` : "§7Scouting is free,\n§7once a minute.\n\n§7Tap to get a hint\n§7about a target.",
+      desc: "See the hint, then deploy or walk away." },
+    { type: "cheap", kick: "§cSHIELDS DOWN", name: "Cheap Raid", icon: CB.broken, red: true, pic: CB.broken, inner: `§7UNPAID UPKEEP\n§c${cheap} §7islands can't pay their core tax right now`, desc: "Half price. Random pick from the exposed islands." },
+  ];
+  for (const c of cards) {
+    const price = fmtMoney(R.priceOf(c.type));
+    let chip = c.type === "intel" ? (intelLive ? `DEPLOY · ${price}` : "SCOUT · FREE") : `BUY · ${price}`;
+    if (!manage) chip = "OWNER / CO-OWNER";
+    if (running) chip = "RAID RUNNING";
+    s.button("RC", c.name, () => (running ? raidMenu(player, "§cYour clan is already in a raid.") : manage ? startRaid(player, c.type) : raidMenu(player, "§cOnly the Owner and Co-Owners can buy raids.")), { icon: c.icon, states: [c.on ? "ON" : undefined] });
+    s.text("RCK", c.kick);
+    s.text("RCX", "", { icon: c.pic });
+    s.text("RCI", c.inner);
+    s.text("RCD", msg && c.type === "normal" ? msg : c.desc);
+    s.text("RCB", chip, { states: [c.red ? "cRED" : undefined] });
+  }
+  for (const [id, m] of Object.entries(clan.members)) {
+    const on = world.getEntity(id);
+    s.text("SQ", m.name, { icon: headFor(m.name) });
+    s.text("SQS", on ? "§aREADY" : "§8OFFLINE");
+  }
+  s.text("FT", `§f${raidLives(clan)}\n§e${fmtMoney(bankOf(clan))}`);
+  await s.show(player);
 }
 
-const onlineMembersOf = (clan) => Object.keys(clan.members).filter((id) => world.getEntity(id)).length;
-
-const intelCooldown = new Map();
-
 async function startRaid(player, type) {
+  const clan = clanOf(player);
+  if (type === "intel") {
+    const live = scouted.get(clan.id);
+    if (live && live.until > Date.now()) {
+      // second tap: deploy on the scouted target
+      if (!(await confirm(player, "Deploy", `Deploy on the scouted island for ${fmt(live.prep.price)} from the clan bank? Everyone online in your clan goes.`, "Deploy")))
+        return raidMenu(player);
+      scouted.delete(clan.id);
+      const fresh = R.prepareRaid(player, "intel");
+      if (!fresh.ok) return raidMenu(player, "§c" + fresh.msg);
+      const r = await R.launchRaid(player, { ...fresh, target: live.prep.target });
+      if (!r.ok) return raidMenu(player, "§c" + r.msg);
+      return;
+    }
+    const prep = R.prepareRaid(player, "intel");
+    if (!prep.ok) return raidMenu(player, "§c" + prep.msg);
+    const last = intelCooldown.get(clan.id) ?? 0;
+    if (Date.now() - last < 60000) return raidMenu(player, `§cYour scouts need ${Math.ceil((60000 - (Date.now() - last)) / 1000)}s before the next scout.`);
+    intelCooldown.set(clan.id, Date.now());
+    scouted.set(clan.id, { prep, intel: R.intelOf(prep.target), until: Date.now() + 60000 });
+    return raidMenu(player);
+  }
   const prep = R.prepareRaid(player, type);
   if (!prep.ok) return raidMenu(player, "§c" + prep.msg);
-  if (type === "intel") {
-    // scouting is free, but only once a minute per clan (no endless re-rolls)
-    const last = intelCooldown.get(prep.clan.id) ?? 0;
-    if (Date.now() - last < 60000) return raidMenu(player, `§cYour scouts need ${Math.ceil((60000 - (Date.now() - last)) / 1000)}s before the next Intel Raid.`);
-    intelCooldown.set(prep.clan.id, Date.now());
-    const intel = R.intelOf(prep.target);
-    const ok = await confirm(
-      player,
-      "Intel Report",
-      `§7A target has been scouted:\n\n§fSpawners: §e${intel.spawners}\n§fClan bank: §e${intel.bank}\n§fOnline: §e${intel.online} / ${intel.members}\n\n§7Deploy now for ${fmt(prep.price)}, or walk away for free.`,
-      "Deploy"
-    );
-    if (!ok) return raidMenu(player, "§7You walked away. Nothing was paid.");
-  } else {
-    const ok = await confirm(player, "Buy Raid", `Buy a ${type} raid for ${fmt(prep.price)} from the clan bank? Everyone online in your clan goes.`, "Raid!");
-    if (!ok) return raidMenu(player);
-  }
+  const ok = await confirm(player, "Buy Raid", `Buy a ${type} raid for ${fmt(prep.price)} from the clan bank? Everyone online in your clan goes.`, "Raid!");
+  if (!ok) return raidMenu(player);
   const r = await R.launchRaid(player, prep);
   if (!r.ok) return raidMenu(player, "§c" + r.msg);
 }
 
 // ---------------------------------------------------------------------------
-// Insurance Vault, Raid Log, Leaderboards
+// Insurance Vault
 // ---------------------------------------------------------------------------
+
+const TIER_LOOK = [
+  { safe: "safe_basic", col: "§7", desc: "A small cushion for new clans." },
+  { safe: "safe_silver", col: "§f", desc: "A quarter of it back." },
+  { safe: "safe_gold", col: "§6", desc: "Half of every stolen dollar back." },
+  { safe: "safe_diamond", col: "§3", desc: "Three quarters back. The best cover." },
+];
 
 export async function insuranceMenu(player, msg) {
   const clan = clanOf(player);
-  if (!clan) return mainMenu(player);
+  if (!clan) return tower(player);
   const owned = clan.insurance ?? 0;
-  const tiers = CONFIG.insurance;
-  const lines = tiers.map((t, i) => `${i < owned ? "§a✔" : i === owned ? "§e›" : "§8✖"} §f${t.name} §7${Math.round(t.pct * 100)}% back · ${fmt(t.price)}`);
-  const form = styled("green")
-    .title("Insurance Vault")
-    .body(
-      (msg ? msg + "\n\n" : "") +
-        "§7Get part of the money back when your clan is raided. Covers money only. Buy the tiers in order; the best one you own counts.\n\n" +
-        lines.join("\n") +
-        `\n\n§7Clan bank §a${fmt(bankOf(clan))}`
-    );
-  const opts = [];
-  if (owned < tiers.length) opts.push({ text: `§a§lBUY ${tiers[owned].name.toUpperCase()} §r§e${fmtMoney(tiers[owned].price)}\n§r§7${Math.round(tiers[owned].pct * 100)}% of stolen money back`, icon: CB.insurance, run: async () => {
-    if (!(await confirm(player, "Insurance", `Buy ${tiers[owned].name} insurance for ${fmt(tiers[owned].price)} from the clan bank?`, "Buy"))) return insuranceMenu(player);
-    const r = A.buyInsurance(player);
-    return insuranceMenu(player, (r.ok ? "§a" : "§c") + r.msg);
-  } });
-  opts.push({ text: "§cBACK\n§r§7Go back", icon: CB.back, run: () => mainMenu(player) });
-  for (const o of opts) form.button(o.text, o.icon);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  await opts[res.selection]?.run();
+  const s = new Screen("insurance", "Insurance Vault");
+  s.text("K", spaced(`Clan ${clan.name}`));
+  CONFIG.insurance.forEach((t, i) => {
+    const look = TIER_LOOK[i] ?? TIER_LOOK[0];
+    const state = i < owned - 1 ? "OWN" : i === owned - 1 ? "ACT" : i === owned ? "NEXT" : "LOCK";
+    const run = state === "NEXT" ? () => buyTier(player, i) : () => insuranceMenu(player, state === "LOCK" ? `§7Unlock ${CONFIG.insurance[i - 1].name} first.` : undefined);
+    s.button("TI", state === "LOCK" ? `§8${t.name}` : `§f${t.name}`, run, { icon: ART(look.safe), states: [state] });
+    s.text("TIK", { OWN: "§aOWNED", ACT: "§aACTIVE", NEXT: "§6NEXT UNLOCK", LOCK: "§8LOCKED" }[state]);
+    s.text("TIP", `${state === "LOCK" ? "§3" : look.col}${Math.round(t.pct * 100)}%`);
+    s.text("TID", state === "ACT" ? "Your current cover." : state === "LOCK" ? `Unlock ${CONFIG.insurance[i - 1]?.name ?? ""} first.` : look.desc);
+    s.text("TIB", { OWN: "OWNED", ACT: "ACTIVE", NEXT: `§0BUY · ${fmtMoney(t.price)}`, LOCK: `§8LOCKED · ${fmtMoney(t.price)}` }[state], { states: [state] });
+  });
+  const claim = (clan.log ?? []).find((e) => e.kind === "raided");
+  s.text("LC", msg ?? (claim ? `Raided by ${claim.other} · lost ${fmt(Math.abs(claim.money))}${claim.refund ? ` · §arefunded ${fmt(claim.refund)}` : ""}` : "§8No claims yet"));
+  await s.show(player);
 }
 
-const LOG_LABEL = {
-  won: "§aRAID WON",
-  failed: "§7RAID FAILED",
-  defended: "§bDEFENDED",
-  raided: "§cRAIDED",
-  backout: "§8CALLED OFF",
+async function buyTier(player, i) {
+  const t = CONFIG.insurance[i];
+  if (!(await confirm(player, "Insurance", `Buy ${t.name} insurance for ${fmt(t.price)} from the clan bank?`, "Buy"))) return insuranceMenu(player);
+  const r = A.buyInsurance(player);
+  return insuranceMenu(player, (r.ok ? "§a" : "§c") + r.msg);
+}
+
+// ---------------------------------------------------------------------------
+// Raid Log
+// ---------------------------------------------------------------------------
+
+const LOG_LOOK = {
+  won: { tag: "tW", badge: "§aRAID WON", title: (e) => `We raided ${e.other}` },
+  raided: { tag: "tR", badge: "§cRAIDED", title: (e) => `${e.other} raided us` },
+  defended: { tag: "tD", badge: "§bDEFENDED", title: (e) => `Held off ${e.other}` },
+  failed: { tag: "tF", badge: "§7RAID FAILED", title: (e) => `Raid on ${e.other} failed` },
+  backout: { tag: "tF", badge: "§8CALLED OFF", title: (e) => `Called off the raid on ${e.other}` },
 };
 
 export async function raidLogMenu(player, filter = "all") {
   const clan = clanOf(player);
-  if (!clan) return mainMenu(player);
+  if (!clan) return tower(player);
   const mine = ["won", "failed", "backout"];
-  const list = (clan.log ?? []).filter((e) => filter === "all" || (filter === "ours" ? mine.includes(e.kind) : !mine.includes(e.kind)));
+  const all = clan.log ?? [];
+  const list = all.filter((e) => filter === "all" || (filter === "ours" ? mine.includes(e.kind) : !mine.includes(e.kind)));
   const st = clan.stats ?? {};
-  const ago = (t) => {
-    const m = Math.floor((Date.now() - t) / 60000);
-    return m < 60 ? `${m}m ago` : m < 1440 ? `${Math.floor(m / 60)}h ago` : `${Math.floor(m / 1440)}d ago`;
-  };
-  const body =
-    `§7Wins §a${st.wins ?? 0}§7 · losses §c${st.losses ?? 0}§7 · defences §b${st.defences ?? 0}§7 · streak §f${st.streak ?? 0}\n\n` +
-    (list.length
-      ? list.slice(0, 15).map((e) => `${LOG_LABEL[e.kind] ?? e.kind} §f${e.other} §7${e.money >= 0 ? "§a+" : "§c-"}${fmt(Math.abs(e.money))} §8${ago(e.t)}\n §8${e.detail ?? ""}`).join("\n")
-      : "§8Nothing here yet.");
-  const form = styled("orange").title("Raid Log").body(body);
-  const tabs = [["all", "All"], ["ours", "Our raids"], ["theirs", "Raids on us"]];
-  for (const [id, label] of tabs) form.button(`${id === filter ? "§e§l" : ""}${label}`, CB.raidlog);
-  form.button("§cBACK\n§r§7Go back", CB.back);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  if (res.selection < tabs.length) return raidLogMenu(player, tabs[res.selection][0]);
-  return mainMenu(player);
+  const sum = (kind, f = (e) => e.money) => all.filter((e) => e.kind === kind).reduce((n, e) => n + (f(e) || 0), 0);
+  const s = new Screen("raidlog", "Raid Log");
+  s.text("K", spaced(`Clan ${clan.name}`));
+  s.text("V1", `§a+${fmt(sum("won"))}`);
+  s.text("V2", `§c-${fmt(Math.abs(sum("raided")))}`);
+  s.text("V3", `§6+${fmt(sum("raided", (e) => e.refund))}`);
+  s.text("WL", `§f${st.wins ?? 0}\n§7Wins`);
+  s.text("WL", `§f${st.losses ?? 0}\n§7Losses`);
+  for (const [id, label] of [["all", "All"], ["ours", "Our raids"], ["theirs", "Raids on us"]])
+    s.button("TAB", id === filter ? `§0${label}` : label, () => raidLogMenu(player, id), { states: [id === filter ? "ON" : undefined] });
+  if (!list.length) s.text("LOG", "§8Nothing here yet.");
+  for (const e of list.slice(0, 7)) {
+    const look = LOG_LOOK[e.kind] ?? LOG_LOOK.failed;
+    s.text("LOG", `§f${look.title(e)}\n§7${e.detail ?? ""}`, { states: [look.tag] });
+    s.text("LOGB", look.badge);
+    s.text("LOGA", `${e.money >= 0 ? (e.kind === "defended" ? "§b" : "§a") : "§c"}${signed(e.money)}`);
+    s.text("LOGT", ago(e.t));
+  }
+  await s.show(player);
 }
+
+// ---------------------------------------------------------------------------
+// Leaderboards
+// ---------------------------------------------------------------------------
+
+const BOARD_ICON = { wins: CB.raids, streak: CB.insurance, richest: CB.bank, core: CB.core };
+const bannerOf = (clan) => BANNER([...clan.id].reduce((n, c) => n + c.charCodeAt(0), 0));
 
 export async function leaderboardsMenu(player, id = "wins") {
   const own = clanOf(player);
   const rows = A.board(id);
-  const b = A.BOARDS.find((x) => x.id === id) ?? A.BOARDS[0];
-  const rank = own ? rows.findIndex((r) => r.clan.id === own.id) + 1 : 0;
-  const top = rows.slice(0, 10).map((r, i) => `${i < 3 ? ["§6", "§f", "§c"][i] : "§7"}#${i + 1} §f${r.clan.name} §7${r.text}${own && r.clan.id === own.id ? " §b(you)" : ""}`);
-  const form = styled("purple")
-    .title(`Leaderboards · ${b.name}`)
-    .body((top.length ? top.join("\n") : "§8No clans yet.") + (own && rank > 10 ? `\n\n§b#${rank} ${own.name} §7${rows[rank - 1].text}` : ""));
-  for (const x of A.BOARDS) form.button(`${x.id === id ? "§e§l" : ""}${x.name}`, { wins: CB.raids, streak: CB.insurance, richest: CB.bank, core: CB.core }[x.id]);
-  form.button("§cBACK\n§r§7Go back", CB.back);
-  const res = await show(player, form);
-  if (!res || res.canceled) return;
-  if (res.selection < A.BOARDS.length) return leaderboardsMenu(player, A.BOARDS[res.selection].id);
-  return mainMenu(player);
+  const s = new Screen("boards", "Leaderboards");
+  for (const b of A.BOARDS) s.button("TAB", b.id === id ? `§0${b.name}` : b.name, () => leaderboardsMenu(player, b.id), { icon: BOARD_ICON[b.id], states: [b.id === id ? "ON" : undefined] });
+  const short = (r) => (id === "wins" ? `${r.v} wins` : r.text);
+  rows.slice(0, 3).forEach((r, i) => s.text(`P${i + 1}`, `§f${r.clan.name}\n§7${short(r)}`, { icon: bannerOf(r.clan) }));
+  rows.slice(3, 10).forEach((r, i) => {
+    s.text("RK", r.clan.name, { icon: bannerOf(r.clan) });
+    s.text("RKR", `#${i + 4}`);
+    s.text("RKW", id === "wins" ? `${r.clan.stats?.wins ?? 0} W · ${r.clan.stats?.losses ?? 0} L` : "");
+    s.text("RKS", id === "richest" ? fmtMoney(r.v) : String(r.v));
+  });
+  if (!rows.length) s.text("NONE", "No clans yet.");
+  if (own) {
+    const rank = rows.findIndex((r) => r.clan.id === own.id);
+    const r = rows[rank];
+    s.text("ME", `§f${own.name} §7· your clan`, { icon: bannerOf(own) });
+    s.text("MER", `#${rank + 1}`);
+    s.text("MEW", id === "wins" ? `${own.stats?.wins ?? 0} W · ${own.stats?.losses ?? 0} L` : "");
+    s.text("MES", r ? (id === "richest" ? fmtMoney(r.v) : String(r.v)) : "0");
+  }
+  await s.show(player);
 }
