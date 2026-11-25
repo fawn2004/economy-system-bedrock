@@ -20,9 +20,9 @@ t('players can be inside but not outside the border',()=>{
   assert.ok(allowedAt(a,{x:20070.5,y:101,z:20000.5}));
   assert.ok(!allowedAt(a,{x:20080.5,y:101,z:20000.5}));
 });
-t('admins can go past it (any capitals, or an operator)',()=>{
+t('only the admin tag lets you past it (any capitals); operators without it cannot',()=>{
   a.addTag('Admin'); assert.ok(allowedAt(a,{x:20080.5,y:101,z:20000.5})); a.removeTag('Admin');
-  a.playerPermissionLevel=2; assert.ok(allowedAt(a,{x:20080.5,y:101,z:20000.5})); delete a.playerPermissionLevel;
-  assert.ok(!allowedAt(a,{x:20080.5,y:101,z:20000.5}));
+  a.playerPermissionLevel=2; a.commandPermissionLevel=4; assert.ok(!allowedAt(a,{x:20080.5,y:101,z:20000.5}),'operator is not an admin');
+  delete a.playerPermissionLevel; delete a.commandPermissionLevel;
 });
 console.log(`\n${n} tests passed`);
