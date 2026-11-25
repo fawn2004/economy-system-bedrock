@@ -3,6 +3,7 @@ import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
 import { CONFIG } from "./config.js";
 import { addMoney, fmt } from "./eco/economy.js";
 import { makeSpawnerItem, mobName } from "./eco/spawners.js";
+import { pauseSidebar } from "./titles.js";
 
 // ---------------------------------------------------------------------------
 // Crates: use a crate key to open its crate. A reel spins through the rewards
@@ -101,6 +102,7 @@ export async function openCrate(player, crate) {
   for (let i = 0; i < frames && player.isValid; i++) {
     const w = i === frames - 1 ? win : table[Math.floor(Math.random() * table.length)];
     const rr = RARITY[w.r];
+    pauseSidebar(player, 80);
     player.onScreenDisplay.setTitle(`${c.color}${c.name}`, {
       subtitle: `§8» ${rr.col}${rewardName(w)} §8«`,
       fadeInDuration: 0, stayDuration: i === frames - 1 ? 60 : 10, fadeOutDuration: i === frames - 1 ? 10 : 0,

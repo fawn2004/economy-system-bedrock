@@ -21,6 +21,7 @@ import { ensureCore, registerCore, setCoreTerminal, settleTax } from "./core.js"
 import { backOut, registerRaids } from "./raids.js";
 import { registerAfterRaid } from "./after.js";
 import { registerCrates } from "./crates.js";
+import { registerSidebar } from "./sidebar.js";
 import { registerEconomy, setupEconomyPlayer } from "./eco/index.js";
 import { setHomeMenu } from "./eco/menus.js";
 
@@ -90,6 +91,7 @@ setFloor("afterDeposit", (clan) => settleTax(clan));
 registerRaids();
 registerAfterRaid();
 registerCrates();
+registerSidebar();
 
 // ---------------------------------------------------------------------------
 // Commands: /menu, /is, /sc <action> [name]

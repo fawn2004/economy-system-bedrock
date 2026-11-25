@@ -7,6 +7,7 @@ import { defenceSeconds, raidLives, shieldUp } from "./core.js";
 import { fmt } from "./eco/economy.js";
 import { countSpawnersWhere, setSpawnerManageOverride } from "./eco/spawners.js";
 import { pref } from "./eco/playerSettings.js";
+import { showTitle } from "./titles.js";
 
 // ---------------------------------------------------------------------------
 // Raids
@@ -182,7 +183,7 @@ export async function launchRaid(player, prep) {
   for (const p of squad) {
     if (!p.isValid) continue;
     p.setSpawnPoint({ dimension: dim, x: launch.x + 0.5, y: launch.y + 1, z: launch.z + 0.5 });
-    p.onScreenDisplay.setTitle("§cRAID", { subtitle: `§fTarget: §e${target.name}`, fadeInDuration: 5, stayDuration: 60, fadeOutDuration: 10 });
+    showTitle(p, "§cRAID", `§fTarget: §e${target.name}`, 60);
     p.sendMessage(`${CONFIG.prefix}§cRaiding §e${target.name}§7! Bridge to their island within §f${Math.round(defenceSeconds(target) / 60 * 10) / 10} min§7. You have §f${raidLives(clan)}§7 lives. Back out within ${R.backOutSeconds}s with §f/sc back§7 for a ${Math.round(R.backOutRefund * 100)}% refund.`);
   }
   alertDefenders(raid);
@@ -193,7 +194,7 @@ function alertDefenders(raid) {
   const target = getClan(raid.target);
   const attacker = getClan(raid.attacker);
   for (const p of onlineMembers(target)) {
-    p.onScreenDisplay.setTitle("§cRAID INCOMING", { subtitle: "§fRun §e/is §fto defend your island!", fadeInDuration: 5, stayDuration: 80, fadeOutDuration: 10 });
+    showTitle(p, "§cRAID INCOMING", "§fRun §e/is §fto defend your island!", 80);
     p.sendMessage(`${CONFIG.prefix}§c${Object.keys(raid.raiders).length} raiders from §e${attacker?.name ?? "a clan"}§c are bridging to your island! Type §f/is§c to go home and defend.`);
     if (pref(p, "raidsound", true)) p.playSound("raid.horn", { volume: 1 });
   }
@@ -270,7 +271,7 @@ function win(raid) {
   const lootMin = Math.round(R.lootSeconds / 60);
   for (const p of onlineMembers(attacker)) {
     if (!raid.raiders[p.id]) continue;
-    p.onScreenDisplay.setTitle("§aRAID WON", { subtitle: `§f+${fmt(stolen + bonus)} · loot for ${lootMin} min`, fadeInDuration: 5, stayDuration: 60, fadeOutDuration: 10 });
+    showTitle(p, "§aRAID WON", `§f+${fmt(stolen + bonus)} · loot for ${lootMin} min`, 60);
   }
   tellClan(attacker, `§aYou landed on §e${target.name}§a! Stole §f${fmt(stolen)}${bonus ? `§a + §f${fmt(bonus)}§a underdog bonus` : ""}§a. Loot for ${lootMin} minutes.`);
   tellClan(target, `§c${attacker.name} landed on your island and stole §f${fmt(stolen)}§c. They can loot for ${lootMin} minutes!`);
@@ -380,17 +381,6 @@ function tick() {
       const home = p.dimension.id === "minecraft:overworld" && clanAt(p.dimension.id, p.location)?.id === target.id;
       if (home && !p.hasTag(TAG_PVP)) p.addTag(TAG_PVP);
       if (!home && p.hasTag(TAG_PVP)) p.removeTag(TAG_PVP);
-    }
-    // action bar until the custom sidebar takes over (Milestone 6)
-    const s = raidStatus(raid);
-    for (const p of live) {
-      const hearts = "§c" + "♥".repeat(raid.raiders[p.id].lives) + "§8" + "♡".repeat(Math.max(0, raidLives(attacker) - raid.raiders[p.id].lives));
-      const where = raid.phase === "loot" ? "§aLOOTING" : `§f${s.distance} §7blocks to go`;
-      p.onScreenDisplay.setActionBar(`§6RAID §e${s.targetName} §7· ${where} §7· §e${s.timeLeft} §7· ${hearts}`);
-    }
-    for (const p of onlineMembers(target)) {
-      const where = raid.phase === "loot" ? "§cLOOTING YOUR ISLAND" : `§f${s.distance} §7blocks away`;
-      p.onScreenDisplay.setActionBar(`§cRAID INCOMING §7· §f${s.raiders} §7raiders · ${where} §7· §e${s.timeLeft}`);
     }
   }
 }

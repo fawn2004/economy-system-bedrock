@@ -46,7 +46,7 @@ export const CONFIG = {
 };
 
 // Menu colour themes (must match the header textures in the resource pack)
-export const THEME = { red: 1, gold: 2, green: 3, blue: 4, purple: 5, orange: 6 };
+export const THEME = { red: 1, gold: 2, green: 3, blue: 4, purple: 5, orange: 6, cyan: 7, pink: 8 };
 
 // ----------------------------------------------------------------------------
 //  Price overrides:  "minecraft:item": { buy, sell }   (either can be left out)
