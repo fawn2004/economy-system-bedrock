@@ -18,7 +18,6 @@ import { leaderboardsMenu } from "./leaderboards.js";
 import { makeHopperItem } from "./chunkHopper.js";
 import { NPC_TYPES, removeNearestNpc, setNpcOpeners, spawnNpc } from "./npc.js";
 import { playerSettingsMenu } from "./playerSettings.js";
-import { isMinionLoot, lootIcon, lootIdFor, lootName, lootSellPrice, makeMinionItem } from "./minions.js";
 import { getSkillXp, levelInfo as skillLevelInfo, skillsMenu, xpToReach } from "./skills.js";
 import { editItemMenu, editorMenu } from "./editor.js";
 import { clearGroundItems } from "./groundItems.js";
@@ -139,8 +138,6 @@ async function economyShopMenu(player, msg) {
       tiles.push({ text: "§e§lSPAWNERS", sub: `§7${SPAWNERS.filter((s) => !s.disabled).length} mobs`, icon: U + "icon_spawners", badge: BADGES.spawners, onClick: () => spawnersMenu(player) });
     } else if (key === "chunkhopper") {
       tiles.push({ text: "§6§lCHUNK HOPPER", sub: `${priceColor(player, CHUNK_HOPPER.price)}${fmtShort(CHUNK_HOPPER.price)}`, icon: "textures/items/hopper", badge: BADGES.chunkhopper, onClick: () => chunkHopperShop(player) });
-    } else if (key === "minions") {
-      tiles.push({ text: "§e§lMINIONS", sub: "§7They mine for you", icon: U + "icon_minion", badge: BADGES.minions, onClick: () => minionShop(player) });
     } else if (key === "skilltools") {
       tiles.push({ text: "§6§lSKILL TOOLS", sub: "§7Level-up tools", icon: SKILL_TOOL_ICON, badge: BADGES.skilltools, onClick: () => skillToolsMenu(player) });
     } else if (key === "search") {
@@ -332,72 +329,6 @@ async function chunkHopperShop(player, msg) {
   });
 }
 
-// ---- minions -------------------------------------------------------------------
-async function minionShop(player, msg) {
-  const kinds = [
-    { id: "mining", name: "MINING MINIONS", sub: "§7Ores & rare blocks", icon: "textures/items/diamond_pickaxe" },
-    { id: "farming", name: "FARMING MINIONS", sub: "§7Crops & plants", icon: "textures/items/diamond_hoe" },
-  ];
-  const tiles = kinds.map((k) => ({
-    text: `§e§l${k.name}`,
-    sub: k.sub,
-    icon: k.icon,
-    onClick: () => minionKindShop(player, k),
-  }));
-  tiles.push(backTile(() => shopMenu(player)));
-  await tileMenu(player, {
-    title: "MINIONS",
-    theme: "orange",
-    body:
-      (msg ? msg + "\n" : "") +
-      "§7Minions collect enchanted items for you - even while you're away.\n" +
-      `§7Better minions cost more but pay a lot more. §8(max ${MINION_SETTINGS.maxPerPlayer} each)    ${balLine(player)}`,
-    tiles,
-  });
-}
-
-async function minionKindShop(player, k) {
-  const tiles = MINION_TYPES.filter((t) => (t.kind ?? "mining") === k.id).map((t) => ({
-    text: `§e§l${t.name.toUpperCase()}`,
-    sub: `${priceColor(player, t.price)}${fmtShort(t.price)}`,
-    icon: U + "icon_minion",
-    onClick: () => minionTypeShop(player, t, undefined, () => minionKindShop(player, k)),
-  }));
-  tiles.push(backTile(() => minionShop(player)));
-  await tileMenu(player, { title: k.name, theme: "orange", body: `§7Pick a minion to see what it collects.    ${balLine(player)}`, tiles });
-}
-
-async function minionTypeShop(player, t, msg, back = () => minionShop(player)) {
-  const first = t.tiers[0], last = t.tiers[t.tiers.length - 1];
-  await tileMenu(player, {
-    title: `${t.name.toUpperCase()} MINION`,
-    theme: "orange",
-    body:
-      (msg ? msg + "\n" : "") +
-      `§7${t.kind === "farming" ? "Farms" : "Mines"}: §f${t.tiers.map((x) => x.name).join(" §7> §f")}\n` +
-      `§7Each item sells for §a${fmt(lootSellPrice(lootIdFor(first.drop[0])))} §7(${first.name}) up to §a${fmt(lootSellPrice(lootIdFor(last.drop[0])))} §7(${last.name})\n` +
-      `§7Upgrades cost §fx${t.upgradeMultiplier}§7.    ${balLine(player)}`,
-    tiles: [
-      {
-        text: `§a§lBUY`,
-        sub: `${priceColor(player, t.price)}${fmtShort(t.price)}`,
-        icon: U + "icon_minion",
-        onClick: () => {
-          if (getBalance(player) < t.price) {
-            fail(player, `You need ${fmt(t.price)}.`);
-            return minionTypeShop(player, t, `§cYou need §f${fmt(t.price)}§c.`, back);
-          }
-          if (freeSlots(player) < 1) return minionTypeShop(player, t, "§cYou need a free inventory slot!", back);
-          takeMoney(player, t.price);
-          player.getComponent("minecraft:inventory").container.addItem(makeMinionItem(0, {}, t.id));
-          success(player, `Bought a ${t.name} Minion! Place it on a block.`);
-          return minionTypeShop(player, t, `§aBought a §f${t.name} Minion§a! Place it on a block.`, back);
-        },
-      },
-      backTile(back),
-    ],
-  });
-}
 
 // ---- skill tools -------------------------------------------------------------
 const SKILL_TOOL_ICON = "textures/items/diamond_hoe";
@@ -571,8 +502,7 @@ function buySpawner(player, sp, amount) {
 // ============================================================================
 export async function sellMenu(player, msg) {
   const { byId } = getCatalog();
-  // shop items + enchanted minion items (worth lootMultiplier x)
-  const priceOf = (id) => sellPrice(id) || lootSellPrice(id);
+  const priceOf = (id) => sellPrice(id);
   const sellable = [...countPlain(player)].filter(([id]) => priceOf(id) > 0);
   sellable.sort((a, b) => priceOf(b[0]) * b[1] - priceOf(a[0]) * a[1]);
   const total = sellable.reduce((sum, [id, n]) => sum + priceOf(id) * n, 0);
@@ -637,11 +567,11 @@ export async function sellMenu(player, msg) {
   }
   for (const [id, n] of sellable.slice(0, 40)) {
     const e = byId.get(id);
-    const name = e?.name ?? (isMinionLoot(id) ? lootName(id) : pretty(id));
+    const name = e?.name ?? pretty(id);
     tiles.push({
-      text: `${isMinionLoot(id) ? "§b" : "§f"}${clip(name)}`,
+      text: `§f${clip(name)}`,
       sub: `§7x${n} §a${fmtShort(priceOf(id) * n)}`,
-      icon: e?.icon ?? (isMinionLoot(id) ? lootIcon(id) : ICON.coin),
+      icon: e?.icon ?? ICON.coin,
       onClick: () => {
         const sold = removeAllPlain(player, id);
         const earned = Math.floor(sold * priceOf(id) * sellMultiplier(player));
@@ -1137,14 +1067,7 @@ export async function skyShopMenu(player, msg, st = {}) {
     { id: "farming", name: "Farming", desc: "Seeds, saplings and crops", icon: CBI + "crops", items: () => deep("farming") },
     { id: "blocks", name: "Blocks", desc: "Build and decorate your island", icon: U + "icon_blocks", items: () => deep("blocks") },
     { id: "food", name: "Food", desc: "Eat up before a raid", icon: U + "icon_food", items: () => deep("food") },
-    { id: "minions", name: "Minions & Hoppers", desc: "They work while you're away", icon: U + "icon_minion", count: MINION_TYPES.length + 1, open: () => tileMenu(player, {
-      title: "MINIONS & HOPPERS", theme: "orange", body: balLine(player),
-      tiles: [
-        { text: "§e§lMINIONS", sub: "§7Mine and farm for you", icon: U + "icon_minion", onClick: () => minionShop(player) },
-        { text: "§6§lCHUNK HOPPER", sub: `${priceColor(player, CHUNK_HOPPER.price)}${fmtShort(CHUNK_HOPPER.price)}`, icon: "textures/items/hopper", onClick: () => chunkHopperShop(player) },
-        backTile(back),
-      ],
-    }) },
+    { id: "hopper", name: "Chunk Hopper", desc: "Collects drops in its chunk", icon: "textures/items/hopper", count: 1, open: () => chunkHopperShop(player) },
     { id: "more", name: "More", desc: "Redstone, brewing, mob drops and treasure", icon: "textures/items/redstone_dust", items: () => deep("treasure", "redstone", "misc", "mobs", "brewing") },
     { id: "search", name: "Search", desc: "Find any item", icon: ICON.search, count: "", open: () => searchMenu(player) },
     { id: "sell", name: "Sell", desc: "Sell your loot", icon: CBI + "sell", count: "", open: () => sellMenu(player) },

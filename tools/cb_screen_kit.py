@@ -354,13 +354,10 @@ def zone_defs(scr, z):
     inner = {"type": "panel", "size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left", "controls": kids}
     show = vis(has(f"[{z.tag}]"))
     if z.single:
-        # one fixed button: no factory, no copies for the other buttons
-        inner["collection_index"] = z.index
+        # drawn by the screen's "singles grid" (see screen_json): a variant at the zone's spot
         inner["bindings"] = show
-        if z.click:
-            kids[-1]["button"]["collection_index"] = z.index
-        ctrl = {"type": "panel", "collection_name": "form_buttons", "controls": [{"one": inner}]}
-        return defs, place(ctrl, list(z.rect))
+        inner["offset"] = [z.rect[0], z.rect[1]]
+        return defs, inner
     if z.grid:
         # a grid decides on its own which cells show, so the cell's CONTENT hides itself
         inner["bindings"] = show
@@ -398,10 +395,29 @@ def screen_json(scr):
     ctrls = []
     for i, p in enumerate(scr.static):
         ctrls.append({f"s{i}": img_json(p) if isinstance(p, Img) else label_json(p)})
+    variants = []
     for z in scr.zones:
         d, c = zone_defs(scr, z)
         defs.update(d)
-        ctrls.append({f"z_{re.sub('[^a-z0-9]', '', z.tag.lower())}": c})
+        name = f"z_{re.sub('[^a-z0-9]', '', z.tag.lower())}"
+        if z.single:
+            if not variants:
+                ctrls.append({"singles": None})  # placeholder: drawn where the first single zone sits
+            variants.append({name: c})
+        else:
+            ctrls.append({name: c})
+    if variants:
+        # One grid cell per button index up to the last single. Cells have no size, so every
+        # cell sits at the screen's top-left and its variants are placed absolutely. Cell i
+        # holds button i; only the variant whose tag that button carries shows. This reaches
+        # "button number i" without building a copy of every button per zone.
+        count = max(z.index for z in scr.zones if z.single) + 1
+        defs[scr.sid + "_one_cell"] = {"type": "panel", "size": [0, 0], "controls": variants}
+        grid = {"type": "grid", "size": [0, 0], "anchor_from": "top_left", "anchor_to": "top_left",
+                "grid_item_template": f"{NS}.{scr.sid}_one_cell", "grid_dimensions": [count, 1], "collection_name": "form_buttons",
+                "bindings": only_when_shown(scr, "#maximum_grid_items")}
+        i = next(k for k, c in enumerate(ctrls) if "singles" in c)
+        ctrls[i] = {"singles": {"type": "panel", "size": [W, H], "anchor_from": "top_left", "anchor_to": "top_left", "controls": [{"grid": grid}]}}
     if scr.close:
         ctrls.append({"close@eco_form.close_button": {"size": [12, 12], "anchor_from": "top_right", "anchor_to": "top_right", "offset": [-2, 2], "layer": 8}})
     defs[scr.sid + "_screen"] = {"type": "image", "texture": scr.bg, "size": [W, H], "controls": ctrls}

@@ -4,7 +4,7 @@ Clans of up to 5 share a floating island, grind it up like skyblock, and buy bli
 other islands. The full design is in the Cloudbreak design doc; the UI mockups are on the
 Cloudbreak UI canvas.
 
-Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.4.6). Cloudbreak contains its
+Packs: `packs/Cloudbreak_BP` and `packs/Cloudbreak_RP` (version 0.5.0). Cloudbreak contains its
 own copy of the Skyblock Economy code (`scripts/eco`), so it does **not** need the Skyblock
 Economy packs. Don't run both in the same world.
 
@@ -22,7 +22,7 @@ offline tests (`tools/cloudbreak_tests/run.sh`).
 | 5 | Sky Shop, crates (reel animation), kits |
 | 6 | Styled menus with icons, Core Monitor sidebar, raid sidebars, admin Control Room |
 | 0.3 | Every menu rebuilt as its own screen from the chosen mockup (Elevator Tower, Core Terminal, Raid Dispatch, Insurance Vault, Sky Shop, Crate Opening, Raid Log, Leaderboards, Chain of Command, Coin Tower, Levers, Control Room) |
-| + | Economy merged in; 10 new minions with their own models |
+| + | Economy merged in (spawners, chunk hopper, NPCs). Minions were removed in v5. |
 
 ## Install
 
@@ -63,8 +63,8 @@ If another addon already uses one of these names, add the namespace: `/cb:menu`,
 
 - **Islands:** 15×15 starter island inside a 100×100 border (Island Size grows it to 300×300).
   The 9×9 stone-brick spawn zone can't be broken or built on; chests there still open and
-  spawners can still be picked up. You can only build on your own island. A see-through red wall shows the border when you get within
-  10 blocks of it (you can walk and bridge through it).
+  spawners can still be picked up. You can only build on your own island. A see-through red wall (bottom of the world to the top) shows the border
+  when you get within 10 blocks of it. Only admins can cross it; raiders can cross into the island they're raiding.
 - **Island Core:** tap it for the Core Terminal. It charges $10,000 from the clan bank for every
   hour a member is online. If the bank can't pay: a 30-minute grace, then the shield drops, all
   upgrades switch off and the island shows up in Cheap Raids. Paying brings everything back.
@@ -85,7 +85,6 @@ If another addon already uses one of these names, add the namespace: `/cb:menu`,
 
 ```
 tools/build_cloudbreak.sh            build the .mcaddon
-tools/build_cloudbreak_minions.py    rebuild minion models, entities, loot items, minion_types.js
 tools/build_cloudbreak_ui.py         rebuild icons, menu header themes, sidebar panels, terminal textures
 tools/build_cloudbreak_screens.py    rebuild every menu screen from the chosen mockups (ui/cb_screens.json)
 tools/cloudbreak_tests/preview/run.sh   draw every screen from the real menu code (dist/previews)
@@ -101,5 +100,5 @@ tools/cloudbreak_tests/run.sh        offline rule tests (no Minecraft needed)
 - [ ] Raid: launch island, back out, bridge, defenders warned + sidebar, lives, landing, 25%,
       loot 15 min, cleanup; defended raid pays the fee; logging off / restart mid-raid
 - [ ] Insurance payout, immunity, revenge, raid log, leaderboards, crate keys and crate reel
-- [ ] Sky Shop categories, Sell with multiplier, minions (all 10 models), chunk hopper
+- [ ] Sky Shop categories, Sell with multiplier, chunk hopper
 - [ ] Admin panel: normal vs admin-tagged player, Server Rules saved after restart

@@ -88,7 +88,6 @@ function boards() {
     list.push({ id: `skill_${id}`, name: `${s.name} Skill`, icon: s.icon, theme: "blue", stat: `skill_${id}`, skill: true });
   }
   list.push({ id: "spawners", name: "Spawners", icon: "textures/ui/eco/icon_spawners", theme: "red", unit: " spawners", owned: ["eco:sp:", "stack"] });
-  list.push({ id: "minions", name: "Minions", icon: "textures/ui/eco/icon_minion", theme: "orange", unit: " minions", owned: ["eco:mi:", null] });
   return list;
 }
 

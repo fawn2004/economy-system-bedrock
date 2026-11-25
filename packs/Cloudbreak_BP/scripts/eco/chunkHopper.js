@@ -2,7 +2,6 @@ import { BlockPermutation, ItemStack, system, world } from "@minecraft/server";
 import { sellPrice } from "./catalog.js";
 import { CHUNK_HOPPER as CH, CONFIG } from "./config.js";
 import { addMoney, fmt, getBalance, sellMultiplier, takeMoney } from "./economy.js";
-import { isMinionLoot, lootName, lootSellPrice } from "./minions.js";
 import { addHeadPoints, headMob, mobName } from "./spawners.js";
 import { addCropPoints, cropName, enchantedCrop } from "./tools.js";
 import { addHeadsCollected } from "./leaderboards.js";
@@ -24,7 +23,7 @@ const hoppers = new Map(); // key -> data (+ dim, x, y, z)
 const commas = (n) => String(Math.floor(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const titleCase = (id) => id.replace(/^(minecraft|eco):/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 const pretty = (id) =>
-  headMob(id) ? `${mobName(headMob(id))} Head` : enchantedCrop(id) ? `Enchanted ${cropName(enchantedCrop(id))}` : isMinionLoot(id) ? lootName(id) : titleCase(id);
+  headMob(id) ? `${mobName(headMob(id))} Head` : enchantedCrop(id) ? `Enchanted ${cropName(enchantedCrop(id))}` : titleCase(id);
 const keyOf = (dimId, l) => `${KEY}${dimId}:${l.x},${l.y},${l.z}`;
 const chunkOf = (l) => `${Math.floor(l.x / 16)},${Math.floor(l.z / 16)}`;
 const isAdmin = (p) => p.hasTag(CONFIG.adminTag);
@@ -189,7 +188,7 @@ function tick() {
 }
 
 // ---- menu -----------------------------------------------------------------------------
-const valueOf = (id) => sellPrice(id) || lootSellPrice(id);
+const valueOf = (id) => sellPrice(id);
 
 export async function hopperMenu(player, key, msg) {
   const d = hoppers.get(key);

@@ -4,7 +4,6 @@ import { getBalance, initEconomy, rememberName, setBalance, syncBalances } from 
 import { registerGroundItems } from "./groundItems.js";
 import { applySavedSettings } from "./settings.js";
 import { registerSpawners } from "./spawners.js";
-import { registerMinions } from "./minions.js";
 import { registerLeaderboards } from "./leaderboards.js";
 import { registerChunkHoppers } from "./chunkHopper.js";
 import { registerNpcs } from "./npc.js";
@@ -23,7 +22,6 @@ export function registerEconomy() {
   });
   registerSpawners();
   registerGroundItems();
-  registerMinions();
   registerLeaderboards();
   registerChunkHoppers();
   registerNpcs();

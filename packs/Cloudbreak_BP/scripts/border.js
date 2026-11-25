@@ -1,19 +1,23 @@
 import { BlockVolume, system, world } from "@minecraft/server";
-import { clanAt } from "./islands.js";
+import { clanAt, inBorder, sendHome } from "./islands.js";
+import { raidOfPlayer } from "./raids.js";
 import { loadJson, saveJson } from "./store.js";
 
 // ---------------------------------------------------------------------------
-// Visible island border. A patch of see-through red wall (cb:border_x /
+// Visible, solid island border. A patch of see-through red wall (cb:border_x /
 // cb:border_z: one flat colour, a single flat face, no shading) appears on the
 // border in front of anyone who gets close to it, and is removed when they
-// move away. You can walk and build through it (it has no collision and is
-// replaceable), so raiders can still bridge in. Only air is ever replaced.
+// move away. It runs from the bottom of the world to the top. Players without
+// the admin tag can't cross it: they're put back where they were. Raiders in a
+// raid may cross into the island they're raiding (and build through it).
+// Only air is ever replaced.
 // ---------------------------------------------------------------------------
 
 const NEAR = 10; // show the wall when this close to it (blocks)
-const SIDE = 8; // patch reaches this far left/right of you
-const BELOW = 5;
-const ABOVE = 8;
+const SIDE = 12; // patch reaches this far left/right of you
+const STEP = 4; // the patch moves in steps of 4 blocks (fewer refills while walking)
+const BOTTOM = -64;
+const TOP = 319;
 const SAVE_KEY = "cb:borderPatches";
 
 let shown = new Map(); // key -> { type, from, to }
@@ -39,11 +43,13 @@ export function patchesFor(player) {
   const px = Math.floor(loc.x);
   const py = Math.floor(loc.y);
   const pz = Math.floor(loc.z);
-  const y1 = clamp(py - BELOW, -64, 319);
-  const y2 = clamp(py + ABOVE, -64, 319);
+  const y1 = BOTTOM;
+  const y2 = TOP;
+  const sx = Math.round(px / STEP) * STEP;
+  const sz = Math.round(pz / STEP) * STEP;
   const out = [];
-  const alongZ = (x) => ({ type: "cb:border_x", from: { x, y: y1, z: clamp(pz - SIDE, minZ, maxZ) }, to: { x, y: y2, z: clamp(pz + SIDE, minZ, maxZ) } });
-  const alongX = (z) => ({ type: "cb:border_z", from: { x: clamp(px - SIDE, minX, maxX), y: y1, z }, to: { x: clamp(px + SIDE, minX, maxX), y: y2, z } });
+  const alongZ = (x) => ({ type: "cb:border_x", from: { x, y: y1, z: clamp(sz - SIDE, minZ, maxZ) }, to: { x, y: y2, z: clamp(sz + SIDE, minZ, maxZ) } });
+  const alongX = (z) => ({ type: "cb:border_z", from: { x: clamp(sx - SIDE, minX, maxX), y: y1, z }, to: { x: clamp(sx + SIDE, minX, maxX), y: y2, z } });
   const nearSpanZ = pz >= minZ - NEAR && pz <= maxZ + NEAR;
   const nearSpanX = px >= minX - NEAR && px <= maxX + NEAR;
   if (nearSpanZ && Math.abs(px - minX) <= NEAR) out.push(alongZ(minX));
@@ -94,10 +100,43 @@ function update() {
   if (changed) saveJson(SAVE_KEY, [...shown.values(), ...pending].slice(-200));
 }
 
+// ---- keeping players inside -------------------------------------------------------
+const safe = new Map(); // player id -> last allowed { location, rotation }
+
+/** May this player be at loc? Everyone may be inside a border; admins anywhere;
+ *  raiders anywhere in the grid cell of the island they're raiding. */
+export function allowedAt(player, loc) {
+  if (player.hasTag("admin")) return true;
+  if (player.dimension.id !== "minecraft:overworld") return true;
+  const clan = clanAt("minecraft:overworld", loc);
+  if (!clan?.island) return true; // not near any island
+  if (inBorder(clan, loc)) return true;
+  const raid = raidOfPlayer(player);
+  return !!raid && raid.target === clan.id;
+}
+
+function enforce() {
+  for (const p of world.getAllPlayers()) {
+    try {
+      const loc = p.location;
+      if (allowedAt(p, loc)) {
+        safe.set(p.id, { location: { x: loc.x, y: loc.y, z: loc.z }, rotation: p.getRotation() });
+        continue;
+      }
+      const back = safe.get(p.id);
+      if (back) p.teleport(back.location, { rotation: back.rotation, keepVelocity: false });
+      else sendHome(p).catch(() => {});
+      p.onScreenDisplay.setActionBar("§cYou can't go past the island border.");
+    } catch {}
+  }
+}
+
 export function registerBorder() {
+  world.afterEvents.playerLeave.subscribe(({ playerId }) => safe.delete(playerId));
   world.afterEvents.worldLoad.subscribe(() => {
     // patches left over from before a restart: removed as soon as their area is loaded
     pending = loadJson(SAVE_KEY, []);
     system.runInterval(update, 4);
+    system.runInterval(enforce, 2);
   });
 }

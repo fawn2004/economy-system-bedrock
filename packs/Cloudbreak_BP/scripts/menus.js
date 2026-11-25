@@ -111,7 +111,7 @@ function floorsFor(player) {
     : [];
   const settings = { n: 9, key: "settings", name: "Settings", icon: CB.settings, col: "GREY", desc: "Chunk borders, full bright, raid alert sound and coordinates. Only you see these.", stats: () => [["Switched on", `${settingsOnCount(player)} / 4`]], run: () => playerSettingsMenu(player, () => tower(player, "settings")) };
   const boards = { n: 8, key: "boards", name: "Leaderboards", icon: CB.leaderboards, col: "PURPLE", desc: "The top clans for raid wins, defence streaks, money and core level.", stats: () => [["Clans", allClans().length]], run: () => leaderboardsMenu(player) };
-  const shop = { n: 4, key: "shop", name: "Shop", icon: CB.shop, col: "GOLD", desc: "Buy blocks, raid gear, spawners and minions. Sell what you farm.", stats: () => [["Wallet", fmtMoney(getBalance(player))], ["Sell bonus", `x${sellMultiplier(player).toFixed(2)}`]], run: () => skyShopMenu(player) };
+  const shop = { n: 4, key: "shop", name: "Shop", icon: CB.shop, col: "GOLD", desc: "Buy blocks, raid gear and spawners. Sell what you farm.", stats: () => [["Wallet", fmtMoney(getBalance(player))], ["Sell bonus", `x${sellMultiplier(player).toFixed(2)}`]], run: () => skyShopMenu(player) };
   if (!clan) {
     const inv = pendingInvite(player);
     const floors = [settings, boards, shop];

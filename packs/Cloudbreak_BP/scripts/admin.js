@@ -6,11 +6,10 @@ import { bankOf } from "./bank.js";
 import { activeRaids, forceEndRaid, raidStatus } from "./raids.js";
 import { giveKey } from "./after.js";
 import { addMoney, fmt, fmtMoney, getBalance, setBalance } from "./eco/economy.js";
-import { KITS, MINION_TYPES, SPAWNERS } from "./eco/config.js";
+import { KITS, SPAWNERS } from "./eco/config.js";
 import { addHeadPoints, makeSpawnerItem, mobIcon } from "./eco/spawners.js";
 import { Screen, headFor } from "./screens.js";
 import { adminMenu as ecoAdminMenu, giveKit } from "./eco/menus.js";
-import { makeMinionItem } from "./eco/minions.js";
 import { makeHopperItem } from "./eco/chunkHopper.js";
 import { clearGroundItems } from "./eco/groundItems.js";
 import { ecoTitle } from "./eco/ui.js";
@@ -195,7 +194,6 @@ async function customPanel(player, target) {
       return s;
     } },
     { name: "Chunk Hopper", make: () => makeHopperItem(0, 0) },
-    ...MINION_TYPES.map((t) => ({ name: `${t.name} (minion)`, make: () => makeMinionItem(0, {}, t.id) })),
     ...SPAWNERS.filter((s) => !s.disabled).map((s) => ({ name: `${s.name} Spawner`, make: () => makeSpawnerItem(s.mob, 1, 1) })),
   ];
   await tiles(player, "CUSTOM ITEMS", `§7Admin tag only. Give to ${target.name}:`, [
