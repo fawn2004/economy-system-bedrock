@@ -88,7 +88,7 @@ export class Screen {
 
   /** Shows the screen; runs the tapped item. Resolves to the tapped item (or undefined). */
   async show(player) {
-    if ((LAYOUT[this.id]?.singles ?? []).includes("BACK") && !this.items.some((i) => i.tag === "BACK"))
+    if (LAYOUT[this.id]?.back && !this.items.some((i) => i.tag === "BACK"))
       this.button("BACK", "", () => goBack(player));
     const form = this.form();
     Screen.last = this;

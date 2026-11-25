@@ -197,12 +197,14 @@ class Screen:
         by = {}
         for z in self.zones:
             by.setdefault(z.tag, z)
-        self.singles = list(singles) + (["BACK"] if "BACK" in by and "BACK" not in singles else [])
+        # Only text/pictures go in the singles grid. Its cells have no size, and a button in a
+        # cell with no size never receives taps, so tappable zones stay normal lists.
+        self.singles = [t for t in singles if not by[t].click]
         for i, tag in enumerate(self.singles):
             z = by[tag]
             assert not z.grid, tag
             z.single, z.index = True, size + i
-        return {"grid": self.grid.tag if self.grid else None, "gridSize": size, "singles": self.singles}
+        return {"grid": self.grid.tag if self.grid else None, "gridSize": size, "singles": self.singles, "back": "BACK" in by}
 
 
 # ---------------------------------------------------------------------------

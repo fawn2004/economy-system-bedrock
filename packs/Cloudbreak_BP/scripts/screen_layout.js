@@ -6,18 +6,17 @@ export const LAYOUT = {
     "gridSize": 10,
     "singles": [
       "K"
-    ]
+    ],
+    "back": false
   },
   "members": {
     "grid": null,
     "gridSize": 0,
     "singles": [
       "K",
-      "OW",
-      "SA",
-      "ACT2",
-      "BACK"
-    ]
+      "SA"
+    ],
+    "back": true
   },
   "bank": {
     "grid": null,
@@ -28,51 +27,46 @@ export const LAYOUT = {
       "BAL",
       "TAX",
       "MSG",
-      "CF",
-      "OK",
-      "BACK"
-    ]
+      "CF"
+    ],
+    "back": true
   },
   "settings": {
     "grid": "SET",
     "gridSize": 4,
-    "singles": [
-      "BACK"
-    ]
+    "singles": [],
+    "back": true
   },
   "admin": {
     "grid": "OPT",
     "gridSize": 6,
     "singles": [
-      "SR",
       "SC",
       "CH",
       "N",
-      "GIVE",
       "LOCK",
-      "LOCKT",
-      "BACK"
-    ]
+      "LOCKT"
+    ],
+    "back": true
   },
   "dispatch": {
     "grid": null,
     "gridSize": 0,
     "singles": [
       "K",
-      "RV",
       "RVP",
-      "FT",
-      "BACK"
-    ]
+      "FT"
+    ],
+    "back": true
   },
   "insurance": {
     "grid": null,
     "gridSize": 0,
     "singles": [
       "K",
-      "LC",
-      "BACK"
-    ]
+      "LC"
+    ],
+    "back": true
   },
   "shop": {
     "grid": "IT",
@@ -81,9 +75,9 @@ export const LAYOUT = {
       "HI",
       "HT",
       "SELL",
-      "BAL",
-      "BACK"
-    ]
+      "BAL"
+    ],
+    "back": true
   },
   "crate": {
     "grid": null,
@@ -91,9 +85,9 @@ export const LAYOUT = {
     "singles": [
       "CT",
       "KEYS",
-      "OP",
       "MSG"
-    ]
+    ],
+    "back": false
   },
   "raidlog": {
     "grid": null,
@@ -102,9 +96,9 @@ export const LAYOUT = {
       "K",
       "V1",
       "V2",
-      "V3",
-      "BACK"
-    ]
+      "V3"
+    ],
+    "back": true
   },
   "boards": {
     "grid": null,
@@ -117,9 +111,9 @@ export const LAYOUT = {
       "MER",
       "MEW",
       "MES",
-      "NONE",
-      "BACK"
-    ]
+      "NONE"
+    ],
+    "back": true
   },
   "terminal": {
     "grid": "MOD",
@@ -130,8 +124,8 @@ export const LAYOUT = {
       "SH",
       "CL",
       "UPV",
-      "DEP",
       "HDR"
-    ]
+    ],
+    "back": false
   }
 };
