@@ -354,35 +354,35 @@ def zone_defs(scr, z):
     defs[face_name] = face_controls(z.face, z.tags)
     show = vis(has(f"[{z.tag}]"))
     at = {"size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left"}
-    face = {f"face@{NS}.{face_name}": dict(at)}
-    button = None
     if z.click:
-        # The button must be a DIRECT child of the row/cell the factory or grid makes:
-        # only there does it learn which form button it is (collection_details).
+        # v3 style (the way that's known to work, like the tile menus): the button sits directly
+        # in the row/cell and CONTAINS its picture: default = the face, hover/pressed = the face
+        # with a highlight on top.
         hl = z.face.hover or box("#FFFFFF", "#FFFFFF", alpha=28)
-        button = {"button": dict(at, **{
-            "type": "button", "layer": 7,
+        hover = face_controls(z.face, z.tags)
+        hover["controls"] = hover["controls"] + [{"hl": {"type": "image", "texture": hl, "size": ["100%", "100%"], "layer": 7}}]
+        defs[face_name + "_hover"] = hover
+        piece = {"button": dict(at, **{
+            "type": "button",
             "default_control": "default", "hover_control": "hover", "pressed_control": "pressed",
             "sound_name": "random.click", "sound_volume": 1.0, "sound_pitch": 1.0, "button_mappings": CLICK,
             "bindings": [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
-            "controls": [{"default": {"type": "panel", "size": ["100%", "100%"]}},
-                         {"hover": {"type": "image", "texture": hl, "size": ["100%", "100%"]}},
-                         {"pressed": {"type": "image", "texture": hl, "size": ["100%", "100%"], "alpha": 0.6}}]})}
+            "controls": [{f"default@{NS}.{face_name}": {}}, {f"hover@{NS}.{face_name}_hover": {}},
+                         {f"pressed@{NS}.{face_name}_hover": {"offset": [0, 0.5]}}]})}
+    else:
+        piece = {f"face@{NS}.{face_name}": dict(at)}
     if z.single:
         # text/pictures only (see Screen.layout): a variant at the zone's spot in the singles grid
         return defs, {"type": "panel", "size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left",
-                      "offset": [z.rect[0], z.rect[1]], "bindings": show, "controls": [face]}
+                      "offset": [z.rect[0], z.rect[1]], "bindings": show, "controls": [piece]}
     if z.grid:
-        # a grid decides on its own which cells show, so the cell's face and button hide themselves
-        list(face.values())[0]["bindings"] = show
-        kids = [face]
-        if button:
-            button["button"]["bindings"] = show + button["button"]["bindings"]
-            kids.append(button)
-        defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "controls": kids}
+        # a grid decides on its own which cells show, so the cell's button hides itself
+        ctrl = list(piece.values())[0]
+        ctrl["bindings"] = show + ctrl.get("bindings", [])
+        defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "controls": [piece]}
     else:
         # in a list, a hidden row takes no space
-        defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "bindings": show, "controls": [face] + ([button] if button else [])}
+        defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "bindings": show, "controls": [piece]}
 
     x, y, w, h = z.rect
     if z.grid:

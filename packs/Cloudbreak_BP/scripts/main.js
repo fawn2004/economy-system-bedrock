@@ -55,7 +55,7 @@ function setupPlayer(player) {
   }
   if (CONFIG.menuItem.giveOnJoin) giveMenuItem(player);
   payOwedKeys(player);
-  player.sendMessage(`${CONFIG.prefix}§8Cloudbreak v${CONFIG.version}`);
+  player.sendMessage(`${CONFIG.prefix}§aCloudbreak v${CONFIG.version} is running.`);
   if (!player.getDynamicProperty("cb:joined")) {
     player.setDynamicProperty("cb:joined", true);
     player.sendMessage(`${CONFIG.prefix}Welcome to §b${CONFIG.serverName}§7! Use the menu item or type §f/menu§7 to create a clan.`);

@@ -12,3 +12,4 @@ cp -r "$HERE"/mock/@minecraft "$WORK/node_modules/"
 cp "$HERE"/*.test.mjs "$WORK"/
 cd "$WORK"
 for t in *.test.mjs; do echo "== $t"; node "$t" | tail -1; done
+echo "== start-up"; bash "$HERE/startup.sh"
