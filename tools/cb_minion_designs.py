@@ -30,7 +30,15 @@ def pick(head="#5ee6e6", handle="#8a5a2b"):
 
 
 def hoe(head="#cfcfcf", handle="#8a5a2b"):
-    return [Cube([-6.5, 12.5, -11], [1, 1, 9], handle), Cube([-6.5, 9.5, -11.5], [1, 4, 2], head)]
+    """A real hoe: a long handle with a flat blade that drops down at the end."""
+    hc = hexc(head)
+    light, dark = shade(hc, 0.35), shade(hc, -0.3)
+    return [
+        Cube([-6.5, 12.5, -12], [1, 1, 10], handle),             # handle
+        Cube([-7, 12, -13.5], [2, 2.5, 1.5], dark),               # socket
+        Cube([-7, 7, -13.5], [2, 5, 1], hc),                      # long blade hanging down
+        Cube([-7, 6, -13], [2, 1, 2], light),                     # sharp tip, hooked back
+    ]
 
 
 def hammer(head="#4a4a4a", handle="#8a5a2b"):
