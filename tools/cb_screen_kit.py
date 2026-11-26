@@ -367,14 +367,14 @@ def zone_defs(scr, z):
     defs[face] = face_controls(z.face, z.tags)
     at = {"size": [iw, ih], "anchor_from": "top_left", "anchor_to": "top_left"}
     if z.click:
-        defs[face + "_hover"] = face_controls(z.face, z.tags, highlight=z.face.hover or box("#FFFFFF", "#FFFFFF", alpha=28))
+        # ONE picture per button: normal, hover and pressed all show the same control
+        # (no hover glow, but the button is built once instead of two or three times)
         piece = {"button": dict(at, **{
             "type": "button",
-            "default_control": "default", "hover_control": "hover", "pressed_control": "hover",
+            "default_control": "default", "hover_control": "default", "pressed_control": "default",
             "button_mappings": CLICK,
             "bindings": ([] if not z.grid else show) + [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
-            # pressed reuses the hover picture: two copies per button instead of three
-            "controls": [{f"default@{NS}.{face}": {}}, {f"hover@{NS}.{face}_hover": {}}]})}
+            "controls": [{f"default@{NS}.{face}": {}}]})}
     else:
         piece = {f"face@{NS}.{face}": dict(at, **({"bindings": show} if z.grid else {}))}
     defs[base + "_item"] = {"type": "panel", "size": [gw, gh], "bindings": show, "controls": [piece]}
